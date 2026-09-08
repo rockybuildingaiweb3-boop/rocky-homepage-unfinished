@@ -1,0 +1,446 @@
+/**
+ * SKILL ICONS MAPPING
+ * 
+ * Implements Scheme A (Simple Icons Official CDN) and Scheme B (@iconify/react):
+ * - Scheme A: Standard SVG CDN URLs directly from https://cdn.simpleicons.org/[slug]/[hex]
+ * - Scheme B: Dynamic @iconify/react identifiers (simple-icons:*, lucide:*)
+ * - Conceptual/Non-brand overrides per user specification:
+ *   Canvas API -> lucide:palette
+ *   UV/Baking -> lucide:layers
+ *   Design Systems -> lucide:layout-grid
+ *   Draco/Meshopt -> lucide:archive
+ *   MCP -> lucide:cpu
+ *   Foundry -> lucide:hammer
+ *   Privy -> lucide:key-round
+ *   ERC-4337 -> lucide:wallet-cards
+ */
+
+export interface SkillIconDefinition {
+  id: string;
+  name: string;
+  cdnUrl: string;
+  iconifyIcon: string;
+  brandColor: string;
+  keycapBg: string;
+  isConceptual?: boolean;
+}
+
+export const SKILL_ICONS: Record<string, SkillIconDefinition> = {
+  // ─── ROW 1: Core Frontend & Kinetic Motion ──────────────────────────────────
+  typescript: {
+    id: 'typescript',
+    name: 'TypeScript',
+    cdnUrl: 'https://cdn.simpleicons.org/typescript/3178C6',
+    iconifyIcon: 'simple-icons:typescript',
+    brandColor: '#3178C6',
+    keycapBg: '#1D4ED8',
+  },
+  javascript: {
+    id: 'javascript',
+    name: 'JavaScript',
+    cdnUrl: 'https://cdn.simpleicons.org/javascript/F7DF1E',
+    iconifyIcon: 'simple-icons:javascript',
+    brandColor: '#F7DF1E',
+    keycapBg: '#D97706',
+  },
+  react: {
+    id: 'react',
+    name: 'React',
+    cdnUrl: 'https://cdn.simpleicons.org/react/61DAFB',
+    iconifyIcon: 'simple-icons:react',
+    brandColor: '#61DAFB',
+    keycapBg: '#0284C7',
+  },
+  nextjs: {
+    id: 'nextjs',
+    name: 'Next.js',
+    cdnUrl: 'https://cdn.simpleicons.org/nextdotjs/white',
+    iconifyIcon: 'simple-icons:nextdotjs',
+    brandColor: '#FFFFFF',
+    keycapBg: '#09090B',
+  },
+  svelte: {
+    id: 'svelte',
+    name: 'Svelte',
+    cdnUrl: 'https://cdn.simpleicons.org/svelte/FF3E00',
+    iconifyIcon: 'simple-icons:svelte',
+    brandColor: '#FF3E00',
+    keycapBg: '#EA580C',
+  },
+  tailwind: {
+    id: 'tailwind',
+    name: 'Tailwind CSS',
+    cdnUrl: 'https://cdn.simpleicons.org/tailwindcss/06B6D4',
+    iconifyIcon: 'simple-icons:tailwindcss',
+    brandColor: '#38BDF8',
+    keycapBg: '#0891B2',
+  },
+  motion: {
+    id: 'motion',
+    name: 'Framer Motion',
+    cdnUrl: 'https://cdn.simpleicons.org/framer/EA580C',
+    iconifyIcon: 'simple-icons:framer',
+    brandColor: '#E056FD',
+    keycapBg: '#7C3AED',
+  },
+  gsap: {
+    id: 'gsap',
+    name: 'GSAP',
+    cdnUrl: 'https://cdn.simpleicons.org/greensock/88CE02',
+    iconifyIcon: 'simple-icons:greensock',
+    brandColor: '#88CE02',
+    keycapBg: '#4D7C0F',
+  },
+  html5: {
+    id: 'html5',
+    name: 'HTML5',
+    cdnUrl: 'https://cdn.simpleicons.org/html5/E34F26',
+    iconifyIcon: 'simple-icons:html5',
+    brandColor: '#E44D26',
+    keycapBg: '#DC2626',
+  },
+  vite: {
+    id: 'vite',
+    name: 'Vite',
+    cdnUrl: 'https://cdn.simpleicons.org/vite/646CFF',
+    iconifyIcon: 'simple-icons:vite',
+    brandColor: '#646CFF',
+    keycapBg: '#4F46E5',
+  },
+
+  // ─── ROW 2: 3D Spatial Computing & Graphics ────────────────────────────────
+  threejs: {
+    id: 'threejs',
+    name: 'Three.js',
+    cdnUrl: 'https://cdn.simpleicons.org/threedotjs/white',
+    iconifyIcon: 'simple-icons:threedotjs',
+    brandColor: '#FFFFFF',
+    keycapBg: '#18181B',
+  },
+  webgl: {
+    id: 'webgl',
+    name: 'WebGL',
+    cdnUrl: 'https://cdn.simpleicons.org/webgl/990000',
+    iconifyIcon: 'simple-icons:webgl',
+    brandColor: '#990000',
+    keycapBg: '#991B1B',
+  },
+  glsl: {
+    id: 'glsl',
+    name: 'GLSL Shaders',
+    cdnUrl: 'https://cdn.simpleicons.org/opengl/5586A4',
+    iconifyIcon: 'simple-icons:opengl',
+    brandColor: '#5586A4',
+    keycapBg: '#1E293B',
+  },
+  webgpu: {
+    id: 'webgpu',
+    name: 'WebGPU',
+    cdnUrl: 'https://cdn.simpleicons.org/webgpu/005A9C',
+    iconifyIcon: 'simple-icons:webgpu',
+    brandColor: '#005A9C',
+    keycapBg: '#1E40AF',
+  },
+  r3f: {
+    id: 'r3f',
+    name: 'React Three Fiber',
+    cdnUrl: 'https://cdn.simpleicons.org/react/61DAFB',
+    iconifyIcon: 'simple-icons:react',
+    brandColor: '#61DAFB',
+    keycapBg: '#0369A1',
+  },
+  blender: {
+    id: 'blender',
+    name: 'Blender',
+    cdnUrl: 'https://cdn.simpleicons.org/blender/E87D0D',
+    iconifyIcon: 'simple-icons:blender',
+    brandColor: '#F5792A',
+    keycapBg: '#C2410C',
+  },
+  spline: {
+    id: 'spline',
+    name: 'Spline 3D',
+    cdnUrl: 'https://cdn.simpleicons.org/spline/FF5C9D',
+    iconifyIcon: 'lucide:box',
+    brandColor: '#FF5C9D',
+    keycapBg: '#BE185D',
+  },
+  draco: {
+    id: 'draco',
+    name: 'Draco Compression',
+    cdnUrl: 'https://cdn.simpleicons.org/google/34A853',
+    iconifyIcon: 'lucide:archive',
+    brandColor: '#34A853',
+    keycapBg: '#15803D',
+    isConceptual: true,
+  },
+  uvbaking: {
+    id: 'uvbaking',
+    name: 'UV Baking',
+    cdnUrl: 'https://cdn.simpleicons.org/blender/9333EA',
+    iconifyIcon: 'lucide:layers',
+    brandColor: '#9333EA',
+    keycapBg: '#6B21A8',
+    isConceptual: true,
+  },
+  canvas: {
+    id: 'canvas',
+    name: 'Canvas API',
+    cdnUrl: 'https://cdn.simpleicons.org/html5/E44D26',
+    iconifyIcon: 'lucide:palette',
+    brandColor: '#E44D26',
+    keycapBg: '#B91C1C',
+    isConceptual: true,
+  },
+
+  // ─── ROW 3: Backend, Systems & Cloud Infrastructure ─────────────────────────
+  nodejs: {
+    id: 'nodejs',
+    name: 'Node.js',
+    cdnUrl: 'https://cdn.simpleicons.org/nodedotjs/5FA04E',
+    iconifyIcon: 'simple-icons:nodedotjs',
+    brandColor: '#539E43',
+    keycapBg: '#15803D',
+  },
+  express: {
+    id: 'express',
+    name: 'Express.js',
+    cdnUrl: 'https://cdn.simpleicons.org/express/white',
+    iconifyIcon: 'simple-icons:express',
+    brandColor: '#FFFFFF',
+    keycapBg: '#1E293B',
+  },
+  postgresql: {
+    id: 'postgresql',
+    name: 'PostgreSQL',
+    cdnUrl: 'https://cdn.simpleicons.org/postgresql/4169E1',
+    iconifyIcon: 'simple-icons:postgresql',
+    brandColor: '#336791',
+    keycapBg: '#0369A1',
+  },
+  supabase: {
+    id: 'supabase',
+    name: 'Supabase',
+    cdnUrl: 'https://cdn.simpleicons.org/supabase/3ECF8E',
+    iconifyIcon: 'simple-icons:supabase',
+    brandColor: '#3ECF8E',
+    keycapBg: '#047857',
+  },
+  prisma: {
+    id: 'prisma',
+    name: 'Prisma',
+    cdnUrl: 'https://cdn.simpleicons.org/prisma/white',
+    iconifyIcon: 'simple-icons:prisma',
+    brandColor: '#2D3748',
+    keycapBg: '#0F172A',
+  },
+  drizzle: {
+    id: 'drizzle',
+    name: 'Drizzle ORM',
+    cdnUrl: 'https://cdn.simpleicons.org/drizzle/C5F74F',
+    iconifyIcon: 'simple-icons:drizzle',
+    brandColor: '#C5F74F',
+    keycapBg: '#3F6212',
+  },
+  redis: {
+    id: 'redis',
+    name: 'Redis',
+    cdnUrl: 'https://cdn.simpleicons.org/redis/FF4438',
+    iconifyIcon: 'simple-icons:redis',
+    brandColor: '#DC382D',
+    keycapBg: '#B91C1C',
+  },
+  trpc: {
+    id: 'trpc',
+    name: 'tRPC',
+    cdnUrl: 'https://cdn.simpleicons.org/trpc/2596BE',
+    iconifyIcon: 'simple-icons:trpc',
+    brandColor: '#398CCB',
+    keycapBg: '#0284C7',
+  },
+  graphql: {
+    id: 'graphql',
+    name: 'GraphQL',
+    cdnUrl: 'https://cdn.simpleicons.org/graphql/E10098',
+    iconifyIcon: 'simple-icons:graphql',
+    brandColor: '#E10098',
+    keycapBg: '#BE185D',
+  },
+  docker: {
+    id: 'docker',
+    name: 'Docker',
+    cdnUrl: 'https://cdn.simpleicons.org/docker/2496ED',
+    iconifyIcon: 'simple-icons:docker',
+    brandColor: '#2496ED',
+    keycapBg: '#0284C7',
+  },
+
+  // ─── ROW 4: Web3 & Decentralized Protocols ──────────────────────────────────
+  solidity: {
+    id: 'solidity',
+    name: 'Solidity',
+    cdnUrl: 'https://cdn.simpleicons.org/solidity/white',
+    iconifyIcon: 'simple-icons:solidity',
+    brandColor: '#627EEA',
+    keycapBg: '#3730A3',
+  },
+  viem: {
+    id: 'viem',
+    name: 'Viem',
+    cdnUrl: 'https://cdn.simpleicons.org/ethereum/627EEA',
+    iconifyIcon: 'simple-icons:ethereum',
+    brandColor: '#7C3AED',
+    keycapBg: '#5B21B6',
+  },
+  wagmi: {
+    id: 'wagmi',
+    name: 'Wagmi',
+    cdnUrl: 'https://cdn.simpleicons.org/wagmi/white',
+    iconifyIcon: 'simple-icons:wagmi',
+    brandColor: '#FFFFFF',
+    keycapBg: '#0F172A',
+  },
+  ethers: {
+    id: 'ethers',
+    name: 'Ethers.js',
+    cdnUrl: 'https://cdn.simpleicons.org/ethereum/627EEA',
+    iconifyIcon: 'simple-icons:ethereum',
+    brandColor: '#2535A0',
+    keycapBg: '#1E40AF',
+  },
+  foundry: {
+    id: 'foundry',
+    name: 'Foundry Forge',
+    cdnUrl: 'https://cdn.simpleicons.org/ethereum/C084FC',
+    iconifyIcon: 'lucide:hammer',
+    brandColor: '#C084FC',
+    keycapBg: '#6B21A8',
+    isConceptual: true,
+  },
+  privy: {
+    id: 'privy',
+    name: 'Privy Auth',
+    cdnUrl: 'https://cdn.simpleicons.org/auth0/EB5424',
+    iconifyIcon: 'lucide:key-round',
+    brandColor: '#9333EA',
+    keycapBg: '#581C87',
+    isConceptual: true,
+  },
+  erc4337: {
+    id: 'erc4337',
+    name: 'ERC-4337 Account Abstraction',
+    cdnUrl: 'https://cdn.simpleicons.org/ethereum/10B981',
+    iconifyIcon: 'lucide:wallet-cards',
+    brandColor: '#10B981',
+    keycapBg: '#065F46',
+    isConceptual: true,
+  },
+  thegraph: {
+    id: 'thegraph',
+    name: 'The Graph Protocol',
+    cdnUrl: 'https://cdn.simpleicons.org/thegraph/6F4CFF',
+    iconifyIcon: 'simple-icons:thegraph',
+    brandColor: '#6F4CFF',
+    keycapBg: '#4C1D95',
+  },
+  ipfs: {
+    id: 'ipfs',
+    name: 'IPFS Storage',
+    cdnUrl: 'https://cdn.simpleicons.org/ipfs/65C2CB',
+    iconifyIcon: 'simple-icons:ipfs',
+    brandColor: '#65C2CB',
+    keycapBg: '#0E7490',
+  },
+  siwe: {
+    id: 'siwe',
+    name: 'Sign-In with Ethereum (SIWE)',
+    cdnUrl: 'https://cdn.simpleicons.org/ethereum/627EEA',
+    iconifyIcon: 'simple-icons:ethereum',
+    brandColor: '#627EEA',
+    keycapBg: '#312E81',
+  },
+
+  // ─── ROW 5: AI Agents, Design & Tooling ─────────────────────────────────────
+  vercelai: {
+    id: 'vercelai',
+    name: 'Vercel AI SDK',
+    cdnUrl: 'https://cdn.simpleicons.org/vercel/white',
+    iconifyIcon: 'simple-icons:vercel',
+    brandColor: '#FFFFFF',
+    keycapBg: '#000000',
+  },
+  langchain: {
+    id: 'langchain',
+    name: 'LangChain Orchestration',
+    cdnUrl: 'https://cdn.simpleicons.org/langchain/1C3C3C',
+    iconifyIcon: 'simple-icons:langchain',
+    brandColor: '#7FC8FF',
+    keycapBg: '#0369A1',
+  },
+  llamaindex: {
+    id: 'llamaindex',
+    name: 'LlamaIndex RAG',
+    cdnUrl: 'https://cdn.simpleicons.org/ollama/white',
+    iconifyIcon: 'simple-icons:ollama',
+    brandColor: '#38BDF8',
+    keycapBg: '#075985',
+  },
+  openai: {
+    id: 'openai',
+    name: 'OpenAI',
+    cdnUrl: 'https://cdn.simpleicons.org/openai/white',
+    iconifyIcon: 'simple-icons:openai',
+    brandColor: '#FFFFFF',
+    keycapBg: '#064E3B',
+  },
+  pgvector: {
+    id: 'pgvector',
+    name: 'pgvector Vectors',
+    cdnUrl: 'https://cdn.simpleicons.org/postgresql/4169E1',
+    iconifyIcon: 'simple-icons:postgresql',
+    brandColor: '#336791',
+    keycapBg: '#0C4A6E',
+  },
+  mcp: {
+    id: 'mcp',
+    name: 'Model Context Protocol (MCP)',
+    cdnUrl: 'https://cdn.simpleicons.org/anthropic/D97706',
+    iconifyIcon: 'lucide:cpu',
+    brandColor: '#D97706',
+    keycapBg: '#78350F',
+    isConceptual: true,
+  },
+  figma: {
+    id: 'figma',
+    name: 'Figma',
+    cdnUrl: 'https://cdn.simpleicons.org/figma',
+    iconifyIcon: 'simple-icons:figma',
+    brandColor: '#F24E1E',
+    keycapBg: '#B91C1C',
+  },
+  designsystems: {
+    id: 'designsystems',
+    name: 'Design Systems',
+    cdnUrl: 'https://cdn.simpleicons.org/figma/A855F7',
+    iconifyIcon: 'lucide:layout-grid',
+    brandColor: '#A855F7',
+    keycapBg: '#6B21A8',
+    isConceptual: true,
+  },
+  git: {
+    id: 'git',
+    name: 'Git',
+    cdnUrl: 'https://cdn.simpleicons.org/git/F05032',
+    iconifyIcon: 'simple-icons:git',
+    brandColor: '#F05032',
+    keycapBg: '#C2410C',
+  },
+  rive: {
+    id: 'rive',
+    name: 'Rive',
+    cdnUrl: 'https://cdn.simpleicons.org/rive/white',
+    iconifyIcon: 'simple-icons:rive',
+    brandColor: '#FF6B00',
+    keycapBg: '#C2410C',
+  },
+};
