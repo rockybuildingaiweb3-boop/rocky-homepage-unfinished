@@ -111,86 +111,64 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
 
   return (
     <>
-      {/* Trailing Comet Stardust Particle 2 (subtle delayed wake) */}
-      <div
-        ref={trail2Ref}
-        className="fixed top-0 left-0 pointer-events-none z-[9997] will-change-transform"
-      >
+      {/* Trail 2 - 最远拖尾 */}
+      <div ref={trail2Ref} className="fixed top-0 left-0 pointer-events-none z-[9997] will-change-transform">
         <div
-          className="rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-300"
-          style={{
-            width: isDisabled ? 0 : '10px',
-            height: isDisabled ? 0 : '10px',
-            opacity: isDisabled ? 0 : 0.35,
-            background:
-              'radial-gradient(circle, rgba(168, 85, 247, 0.9) 0%, rgba(99, 102, 241, 0.4) 50%, transparent 100%)',
-            filter: 'blur(1px)',
-          }}
-        />
-      </div>
-
-      {/* Trailing Comet Stardust Particle 1 (closer wake) */}
-      <div
-        ref={trail1Ref}
-        className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform"
-      >
-        <div
-          className="rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-300"
+          className="rounded-full -translate-x-1/2 -translate-y-1/2"
           style={{
             width: isDisabled ? 0 : '14px',
             height: isDisabled ? 0 : '14px',
-            opacity: isDisabled ? 0 : 0.55,
-            background:
-              'radial-gradient(circle, rgba(192, 132, 252, 0.95) 0%, rgba(129, 140, 248, 0.45) 55%, transparent 100%)',
-            filter: 'blur(1px)',
+            opacity: isDisabled ? 0 : 0.45,
+            background: 'radial-gradient(circle, rgba(168,85,247,0.9) 0%, transparent 70%)',
+            filter: 'blur(2px)',
           }}
         />
       </div>
 
-      {/* Trailing Chromatic Aura (normal blend mode, high-contrast glow over watercolor) */}
-      <div
-        ref={auraRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform"
-      >
+      {/* Trail 1 - 近拖尾 */}
+      <div ref={trail1Ref} className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform">
+        <div
+          className="rounded-full -translate-x-1/2 -translate-y-1/2"
+          style={{
+            width: isDisabled ? 0 : '18px',
+            height: isDisabled ? 0 : '18px',
+            opacity: isDisabled ? 0 : 0.6,
+            background: 'radial-gradient(circle, rgba(192,132,252,0.95) 0%, rgba(99,102,241,0.4) 60%, transparent 100%)',
+            filter: 'blur(1.5px)',
+          }}
+        />
+      </div>
+
+      {/* Aura 光晕 */}
+      <div ref={auraRef} className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform">
         <div
           className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isDisabled ? 0 : hover ? '72px' : '52px',
-            height: isDisabled ? 0 : hover ? '72px' : '52px',
-            opacity: isDisabled ? 0 : hover ? 0.95 : 0.8,
+            width: isDisabled ? 0 : hover ? '80px' : '58px',
+            height: isDisabled ? 0 : hover ? '80px' : '58px',
+            opacity: isDisabled ? 0 : hover ? 1 : 0.85,
             background: hover
-              ? 'radial-gradient(circle, rgba(224, 231, 255, 0.45) 0%, rgba(192, 132, 252, 0.35) 40%, rgba(99, 102, 241, 0.2) 70%, transparent 100%)'
-              : 'radial-gradient(circle, rgba(192, 132, 252, 0.4) 0%, rgba(139, 92, 246, 0.25) 45%, rgba(56, 189, 248, 0.12) 75%, transparent 100%)',
+              ? 'radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(192,132,252,0.5) 35%, rgba(99,102,241,0.3) 65%, transparent 100%)'
+              : 'radial-gradient(circle, rgba(192,132,252,0.45) 0%, rgba(139,92,246,0.3) 40%, rgba(56,189,248,0.15) 70%, transparent 100%)',
             boxShadow: hover
-              ? '0 0 28px 6px rgba(168, 85, 247, 0.55), 0 0 50px 12px rgba(99, 102, 241, 0.3)'
-              : '0 0 20px 4px rgba(168, 85, 247, 0.4), 0 0 36px 8px rgba(99, 102, 241, 0.22)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
+              ? '0 0 32px 8px rgba(168,85,247,0.7), 0 0 60px 16px rgba(99,102,241,0.4)'
+              : '0 0 24px 6px rgba(168,85,247,0.55), 0 0 45px 12px rgba(99,102,241,0.3)',
+            border: '1px solid rgba(255,255,255,0.3)',
           }}
         />
       </div>
 
-      {/* Core Precision Photon Bead (normal blend mode, enlarged core + double white/purple glow) */}
-      <div
-        ref={coreRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform"
-      >
+      {/* Core 核心 */}
+      <div ref={coreRef} className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform">
         <div
           className="rounded-full bg-white transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2"
           style={{
-            width: isDisabled ? 0 : hover ? '14px' : '9px',
-            height: isDisabled ? 0 : hover ? '14px' : '9px',
+            width: isDisabled ? 0 : hover ? '16px' : '11px',
+            height: isDisabled ? 0 : hover ? '16px' : '11px',
             opacity: isDisabled ? 0 : 1,
             boxShadow: hover
-              ? `
-                0 0 10px 2px rgba(255, 255, 255, 1),
-                0 0 22px 6px rgba(192, 132, 252, 0.75),
-                0 0 40px 10px rgba(139, 92, 246, 0.4)
-              `
-              : `
-                0 0 8px 2px rgba(255, 255, 255, 0.95),
-                0 0 16px 4px rgba(192, 132, 252, 0.6),
-                0 0 28px 8px rgba(139, 92, 246, 0.3)
-              `,
+              ? `0 0 12px 3px #fff, 0 0 28px 8px rgba(192,132,252,0.9), 0 0 50px 14px rgba(139,92,246,0.5)`
+              : `0 0 10px 2px #fff, 0 0 20px 6px rgba(192,132,252,0.75), 0 0 36px 10px rgba(139,92,246,0.4)`,
           }}
         />
       </div>

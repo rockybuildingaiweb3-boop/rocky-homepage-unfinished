@@ -235,8 +235,23 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             top: '49%',
             transform: 'translate(-50%, -50%)',
             background:
-              'radial-gradient(ellipse 80% 64% at 50% 49%, rgba(49, 46, 129, 0.24) 0%, rgba(67, 56, 202, 0.16) 35%, rgba(79, 70, 229, 0.09) 60%, rgba(30, 27, 75, 0.03) 80%, transparent 94%)',
+              'radial-gradient(ellipse 80% 64% at 50% 49%, rgba(49, 46, 129, 0.22) 0%, rgba(67, 56, 202, 0.14) 35%, rgba(79, 70, 229, 0.08) 60%, transparent 92%)',
             filter: 'blur(50px)',
+          }}
+        />
+
+        {/* Tier 1.5: Distinct Hollow Violet Corona Ring (transparent center 52%, luminous purple perimeter) */}
+        <div
+          className="absolute pointer-events-none celestial-spin"
+          style={{
+            width: '136%',
+            height: '116%',
+            left: '50%',
+            top: '49%',
+            transform: 'translate(-50%, -50%)',
+            background:
+              'radial-gradient(ellipse 75% 65% at 50% 50%, transparent 52%, rgba(167, 139, 250, 0.26) 62%, rgba(139, 92, 246, 0.16) 72%, transparent 85%)',
+            filter: 'blur(16px)',
           }}
         />
 
@@ -250,9 +265,9 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             top: '48.5%',
             transform: 'translate(-50%, -50%) rotate(-7deg)',
             borderRadius: '50%',
-            border: '1.5px solid rgba(216, 180, 254, 0.42)',
+            border: '1.5px solid rgba(216, 180, 254, 0.50)',
             boxShadow:
-              'inset 0 0 24px rgba(168, 85, 247, 0.22), 0 0 28px rgba(192, 132, 252, 0.38), 0 0 65px rgba(99, 102, 241, 0.18)',
+              'inset 0 0 28px rgba(168, 85, 247, 0.28), 0 0 34px 6px rgba(192, 132, 252, 0.45), 0 0 72px 12px rgba(99, 102, 241, 0.24)',
             background: 'transparent',
             filter: 'blur(0.5px)',
           }}
@@ -268,8 +283,8 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             top: '49%',
             transform: 'translate(-50%, -50%) rotate(14deg)',
             borderRadius: '50%',
-            border: '1px dashed rgba(224, 231, 255, 0.32)',
-            boxShadow: '0 0 18px rgba(147, 51, 234, 0.22)',
+            border: '1px dashed rgba(224, 231, 255, 0.36)',
+            boxShadow: '0 0 20px rgba(147, 51, 234, 0.26)',
             background: 'transparent',
           }}
         />
@@ -324,7 +339,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           </svg>
         </div>
 
-        {/* Tier 6: Subtle Singularity Video (blackhole.webm) with controlled presence (opacity ~0.30) */}
+        {/* Tier 6: Subtle Singularity Video (blackhole.webm) with controlled presence (opacity ~0.32, brightness 0.6, contrast 1.2) */}
         <div
           className="relative w-full h-full flex items-center justify-center overflow-hidden"
           style={{
@@ -340,10 +355,10 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             muted
             loop
             playsInline
-            className="w-[125%] h-[125%] max-w-none object-cover select-none pointer-events-none opacity-30"
+            className="w-[125%] h-[125%] max-w-none object-cover select-none pointer-events-none opacity-32"
             style={{
               objectPosition: 'center 46%',
-              filter: 'brightness(0.70) contrast(1.40) saturate(1.25)',
+              filter: 'brightness(0.60) contrast(1.20) saturate(1.20)',
             }}
             src="/videos/blackhole.webm"
           />
@@ -351,15 +366,15 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
 
         {/* Tier 7: Anamorphic Horizontal Flare with Intensified Center Highlight & 10s Slow Breath */}
         <div
-          className="absolute w-[185%] max-w-[1280px] h-[1.5px] sm:h-[2px] pointer-events-none celestial-flare"
+          className="absolute w-[185%] max-w-[1280px] h-[2px] sm:h-[2.5px] pointer-events-none celestial-flare"
           style={{
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0) 10%, rgba(147, 51, 234, 0.42) 28%, rgba(255, 255, 255, 1) 50%, rgba(147, 51, 234, 0.42) 72%, rgba(56, 189, 248, 0) 90%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0) 8%, rgba(147, 51, 234, 0.48) 26%, rgba(255, 255, 255, 1) 50%, rgba(147, 51, 234, 0.48) 74%, rgba(56, 189, 248, 0) 92%, transparent 100%)',
             boxShadow:
-              '0 0 16px 3px rgba(192, 132, 252, 0.70), 0 0 34px 6px rgba(99, 102, 241, 0.30), 0 0 5px 2px #ffffff',
+              '0 0 20px 4px rgba(192, 132, 252, 0.85), 0 0 42px 8px rgba(139, 92, 246, 0.45), 0 0 8px 3px #ffffff',
           }}
         />
 
