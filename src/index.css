@@ -565,14 +565,36 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 @keyframes celestialBeamBreath {
   0%, 100% {
-    opacity: 0.80;
-    transform: translate(-50%, -50%) scaleX(0.96);
-    filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.35));
+    opacity: 0.82;
+    transform: translate(-50%, -50%) rotate(-1.6deg) scaleX(0.95);
+    filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.45));
   }
   50% {
     opacity: 1;
-    transform: translate(-50%, -50%) scaleX(1.03);
-    filter: drop-shadow(0 0 16px rgba(224, 231, 255, 0.75));
+    transform: translate(-50%, -50%) rotate(-1.6deg) scaleX(1.03);
+    filter: drop-shadow(0 0 22px rgba(224, 231, 255, 0.90));
+  }
+}
+
+@keyframes celestialVerticalRayBreath {
+  0%, 100% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) scaleY(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleY(1.08);
+  }
+}
+
+@keyframes diamondCorePulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.88;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.14);
+    opacity: 1;
   }
 }
 
@@ -587,47 +609,18 @@ ul.work-list .list-item .text-wrapper .item-title {
 }
 
 .celestial-flare {
-  animation: celestialBeamBreath 10s ease-in-out infinite;
+  animation: celestialBeamBreath 9s ease-in-out infinite;
   will-change: transform, opacity, filter;
 }
 
-/* ─── TITLE LIGHT SWEEP (ENTRANCE CEREMONIAL SHIMMER) ─── */
-@keyframes titleShimmerSweep {
-  0% {
-    transform: translateX(-120%) skewX(-20deg);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.85;
-  }
-  60% {
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateX(180%) skewX(-20deg);
-    opacity: 0;
-  }
+.celestial-vertical-ray {
+  animation: celestialVerticalRayBreath 9s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-.title-light-sweep {
-  position: absolute;
-  top: -20%;
-  left: 0;
-  width: 60%;
-  height: 140%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 20%,
-    rgba(255, 255, 255, 0.65) 50%,
-    rgba(224, 231, 255, 0.45) 60%,
-    transparent 100%
-  );
-  filter: blur(8px);
-  pointer-events: none;
-  animation: titleShimmerSweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-delay: 0.68s;
-  mix-blend-mode: overlay;
+.diamond-core-pulse {
+  animation: diamondCorePulse 6s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 /* ─── 35MM CINEMATIC FILM GRAIN TEXTURE ─── */
