@@ -156,7 +156,6 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
                       <TechLogo
                         id={skill.id}
                         iconUrl={skill.icon}
-                        iconifyId={skill.iconify}
                         name={skill.name}
                         color={brandColor}
                         size={44}

@@ -143,13 +143,17 @@ export const WorkSection: React.FC<WorkSectionProps> = ({
       ) / 100;
   }, []);
 
-  // Wheel horizontal navigation
+  // Wheel horizontal navigation: ONLY handle horizontal swipe / Shift+wheel
   const handleWheel = (e: React.WheelEvent) => {
     if (currentActive >= 0) return;
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (Math.abs(delta) > 2) {
-      sliderState.current.targetPosition -= delta * 1.5;
+    // Only scroll horizontally if the gesture is primarily horizontal or shift is pressed
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
+      const delta = Math.abs(e.deltaX) > 0 ? e.deltaX : e.deltaY;
+      if (Math.abs(delta) > 2) {
+        sliderState.current.targetPosition -= delta * 1.5;
+      }
     }
+    // Vertical mouse wheel is preserved for smooth full-page vertical scrolling
   };
 
   // Keyboard accessibility: Escape to close details

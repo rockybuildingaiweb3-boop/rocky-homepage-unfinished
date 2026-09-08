@@ -103,35 +103,54 @@ export default function App() {
 
   const [activeSection, setActiveSection] = useState<string>('home');
 
-  // Handle scroll events and track active section dynamically
+  // Handle scroll events on window & scroll-frame to track active section dynamically
+  useEffect(() => {
+    const handleScrollUpdate = () => {
+      const scrollPos =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        scrollFrameRef.current?.scrollTop ||
+        0;
+      setScrollY(scrollPos);
+
+      const windowH = window.innerHeight;
+      const sections = [
+        { id: 'footer', el: document.getElementById('footer') },
+        { id: 'skills', el: document.getElementById('skills') },
+        { id: 'work', el: document.getElementById('work') },
+        { id: 'home', el: document.getElementById('home') },
+      ];
+
+      for (const sec of sections) {
+        if (sec.el) {
+          const top = sec.el.offsetTop - windowH * 0.25;
+          if (scrollPos >= top) {
+            setActiveSection(sec.id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollUpdate, { passive: true });
+    handleScrollUpdate();
+
+    return () => window.removeEventListener('scroll', handleScrollUpdate);
+  }, []);
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     const scrollPos = target.scrollTop;
     setScrollY(scrollPos);
-
-    const windowH = window.innerHeight;
-    const sections = [
-      { id: 'footer', el: document.getElementById('footer') },
-      { id: 'skills', el: document.getElementById('skills') },
-      { id: 'work', el: document.getElementById('work') },
-      { id: 'home', el: document.getElementById('home') },
-    ];
-
-    for (const sec of sections) {
-      if (sec.el) {
-        const top = sec.el.offsetTop - windowH * 0.25;
-        if (scrollPos >= top) {
-          setActiveSection(sec.id);
-          break;
-        }
-      }
-    }
   };
 
   const handleNavigate = (targetId: string) => {
-    if (!scrollFrameRef.current) return;
     if (targetId === 'home') {
-      scrollFrameRef.current.scrollTo({
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+      scrollFrameRef.current?.scrollTo({
         top: 0,
         behavior: 'smooth',
       });
@@ -145,7 +164,11 @@ export default function App() {
       // Smooth momentum scrolling with header offset of offsetTop - 10vh
       const headerOffset10vh = window.innerHeight * 0.1;
       const targetY = Math.max(0, targetEl.offsetTop - headerOffset10vh);
-      scrollFrameRef.current.scrollTo({
+      window.scrollTo({
+        top: targetY,
+        behavior: 'smooth',
+      });
+      scrollFrameRef.current?.scrollTo({
         top: targetY,
         behavior: 'smooth',
       });
@@ -177,8 +200,7 @@ export default function App() {
         id="scroll-frame"
         ref={scrollFrameRef}
         onScroll={handleScroll}
-        className="w-full h-screen relative z-10 overflow-x-hidden overflow-y-auto"
-        style={{ overflowY: loading ? 'hidden' : 'auto' }}
+        className="w-full min-h-screen relative z-10 overflow-x-hidden"
       >
         <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
 

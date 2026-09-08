@@ -69,6 +69,11 @@
   -webkit-font-smoothing: antialiased;
 }
 
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
 html, body, #root {
   background-color: #030014;
 }
@@ -78,7 +83,9 @@ body {
   color: #ffffff;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: var(--body-font);
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
