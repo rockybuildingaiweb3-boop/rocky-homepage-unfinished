@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { getGPUTier } from 'detect-gpu';
-import { WorkItem } from '../types';
-import { lerp } from '../utils';
-import { ImageRenderer } from '../effects/work-slider/renderer';
+import { WorkItem } from '../../types';
+import { lerp } from '../../utils';
+import { ImageRenderer } from '../../effects/work-slider/renderer';
 
 interface WorkSectionProps {
   workData: WorkItem[];

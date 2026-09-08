@@ -56,53 +56,69 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
             <button
               onClick={() => handleNavClick('home')}
-              className={`border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1 ${
-                isHomeActive ? 'text-white font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-white/80 hover:text-white'
+              className={`group border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
+                isHomeActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
               }`}
             >
               HOME
-              {isHomeActive && (
-                <span className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.95)] animate-pulse" />
-              )}
+              <span
+                className={`absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
+                  isHomeActive
+                    ? 'bg-purple-200 opacity-100 scale-x-100 shadow-[0_0_12px_2px_rgba(216,180,254,0.95),_0_0_24px_4px_rgba(168,85,247,0.6)]'
+                    : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]'
+                }`}
+              />
             </button>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
             <button
               onClick={() => handleNavClick('work')}
-              className={`border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1 ${
-                isStudioActive ? 'text-white font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-white/80 hover:text-white'
+              className={`group border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
+                isStudioActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
               }`}
             >
               STUDIO
-              {isStudioActive && (
-                <span className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.95)] animate-pulse" />
-              )}
+              <span
+                className={`absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
+                  isStudioActive
+                    ? 'bg-purple-200 opacity-100 scale-x-100 shadow-[0_0_12px_2px_rgba(216,180,254,0.95),_0_0_24px_4px_rgba(168,85,247,0.6)]'
+                    : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]'
+                }`}
+              />
             </button>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
             <button
               onClick={() => handleNavClick('skills')}
-              className={`border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1 ${
-                isSkillsActive ? 'text-white font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-white/80 hover:text-white'
+              className={`group border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
+                isSkillsActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
               }`}
             >
               SKILLS
-              {isSkillsActive && (
-                <span className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.95)] animate-pulse" />
-              )}
+              <span
+                className={`absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
+                  isSkillsActive
+                    ? 'bg-purple-200 opacity-100 scale-x-100 shadow-[0_0_12px_2px_rgba(216,180,254,0.95),_0_0_24px_4px_rgba(168,85,247,0.6)]'
+                    : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]'
+                }`}
+              />
             </button>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
             <a
-              href="mailto:holmepavolini@gmail.com"
-              className={`uppercase font-inherit text-inherit tracking-inherit no-underline clickable transition-all duration-300 relative py-1 px-1 ${
-                isContactActive ? 'text-white font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-white/80 hover:text-white'
+              href="mailto:rockybuilding.aiweb3@gmail.com"
+              className={`group uppercase font-inherit text-inherit tracking-inherit no-underline clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
+                isContactActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
               }`}
             >
               CONTACT
-              {isContactActive && (
-                <span className="absolute bottom-0 left-1 right-1 h-[1.5px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.95)] animate-pulse" />
-              )}
+              <span
+                className={`absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
+                  isContactActive
+                    ? 'bg-purple-200 opacity-100 scale-x-100 shadow-[0_0_12px_2px_rgba(216,180,254,0.95),_0_0_24px_4px_rgba(168,85,247,0.6)]'
+                    : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]'
+                }`}
+              />
             </a>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
@@ -110,7 +126,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
               href="https://github.com/RockyBabcock/Rockyshomepage"
               target="_blank"
               rel="noreferrer"
-              className="text-white/80 uppercase font-inherit text-inherit tracking-inherit no-underline clickable hover:text-white transition-colors py-1 px-1"
+              className="text-white/75 uppercase font-inherit text-inherit tracking-inherit no-underline clickable hover:text-white transition-colors py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded"
             >
               GITHUB
             </a>
@@ -184,7 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
           </li>
           <li className="font-[family-name:var(--body-font)] font-bold lowercase text-[9vw] py-[2vh] border-b border-white/20">
             <a
-              href="mailto:holmepavolini@gmail.com"
+              href="mailto:rockybuilding.aiweb3@gmail.com"
               className={`no-underline font-inherit text-inherit block w-full clickable transition-all ${
                 isContactActive ? 'text-white font-extrabold pl-2 border-l-2 border-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse' : 'text-white/60'
               }`}

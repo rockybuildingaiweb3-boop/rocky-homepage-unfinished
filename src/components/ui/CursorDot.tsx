@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { easeInOutQuad } from '../utils';
+import { easeInOutQuad } from '../../utils';
 
 interface CursorDotProps {
   isMobile?: boolean;
@@ -111,63 +111,64 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
 
   return (
     <>
-      {/* Trail 2 - 最远拖尾 */}
+      {/* Trail 2 - 最远拖尾 (Ethereal Violet Stardust) */}
       <div ref={trail2Ref} className="fixed top-0 left-0 pointer-events-none z-[9997] will-change-transform">
         <div
-          className="rounded-full -translate-x-1/2 -translate-y-1/2"
+          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isDisabled ? 0 : '14px',
-            height: isDisabled ? 0 : '14px',
-            opacity: isDisabled ? 0 : 0.45,
-            background: 'radial-gradient(circle, rgba(168,85,247,0.9) 0%, transparent 70%)',
-            filter: 'blur(2px)',
+            width: isDisabled ? 0 : hover ? '20px' : '15px',
+            height: isDisabled ? 0 : hover ? '20px' : '15px',
+            opacity: isDisabled ? 0 : hover ? 0.65 : 0.45,
+            background: 'radial-gradient(circle, rgba(168,85,247,0.95) 0%, rgba(139,92,246,0.5) 50%, transparent 80%)',
+            filter: 'blur(2.5px)',
           }}
         />
       </div>
 
-      {/* Trail 1 - 近拖尾 */}
+      {/* Trail 1 - 近拖尾 (Luminous Purple Core) */}
       <div ref={trail1Ref} className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform">
         <div
-          className="rounded-full -translate-x-1/2 -translate-y-1/2"
+          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isDisabled ? 0 : '18px',
-            height: isDisabled ? 0 : '18px',
-            opacity: isDisabled ? 0 : 0.6,
-            background: 'radial-gradient(circle, rgba(192,132,252,0.95) 0%, rgba(99,102,241,0.4) 60%, transparent 100%)',
-            filter: 'blur(1.5px)',
+            width: isDisabled ? 0 : hover ? '26px' : '19px',
+            height: isDisabled ? 0 : hover ? '26px' : '19px',
+            opacity: isDisabled ? 0 : hover ? 0.8 : 0.6,
+            background: 'radial-gradient(circle, rgba(216,180,254,0.98) 0%, rgba(168,85,247,0.7) 45%, rgba(99,102,241,0.3) 75%, transparent 100%)',
+            filter: 'blur(1.8px)',
           }}
         />
       </div>
 
-      {/* Aura 光晕 */}
+      {/* Aura 光晕 (Chromatic Celestial Halo) */}
       <div ref={auraRef} className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform">
         <div
           className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isDisabled ? 0 : hover ? '80px' : '58px',
-            height: isDisabled ? 0 : hover ? '80px' : '58px',
+            width: isDisabled ? 0 : hover ? '88px' : '58px',
+            height: isDisabled ? 0 : hover ? '88px' : '58px',
             opacity: isDisabled ? 0 : hover ? 1 : 0.85,
             background: hover
-              ? 'radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(192,132,252,0.5) 35%, rgba(99,102,241,0.3) 65%, transparent 100%)'
+              ? 'radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(216,180,254,0.55) 30%, rgba(168,85,247,0.35) 60%, transparent 100%)'
               : 'radial-gradient(circle, rgba(192,132,252,0.45) 0%, rgba(139,92,246,0.3) 40%, rgba(56,189,248,0.15) 70%, transparent 100%)',
             boxShadow: hover
-              ? '0 0 32px 8px rgba(168,85,247,0.7), 0 0 60px 16px rgba(99,102,241,0.4)'
+              ? '0 0 36px 10px rgba(192,132,252,0.85), 0 0 65px 18px rgba(147,51,234,0.45)'
               : '0 0 24px 6px rgba(168,85,247,0.55), 0 0 45px 12px rgba(99,102,241,0.3)',
-            border: '1px solid rgba(255,255,255,0.3)',
+            border: hover ? '1.5px solid rgba(230,210,255,0.7)' : '1px solid rgba(255,255,255,0.3)',
           }}
         />
       </div>
 
-      {/* Core 核心 */}
+      {/* Core 核心 (Luminous Diamond Point) */}
       <div ref={coreRef} className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform">
         <div
-          className="rounded-full bg-white transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2"
+          className="rounded-full transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2"
           style={{
-            width: isDisabled ? 0 : hover ? '16px' : '11px',
-            height: isDisabled ? 0 : hover ? '16px' : '11px',
+            width: isDisabled ? 0 : hover ? '18px' : '11px',
+            height: isDisabled ? 0 : hover ? '18px' : '11px',
             opacity: isDisabled ? 0 : 1,
+            backgroundColor: hover ? '#fdf4ff' : '#ffffff',
             boxShadow: hover
-              ? `0 0 12px 3px #fff, 0 0 28px 8px rgba(192,132,252,0.9), 0 0 50px 14px rgba(139,92,246,0.5)`
+              ? `0 0 14px 4px #fff, 0 0 32px 10px rgba(216,180,254,0.95), 0 0 54px 16px rgba(168,85,247,0.6)`
               : `0 0 10px 2px #fff, 0 0 20px 6px rgba(192,132,252,0.75), 0 0 36px 10px rgba(139,92,246,0.4)`,
           }}
         />

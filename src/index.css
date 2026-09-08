@@ -421,8 +421,18 @@ ul.work-list .list-item .img-wrapper {
   margin-right: 15%;
   box-shadow: 3px 9px 18px rgba(0, 0, 0, 0.2);
   border-radius: 0.8vh;
+  border: 1px solid rgba(255, 255, 255, 0.07);
   background-color: #1a1a1c;
-  transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1), margin 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1), margin 0.7s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.45s ease, border-color 0.45s ease;
+}
+
+ul.work-list .list-item:hover .img-wrapper {
+  border-color: rgba(216, 180, 254, 0.55);
+  box-shadow: 0 0 26px 4px rgba(168, 85, 247, 0.38), 0 0 52px 8px rgba(139, 92, 246, 0.18), 0 16px 32px rgba(0, 0, 0, 0.7);
+}
+
+ul.work-list .list-item:hover .text-wrapper .item-title {
+  text-shadow: 0 0 18px rgba(192, 132, 252, 0.6), 0 0 32px rgba(147, 51, 234, 0.35);
 }
 
 ul.work-list .list-item .img-wrapper img {
@@ -565,15 +575,107 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 @keyframes celestialBeamBreath {
   0%, 100% {
-    opacity: 0.82;
-    transform: translate(-50%, -50%) rotate(-1.6deg) scaleX(0.95);
-    filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.45));
+    opacity: 0.78;
+    transform: translate(-50%, -50%) rotate(-1.5deg) scaleX(0.95);
+    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.45)) drop-shadow(0 0 22px rgba(139, 92, 246, 0.25));
   }
   50% {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(-1.6deg) scaleX(1.03);
-    filter: drop-shadow(0 0 22px rgba(224, 231, 255, 0.90));
+    transform: translate(-50%, -50%) rotate(-1.5deg) scaleX(1.03);
+    filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 42px rgba(216, 180, 254, 0.85)) drop-shadow(0 0 70px rgba(168, 85, 247, 0.45));
   }
+}
+
+/* Dual-layer illumination on hero display title (crisp white core + atmospheric violet breathing) */
+@keyframes heroTitleDualGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.90))
+            drop-shadow(0 0 8px rgba(255, 255, 255, 0.60))
+            drop-shadow(0 0 22px rgba(167, 139, 250, 0.50))
+            drop-shadow(0 0 44px rgba(139, 92, 246, 0.30))
+            drop-shadow(0 4px 16px rgba(0, 0, 0, 0.75));
+  }
+  50% {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1))
+            drop-shadow(0 0 14px rgba(255, 255, 255, 0.85))
+            drop-shadow(0 0 34px rgba(216, 180, 254, 0.75))
+            drop-shadow(0 0 60px rgba(168, 85, 247, 0.45))
+            drop-shadow(0 4px 20px rgba(0, 0, 0, 0.85));
+  }
+}
+
+.hero-title-illuminated {
+  animation: heroTitleDualGlow 10s ease-in-out infinite;
+  will-change: filter;
+}
+
+/* Gentle floating bobbing for scroll cues */
+@keyframes scrollCueFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.scroll-cue-float {
+  animation: scrollCueFloat 2.4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Ethereal cosmic sheen across footer signature & brand mark */
+@keyframes footerSignatureSheen {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.35)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.15));
+    opacity: 0.88;
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(216, 180, 254, 0.85)) drop-shadow(0 0 34px rgba(168, 85, 247, 0.50));
+    opacity: 1;
+  }
+}
+
+.footer-signature-sheen {
+  animation: footerSignatureSheen 10s ease-in-out infinite;
+  will-change: filter, opacity;
+}
+
+/* Navigation link glowing diffusion */
+@keyframes navGlowSpread {
+  0% {
+    transform: scaleX(0.65);
+    opacity: 0.6;
+    box-shadow: 0 0 6px rgba(216, 180, 254, 0.6);
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+    box-shadow: 0 0 14px 2px rgba(216, 180, 254, 0.95), 0 0 24px 4px rgba(168, 85, 247, 0.5);
+  }
+}
+
+.nav-glow-underline {
+  animation: navGlowSpread 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Light sweep across loader progress bar on completion */
+@keyframes loaderLightSweep {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%);
+    opacity: 0;
+  }
+}
+
+.loader-light-sweep {
+  animation: loaderLightSweep 0.75s ease-out forwards;
 }
 
 @keyframes celestialVerticalRayBreath {
@@ -1026,7 +1128,16 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 @media (prefers-reduced-motion: reduce) {
   .marquee-track-forward,
-  .marquee-track-reverse {
+  .marquee-track-reverse,
+  .hero-title-illuminated,
+  .scroll-cue-float,
+  .footer-signature-sheen,
+  .nav-glow-underline,
+  .celestial-spin,
+  .celestial-pulse,
+  .celestial-flare,
+  .celestial-vertical-ray,
+  .diamond-core-pulse {
     animation: none !important;
   }
 }

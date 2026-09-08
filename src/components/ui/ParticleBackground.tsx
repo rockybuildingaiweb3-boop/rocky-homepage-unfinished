@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as random from 'maath/random';
 import type { Points as PointsType } from 'three';
-import { isWebGLAvailable } from '../utils';
+import { isWebGLAvailable } from '../../utils';
 
 export interface ParticleBackgroundProps {
   scrollY?: number;
@@ -56,37 +56,37 @@ export const StarBackground: React.FC = (props) => {
 
   return (
     <group rotation={[0, 0, Math.PI / 4]}>
-      {/* 1. Many tiny low-alpha background stars */}
+      {/* 1. Many tiny low-alpha background stars with ethereal violet tint */}
       <Points ref={refTiny} stride={3} positions={sphereTiny} frustumCulled {...props}>
         <PointMaterial
           transparent
-          color="#e2e8f0"
-          size={0.0014}
-          opacity={0.28}
+          color="#d8b4fe"
+          size={0.0015}
+          opacity={0.32}
           sizeAttenuation
           depthWrite={false}
         />
       </Points>
 
-      {/* 2. Medium particles with soft gentle glow */}
+      {/* 2. Medium particles with soft gentle lavender glow */}
       <Points ref={refMed} stride={3} positions={sphereMed} frustumCulled {...props}>
         <PointMaterial
           transparent
-          color="#f8fafc"
-          size={0.0026}
-          opacity={0.48}
+          color="#f3e8ff"
+          size={0.0028}
+          opacity={0.52}
           sizeAttenuation
           depthWrite={false}
         />
       </Points>
 
-      {/* 3. Micro-stars creating delicate depth sparkle without harsh glare */}
+      {/* 3. Micro-stars creating delicate depth sparkle with cosmic diamond light */}
       <Points ref={refBright} stride={3} positions={sphereBright} frustumCulled {...props}>
         <PointMaterial
           transparent
           color="#ffffff"
-          size={0.0042}
-          opacity={0.72}
+          size={0.0044}
+          opacity={0.78}
           sizeAttenuation
           depthWrite={false}
         />
@@ -180,7 +180,12 @@ const StarBackground2D: React.FC = () => {
         if (px < 0 || px >= width || py < 0 || py >= height) continue;
 
         const alpha = Math.max(0.06, Math.min(0.85, (baseAlpha * 0.95) / dist));
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+        ctx.fillStyle =
+          i % 3 === 0
+            ? `rgba(216, 180, 254, ${alpha.toFixed(2)})`
+            : i % 3 === 1
+            ? `rgba(243, 232, 255, ${alpha.toFixed(2)})`
+            : `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
         ctx.fillRect(px, py, size, size);
       }
     };

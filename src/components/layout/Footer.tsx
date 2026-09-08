@@ -11,8 +11,8 @@ import {
   RxArchive,
 } from 'react-icons/rx';
 import { FaYoutube, FaSpotify } from 'react-icons/fa';
-import { onScrolledIntoView } from '../utils';
-import { SiteData } from '../types';
+import { onScrolledIntoView } from '../../utils';
+import { SiteData } from '../../types';
 
 interface FooterProps {
   siteData?: SiteData | null;
@@ -81,7 +81,7 @@ export const FOOTER_DATA = [
       {
         name: 'Contact Directly',
         icon: RxEnvelopeClosed,
-        link: 'mailto:holmepavolini@gmail.com',
+        link: 'mailto:rockybuilding.aiweb3@gmail.com',
       },
     ],
   },
@@ -267,11 +267,11 @@ export const Footer: React.FC<FooterProps> = ({ siteData }) => {
         <div className="flex-wrapper decor flex items-center justify-end flex-shrink-0 w-full lg:w-[170px] xl:w-[200px]">
           <svg
             id="signature"
-            className="name-signature"
+            className="name-signature footer-signature-sheen transition-all duration-500 hover:drop-shadow-[0_0_16px_rgba(216,180,254,0.85)] cursor-pointer"
             x="0px"
             y="0px"
             viewBox="0 0 190 136.9"
-            style={{ stroke: 'rgb(140, 139, 150)' }}
+            style={{ stroke: 'rgb(160, 155, 175)' }}
           >
             <g>
               <path

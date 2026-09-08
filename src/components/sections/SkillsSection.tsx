@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { SkillItem, SKILLS_DATA } from '../data/skills';
-import { TechLogoConstellation } from './skills/TechLogoConstellation';
-import { SkillsPlanetBackground } from './skills/SkillsPlanetBackground';
-import { SkillsMarquee } from './skills/SkillsMarquee';
+import { SkillItem, SKILLS_DATA } from '../../data/skills';
+import { TechLogoConstellation } from '../skills/TechLogoConstellation';
+import { SkillsPlanetBackground } from '../skills/SkillsPlanetBackground';
+import { SkillsMarquee } from '../skills/SkillsMarquee';
 
 interface SkillsSectionProps {
   onSelectProject?: (projectId: string) => void;

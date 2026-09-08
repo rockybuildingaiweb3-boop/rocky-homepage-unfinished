@@ -1,147 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Navbar } from './components/Navbar';
-import { HomeSection } from './components/HomeSection';
-import { WorkSection } from './components/WorkSection';
-import { SkillsSection } from './components/SkillsSection';
-import { Footer } from './components/Footer';
-import { CursorDot } from './components/CursorDot';
-import { Loader } from './components/Loader';
-import { ParticleBackground } from './components/ParticleBackground';
-import { SiteData, WorkItem } from './types';
-import { fetchJsonData, loadImage, devMsg } from './utils';
+import React, { useRef } from 'react';
+import { Navbar, Footer, Loader } from './components/layout';
+import { HomeSection, WorkSection, SkillsSection } from './components/sections';
+import { CursorDot, ParticleBackground } from './components/ui';
+import { useIsMobile } from './hooks/useIsMobile';
+import { usePreloadAssets } from './hooks/usePreloadAssets';
+import { useScrollSpy } from './hooks/useScrollSpy';
+
+const SECTION_IDS = ['footer', 'skills', 'work', 'home'];
 
 export default function App() {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [loadingDone, setLoadingDone] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(10);
-  const [siteData, setSiteData] = useState<SiteData | null>(null);
-  const [workData, setWorkData] = useState<WorkItem[]>([]);
-  const [scrollY, setScrollY] = useState<number>(0);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-
+  const isMobile = useIsMobile();
+  const { loading, loadingDone, progress, siteData, workData } = usePreloadAssets();
   const scrollFrameRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth <= 768);
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Preload and bootstrap
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadPortfolio() {
-      try {
-        const [wData, sData] = await Promise.all([
-          fetchJsonData<WorkItem[]>('/data/work-data.json').catch(() => []),
-          fetchJsonData<SiteData>('/data/data.json').catch(() => ({ availablity_date: '' })),
-        ]);
-
-        if (!isMounted) return;
-        setWorkData(wData);
-        setSiteData(sData);
-        setProgress(30);
-
-        // Preload key images
-        const criticalImages = [
-          '/assets/imgs/home-back.jpg',
-          '/assets/imgs/profile-photo.jpg',
-          '/assets/imgs/logo.svg',
-          ...wData.map((item) => `/assets/imgs/work-back/${item.id}/cover.jpg`),
-        ];
-
-        let loadedCount = 0;
-        const total = criticalImages.length;
-
-        await Promise.all(
-          criticalImages.map(async (src) => {
-            try {
-              await loadImage(src);
-            } catch {
-              // Ignore single image failure to avoid blocking app
-            }
-            if (isMounted) {
-              loadedCount++;
-              const calculated = 30 + Math.round((loadedCount / total) * 70);
-              setProgress(calculated);
-            }
-          })
-        );
-
-        if (!isMounted) return;
-        setProgress(100);
-
-        // Finish loader transition:
-        // Wait 250ms -> setLoadingDone(true) triggers right: 0; width: 0 (800ms wipe) -> 700ms overlay fade
-        setTimeout(() => {
-          if (!isMounted) return;
-          setLoadingDone(true);
-          setTimeout(() => {
-            if (!isMounted) return;
-            setLoading(false);
-            devMsg();
-          }, 1550);
-        }, 250);
-      } catch (err) {
-        console.error('Failed to load portfolio:', err);
-        if (isMounted) {
-          setProgress(100);
-          setLoadingDone(true);
-          setLoading(false);
-        }
-      }
-    }
-
-    loadPortfolio();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const [activeSection, setActiveSection] = useState<string>('home');
-
-  // Handle scroll events on window & scroll-frame to track active section dynamically
-  useEffect(() => {
-    const handleScrollUpdate = () => {
-      const scrollPos =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        scrollFrameRef.current?.scrollTop ||
-        0;
-      setScrollY(scrollPos);
-
-      const windowH = window.innerHeight;
-      const sections = [
-        { id: 'footer', el: document.getElementById('footer') },
-        { id: 'skills', el: document.getElementById('skills') },
-        { id: 'work', el: document.getElementById('work') },
-        { id: 'home', el: document.getElementById('home') },
-      ];
-
-      for (const sec of sections) {
-        if (sec.el) {
-          const top = sec.el.offsetTop - windowH * 0.25;
-          if (scrollPos >= top) {
-            setActiveSection(sec.id);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScrollUpdate, { passive: true });
-    handleScrollUpdate();
-
-    return () => window.removeEventListener('scroll', handleScrollUpdate);
-  }, []);
+  const { scrollY, setScrollY, activeSection, setActiveSection } = useScrollSpy({
+    sectionIds: SECTION_IDS,
+    scrollContainerRef: scrollFrameRef,
+  });
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    const scrollPos = target.scrollTop;
-    setScrollY(scrollPos);
+    setScrollY(e.currentTarget.scrollTop);
   };
 
   const handleNavigate = (targetId: string) => {
