@@ -195,6 +195,9 @@ export default function App() {
       {/* Intro progress bar loader */}
       {loading && <Loader progress={progress} loadingDone={loadingDone} />}
 
+      {/* Atmospheric 35mm Cinematic Film Grain Texture Layer */}
+      <div className="cinematic-grain" aria-hidden="true" />
+
       {/* Main scrolling viewport container */}
       <div
         id="scroll-frame"

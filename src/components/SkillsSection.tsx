@@ -36,6 +36,9 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ onSelectProject })
       {/* ─── 1. SIGNATURE PURPLE COSMIC PLANET BACKGROUND ─── */}
       <SkillsPlanetBackground activeBrandColor={selectedSkill.brandColor} />
 
+      {/* Deep cosmic grain overlay */}
+      <div className="dark-section-grain" aria-hidden="true" />
+
       {/* ─── 2. MAIN STRUCTURAL CONTENT CONTAINER ─── */}
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center relative z-10">
         {/* Header */}

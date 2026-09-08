@@ -589,6 +589,68 @@ ul.work-list .list-item .text-wrapper .item-title {
   will-change: transform, opacity;
 }
 
+/* ─── TITLE LIGHT SWEEP (ENTRANCE CEREMONIAL SHIMMER) ─── */
+@keyframes titleShimmerSweep {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(180%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+.title-light-sweep {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 60%;
+  height: 140%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(224, 231, 255, 0.45) 60%,
+    transparent 100%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+  animation: titleShimmerSweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.68s;
+  mix-blend-mode: overlay;
+}
+
+/* ─── 35MM CINEMATIC FILM GRAIN TEXTURE ─── */
+.cinematic-grain {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.038;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Additional deep cosmic grain accent for dark background sections */
+.dark-section-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.032;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
 /* Typography Classes matching original site */
 .title {
   color: white;

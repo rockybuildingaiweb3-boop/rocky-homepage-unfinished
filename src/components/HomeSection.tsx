@@ -15,6 +15,8 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [nebulaReady, setNebulaReady] = useState<boolean>(false);
+  const [shimmerActive, setShimmerActive] = useState<boolean>(false);
 
   useEffect(() => {
     // Check for user's reduced-motion preferences
@@ -78,9 +80,14 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         'opacity 0.9s ease 0.8s, transform 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) 0.8s';
     }
 
-    // Trigger staggered entrance animation
+    // Trigger staggered entrance animation & ceremonial awakening
     const rafId = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        // Synchronize gentle entrance expansion & illumination for the celestial nebula
+        setTimeout(() => {
+          setNebulaReady(true);
+        }, 120);
+
         if (word1Ref.current) {
           setTimeout(() => {
             word1Ref.current!.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
@@ -102,6 +109,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           }, 460);
         }
 
+        // Light sweeps across title right as words lock into resting position
+        setTimeout(() => {
+          setShimmerActive(true);
+        }, 620);
+
         if (occRef.current) {
           setTimeout(() => {
             occRef.current!.style.opacity = '1';
@@ -121,8 +133,10 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  // Parallax translation for floating frame (GPU accelerated translate3d)
-  const parallaxOffsetY = scrollY * 0.12;
+  // Multi-tier parallax offsets for deep dimensional separation
+  const bgParallaxY = scrollY * 0.15;
+  const nebulaParallaxY = scrollY * 0.35; // Enhanced from 0.12 for distinct cosmic depth
+  const textParallaxY = scrollY * 0.08;
 
   const handleScrollCueClick = () => {
     if (onNavigate) {
@@ -152,7 +166,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       <div
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-[1] overflow-hidden"
         style={{
-          transform: `translate3d(0, ${parallaxOffsetY}px, 0)`,
+          transform: `translate3d(0, ${bgParallaxY}px, 0)`,
           willChange: 'transform',
         }}
         aria-hidden="true"
@@ -177,12 +191,15 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           4. High-Definition Singularity: Compressed brightness & boosted contrast (contrast 1.65)
           5. Anamorphic Cross Flare: Razor-sharp horizontal flare + delicate vertical ray
           6. Living Micro-Dynamics: Ultra-slow 28s orbit + 18s pulse for alive, majestic presence
+          7. Enhanced Parallax (0.35x) & Entrance Bloom Expansion (scale 0.88 -> 1)
          ───────────────────────────────────────────────────────────── */}
       <div
-        className="absolute left-1/2 pointer-events-none select-none z-[3] flex flex-col items-center justify-center overflow-visible mix-blend-screen"
+        className="absolute left-1/2 pointer-events-none select-none z-[3] flex flex-col items-center justify-center overflow-visible mix-blend-screen will-change-transform"
         style={{
           top: '24%',
-          transform: 'translate(-50%, -50%)',
+          transform: `translate3d(-50%, calc(-50% + ${nebulaParallaxY}px), 0) scale(${nebulaReady ? 1 : 0.88})`,
+          opacity: nebulaReady ? 1 : 0.25,
+          transition: 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.3s ease-out',
           width: 'clamp(380px, 64vw, 820px)',
           height: 'clamp(280px, 46vw, 560px)',
         }}
@@ -332,7 +349,12 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             upper-left flank of 'rocky', clearing the 'babcock' letters.
           - Occupation tagline and interactive '↓ SCROLL' cue aligned cleanly below.
          ───────────────────────────────────────────────────────────── */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-12 sm:pt-16 pb-4">
+      <div
+        className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-12 sm:pt-16 pb-4 will-change-transform"
+        style={{
+          transform: `translate3d(0, ${textParallaxY}px, 0)`,
+        }}
+      >
         {/* Core title and signature cluster */}
         <div className="relative flex flex-col items-center pointer-events-auto">
           {/* Handcrafted white signature placed to upper-left flank with artistic breathing room */}
@@ -350,47 +372,52 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             />
           </div>
 
-          {/* Editorial Display Title Block */}
-          <h1
-            className="flex flex-col items-center m-0 p-0 font-normal select-none"
-            style={{
-              fontFamily: 'var(--title-font)',
-              filter:
-                'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75))',
-            }}
-          >
-            {/* First Word: rocky */}
-            <div className="overflow-hidden inline-flex pb-1">
-              <span
-                ref={word1Ref}
-                className="inline-block text-white lowercase will-change-transform"
-                style={{
-                  fontSize: 'clamp(4.2rem, 11vw, 9.4rem)',
-                  lineHeight: 0.86,
-                  letterSpacing: '-0.035em',
-                  fontFamily: 'var(--title-font)',
-                }}
-              >
-                rocky
-              </span>
-            </div>
+          {/* Editorial Display Title Block with Ceremonial Light Sweep */}
+          <div className="relative overflow-hidden px-4 py-1">
+            {/* Soft luminous light sweep across title after letters lock into place */}
+            {shimmerActive && <div className="title-light-sweep" />}
 
-            {/* Second Word: babcock */}
-            <div className="overflow-hidden inline-flex pb-1">
-              <span
-                ref={word2Ref}
-                className="inline-block text-white lowercase will-change-transform"
-                style={{
-                  fontSize: 'clamp(4.2rem, 11vw, 9.4rem)',
-                  lineHeight: 0.86,
-                  letterSpacing: '-0.035em',
-                  fontFamily: 'var(--title-font)',
-                }}
-              >
-                babcock
-              </span>
-            </div>
-          </h1>
+            <h1
+              className="flex flex-col items-center m-0 p-0 font-normal select-none"
+              style={{
+                fontFamily: 'var(--title-font)',
+                filter:
+                  'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75))',
+              }}
+            >
+              {/* First Word: rocky */}
+              <div className="overflow-hidden inline-flex pb-1">
+                <span
+                  ref={word1Ref}
+                  className="inline-block text-white lowercase will-change-transform"
+                  style={{
+                    fontSize: 'clamp(4.2rem, 11vw, 9.4rem)',
+                    lineHeight: 0.86,
+                    letterSpacing: '-0.035em',
+                    fontFamily: 'var(--title-font)',
+                  }}
+                >
+                  rocky
+                </span>
+              </div>
+
+              {/* Second Word: babcock */}
+              <div className="overflow-hidden inline-flex pb-1">
+                <span
+                  ref={word2Ref}
+                  className="inline-block text-white lowercase will-change-transform"
+                  style={{
+                    fontSize: 'clamp(4.2rem, 11vw, 9.4rem)',
+                    lineHeight: 0.86,
+                    letterSpacing: '-0.035em',
+                    fontFamily: 'var(--title-font)',
+                  }}
+                >
+                  babcock
+                </span>
+              </div>
+            </h1>
+          </div>
 
           {/* Minimalist Occupation Tagline */}
           <div className="overflow-hidden mt-4 sm:mt-5 md:mt-6">
