@@ -119,10 +119,11 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
         <div
           className="rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-300"
           style={{
-            width: isDisabled ? 0 : '8px',
-            height: isDisabled ? 0 : '8px',
-            opacity: isDisabled ? 0 : 0.22,
-            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.7) 0%, rgba(99, 102, 241, 0) 100%)',
+            width: isDisabled ? 0 : '10px',
+            height: isDisabled ? 0 : '10px',
+            opacity: isDisabled ? 0 : 0.35,
+            background:
+              'radial-gradient(circle, rgba(168, 85, 247, 0.9) 0%, rgba(99, 102, 241, 0.4) 50%, transparent 100%)',
             filter: 'blur(1px)',
           }}
         />
@@ -136,54 +137,60 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
         <div
           className="rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-300"
           style={{
-            width: isDisabled ? 0 : '12px',
-            height: isDisabled ? 0 : '12px',
-            opacity: isDisabled ? 0 : 0.38,
-            background: 'radial-gradient(circle, rgba(192, 132, 252, 0.8) 0%, rgba(56, 189, 248, 0.2) 60%, transparent 100%)',
-            filter: 'blur(1.5px)',
+            width: isDisabled ? 0 : '14px',
+            height: isDisabled ? 0 : '14px',
+            opacity: isDisabled ? 0 : 0.55,
+            background:
+              'radial-gradient(circle, rgba(192, 132, 252, 0.95) 0%, rgba(129, 140, 248, 0.45) 55%, transparent 100%)',
+            filter: 'blur(1px)',
           }}
         />
       </div>
 
-      {/* Trailing Chromatic Aura (soft organic lag halo with violet/cyan refraction) */}
+      {/* Trailing Chromatic Aura (normal blend mode, high-contrast glow over watercolor) */}
       <div
         ref={auraRef}
         className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform"
-        style={{
-          mixBlendMode: 'screen',
-        }}
       >
         <div
           className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isDisabled ? 0 : hover ? '68px' : '42px',
-            height: isDisabled ? 0 : hover ? '68px' : '42px',
-            opacity: isDisabled ? 0 : hover ? 0.9 : 0.65,
+            width: isDisabled ? 0 : hover ? '72px' : '52px',
+            height: isDisabled ? 0 : hover ? '72px' : '52px',
+            opacity: isDisabled ? 0 : hover ? 0.95 : 0.8,
             background: hover
-              ? 'radial-gradient(circle, rgba(192, 132, 252, 0.35) 0%, rgba(129, 140, 248, 0.25) 45%, rgba(56, 189, 248, 0.15) 75%, transparent 100%)'
-              : 'radial-gradient(circle, rgba(168, 85, 247, 0.28) 0%, rgba(99, 102, 241, 0.18) 45%, rgba(56, 189, 248, 0.08) 75%, transparent 100%)',
-            border: hover ? '1px solid rgba(224, 231, 255, 0.45)' : '1px solid rgba(192, 132, 252, 0.22)',
+              ? 'radial-gradient(circle, rgba(224, 231, 255, 0.45) 0%, rgba(192, 132, 252, 0.35) 40%, rgba(99, 102, 241, 0.2) 70%, transparent 100%)'
+              : 'radial-gradient(circle, rgba(192, 132, 252, 0.4) 0%, rgba(139, 92, 246, 0.25) 45%, rgba(56, 189, 248, 0.12) 75%, transparent 100%)',
             boxShadow: hover
-              ? '0 0 24px 3px rgba(168, 85, 247, 0.45), 0 0 45px 8px rgba(99, 102, 241, 0.25)'
-              : '0 0 16px 2px rgba(168, 85, 247, 0.25)',
+              ? '0 0 28px 6px rgba(168, 85, 247, 0.55), 0 0 50px 12px rgba(99, 102, 241, 0.3)'
+              : '0 0 20px 4px rgba(168, 85, 247, 0.4), 0 0 36px 8px rgba(99, 102, 241, 0.22)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
           }}
         />
       </div>
 
-      {/* Core Precision Photon Bead (snappy foreground indicator) */}
+      {/* Core Precision Photon Bead (normal blend mode, enlarged core + double white/purple glow) */}
       <div
         ref={coreRef}
         className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform"
-        style={{
-          mixBlendMode: 'exclusion',
-        }}
       >
         <div
-          className="rounded-full bg-white transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2 shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+          className="rounded-full bg-white transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2"
           style={{
-            width: isDisabled ? 0 : hover ? '10px' : '6px',
-            height: isDisabled ? 0 : hover ? '10px' : '6px',
+            width: isDisabled ? 0 : hover ? '14px' : '9px',
+            height: isDisabled ? 0 : hover ? '14px' : '9px',
             opacity: isDisabled ? 0 : 1,
+            boxShadow: hover
+              ? `
+                0 0 10px 2px rgba(255, 255, 255, 1),
+                0 0 22px 6px rgba(192, 132, 252, 0.75),
+                0 0 40px 10px rgba(139, 92, 246, 0.4)
+              `
+              : `
+                0 0 8px 2px rgba(255, 255, 255, 0.95),
+                0 0 16px 4px rgba(192, 132, 252, 0.6),
+                0 0 28px 8px rgba(139, 92, 246, 0.3)
+              `,
           }}
         />
       </div>

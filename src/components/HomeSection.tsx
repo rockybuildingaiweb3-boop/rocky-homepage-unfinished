@@ -183,20 +183,40 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
+          LAYER 1.5: FOCUSED LOCAL DARK CRADLE (ONLY DIRECTLY UNDER TITLE)
+          Extremely light, compact anchor keeping the expansive watercolor
+          background clean and bright while lifting the title & signature.
+         ───────────────────────────────────────────────────────────── */}
+      <div
+        className="absolute left-1/2 pointer-events-none select-none z-[2]"
+        style={{
+          top: '46%',
+          transform: 'translate(-50%, -50%)',
+          width: 'clamp(380px, 58vw, 760px)',
+          height: 'clamp(240px, 40vw, 440px)',
+          background:
+            'radial-gradient(ellipse 65% 55% at 50% 50%, rgba(10, 8, 25, 0.40) 0%, rgba(15, 10, 32, 0.20) 45%, rgba(20, 15, 40, 0.05) 72%, transparent 92%)',
+          filter: 'blur(36px)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ─────────────────────────────────────────────────────────────
           LAYER 2: SCULPTED CELESTIAL ACCRETION NEBULA (ICONIC HERO CENTERPIECE)
           Structured, high-contrast celestial architecture:
-          1. Outer Accretion Boundary: Deep indigo/violet mantle for distinct structural contrast
-          2. Torus Plasma Ring: Sculpted elliptical accretion ring with slow rotational breathing
-          3. Cold Core: Icy lilac / silver-blue radiant center (cold photon sphere)
-          4. High-Definition Singularity: Compressed brightness & boosted contrast (contrast 1.65)
-          5. Anamorphic Cross Flare: Razor-sharp horizontal flare + delicate vertical ray
-          6. Living Micro-Dynamics: Ultra-slow 28s orbit + 18s pulse for alive, majestic presence
-          7. Enhanced Parallax (0.35x) & Entrance Bloom Expansion (scale 0.88 -> 1)
+          1. Outer Accretion Mantle: Deep indigo/violet mantle for perimeter
+          2. Sculpted Hollow Torus Ring: Defined hollow ring contour (not a solid blob)
+          3. Secondary Fine Filament Orbit: Ethereal dashed resonant ring
+          4. Directional Plasma Swirl: Elliptical matter streaming
+          5. Cold Core: Icy lilac / silver-blue radiant center
+          6. Singularity Video (blackhole.webm): Low-profile subtle morphological motion (opacity 0.30)
+          7. Horizontal Beam & Starburst: Strengthened center highlight with 10s breathing
+          8. Seamless vertical proximity to title, cradling title & signature
          ───────────────────────────────────────────────────────────── */}
       <div
         className="absolute left-1/2 pointer-events-none select-none z-[3] flex flex-col items-center justify-center overflow-visible mix-blend-screen will-change-transform"
         style={{
-          top: '24%',
+          top: '36%',
           transform: `translate3d(-50%, calc(-50% + ${nebulaParallaxY}px), 0) scale(${nebulaReady ? 1 : 0.88})`,
           opacity: nebulaReady ? 1 : 0.25,
           transition: 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.3s ease-out',
@@ -205,35 +225,52 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         }}
         aria-hidden="true"
       >
-        {/* Tier 1: Outer Accretion Mantle — Deep Indigo/Dark Violet (establishes firm contrast & perimeter) */}
+        {/* Tier 1: Outer Accretion Mantle — Deep Indigo/Dark Violet */}
         <div
           className="absolute pointer-events-none celestial-spin"
           style={{
-            width: '155%',
-            height: '135%',
+            width: '150%',
+            height: '130%',
             left: '50%',
             top: '49%',
             transform: 'translate(-50%, -50%)',
             background:
-              'radial-gradient(ellipse 80% 64% at 50% 49%, rgba(49, 46, 129, 0.28) 0%, rgba(67, 56, 202, 0.20) 35%, rgba(79, 70, 229, 0.12) 60%, rgba(30, 27, 75, 0.05) 80%, transparent 94%)',
-            filter: 'blur(52px)',
+              'radial-gradient(ellipse 80% 64% at 50% 49%, rgba(49, 46, 129, 0.24) 0%, rgba(67, 56, 202, 0.16) 35%, rgba(79, 70, 229, 0.09) 60%, rgba(30, 27, 75, 0.03) 80%, transparent 94%)',
+            filter: 'blur(50px)',
           }}
         />
 
-        {/* Tier 2: Sculpted Accretion Torus Ring — Defined Geometry & Matter Edge */}
+        {/* Tier 2: Sculpted Hollow Accretion Torus Ring (Hollow Ring Contour) */}
         <div
           className="absolute pointer-events-none celestial-pulse"
           style={{
-            width: '106%',
-            height: '76%',
+            width: '112%',
+            height: '80%',
             left: '50%',
             top: '48.5%',
-            transform: 'translate(-50%, -50%) rotate(-6deg)',
+            transform: 'translate(-50%, -50%) rotate(-7deg)',
             borderRadius: '50%',
-            border: '1px solid rgba(196, 181, 253, 0.32)',
+            border: '1.5px solid rgba(216, 180, 254, 0.42)',
             boxShadow:
-              'inset 0 0 35px rgba(129, 140, 248, 0.22), 0 0 38px rgba(168, 85, 247, 0.26), 0 0 70px rgba(67, 56, 202, 0.18)',
+              'inset 0 0 24px rgba(168, 85, 247, 0.22), 0 0 28px rgba(192, 132, 252, 0.38), 0 0 65px rgba(99, 102, 241, 0.18)',
+            background: 'transparent',
             filter: 'blur(0.5px)',
+          }}
+        />
+
+        {/* Tier 2.5: Secondary Fine Filament Orbit Ring (Hollow Accretion Silhouette) */}
+        <div
+          className="absolute pointer-events-none celestial-spin"
+          style={{
+            width: '94%',
+            height: '66%',
+            left: '50%',
+            top: '49%',
+            transform: 'translate(-50%, -50%) rotate(14deg)',
+            borderRadius: '50%',
+            border: '1px dashed rgba(224, 231, 255, 0.32)',
+            boxShadow: '0 0 18px rgba(147, 51, 234, 0.22)',
+            background: 'transparent',
           }}
         />
 
@@ -247,8 +284,8 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             top: '50%',
             transform: 'translate(-50%, -50%) rotate(-12deg)',
             background:
-              'radial-gradient(ellipse 68% 46% at 50% 50%, rgba(147, 51, 234, 0.20) 0%, rgba(99, 102, 241, 0.16) 40%, rgba(56, 189, 248, 0.07) 68%, transparent 88%)',
-            filter: 'blur(30px)',
+              'radial-gradient(ellipse 68% 46% at 50% 50%, rgba(147, 51, 234, 0.18) 0%, rgba(99, 102, 241, 0.14) 40%, rgba(56, 189, 248, 0.06) 68%, transparent 88%)',
+            filter: 'blur(28px)',
           }}
         />
 
@@ -257,7 +294,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 50% 44% at 50% 48.5%, rgba(248, 250, 252, 0.32) 0%, rgba(224, 231, 255, 0.25) 25%, rgba(199, 210, 254, 0.16) 50%, rgba(168, 85, 247, 0.08) 72%, transparent 88%)',
+              'radial-gradient(ellipse 48% 40% at 50% 48.5%, rgba(248, 250, 252, 0.34) 0%, rgba(224, 231, 255, 0.22) 28%, rgba(192, 132, 252, 0.10) 55%, transparent 84%)',
             filter: 'blur(16px)',
           }}
         />
@@ -287,7 +324,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           </svg>
         </div>
 
-        {/* Tier 6: High-Definition Singularity Video (blackhole.webm) with tuned contrast & defined morphology */}
+        {/* Tier 6: Subtle Singularity Video (blackhole.webm) with controlled presence (opacity ~0.30) */}
         <div
           className="relative w-full h-full flex items-center justify-center overflow-hidden"
           style={{
@@ -303,16 +340,16 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             muted
             loop
             playsInline
-            className="w-[125%] h-[125%] max-w-none object-cover select-none pointer-events-none opacity-56"
+            className="w-[125%] h-[125%] max-w-none object-cover select-none pointer-events-none opacity-30"
             style={{
               objectPosition: 'center 46%',
-              filter: 'brightness(0.64) contrast(1.60) saturate(1.30)',
+              filter: 'brightness(0.70) contrast(1.40) saturate(1.25)',
             }}
             src="/videos/blackhole.webm"
           />
         </div>
 
-        {/* Tier 7: Anamorphic Horizontal Flare (razor-sharp celestial horizon beam) */}
+        {/* Tier 7: Anamorphic Horizontal Flare with Intensified Center Highlight & 10s Slow Breath */}
         <div
           className="absolute w-[185%] max-w-[1280px] h-[1.5px] sm:h-[2px] pointer-events-none celestial-flare"
           style={{
@@ -320,9 +357,9 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             top: '50%',
             transform: 'translate(-50%, -50%)',
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0) 10%, rgba(147, 51, 234, 0.38) 28%, rgba(224, 231, 255, 0.95) 50%, rgba(147, 51, 234, 0.38) 72%, rgba(56, 189, 248, 0) 90%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0) 10%, rgba(147, 51, 234, 0.42) 28%, rgba(255, 255, 255, 1) 50%, rgba(147, 51, 234, 0.42) 72%, rgba(56, 189, 248, 0) 90%, transparent 100%)',
             boxShadow:
-              '0 0 14px 2px rgba(192, 132, 252, 0.50), 0 0 28px 4px rgba(99, 102, 241, 0.20), 0 0 2px 1px rgba(255, 255, 255, 0.9)',
+              '0 0 16px 3px rgba(192, 132, 252, 0.70), 0 0 34px 6px rgba(99, 102, 241, 0.30), 0 0 5px 2px #ffffff',
           }}
         />
 
@@ -334,9 +371,9 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             top: '50%',
             transform: 'translate(-50%, -50%)',
             background:
-              'linear-gradient(180deg, transparent 0%, rgba(129, 140, 248, 0.15) 20%, rgba(224, 231, 255, 0.78) 50%, rgba(168, 85, 247, 0.15) 80%, transparent 100%)',
+              'linear-gradient(180deg, transparent 0%, rgba(129, 140, 248, 0.15) 20%, rgba(255, 255, 255, 0.90) 50%, rgba(168, 85, 247, 0.15) 80%, transparent 100%)',
             boxShadow:
-              '0 0 12px 1px rgba(224, 231, 255, 0.35), 0 0 24px 2px rgba(168, 85, 247, 0.15)',
+              '0 0 14px 2px rgba(224, 231, 255, 0.45), 0 0 26px 3px rgba(168, 85, 247, 0.20)',
           }}
         />
       </div>
@@ -357,7 +394,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       >
         {/* Core title and signature cluster */}
         <div className="relative flex flex-col items-center pointer-events-auto">
-          {/* Handcrafted white signature placed to upper-left flank with artistic breathing room */}
+          {/* Handcrafted white signature placed to upper-left flank with cold purple shadow */}
           <div className="absolute -left-[24vw] sm:-left-[190px] md:-left-[250px] lg:-left-[290px] top-[2%] sm:top-[4%] md:top-[6%] pointer-events-none z-20">
             <img
               ref={signatureRef}
@@ -367,12 +404,12 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
               className="w-[40vw] sm:w-[28vw] md:w-[22vw] max-w-[280px] min-w-[155px] h-auto object-contain select-none will-change-transform"
               style={{
                 filter:
-                  'drop-shadow(0 3px 14px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.75))',
+                  'drop-shadow(0 3px 14px rgba(25, 12, 48, 0.70)) drop-shadow(0 0 18px rgba(192, 132, 252, 0.40))',
               }}
             />
           </div>
 
-          {/* Editorial Display Title Block with Ceremonial Light Sweep */}
+          {/* Editorial Display Title Block with Ceremonial Light Sweep & Subtle Purple Corona Glow */}
           <div className="relative overflow-hidden px-4 py-1">
             {/* Soft luminous light sweep across title after letters lock into place */}
             {shimmerActive && <div className="title-light-sweep" />}
@@ -382,7 +419,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
               style={{
                 fontFamily: 'var(--title-font)',
                 filter:
-                  'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75))',
+                  'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.60)) drop-shadow(0 0 28px rgba(168, 85, 247, 0.38)) drop-shadow(0 0 60px rgba(129, 140, 248, 0.20))',
               }}
             >
               {/* First Word: rocky */}
@@ -455,6 +492,12 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           </div>
         </div>
       </div>
+
+      {/* Hero Bottom Organic Vignette / Smooth Gradient Transition to Dark Projects Section */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-36 sm:h-48 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/40 to-[#030014]"
+        aria-hidden="true"
+      />
     </section>
   );
 };

@@ -545,7 +545,7 @@ ul.work-list .list-item .text-wrapper .item-title {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   50% {
-    transform: translate(-50%, -50%) rotate(3.5deg) scale(1.025);
+    transform: translate(-50%, -50%) rotate(3.5deg) scale(1.02);
   }
   100% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
@@ -554,39 +554,41 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 @keyframes celestialAccretionPulse {
   0%, 100% {
-    transform: translate(-50%, -50%) rotate(-8deg) scale(0.98);
-    opacity: 0.85;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(0.98);
+    opacity: 0.75;
   }
   50% {
-    transform: translate(-50%, -50%) rotate(-4deg) scale(1.02);
-    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-3.5deg) scale(1.025);
+    opacity: 0.96;
   }
 }
 
-@keyframes celestialCrossFlare {
+@keyframes celestialBeamBreath {
   0%, 100% {
-    opacity: 0.85;
-    transform: translate(-50%, -50%) scaleX(0.98);
+    opacity: 0.80;
+    transform: translate(-50%, -50%) scaleX(0.96);
+    filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.35));
   }
   50% {
     opacity: 1;
-    transform: translate(-50%, -50%) scaleX(1.02);
+    transform: translate(-50%, -50%) scaleX(1.03);
+    filter: drop-shadow(0 0 16px rgba(224, 231, 255, 0.75));
   }
 }
 
 .celestial-spin {
-  animation: celestialSlowSpin 28s ease-in-out infinite;
+  animation: celestialSlowSpin 26s ease-in-out infinite;
   will-change: transform;
 }
 
 .celestial-pulse {
-  animation: celestialAccretionPulse 18s ease-in-out infinite;
+  animation: celestialAccretionPulse 14s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
 .celestial-flare {
-  animation: celestialCrossFlare 12s ease-in-out infinite;
-  will-change: transform, opacity;
+  animation: celestialBeamBreath 10s ease-in-out infinite;
+  will-change: transform, opacity, filter;
 }
 
 /* ─── TITLE LIGHT SWEEP (ENTRANCE CEREMONIAL SHIMMER) ─── */
