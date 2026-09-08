@@ -256,11 +256,12 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
   }, []);
 
   return (
-    <div className={className}>
+    <div className={className} style={{ pointerEvents: 'none' }}>
       {canUseWebGL ? (
         <WebGLErrorBoundary fallback={<StarBackground2D />}>
           <Canvas
             camera={{ position: [0, 0, 1] }}
+            style={{ pointerEvents: 'none' }}
             gl={{
               powerPreference: 'high-performance',
               failIfMajorPerformanceCaveat: false,

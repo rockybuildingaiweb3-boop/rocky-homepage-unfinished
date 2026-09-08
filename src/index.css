@@ -71,7 +71,6 @@
 
 html {
   scroll-behavior: smooth;
-  height: 100%;
 }
 
 html, body, #root {
@@ -83,9 +82,9 @@ body {
   color: #ffffff;
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  width: 100%;
+  min-height: 100vh;
   overflow-x: hidden;
-  overflow-y: auto;
   font-family: var(--body-font);
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
@@ -536,11 +535,58 @@ ul.work-list .list-item .text-wrapper .item-title {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+}
+
+/* ─── MAJESTIC CELESTIAL ACCRETION DYNAMICS ─── */
+@keyframes celestialSlowSpin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(3.5deg) scale(1.025);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes celestialAccretionPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(-8deg) scale(0.98);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(-4deg) scale(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes celestialCrossFlare {
+  0%, 100% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scaleX(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleX(1.02);
+  }
+}
+
+.celestial-spin {
+  animation: celestialSlowSpin 28s ease-in-out infinite;
+  will-change: transform;
+}
+
+.celestial-pulse {
+  animation: celestialAccretionPulse 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.celestial-flare {
+  animation: celestialCrossFlare 12s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 /* Typography Classes matching original site */

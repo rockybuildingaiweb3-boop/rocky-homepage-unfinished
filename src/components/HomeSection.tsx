@@ -169,73 +169,91 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          LAYER 2: ATMOSPHERIC NEBULA & CELESTIAL ACCRETION (PRESENCE OVER BRIGHTNESS)
-          Multi-layer perceptual depth strategy:
-          1. Multi-tier chromatic haze: deep indigo/cyan/violet foundation + softer gradual falloff
-          2. De-emphasized pure white core: replaced with chromatic lilac/silver-blue glow
-          3. Micro-grain cosmic dust texture (SVG noise) for retinal structure recognition
-          4. Enhanced video morphology: boosted contrast & saturation while keeping dark zones deep
-          5. Subtle horizon refraction beam with dual-layer bloom
+          LAYER 2: SCULPTED CELESTIAL ACCRETION NEBULA (ICONIC HERO CENTERPIECE)
+          Structured, high-contrast celestial architecture:
+          1. Outer Accretion Boundary: Deep indigo/violet mantle for distinct structural contrast
+          2. Torus Plasma Ring: Sculpted elliptical accretion ring with slow rotational breathing
+          3. Cold Core: Icy lilac / silver-blue radiant center (cold photon sphere)
+          4. High-Definition Singularity: Compressed brightness & boosted contrast (contrast 1.65)
+          5. Anamorphic Cross Flare: Razor-sharp horizontal flare + delicate vertical ray
+          6. Living Micro-Dynamics: Ultra-slow 28s orbit + 18s pulse for alive, majestic presence
          ───────────────────────────────────────────────────────────── */}
       <div
         className="absolute left-1/2 pointer-events-none select-none z-[3] flex flex-col items-center justify-center overflow-visible mix-blend-screen"
         style={{
           top: '24%',
           transform: 'translate(-50%, -50%)',
-          width: 'clamp(380px, 62vw, 780px)',
-          height: 'clamp(280px, 45vw, 550px)',
+          width: 'clamp(380px, 64vw, 820px)',
+          height: 'clamp(280px, 46vw, 560px)',
         }}
         aria-hidden="true"
       >
-        {/* Tier 1: Deep Cosmic Indigo & Cyan Atmospheric Underlay (broad, ultra-soft foundation) */}
+        {/* Tier 1: Outer Accretion Mantle — Deep Indigo/Dark Violet (establishes firm contrast & perimeter) */}
         <div
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none celestial-spin"
           style={{
-            width: '165%',
-            height: '140%',
+            width: '155%',
+            height: '135%',
             left: '50%',
-            top: '48%',
+            top: '49%',
             transform: 'translate(-50%, -50%)',
             background:
-              'radial-gradient(ellipse 85% 68% at 50% 48%, rgba(99, 102, 241, 0.13) 0%, rgba(139, 92, 246, 0.08) 32%, rgba(56, 189, 248, 0.05) 58%, rgba(147, 197, 253, 0.02) 78%, transparent 92%)',
-            filter: 'blur(58px)',
+              'radial-gradient(ellipse 80% 64% at 50% 49%, rgba(49, 46, 129, 0.28) 0%, rgba(67, 56, 202, 0.20) 35%, rgba(79, 70, 229, 0.12) 60%, rgba(30, 27, 75, 0.05) 80%, transparent 94%)',
+            filter: 'blur(52px)',
           }}
         />
 
-        {/* Tier 2: Directional Accretion Nebula Flow (elliptical tilt evoking fluid cosmic matter) */}
+        {/* Tier 2: Sculpted Accretion Torus Ring — Defined Geometry & Matter Edge */}
         <div
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none celestial-pulse"
           style={{
-            width: '130%',
-            height: '110%',
+            width: '106%',
+            height: '76%',
+            left: '50%',
+            top: '48.5%',
+            transform: 'translate(-50%, -50%) rotate(-6deg)',
+            borderRadius: '50%',
+            border: '1px solid rgba(196, 181, 253, 0.32)',
+            boxShadow:
+              'inset 0 0 35px rgba(129, 140, 248, 0.22), 0 0 38px rgba(168, 85, 247, 0.26), 0 0 70px rgba(67, 56, 202, 0.18)',
+            filter: 'blur(0.5px)',
+          }}
+        />
+
+        {/* Tier 3: Directional Plasma Swirl Flow (elliptical matter streaming into the vortex) */}
+        <div
+          className="absolute pointer-events-none celestial-spin"
+          style={{
+            width: '125%',
+            height: '105%',
             left: '50%',
             top: '50%',
-            transform: 'translate(-50%, -50%) rotate(-5deg)',
+            transform: 'translate(-50%, -50%) rotate(-12deg)',
             background:
-              'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(168, 85, 247, 0.12) 0%, rgba(129, 140, 248, 0.10) 38%, rgba(56, 189, 248, 0.04) 65%, transparent 85%)',
-            filter: 'blur(38px)',
+              'radial-gradient(ellipse 68% 46% at 50% 50%, rgba(147, 51, 234, 0.20) 0%, rgba(99, 102, 241, 0.16) 40%, rgba(56, 189, 248, 0.07) 68%, transparent 88%)',
+            filter: 'blur(30px)',
           }}
         />
 
-        {/* Tier 3: Chromatic Center Halo (subtle lilac-ice core, strictly avoiding stark white blowout) */}
+        {/* Tier 4: Cold Lilac & Silver-Blue Radiant Core (icy photon sphere, stark contrast with outer ring) */}
         <div
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 60% 52% at 50% 49%, rgba(243, 232, 255, 0.11) 0%, rgba(224, 231, 255, 0.08) 26%, rgba(196, 181, 253, 0.05) 52%, transparent 78%)',
-            filter: 'blur(28px)',
+              'radial-gradient(ellipse 50% 44% at 50% 48.5%, rgba(248, 250, 252, 0.32) 0%, rgba(224, 231, 255, 0.25) 25%, rgba(199, 210, 254, 0.16) 50%, rgba(168, 85, 247, 0.08) 72%, transparent 88%)',
+            filter: 'blur(16px)',
           }}
         />
 
-        {/* Tier 4: Micro-Grain Cosmic Dust Texture (low-contrast noise for retinal structure detection) */}
+        {/* Tier 5: Micro-Grain Cosmic Dust Texture (low-contrast noise for retinal structure detection) */}
         <div
           className="absolute inset-0 w-full h-full pointer-events-none mix-blend-overlay"
           style={{
-            opacity: 0.055,
+            opacity: 0.065,
             maskImage:
-              'radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, rgba(0, 0, 0, 0.6) 60%, transparent 90%)',
+              'radial-gradient(ellipse 80% 70% at 50% 50%, black 25%, rgba(0, 0, 0, 0.6) 65%, transparent 92%)',
             WebkitMaskImage:
-              'radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, rgba(0, 0, 0, 0.6) 60%, transparent 90%)',
+              'radial-gradient(ellipse 80% 70% at 50% 50%, black 25%, rgba(0, 0, 0, 0.6) 65%, transparent 92%)',
           }}
         >
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -252,14 +270,14 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           </svg>
         </div>
 
-        {/* Tier 5: Celestial Accretion Arcs (blackhole.webm) with defined morphology & tuned contrast */}
+        {/* Tier 6: High-Definition Singularity Video (blackhole.webm) with tuned contrast & defined morphology */}
         <div
           className="relative w-full h-full flex items-center justify-center overflow-hidden"
           style={{
             maskImage:
-              'radial-gradient(ellipse 92% 80% at 50% 48%, black 32%, rgba(0,0,0,0.85) 58%, rgba(0,0,0,0.30) 78%, transparent 98%)',
+              'radial-gradient(ellipse 88% 76% at 50% 48%, black 36%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.30) 78%, transparent 96%)',
             WebkitMaskImage:
-              'radial-gradient(ellipse 92% 80% at 50% 48%, black 32%, rgba(0,0,0,0.85) 58%, rgba(0,0,0,0.30) 78%, transparent 98%)',
+              'radial-gradient(ellipse 88% 76% at 50% 48%, black 36%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.30) 78%, transparent 96%)',
           }}
         >
           <video
@@ -268,26 +286,40 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             muted
             loop
             playsInline
-            className="w-[125%] h-[125%] max-w-none object-cover select-none pointer-events-none opacity-52"
+            className="w-[125%] h-[125%] max-w-none object-cover select-none pointer-events-none opacity-56"
             style={{
               objectPosition: 'center 46%',
-              filter: 'brightness(0.72) contrast(1.30) saturate(1.22)',
+              filter: 'brightness(0.64) contrast(1.60) saturate(1.30)',
             }}
             src="/videos/blackhole.webm"
           />
         </div>
 
-        {/* Tier 6: Delicate Refraction Horizon Flare Beam with soft atmospheric falloff */}
+        {/* Tier 7: Anamorphic Horizontal Flare (razor-sharp celestial horizon beam) */}
         <div
-          className="absolute w-[180%] max-w-[1200px] h-[1px] sm:h-[1.5px] pointer-events-none"
+          className="absolute w-[185%] max-w-[1280px] h-[1.5px] sm:h-[2px] pointer-events-none celestial-flare"
           style={{
             left: '50%',
-            top: '50.5%',
+            top: '50%',
             transform: 'translate(-50%, -50%)',
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0.05) 15%, rgba(192, 132, 252, 0.35) 36%, rgba(245, 243, 255, 0.50) 50%, rgba(192, 132, 252, 0.35) 64%, rgba(56, 189, 248, 0.05) 85%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0) 10%, rgba(147, 51, 234, 0.38) 28%, rgba(224, 231, 255, 0.95) 50%, rgba(147, 51, 234, 0.38) 72%, rgba(56, 189, 248, 0) 90%, transparent 100%)',
             boxShadow:
-              '0 0 12px 2px rgba(168, 85, 247, 0.18), 0 0 24px 4px rgba(99, 102, 241, 0.08)',
+              '0 0 14px 2px rgba(192, 132, 252, 0.50), 0 0 28px 4px rgba(99, 102, 241, 0.20), 0 0 2px 1px rgba(255, 255, 255, 0.9)',
+          }}
+        />
+
+        {/* Tier 8: Delicate Vertical Starburst Ray (creates the iconic Cross-Flare / 十字星芒) */}
+        <div
+          className="absolute w-[1.5px] sm:w-[2px] h-[170px] sm:h-[240px] pointer-events-none celestial-flare"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            background:
+              'linear-gradient(180deg, transparent 0%, rgba(129, 140, 248, 0.15) 20%, rgba(224, 231, 255, 0.78) 50%, rgba(168, 85, 247, 0.15) 80%, transparent 100%)',
+            boxShadow:
+              '0 0 12px 1px rgba(224, 231, 255, 0.35), 0 0 24px 2px rgba(168, 85, 247, 0.15)',
           }}
         />
       </div>
