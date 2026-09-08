@@ -212,34 +212,31 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
 
       {/* ─────────────────────────────────────────────────────────────
           LAYER 3: FOREGROUND TYPOGRAPHIC LOCKUP (MUSAB HASSAN EDITORIAL)
-          - Same light environment: delicate purple back-luster on serif letters
-          - Layered dark drop-shadows ensuring pristine readability over watercolor
-          - Strictly transparent containers, zero rectangle artifacts
+          - Positioned in lower-middle sky, right above the vivid flowers
+          - Zero background blocks or dark translucent sheets (100% clean watercolor)
+          - Delicate, refined silver-purple outer glow on typography
+          - Balanced signature in upper left, perfectly clear of any fog
          ───────────────────────────────────────────────────────────── */}
       <div
-        className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-12 sm:pt-16 pb-4 will-change-transform bg-transparent"
+        className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-10 sm:pt-14 pb-8 sm:pb-12 will-change-transform bg-transparent"
         style={{
           transform: `translate3d(0, ${textParallaxY}px, 0)`,
         }}
       >
         {/* Core title and signature cluster */}
         <div className="relative flex flex-col items-center pointer-events-auto bg-transparent">
-          {/* Handcrafted white signature placed with refined triangular composition toward 'rocky' */}
-          <div className="absolute -top-[42px] sm:-top-[24px] md:-top-[28px] -left-[14px] sm:-left-[180px] md:-left-[230px] lg:-left-[265px] pointer-events-none z-20">
+          {/* Handcrafted white signature placed gracefully at upper-left corner of 'rocky' */}
+          <div className="absolute -top-[34px] sm:-top-[26px] md:-top-[30px] -left-[6px] sm:-left-[160px] md:-left-[210px] lg:-left-[240px] pointer-events-none z-20">
             <img
               ref={signatureRef}
               src="/assets/imgs/signature-white.png"
               alt="Rocky Babcock handwritten signature"
               draggable={false}
-              className="w-[38vw] sm:w-[27vw] md:w-[21vw] max-w-[270px] min-w-[145px] h-auto object-contain select-none will-change-transform rotate-[-3.5deg]"
-              style={{
-                filter:
-                  'drop-shadow(0 0 14px rgba(216, 180, 254, 0.55)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95))',
-              }}
+              className="signature-illuminated w-[36vw] sm:w-[26vw] md:w-[20vw] max-w-[260px] min-w-[140px] h-auto object-contain select-none will-change-transform rotate-[-3.5deg]"
             />
           </div>
 
-          {/* Editorial Display Title Block — completely transparent, dual-layer illuminated aura */}
+          {/* Editorial Display Title Block — completely transparent, delicate silver-purple illumination */}
           <div className="relative px-2 py-1 bg-transparent">
             <h1
               className="hero-title-illuminated flex flex-col items-center m-0 p-0 font-normal select-none bg-transparent"
@@ -282,36 +279,32 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           </div>
 
           {/* Minimalist Occupation Tagline */}
-          <div className="overflow-hidden mt-3 sm:mt-4 md:mt-5">
+          <div className="overflow-hidden mt-4 sm:mt-5 md:mt-6">
             <p
               ref={occRef}
-              className="m-0 text-xs sm:text-sm md:text-base text-white/95 tracking-[0.14em] font-normal lowercase text-center will-change-transform"
+              className="m-0 text-xs sm:text-sm md:text-base text-white/95 tracking-[0.16em] font-normal lowercase text-center will-change-transform"
               style={{
                 fontFamily: 'var(--body-font)',
                 filter:
-                  'drop-shadow(0 2px 10px rgba(0, 0, 0, 0.70)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.90))',
+                  'drop-shadow(0 0 10px rgba(168, 85, 247, 0.35)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.80)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95))',
               }}
             >
               creative technologist &amp; frontend developer
             </p>
           </div>
 
-          {/* Personal Attitude / Philosophy Statement */}
-          <div className="overflow-hidden mt-1.5 sm:mt-2 max-w-lg">
+          {/* Personal Attitude / Philosophy Statement with enhanced breathing room, scale and luminous integration */}
+          <div className="overflow-hidden mt-2.5 sm:mt-3.5 max-w-xl">
             <p
               ref={mottoRef}
-              className="m-0 text-[10.5px] sm:text-xs text-white/75 font-mono tracking-[0.12em] lowercase text-center will-change-transform px-4 leading-relaxed"
-              style={{
-                filter:
-                  'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.80)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95))',
-              }}
+              className="m-0 motto-illuminated text-xs sm:text-[13px] md:text-sm font-mono tracking-[0.14em] lowercase text-center will-change-transform px-4 leading-relaxed font-light"
             >
               bridging aesthetic intuition and algorithmic precision into tactile digital spaces.
             </p>
           </div>
 
           {/* Interactive '↓ SCROLL' Action Cue with Gentle Floating Animation */}
-          <div className="overflow-hidden mt-3 sm:mt-4 md:mt-5">
+          <div className="overflow-hidden mt-4 sm:mt-5 md:mt-6">
             <button
               ref={scrollCtaRef}
               type="button"
@@ -332,9 +325,10 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         </div>
       </div>
 
-      {/* Hero Bottom Organic Vignette / Smooth Gradient Transition to Dark Projects Section */}
+      {/* Hero Bottom Organic Vignette: Replaced heavy dark curtain with ultra-light transition (<15% intensity),
+          preserving maximum brightness, crispness, and clarity of the watercolor tulips */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-52 sm:h-64 lg:h-80 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/25 via-[#030014]/75 to-[#030014]"
+        className="absolute bottom-0 left-0 right-0 h-28 sm:h-36 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/10 to-[#030014]/35"
         aria-hidden="true"
       />
     </section>

@@ -552,61 +552,108 @@ ul.work-list .list-item .text-wrapper .item-title {
 /* ─── MAJESTIC CELESTIAL ACCRETION DYNAMICS ─── */
 @keyframes celestialSlowSpin {
   0% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.99);
   }
   50% {
-    transform: translate(-50%, -50%) rotate(3.5deg) scale(1.02);
+    transform: translate(-50%, -50%) rotate(3deg) scale(1.015);
   }
   100% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.99);
   }
 }
 
+/* High-impact technical accretion pulse (inner crisp & outer subtle cyan-violet glow, 12s period) */
 @keyframes celestialAccretionPulse {
   0%, 100% {
-    transform: translate(-50%, -50%) rotate(-7deg) scale(0.98);
-    opacity: 0.75;
+    transform: translate(-50%, -50%) rotate(-6deg) scale(0.985);
+    opacity: 0.88;
+    filter: drop-shadow(0 0 16px rgba(167, 139, 250, 0.60)) drop-shadow(0 0 32px rgba(99, 102, 241, 0.35));
   }
   50% {
-    transform: translate(-50%, -50%) rotate(-3.5deg) scale(1.025);
-    opacity: 0.96;
+    transform: translate(-50%, -50%) rotate(-4deg) scale(1.025);
+    opacity: 1;
+    filter: drop-shadow(0 0 24px rgba(220, 200, 255, 0.85)) drop-shadow(0 0 46px rgba(129, 140, 248, 0.50)) drop-shadow(0 0 65px rgba(56, 189, 248, 0.35));
   }
 }
 
+/* Horizontal flare beam slow luminosity breathing: 2px height, intense white center, fast purple falloff */
 @keyframes celestialBeamBreath {
   0%, 100% {
-    opacity: 0.78;
-    transform: translate(-50%, -50%) rotate(-1.5deg) scaleX(0.95);
-    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.45)) drop-shadow(0 0 22px rgba(139, 92, 246, 0.25));
+    opacity: 0.85;
+    transform: translate(-50%, -50%) rotate(-0.5deg) scaleX(0.97);
+    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.45)) drop-shadow(0 0 20px rgba(167, 139, 250, 0.35));
   }
   50% {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(-1.5deg) scaleX(1.03);
-    filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 42px rgba(216, 180, 254, 0.85)) drop-shadow(0 0 70px rgba(168, 85, 247, 0.45));
+    transform: translate(-50%, -50%) rotate(-0.5deg) scaleX(1.02);
+    filter: drop-shadow(0 0 16px #ffffff) drop-shadow(0 0 26px rgba(167, 139, 250, 0.65)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.35));
   }
 }
 
-/* Dual-layer illumination on hero display title (crisp white core + atmospheric violet breathing) */
+/* Dual-layer illumination on hero display title with technical cold-violet & cyan rim edge */
 @keyframes heroTitleDualGlow {
   0%, 100% {
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.90))
-            drop-shadow(0 0 8px rgba(255, 255, 255, 0.60))
-            drop-shadow(0 0 22px rgba(167, 139, 250, 0.50))
-            drop-shadow(0 0 44px rgba(139, 92, 246, 0.30))
-            drop-shadow(0 4px 16px rgba(0, 0, 0, 0.75));
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 1))
+            drop-shadow(0 0 10px rgba(167, 139, 250, 0.50))
+            drop-shadow(0 0 20px rgba(56, 189, 248, 0.28))
+            drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85))
+            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
   }
   50% {
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1))
-            drop-shadow(0 0 14px rgba(255, 255, 255, 0.85))
-            drop-shadow(0 0 34px rgba(216, 180, 254, 0.75))
-            drop-shadow(0 0 60px rgba(168, 85, 247, 0.45))
-            drop-shadow(0 4px 20px rgba(0, 0, 0, 0.85));
+            drop-shadow(0 0 16px rgba(167, 139, 250, 0.65))
+            drop-shadow(0 0 28px rgba(56, 189, 248, 0.40))
+            drop-shadow(0 0 45px rgba(129, 140, 248, 0.25))
+            drop-shadow(0 2px 12px rgba(0, 0, 0, 0.90))
+            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
   }
 }
 
 .hero-title-illuminated {
   animation: heroTitleDualGlow 10s ease-in-out infinite;
   will-change: filter;
+}
+
+/* Ethereal signature sheen in the exact same cold violet-indigo lighting environment */
+@keyframes signatureAuraBreathing {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.45))
+            drop-shadow(0 0 26px rgba(99, 102, 241, 0.25))
+            drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85))
+            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(216, 180, 254, 0.75))
+            drop-shadow(0 0 38px rgba(129, 140, 248, 0.40))
+            drop-shadow(0 0 55px rgba(56, 189, 248, 0.18))
+            drop-shadow(0 2px 12px rgba(0, 0, 0, 0.90))
+            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+  }
+}
+
+.signature-illuminated {
+  animation: signatureAuraBreathing 10s ease-in-out infinite;
+  will-change: filter;
+}
+
+/* Subtle luminosity and chromatic shimmer for the personal motto */
+@keyframes mottoLuminosity {
+  0%, 100% {
+    color: rgba(255, 255, 255, 0.82);
+    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.35))
+            drop-shadow(0 2px 8px rgba(0, 0, 0, 0.85));
+  }
+  50% {
+    color: rgba(255, 255, 255, 0.96);
+    filter: drop-shadow(0 0 16px rgba(216, 180, 254, 0.65))
+            drop-shadow(0 0 28px rgba(99, 102, 241, 0.30))
+            drop-shadow(0 2px 10px rgba(0, 0, 0, 0.90));
+  }
+}
+
+.motto-illuminated {
+  animation: mottoLuminosity 10s ease-in-out infinite;
+  will-change: filter, color;
 }
 
 /* Gentle floating bobbing for scroll cues */
@@ -691,13 +738,32 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 @keyframes diamondCorePulse {
   0%, 100% {
-    transform: translate(-50%, -50%) scale(0.92);
-    opacity: 0.88;
+    transform: translate(-50%, -50%) scale(0.90);
+    opacity: 0.90;
+    filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 16px rgba(167, 139, 250, 0.9));
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.14);
+    transform: translate(-50%, -50%) scale(1.18);
     opacity: 1;
+    filter: drop-shadow(0 0 14px #ffffff) drop-shadow(0 0 28px rgba(192, 132, 252, 1)) drop-shadow(0 0 45px rgba(56, 189, 248, 0.8));
   }
+}
+
+/* Diagonal anamorphic flare pulse for authentic lens diffraction */
+@keyframes diagonalFlarePulse {
+  0%, 100% {
+    opacity: 0.70;
+    transform: translate(-50%, -50%) rotate(-28deg) scaleX(0.95);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(-28deg) scaleX(1.06);
+  }
+}
+
+.diagonal-flare-pulse {
+  animation: diagonalFlarePulse 8s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .celestial-spin {

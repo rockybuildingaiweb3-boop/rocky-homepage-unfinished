@@ -9,15 +9,14 @@ export const VISUAL_CONSTANTS = {
     COLOR: '#d8b4fe',
   },
 
-  // Celestial Accretion Disk Nebula parameters
+  // Celestial Accretion Disk Nebula parameters (Concentrated in top-center sky, high clarity & kinetic power)
   NEBULA: {
-    VIDEO_OPACITY: 0.32,
-    VIDEO_BRIGHTNESS: 0.65,
-    VIDEO_CONTRAST: 1.45,
+    VIDEO_OPACITY: 0.60,
+    VIDEO_BRIGHTNESS: 1.15,
+    VIDEO_CONTRAST: 1.70,
     VIDEO_SATURATE: 1.40,
-    MULTIPLY_ANCHOR_OPACITY: 0.12,
-    FLARE_HEIGHT: '3px',
-    TOP_POSITION: '45.5%',
+    FLARE_HEIGHT: '2.5px',
+    TOP_POSITION: '16%',
   },
 
   // Multi-tier parallax scroll ratios
