@@ -995,8 +995,8 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 .footer-wrapper .logo-wrapper .logo {
   display: inline-block;
-  height: clamp(36px, 4.5vh, 48px);
-  max-width: 130px;
+  height: clamp(24px, 3vh, 32px);
+  max-width: 80px;
   width: auto;
   object-fit: contain;
 }

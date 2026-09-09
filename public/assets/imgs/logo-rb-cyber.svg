@@ -12,16 +12,10 @@
       <stop offset="94%" stop-color="#db2777"/>
       <stop offset="100%" stop-color="#f43f5e"/>
     </linearGradient>
-
-    <!-- Clean, subtle ethereal aura (NO dark block, NO dirty mud shadow) -->
-    <filter id="rb-clean-glow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="rgba(147, 51, 234, 0.45)"/>
-      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(255, 255, 255, 0.65)"/>
-    </filter>
   </defs>
 
   <!-- PURE VECTOR EMBLEM - Completely transparent background -->
-  <g filter="url(#rb-clean-glow)">
+  <g>
     <!-- LEFT COMPONENT: The Aerodynamic 'R' -->
     <path fill="url(#rb-pure-gradient)" fill-rule="evenodd" clip-rule="evenodd" d="
       M 82 28

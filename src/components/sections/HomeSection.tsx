@@ -16,7 +16,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
   const mottoRef = useRef<HTMLParagraphElement>(null);
   const scrollCtaRef = useRef<HTMLButtonElement>(null);
 
-  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [imageLoaded, setImageLoaded] = useState<boolean>(true);
   const [nebulaReady, setNebulaReady] = useState<boolean>(false);
 
   // Trigger entrance animation once background image is ready or fallback timer fires

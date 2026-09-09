@@ -10,7 +10,7 @@ import {
   RxCode,
   RxArchive,
 } from 'react-icons/rx';
-import { FaYoutube, FaSpotify } from 'react-icons/fa';
+import { FaYoutube, FaSpotify, FaTelegramPlane } from 'react-icons/fa';
 import { onScrolledIntoView } from '../../utils';
 import { SiteData } from '../../types';
 
@@ -62,6 +62,11 @@ export const FOOTER_DATA = [
         name: 'Spotify Music',
         icon: FaSpotify,
         link: 'https://open.spotify.com',
+      },
+      {
+        name: 'Telegram',
+        icon: FaTelegramPlane,
+        link: 'https://t.me',
       },
     ],
   },
@@ -164,7 +169,7 @@ export const Footer: React.FC<FooterProps> = ({ siteData }) => {
               <img
                 src="/assets/imgs/logo-rb-cyber.svg"
                 alt="Rocky Babcock Logo"
-                className="logo w-auto object-contain filter drop-shadow-[0_0_10px_rgba(168,85,247,0.35)] transition-transform duration-300 group-hover:scale-105"
+                className="logo w-auto h-7 sm:h-8 object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </a>
           </div>

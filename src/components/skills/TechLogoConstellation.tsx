@@ -10,13 +10,13 @@ interface TechLogoConstellationProps {
   onSelectSkill?: (skill: SkillItem) => void;
 }
 
-const CATEGORY_FILTERS = [
-  { id: 'all', label: 'All Domains', row: 0 },
-  { id: 'frontend', label: 'Frontend & Motion', row: 1 },
-  { id: 'spatial', label: '3D & Graphics', row: 2 },
-  { id: 'backend', label: 'Backend & Cloud', row: 3 },
-  { id: 'web3', label: 'Web3 & Systems', row: 4 },
-  { id: 'ai', label: 'AI & Tooling', row: 5 },
+const CATEGORY_LEGENDS = [
+  { id: 'all', label: 'all', row: 0 },
+  { id: 'motion', label: 'motion', row: 1 },
+  { id: 'space', label: 'space', row: 2 },
+  { id: 'systems', label: 'systems', row: 3 },
+  { id: 'chain', label: 'chain', row: 4 },
+  { id: 'mind', label: 'mind', row: 5 },
 ] as const;
 
 export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
@@ -46,83 +46,76 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
   };
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center py-4 select-none">
-      {/* ─── DOMAIN CATEGORY FILTER PILLS ─── */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-6 px-4 z-20">
-        {CATEGORY_FILTERS.map((cat) => {
+    <div className="relative w-full flex flex-col items-center justify-center py-2 select-none">
+      {/* ─── CONSTELLATION LEGEND (No bulky pill buttons, no instrument panel casing) ─── */}
+      <nav aria-label="Constellation Legend" className="flex items-center justify-center flex-wrap gap-x-6 sm:gap-x-8 gap-y-2 mb-8 px-4 z-20">
+        {CATEGORY_LEGENDS.map((cat, idx) => {
           const isActive = selectedCategoryRow === cat.row;
           return (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => handleFilterClick(cat.row)}
-              className={`font-mono text-[10px] sm:text-xs tracking-[0.14em] uppercase px-3 py-1.5 rounded-full transition-all duration-300 clickable cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 ${
-                isActive
-                  ? 'bg-purple-500/25 border-purple-400/70 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.45)] font-semibold'
-                  : 'bg-white/[0.03] border-white/10 text-white/60 hover:text-white/90 hover:border-white/25 hover:bg-white/[0.06]'
-              }`}
-            >
-              {cat.label}
-            </button>
+            <React.Fragment key={cat.id}>
+              <button
+                type="button"
+                onClick={() => handleFilterClick(cat.row)}
+                className={`relative py-1 text-xs sm:text-[13px] tracking-[0.18em] lowercase font-mono transition-all duration-300 clickable cursor-pointer border-none bg-transparent p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-300 rounded ${
+                  isActive
+                    ? 'text-white/95 font-medium'
+                    : 'text-white/40 hover:text-white/80'
+                }`}
+              >
+                <span>{cat.label}</span>
+                {/* Understated lilac active underline — same lineage as top navbar */}
+                <span
+                  className={`absolute -bottom-1 left-0 right-0 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
+                    isActive
+                      ? 'bg-purple-300 opacity-100 scale-x-100 shadow-[0_0_10px_rgba(216,180,254,0.85)]'
+                      : 'bg-purple-300/40 opacity-0 scale-x-0'
+                  }`}
+                />
+              </button>
+              {idx < CATEGORY_LEGENDS.length - 1 && (
+                <span className="text-white/15 select-none text-[10px] hidden sm:inline" aria-hidden="true">
+                  ·
+                </span>
+              )}
+            </React.Fragment>
           );
         })}
-      </div>
+      </nav>
 
-      {/* ─── FLOATING TELEMETRY HUD / BADGE ─── */}
-      <div className="min-h-12 flex items-center justify-center mb-5 px-4">
+      {/* ─── WHISPER TELEMETRY (Silent when idle, floating poetic detail upon hover) ─── */}
+      <div className="min-h-8 flex items-center justify-center mb-6 px-4">
         <AnimatePresence mode="wait">
-          {hoveredSkill ? (
+          {hoveredSkill && (
             <motion.div
               key={hoveredSkill.id}
-              initial={{ opacity: 0, y: 8, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.95 }}
-              transition={{ duration: 0.16, ease: 'easeOut' }}
-              className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 py-1.5 rounded-full bg-[#030014]/90 border backdrop-blur-xl shadow-2xl z-30 max-w-[95vw]"
-              style={{
-                borderColor: `${hoveredSkill.brandColor}65`,
-                boxShadow: `0 0 26px ${hoveredSkill.brandColor}40, 0 4px 20px rgba(0,0,0,0.85)`,
-              }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md z-30 max-w-[95vw]"
             >
               <div className="flex items-center gap-2">
                 <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse shadow-sm"
+                  className="w-2 h-2 rounded-full shrink-0 shadow-sm"
                   style={{ backgroundColor: hoveredSkill.brandColor }}
                 />
-                <span className="text-sm font-semibold text-white tracking-wide">
+                <span className="text-xs font-medium text-white tracking-wide">
                   {hoveredSkill.name}
-                </span>
-                <span className="text-xs text-purple-300/80 font-mono">
-                  [{hoveredSkill.category}]
                 </span>
               </div>
 
               {hoveredSkill.relatedProjects && hoveredSkill.relatedProjects.length > 0 && (
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-900/40 border border-purple-400/40 text-[11px] text-purple-200 font-mono">
-                  <span>✦ studio:</span>
-                  <span className="font-semibold text-white">
-                    {hoveredSkill.relatedProjects
-                      .map((pid) => PROJECT_NAMES[pid]?.title || pid)
-                      .slice(0, 2)
-                      .join(', ')}
-                  </span>
-                </div>
+                <span className="text-[11px] text-purple-300/80 font-mono">
+                  · studio: {hoveredSkill.relatedProjects
+                    .map((pid) => PROJECT_NAMES[pid]?.title || pid)
+                    .slice(0, 1)
+                    .join(', ')}
+                </span>
               )}
 
-              <span className="text-xs text-neutral-300 font-light max-w-[260px] sm:max-w-xs truncate border-l border-white/15 pl-2 sm:inline hidden">
+              <span className="text-xs text-white/50 font-light max-w-[280px] truncate hidden md:inline">
                 &ldquo;{getTechQuote(hoveredSkill.id, hoveredSkill.shortDescription || hoveredSkill.positioning)}&rdquo;
               </span>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-xs sm:text-sm text-purple-300/65 font-mono tracking-wider flex items-center gap-2"
-            >
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
-              <span>HOVER FOR TELEMETRY // LINKED WITH STUDIO SHOWCASE</span>
             </motion.div>
           )}
         </AnimatePresence>
