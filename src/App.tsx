@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Navbar, Footer, Loader } from './components/layout';
 import { HomeSection, WorkSection, SkillsSection } from './components/sections';
 import { CursorDot, ParticleBackground } from './components/ui';
@@ -10,7 +10,8 @@ const SECTION_IDS = ['footer', 'skills', 'work', 'home'];
 
 export default function App() {
   const isMobile = useIsMobile();
-  const { loading, loadingDone, progress, siteData, workData } = usePreloadAssets();
+  const { loadingDone, progress, siteData, workData } = usePreloadAssets();
+  const [ceremonyDone, setCeremonyDone] = useState<boolean>(false);
   const scrollFrameRef = useRef<HTMLDivElement>(null);
 
   const { scrollY, setScrollY, activeSection, setActiveSection } = useScrollSpy({
@@ -70,8 +71,14 @@ export default function App() {
       {/* Interactive custom cursor */}
       <CursorDot isMobile={isMobile} />
 
-      {/* Intro progress bar loader */}
-      {loading && <Loader progress={progress} loadingDone={loadingDone} />}
+      {/* Ceremonial Intro sequence (Blackout → Signature stroke → Tulip blossom → Name drop) */}
+      {!ceremonyDone && (
+        <Loader
+          progress={progress}
+          loadingDone={loadingDone}
+          onFinish={() => setCeremonyDone(true)}
+        />
+      )}
 
       {/* Atmospheric 35mm Cinematic Film Grain Texture Layer */}
       <div className="cinematic-grain" aria-hidden="true" />

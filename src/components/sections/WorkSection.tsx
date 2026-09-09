@@ -25,6 +25,8 @@ export const WorkSection: React.FC<WorkSectionProps> = ({
 }) => {
   const [currentActive, setCurrentActive] = useState<number>(-1);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [sliderProgress, setSliderProgress] = useState<number>(0);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
@@ -33,6 +35,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rendererRef = useRef<ImageRenderer | null>(null);
   const dragDistanceRef = useRef<number>(0);
+  const sliderProgressRef = useRef<number>(0);
 
   // Slider physics state strictly mirroring Musab's WorkSlider class
   const sliderState = useRef({
@@ -211,6 +214,22 @@ export const WorkSection: React.FC<WorkSectionProps> = ({
         listRef.current.style.transform = `translate3d(${
           Math.round(sliderState.current.currentPosition * 100) / 100
         }px, 0px, 0px)`;
+
+        // Calculate progress percentage and active slide index
+        const scrollWidth = listRef.current.scrollWidth || 2400;
+        const maxScroll = Math.max(1, scrollWidth - window.innerWidth * 0.75);
+        const ratio = Math.min(1, Math.max(0, -sliderState.current.currentPosition / maxScroll));
+        const roundedProgress = Math.round(ratio * 100) / 100;
+        const slideIdx = Math.min(
+          workData.length - 1,
+          Math.max(0, Math.floor(ratio * workData.length))
+        );
+
+        if (Math.abs(sliderProgressRef.current - roundedProgress) > 0.008) {
+          sliderProgressRef.current = roundedProgress;
+          setSliderProgress(roundedProgress);
+          setCurrentSlideIndex(slideIdx);
+        }
       }
 
       animFrameRef.current = requestAnimationFrame(loop);
@@ -293,6 +312,54 @@ export const WorkSection: React.FC<WorkSectionProps> = ({
       className="work-click-area"
       ref={containerRef}
     >
+      {/* ─────────────────────────────────────────────────────────────
+          AWWWARDS-GRADE STUDIO HORIZONTAL CUE
+          - Left: 01 + subtle "[ ↔ DRAG / SCROLL TO EXPLORE ]"
+          - Center: Dynamic progress ruler with starlight active bead
+          - Right: Project counter "01 / 06" and total index "06"
+         ───────────────────────────────────────────────────────────── */}
+      <div
+        className={`w-full max-w-7xl mx-auto px-6 sm:px-12 mb-6 sm:mb-8 flex items-center justify-between select-none transition-all duration-500 ${
+          currentActive >= 0 ? 'opacity-0 pointer-events-none -translate-y-2' : 'opacity-100 translate-y-0'
+        }`}
+        aria-hidden={currentActive >= 0}
+      >
+        {/* Left: 01 index & Drag prompt */}
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <span className="font-mono text-xs text-white/50 tracking-widest font-light">01</span>
+          <span className="hidden sm:inline-block w-4 h-[1px] bg-white/20" />
+          <span className="font-mono text-[11px] sm:text-xs tracking-[0.24em] uppercase text-white/40 group-hover:text-white/70 transition-colors">
+            [ ↔ drag to explore ]
+          </span>
+        </div>
+
+        {/* Center: Micro-progress ruler with starlight active glow */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="relative w-28 sm:w-44 md:w-60 h-[2px] bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-purple-500 via-fuchsia-400 to-white transition-all duration-75 ease-out"
+              style={{
+                width: `${Math.max(10, sliderProgress * 100)}%`,
+                boxShadow: '0 0 10px rgba(168, 85, 247, 0.7), 0 0 3px #ffffff',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Right: Counter and total index */}
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <span className="font-mono text-[11px] sm:text-xs tracking-[0.2em] text-white/75 font-medium">
+            {currentSlideIndex < 9 ? `0${currentSlideIndex + 1}` : currentSlideIndex + 1}
+            <span className="text-white/30 mx-1.5 font-light">/</span>
+            {workData.length < 10 ? `0${workData.length}` : workData.length}
+          </span>
+          <span className="hidden sm:inline-block w-4 h-[1px] bg-white/20" />
+          <span className="font-mono text-xs text-white/50 tracking-widest font-light">
+            {workData.length < 10 ? `0${workData.length}` : workData.length}
+          </span>
+        </div>
+      </div>
+
       <div
         ref={contentWrapperRef}
         className={`content-wrapper ${isDragging ? 'is-dragging' : ''} ${

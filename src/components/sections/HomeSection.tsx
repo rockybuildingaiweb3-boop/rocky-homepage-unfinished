@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NebulaBackground } from './NebulaBackground';
+import { PetalDissolveCanvas } from './PetalDissolveCanvas';
 import { VISUAL_CONSTANTS } from '../../constants/visual';
 
 interface HomeSectionProps {
@@ -13,8 +14,8 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
   const word2Ref = useRef<HTMLSpanElement>(null);
   const signatureRef = useRef<HTMLImageElement>(null);
   const occRef = useRef<HTMLParagraphElement>(null);
-  const mottoRef = useRef<HTMLParagraphElement>(null);
-  const scrollCtaRef = useRef<HTMLButtonElement>(null);
+  const mottoRef = useRef<HTMLDivElement>(null);
+  const scrollCtaRef = useRef<HTMLDivElement>(null);
 
   const [imageLoaded, setImageLoaded] = useState<boolean>(true);
   const [nebulaReady, setNebulaReady] = useState<boolean>(false);
@@ -157,6 +158,10 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
   const nebulaParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.NEBULA;
   const textParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.TEXT;
 
+  // Day-to-Night Transition Progress (0.0 = bright watercolor garden, 1.0 = deep cosmic night in Studio)
+  const windowH = typeof window !== 'undefined' ? window.innerHeight : 900;
+  const dayToNightProgress = Math.min(1, Math.max(0, scrollY / (windowH * 0.85)));
+
   const handleScrollCueClick = () => {
     if (onNavigate) {
       onNavigate('work');
@@ -174,19 +179,26 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     <section
       id="home"
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden box-border select-none flex items-center justify-center bg-[#ebe8e1]"
+      className="relative w-full h-screen overflow-hidden box-border select-none flex items-center justify-center transition-colors duration-500"
+      style={{
+        backgroundColor: dayToNightProgress > 0.45 ? '#06040f' : '#ebe8e1',
+      }}
       aria-label="Hero section — Rocky Babcock"
     >
       {/* ─────────────────────────────────────────────────────────────
           LAYER 1: FULL-SCREEN BOTANICAL WATERCOLOR ARTWORK (home-back.jpg)
-          The watercolor tulip garden and blue watercolor sky fill the entire
-          canvas, establishing the light, artistic museum atmosphere.
+          With dynamic day-to-night saturation decrease & dimming on scroll
          ───────────────────────────────────────────────────────────── */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-[1] overflow-hidden"
         style={{
           transform: `translate3d(0, ${bgParallaxY}px, 0)`,
-          willChange: 'transform',
+          filter: `saturate(${Math.max(0.08, 1 - dayToNightProgress * 0.92)}) brightness(${Math.max(
+            0.18,
+            1 - dayToNightProgress * 0.76
+          )})`,
+          willChange: 'transform, filter',
+          transition: 'filter 0.1s ease-out',
         }}
         aria-hidden="true"
       >
@@ -202,12 +214,19 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
+          LAYER 1.2: PETAL PARTICLE DISSOLUTION (花瓣粒子化)
+          As user scrolls towards Studio, watercolor petals lift off the garden,
+          swirl in the wind, and disintegrate into luminous stardust.
+         ───────────────────────────────────────────────────────────── */}
+      <PetalDissolveCanvas progress={dayToNightProgress} />
+
+      {/* ─────────────────────────────────────────────────────────────
           LAYER 1.5 & LAYER 2: CELESTIAL ACCRETION DISK NEBULA
-          Extracted to dedicated <NebulaBackground /> component for modularity
+          Rises from below as night ascends into the studio
          ───────────────────────────────────────────────────────────── */}
       <NebulaBackground
         nebulaReady={nebulaReady}
-        nebulaParallaxY={nebulaParallaxY}
+        nebulaParallaxY={nebulaParallaxY - dayToNightProgress * 60}
       />
 
       {/* ─────────────────────────────────────────────────────────────
@@ -221,6 +240,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-10 sm:pt-14 pb-8 sm:pb-12 will-change-transform bg-transparent"
         style={{
           transform: `translate3d(0, ${textParallaxY}px, 0)`,
+          opacity: Math.max(0, 1 - dayToNightProgress * 1.5),
         }}
       >
         {/* Core title and signature cluster */}
@@ -293,42 +313,67 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             </p>
           </div>
 
-          {/* Personal Attitude / Philosophy Statement with enhanced breathing room, scale and luminous integration */}
-          <div className="overflow-hidden mt-2.5 sm:mt-3.5 max-w-xl">
-            <p
-              ref={mottoRef}
-              className="m-0 motto-illuminated text-xs sm:text-[13px] md:text-sm font-mono tracking-[0.14em] lowercase text-center will-change-transform px-4 leading-relaxed font-light"
-            >
-              bridging aesthetic intuition and algorithmic precision into tactile digital spaces.
+          {/* Personal Attitude / Philosophy Statement: Authentic & Poetic (Zero AI clichés) */}
+          <div ref={mottoRef} className="overflow-hidden mt-3 sm:mt-4 max-w-xl text-center will-change-transform px-4">
+            <p className="m-0 motto-illuminated text-xs sm:text-sm md:text-[15px] font-normal tracking-[0.16em] text-white/95 leading-relaxed">
+              写有呼吸的代码，造看得见光的界面。
+            </p>
+            <p className="mt-1 text-[11px] sm:text-xs font-mono tracking-[0.2em] text-purple-200/80 lowercase font-light">
+              crafting digital spaces with soul and light
             </p>
           </div>
 
-          {/* Interactive '↓ SCROLL' Action Cue with Gentle Floating Animation */}
-          <div className="overflow-hidden mt-4 sm:mt-5 md:mt-6">
+          {/* Action Suite: Real Actions (Enter the Studio + Available for 2026) */}
+          <div
+            ref={scrollCtaRef}
+            className="overflow-hidden mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 will-change-transform"
+          >
+            {/* Primary Action Button: Enter the Studio */}
             <button
-              ref={scrollCtaRef}
+              type="button"
+              onClick={() => onNavigate?.('work')}
+              className="group relative inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full font-mono text-xs sm:text-sm tracking-[0.22em] uppercase text-white font-medium bg-gradient-to-r from-purple-600/70 via-fuchsia-600/60 to-indigo-600/70 hover:from-purple-500/90 hover:via-fuchsia-500/80 hover:to-indigo-500/90 border border-white/35 hover:border-white/70 shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_32px_rgba(216,180,254,0.7)] backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              aria-label="Enter the Studio projects"
+            >
+              <span>enter the studio</span>
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 font-normal text-base">
+                →
+              </span>
+            </button>
+
+            {/* Secondary Status Action: Available for 2026 */}
+            <button
+              type="button"
+              onClick={() => onNavigate?.('footer')}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[11px] sm:text-xs tracking-[0.2em] text-white/85 hover:text-white bg-black/30 hover:bg-black/50 border border-white/20 hover:border-white/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+              aria-label="Available for 2026 collaboration"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+              </span>
+              <span className="lowercase">available for 2026</span>
+            </button>
+          </div>
+
+          {/* Minimalist Floating Scroll Prompt */}
+          <div className="mt-3.5 opacity-60 hover:opacity-100 transition-opacity">
+            <button
               type="button"
               onClick={handleScrollCueClick}
-              className="scroll-cue-float group font-mono text-xs sm:text-sm tracking-[0.28em] uppercase text-white/90 hover:text-white flex items-center gap-2 cursor-pointer transition-all duration-300 py-2 px-4 border-none bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded clickable will-change-transform"
-              aria-label="Scroll down to studio projects"
-              style={{
-                filter:
-                  'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.70)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.90))',
-              }}
+              className="group flex items-center gap-1.5 font-mono text-[10px] tracking-[0.3em] uppercase text-white/70 hover:text-white bg-transparent border-none cursor-pointer p-1"
+              aria-label="Scroll down to explore"
             >
-              <span className="inline-block transition-transform duration-300 group-hover:translate-y-1 text-sm sm:text-base font-normal">
-                ↓
-              </span>
-              <span className="font-mono tracking-[0.28em]">SCROLL</span>
+              <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+              <span>scroll to explore</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Hero Bottom Organic Vignette: Replaced heavy dark curtain with ultra-light transition (<15% intensity),
-          preserving maximum brightness, crispness, and clarity of the watercolor tulips */}
+      {/* Hero Bottom Organic Vignette */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-28 sm:h-36 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/10 to-[#030014]/35"
+        className="absolute bottom-0 left-0 right-0 h-28 sm:h-36 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/15 to-[#030014]/40"
         aria-hidden="true"
       />
     </section>

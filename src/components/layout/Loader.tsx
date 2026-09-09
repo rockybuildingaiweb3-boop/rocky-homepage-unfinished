@@ -1,96 +1,365 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface LoaderProps {
   progress: number;
   loadingDone: boolean;
+  onFinish?: () => void;
 }
 
-export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone }) => {
-  const [overlayFade, setOverlayFade] = useState<boolean>(false);
+// Exact signature paths from /public/assets/imgs/signature.svg for fluid vector stroke animation
+const SIGNATURE_PATHS = [
+  // Rocky
+  'M 65 190 C 75 140, 115 75, 160 70 C 190 66, 215 88, 205 125 C 195 160, 155 190, 130 195 C 115 198, 105 185, 110 160 L 140 75',
+  'M 152 142 C 172 145, 195 165, 205 195 C 210 208, 222 210, 235 195',
+  'M 235 195 C 248 175, 275 170, 285 190 C 292 205, 280 215, 265 215 C 250 215, 242 205, 252 192 C 262 180, 280 185, 298 195',
+  'M 312 188 C 305 182, 295 188, 298 200 C 302 212, 318 214, 332 204',
+  'M 332 204 C 345 185, 365 110, 375 105 C 382 102, 385 112, 375 145 L 360 212 M 365 188 C 380 182, 395 192, 390 205 C 388 210, 395 212, 405 204',
+  'M 405 204 C 412 190, 424 186, 432 198 L 436 210 C 445 192, 458 188, 466 200 L 468 215 C 465 240, 450 290, 430 305 C 412 318, 395 305, 412 280 C 428 255, 470 220, 510 195',
+  // Babcock
+  'M 525 215 L 565 65 C 570 48, 555 52, 542 75 L 520 160 C 520 160, 545 125, 580 120 C 610 115, 625 135, 612 165 C 600 188, 570 195, 545 192 C 575 190, 620 188, 628 220 C 634 245, 610 262, 575 260 C 535 258, 510 240, 528 210',
+  'M 635 212 C 648 190, 672 188, 680 205 C 685 218, 675 228, 660 228 C 646 228, 640 216, 650 202 C 660 190, 678 195, 688 226',
+  'M 688 226 C 700 205, 725 115, 735 110 C 742 106, 745 118, 735 150 L 725 220 C 730 228, 745 226, 755 212',
+  'M 770 200 C 762 194, 752 200, 756 214 C 760 225, 776 226, 790 216',
+  'M 802 206 C 812 192, 830 190, 836 205 C 840 216, 832 225, 820 225 C 808 225, 802 216, 810 204 C 818 194, 832 198, 846 208',
+  'M 865 200 C 858 194, 848 200, 852 214 C 856 225, 872 226, 886 216',
+  'M 886 216 C 896 195, 915 125, 924 120 C 930 116, 932 125, 924 155 L 912 218 M 918 196 C 930 190, 942 198, 938 210 C 935 218, 946 218, 960 208 C 995 188, 1045 178, 1100 174',
+];
 
+/**
+ * Ceremonial Opening (入场典礼):
+ * 黑场 → 签名一笔写出（进度条藏在签名笔触中） → 花亮起来（郁金香柔光盛开） → 名字落地。
+ * 3.5 秒严格编排，只播一次（支持 Session 状态记录），支持右上角随时跳过。
+ */
+export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone, onFinish }) => {
+  const [phase, setPhase] = useState<'black' | 'signature' | 'flower' | 'name' | 'exit'>('black');
+  const [strokeProgress, setStrokeProgress] = useState<number>(0);
+  const [isExiting, setIsExiting] = useState<boolean>(false);
+  const [hasSkipped, setHasSkipped] = useState<boolean>(false);
+
+  const startTimeRef = useRef<number>(performance.now());
+  const reqAnimRef = useRef<number | null>(null);
+
+  // Check if session has already experienced the ceremony
   useEffect(() => {
-    if (loadingDone) {
-      // Step 1: Progress line wipes to right: 0; width: 0; transition: width 0.8s ease
-      // Step 2: Dark overlay then fades out seamlessly over 700ms to awaken the homepage
-      const fadeTimer = setTimeout(() => {
-        setOverlayFade(true);
-      }, 800);
-      return () => clearTimeout(fadeTimer);
+    try {
+      const alreadyPlayed = sessionStorage.getItem('rb_ceremony_seen');
+      if (alreadyPlayed === 'true') {
+        // Fast-path for repeated sessions: immediate exit
+        setIsExiting(true);
+        if (onFinish) onFinish();
+        return;
+      }
+    } catch {
+      // Ignore sessionStorage errors
     }
-  }, [loadingDone]);
+  }, [onFinish]);
+
+  // Master Ceremonial Timeline: exactly 3.5 seconds
+  useEffect(() => {
+    if (isExiting) return;
+
+    startTimeRef.current = performance.now();
+
+    const animateTimeline = (now: number) => {
+      const elapsed = now - startTimeRef.current;
+
+      // 1. Stage 0: 0.0s - 0.4s (黑场 / Absolute Stillness)
+      if (elapsed < 400) {
+        setPhase('black');
+        setStrokeProgress(0);
+      }
+      // 2. Stage 1: 0.4s - 1.8s (签名一笔写出 / Signature Stroke Drawing with embedded progress)
+      else if (elapsed < 1800) {
+        setPhase('signature');
+        const drawNorm = (elapsed - 400) / 1400; // 0 -> 1
+        // Harmonize time-based stroke drawing with actual network progress
+        const networkNorm = Math.min(1, progress / 100);
+        const combined = Math.max(drawNorm, networkNorm * 0.95);
+        setStrokeProgress(Math.min(1, combined));
+      }
+      // 3. Stage 2: 1.8s - 2.5s (花亮起来 / Watercolor Tulip Blossom lights up)
+      else if (elapsed < 2500) {
+        setPhase('flower');
+        setStrokeProgress(1);
+      }
+      // 4. Stage 3: 2.5s - 3.2s (名字落地 / Name drops down with starlight resonance)
+      else if (elapsed < 3200) {
+        setPhase('name');
+        setStrokeProgress(1);
+      }
+      // 5. Stage 4: 3.2s - 3.5s (Exit / Curtain parts)
+      else {
+        setPhase('exit');
+        setStrokeProgress(1);
+        handleCeremonyComplete();
+        return;
+      }
+
+      reqAnimRef.current = requestAnimationFrame(animateTimeline);
+    };
+
+    reqAnimRef.current = requestAnimationFrame(animateTimeline);
+
+    return () => {
+      if (reqAnimRef.current) cancelAnimationFrame(reqAnimRef.current);
+    };
+  }, [progress, isExiting]);
+
+  const handleCeremonyComplete = () => {
+    try {
+      sessionStorage.setItem('rb_ceremony_seen', 'true');
+    } catch {
+      // Storage unavailable
+    }
+    setIsExiting(true);
+    setTimeout(() => {
+      if (onFinish) onFinish();
+    }, 700);
+  };
+
+  const handleSkip = () => {
+    if (isExiting || hasSkipped) return;
+    setHasSkipped(true);
+    handleCeremonyComplete();
+  };
+
+  // Compute stroke dashoffset (0 = completely drawn, 1000 = hidden)
+  const dashoffset = Math.max(0, (1 - strokeProgress) * 1000);
 
   return (
     <div
-      className={`fixed inset-0 w-screen h-screen flex flex-col justify-center items-center z-[1000] bg-[#222224] transition-opacity duration-700 ease-in-out ${
-        overlayFade ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      className={`fixed inset-0 w-screen h-screen flex flex-col justify-center items-center z-[1000] bg-[#050408] transition-opacity duration-700 ease-out select-none ${
+        isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
-      aria-hidden={overlayFade}
+      aria-hidden={isExiting}
     >
-      {/* Refined Glowing Gradient Progress Bar Container */}
-      <div className="relative flex flex-col items-center">
-        {/* Track bar */}
-        <div className="relative block h-[3px] w-80 max-w-[80vw] rounded-full overflow-hidden bg-white/[0.08] shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
-          {/* Subtle ambient track glow */}
-          <div
-            className={`absolute inset-0 rounded-full bg-indigo-500/10 transition-opacity duration-500 ${
-              loadingDone ? 'opacity-0' : 'opacity-100'
-            }`}
-          />
+      {/* Deep celestial starlight vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.18)_0%,rgba(10,5,24,0.6)_60%,#050408_100%)]"
+        aria-hidden="true"
+      />
 
-          {/* Glowing Gradient Progress Bar */}
-          <div
-            className="absolute top-0 h-full rounded-full transition-all"
-            style={{
-              width: loadingDone ? '100%' : `${progress}%`,
-              left: 0,
-              background:
-                'linear-gradient(90deg, rgba(79, 70, 229, 0.8) 0%, rgba(168, 85, 247, 0.95) 45%, rgba(192, 132, 252, 1) 85%, #ffffff 100%)',
-              boxShadow:
-                '0 0 14px 1px rgba(168, 85, 247, 0.75), 0 0 26px 3px rgba(99, 102, 241, 0.35), 0 0 4px 1px rgba(255, 255, 255, 0.9)',
-              transition: 'width 0.35s ease-out',
-            }}
+      {/* Skip button (可跳过) in upper right */}
+      <button
+        type="button"
+        onClick={handleSkip}
+        className="absolute top-6 right-8 sm:top-8 sm:right-10 z-50 text-white/50 hover:text-white text-xs font-mono tracking-[0.24em] uppercase transition-all duration-300 py-1.5 px-3 rounded-full border border-white/10 hover:border-white/30 bg-white/[0.03] backdrop-blur-md cursor-pointer group"
+        aria-label="Skip introductory ceremony"
+      >
+        <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200">
+          skip intro ↗
+        </span>
+      </button>
+
+      {/* Main Ceremonial Container */}
+      <div className="relative flex flex-col items-center justify-center w-full max-w-4xl px-6">
+        {/* ─────────────────────────────────────────────────────────────
+            STAGE 2: 花亮起来 (TULIP WATERCOLOR BLOSSOM LIGHTS UP)
+            Unfurls behind signature with organic watercolor petals & soft warm glow
+           ───────────────────────────────────────────────────────────── */}
+        <div
+          className={`absolute pointer-events-none transition-all duration-1000 ease-out ${
+            phase === 'flower' || phase === 'name' || phase === 'exit'
+              ? 'opacity-85 scale-100 filter blur-0'
+              : 'opacity-0 scale-75 filter blur-md'
+          }`}
+          style={{
+            width: 'min(70vw, 420px)',
+            height: 'min(70vw, 420px)',
+            top: '50%',
+            left: '50%',
+            transform: `translate(-50%, -50%) ${
+              phase === 'flower' || phase === 'name' || phase === 'exit' ? 'scale(1)' : 'scale(0.7)'
+            }`,
+          }}
+          aria-hidden="true"
+        >
+          {/* Radial watercolor halo */}
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(244,63,94,0.45)_0%,rgba(168,85,247,0.35)_40%,rgba(234,179,8,0.15)_65%,transparent_80%)] animate-pulse opacity-70 filter blur-xl" />
+
+          {/* Luminous Tulip Blossom Silhouette SVG */}
+          <svg
+            viewBox="0 0 200 200"
+            className="w-full h-full object-contain filter drop-shadow-[0_0_24px_rgba(244,63,94,0.55)]"
+            fill="none"
           >
-            {/* Leading photon flare (spark on the moving tip) */}
-            {!loadingDone && progress > 2 && (
-              <div
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-white"
-                style={{
-                  boxShadow:
-                    '0 0 8px 2px #ffffff, 0 0 16px 4px rgba(192, 132, 252, 0.9), 0 0 24px 6px rgba(99, 102, 241, 0.6)',
-                }}
-              />
-            )}
-          </div>
+            <defs>
+              <linearGradient id="ceremony-petal-grad-1" x1="0%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" stopColor="#be185d" stopOpacity="0.75" />
+                <stop offset="50%" stopColor="#f43f5e" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#fda4af" stopOpacity="0.95" />
+              </linearGradient>
+              <linearGradient id="ceremony-petal-grad-2" x1="100%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.75" />
+                <stop offset="60%" stopColor="#c084fc" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.95" />
+              </linearGradient>
+            </defs>
 
-          {/* Ceremonial Light Sweep Streak on Completion */}
-          {(loadingDone || progress >= 95) && (
-            <div
-              className="absolute inset-y-0 w-28 loader-light-sweep pointer-events-none"
+            {/* Left Petal */}
+            <path
+              d="M 100 160 C 60 140, 45 90, 70 50 C 85 75, 95 110, 100 160 Z"
+              fill="url(#ceremony-petal-grad-1)"
+              className="transition-transform duration-1000 ease-out"
               style={{
-                background:
-                  'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%)',
-                filter: 'drop-shadow(0 0 8px #ffffff)',
+                transformOrigin: '100px 160px',
+                transform: phase !== 'black' && phase !== 'signature' ? 'rotate(-6deg)' : 'rotate(0deg)',
               }}
             />
-          )}
+            {/* Right Petal */}
+            <path
+              d="M 100 160 C 140 140, 155 90, 130 50 C 115 75, 105 110, 100 160 Z"
+              fill="url(#ceremony-petal-grad-2)"
+              className="transition-transform duration-1000 ease-out"
+              style={{
+                transformOrigin: '100px 160px',
+                transform: phase !== 'black' && phase !== 'signature' ? 'rotate(6deg)' : 'rotate(0deg)',
+              }}
+            />
+            {/* Center Crown Petal */}
+            <path
+              d="M 100 165 C 80 130, 80 80, 100 35 C 120 80, 120 130, 100 165 Z"
+              fill="url(#ceremony-petal-grad-1)"
+              opacity="0.95"
+            />
+            {/* Golden Pollen Core Stardust */}
+            <circle cx="100" cy="95" r="4" fill="#fef08a" className="filter drop-shadow-[0_0_8px_#facc15]" />
+            <circle cx="94" cy="85" r="2.5" fill="#ffffff" className="filter drop-shadow-[0_0_6px_#ffffff]" />
+            <circle cx="106" cy="88" r="2.5" fill="#ffffff" className="filter drop-shadow-[0_0_6px_#ffffff]" />
+          </svg>
         </div>
 
-        {/* Minimalist Tech / Editorial Status */}
+        {/* ─────────────────────────────────────────────────────────────
+            STAGE 1: 签名一笔写出 (SIGNATURE STROKE DRAWING)
+            Animated stroke-dashoffset with embedded progress bar along the flourish
+           ───────────────────────────────────────────────────────────── */}
         <div
-          className={`flex items-center justify-between w-80 max-w-[80vw] mt-4 transition-opacity duration-500 ${
-            loadingDone ? 'opacity-0' : 'opacity-60'
+          className={`relative z-10 w-[78vw] sm:w-[65vw] md:w-[50vw] max-w-[560px] h-auto transition-opacity duration-500 ${
+            phase === 'black' ? 'opacity-0' : 'opacity-100'
           }`}
         >
-          <span className="text-[10px] tracking-[0.24em] font-mono text-white/50 lowercase">
-            loading archive
-          </span>
-          <span className="text-[10px] tracking-[0.2em] font-mono text-white/70 font-medium">
-            {Math.min(100, Math.round(progress))}%
-          </span>
+          <svg
+            viewBox="0 0 1150 360"
+            fill="none"
+            className="w-full h-auto overflow-visible select-none pointer-events-none"
+          >
+            <defs>
+              <linearGradient id="stroke-neon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#a855f7" />
+                <stop offset="35%" stopColor="#c084fc" />
+                <stop offset="70%" stopColor="#f3e8ff" />
+                <stop offset="100%" stopColor="#ffffff" />
+              </linearGradient>
+
+              {/* Luminous starlight pen tip flare filter */}
+              <filter id="pen-tip-flare" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feFlood floodColor="#ffffff" result="color" />
+                <feComposite in="color" in2="blur" operator="in" result="glow" />
+                <feMerge>
+                  <feMergeNode in="glow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* Glowing Ethereal Stroke Bloom Behind */}
+            <g
+              stroke="url(#stroke-neon-grad)"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="opacity-70 filter blur-[3px]"
+            >
+              {SIGNATURE_PATHS.map((pathD, idx) => (
+                <path
+                  key={`bloom-${idx}`}
+                  d={pathD}
+                  pathLength="1000"
+                  strokeDasharray="1000"
+                  strokeDashoffset={dashoffset}
+                  style={{ transition: 'stroke-dashoffset 0.08s linear' }}
+                />
+              ))}
+            </g>
+
+            {/* Laser-Sharp White Foreground Stroke */}
+            <g
+              stroke="#ffffff"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {SIGNATURE_PATHS.map((pathD, idx) => (
+                <path
+                  key={`core-${idx}`}
+                  d={pathD}
+                  pathLength="1000"
+                  strokeDasharray="1000"
+                  strokeDashoffset={dashoffset}
+                  style={{ transition: 'stroke-dashoffset 0.08s linear' }}
+                />
+              ))}
+            </g>
+
+            {/* Spark Tip at the lead of the pen stroke */}
+            {strokeProgress > 0.02 && strokeProgress < 0.98 && (
+              <circle
+                cx={65 + strokeProgress * (1100 - 65)}
+                cy={174 + Math.sin(strokeProgress * Math.PI * 4) * 35}
+                r="4.5"
+                fill="#ffffff"
+                filter="url(#pen-tip-flare)"
+                className="animate-ping"
+              />
+            )}
+          </svg>
+
+          {/* 进度条藏在签名笔触底部：微弱而精雅的数字度量 */}
+          <div
+            className={`flex items-center justify-between mt-3 px-2 transition-all duration-700 ${
+              phase === 'signature' ? 'opacity-75 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+          >
+            <div className="h-[1.5px] flex-1 max-w-[120px] rounded-full overflow-hidden bg-white/10">
+              <div
+                className="h-full bg-gradient-to-r from-purple-500 to-white transition-all duration-150"
+                style={{ width: `${Math.round(strokeProgress * 100)}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-mono tracking-[0.28em] text-white/70">
+              {Math.min(100, Math.round(strokeProgress * 100))}%
+            </span>
+          </div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────
+            STAGE 3: 名字落下 (NAME LANDS WITH GRAVITATIONAL RESONANCE)
+            "rocky babcock" drops down from upper sky into sovereign alignment
+           ───────────────────────────────────────────────────────────── */}
+        <div
+          className={`relative z-20 mt-6 sm:mt-8 overflow-hidden transition-all duration-1000 ease-out ${
+            phase === 'name' || phase === 'exit'
+              ? 'opacity-100 translate-y-0 filter blur-0'
+              : 'opacity-0 -translate-y-12 filter blur-sm'
+          }`}
+        >
+          <h1
+            className="text-center m-0 p-0 font-normal lowercase tracking-[-0.035em] text-white text-3xl sm:text-4xl md:text-5xl"
+            style={{
+              fontFamily: 'var(--title-font)',
+              textShadow:
+                '0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(168,85,247,0.7), 0 4px 16px rgba(0,0,0,0.95)',
+            }}
+          >
+            rocky babcock
+          </h1>
+          <p className="mt-2 text-center text-[11px] sm:text-xs font-mono tracking-[0.2em] text-purple-200/70 lowercase">
+            ceremony initiated &bull; 2026
+          </p>
         </div>
       </div>
     </div>
   );
 };
-
-
+export default Loader;
