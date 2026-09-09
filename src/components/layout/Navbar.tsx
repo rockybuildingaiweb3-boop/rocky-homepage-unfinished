@@ -33,18 +33,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
 
   return (
     <nav className="fixed top-4 sm:top-6 left-0 w-full z-[100] px-6 sm:px-10 md:px-14 flex flex-row justify-between items-center box-border pointer-events-none transition-all duration-300">
-      {/* Brand Logo */}
-      <div className="overflow-hidden h-8 sm:h-9 w-10 sm:w-12 mix-blend-exclusion cursor-pointer pointer-events-auto">
+      {/* Brand Logo - Aerodynamic Cyber RB Emblem */}
+      <div className="h-8 sm:h-9 w-16 sm:w-20 cursor-pointer pointer-events-auto transition-transform duration-300 hover:scale-105 flex items-center justify-start">
         <button
           onClick={() => handleNavClick('home')}
-          className="border-none bg-transparent cursor-pointer p-0 m-0 w-full h-full flex items-center justify-center clickable"
+          className="border-none bg-transparent cursor-pointer p-0 m-0 w-full h-full flex items-center justify-start clickable focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg group"
           aria-label="Scroll to home"
         >
           <img
-            src="/assets/imgs/logo.svg"
-            alt="Logo"
+            src="/assets/imgs/logo-rb-cyber.svg"
+            alt="Rocky Babcock RB Logo"
             draggable="false"
-            className="h-full w-full object-contain"
+            className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           />
         </button>
       </div>

@@ -225,14 +225,14 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       >
         {/* Core title and signature cluster */}
         <div className="relative flex flex-col items-center pointer-events-auto bg-transparent">
-          {/* Handcrafted white signature placed gracefully at upper-left corner of 'rocky' */}
-          <div className="absolute -top-[34px] sm:-top-[26px] md:-top-[30px] -left-[6px] sm:-left-[160px] md:-left-[210px] lg:-left-[240px] pointer-events-none z-20">
+          {/* Handcrafted luminous signature placed with commanding presence above 'rocky' */}
+          <div className="absolute -top-[52px] sm:-top-[58px] md:-top-[68px] lg:-top-[78px] -left-[14px] sm:-left-[180px] md:-left-[240px] lg:-left-[300px] pointer-events-none z-20">
             <img
               ref={signatureRef}
-              src="/assets/imgs/signature-white.png"
+              src="/assets/imgs/signature.svg"
               alt="Rocky Babcock handwritten signature"
               draggable={false}
-              className="signature-illuminated w-[36vw] sm:w-[26vw] md:w-[20vw] max-w-[260px] min-w-[140px] h-auto object-contain select-none will-change-transform rotate-[-3.5deg]"
+              className="signature-illuminated w-[55vw] sm:w-[42vw] md:w-[35vw] lg:w-[30vw] max-w-[440px] min-w-[210px] h-auto object-contain select-none will-change-transform rotate-[-3deg]"
             />
           </div>
 

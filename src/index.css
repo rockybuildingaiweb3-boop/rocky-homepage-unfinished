@@ -614,26 +614,26 @@ ul.work-list .list-item .text-wrapper .item-title {
   will-change: filter;
 }
 
-/* Ethereal signature sheen in the exact same cold violet-indigo lighting environment */
+/* Ethereal, ultra-luminous signature glow with cosmic bloom and high contrast separation */
 @keyframes signatureAuraBreathing {
   0%, 100% {
-    filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.45))
-            drop-shadow(0 0 26px rgba(99, 102, 241, 0.25))
-            drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85))
-            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.95))
+            drop-shadow(0 0 32px rgba(192, 132, 252, 0.85))
+            drop-shadow(0 0 54px rgba(129, 140, 248, 0.65))
+            drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95));
   }
   50% {
-    filter: drop-shadow(0 0 20px rgba(216, 180, 254, 0.75))
-            drop-shadow(0 0 38px rgba(129, 140, 248, 0.40))
-            drop-shadow(0 0 55px rgba(56, 189, 248, 0.18))
-            drop-shadow(0 2px 12px rgba(0, 0, 0, 0.90))
-            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+    filter: drop-shadow(0 0 24px rgba(255, 255, 255, 1.0))
+            drop-shadow(0 0 46px rgba(216, 180, 254, 0.95))
+            drop-shadow(0 0 75px rgba(56, 189, 248, 0.60))
+            drop-shadow(0 0 100px rgba(168, 85, 247, 0.45))
+            drop-shadow(0 4px 18px rgba(0, 0, 0, 0.98));
   }
 }
 
 .signature-illuminated {
-  animation: signatureAuraBreathing 10s ease-in-out infinite;
-  will-change: filter;
+  animation: signatureAuraBreathing 6s ease-in-out infinite;
+  will-change: filter, transform;
 }
 
 /* Subtle luminosity and chromatic shimmer for the personal motto */
@@ -937,46 +937,47 @@ ul.work-list .list-item .text-wrapper .item-title {
 
 /* Signature stroke initial state */
 #signature .path-1 {
-  stroke-dasharray: 365;
-  stroke-dashoffset: 365;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
 }
 
 #signature .path-2 {
-  stroke-dasharray: 85;
-  stroke-dashoffset: 85;
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
 }
 
 #signature .path-3 {
-  stroke-dasharray: 45;
-  stroke-dashoffset: 45;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
 }
 
 #signature .path-4 {
-  stroke-dasharray: 180;
-  stroke-dashoffset: 180;
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
 }
 
 /* ─── MUSAB HASSAN AUTHENTIC FOOTER STYLES ────────────────────────────── */
 .footer-wrapper {
   width: 100%;
-  background-color: #131314;
+  background: linear-gradient(180deg, #111113 0%, #0d0d0e 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(18px, 2.8vh, 32px) clamp(24px, 5vw, 64px);
-  margin-top: clamp(16px, 3.2vh, 36px);
+  padding: clamp(28px, 4vh, 48px) clamp(24px, 5vw, 64px);
+  margin-top: clamp(24px, 4vh, 48px);
   box-sizing: border-box;
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1279px) {
   .footer-wrapper {
     flex-direction: column;
-    padding: 24px 20px;
-    margin-top: 24px;
+    padding: 36px 28px;
+    margin-top: 28px;
   }
   .footer-wrapper .flex-wrapper.decor {
-    margin-top: 22px;
+    margin-top: 16px;
     align-items: flex-start !important;
   }
 }
@@ -989,13 +990,15 @@ ul.work-list .list-item .text-wrapper .item-title {
 }
 
 .footer-wrapper .logo-wrapper {
-  margin-bottom: 1.2vh;
+  margin-bottom: 1.5vh;
 }
 
 .footer-wrapper .logo-wrapper .logo {
   display: inline-block;
-  height: clamp(28px, 3.5vh, 36px);
+  height: clamp(36px, 4.5vh, 48px);
+  max-width: 130px;
   width: auto;
+  object-fit: contain;
 }
 
 .footer-wrapper .status-wrapper .button.large-text {
@@ -1043,10 +1046,43 @@ ul.work-list .list-item .text-wrapper .item-title {
   justify-content: center;
   align-items: flex-end;
   flex-shrink: 0;
+  min-width: 240px;
 }
 
 .footer-wrapper .flex-wrapper.decor .name-signature {
-  width: clamp(130px, 14vh, 180px);
+  width: clamp(220px, 22vw, 360px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85))
+          drop-shadow(0 0 28px rgba(192, 132, 252, 0.75))
+          drop-shadow(0 0 45px rgba(129, 140, 248, 0.50));
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.footer-wrapper .flex-wrapper.decor .name-signature:hover {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 1))
+          drop-shadow(0 0 38px rgba(216, 180, 254, 0.95))
+          drop-shadow(0 0 60px rgba(56, 189, 248, 0.75));
+}
+
+/* Cosmic starlight pulse once signature finishes drawing */
+@keyframes footerSignaturePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))
+            drop-shadow(0 0 24px rgba(192, 132, 252, 0.8))
+            drop-shadow(0 0 44px rgba(129, 140, 248, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))
+            drop-shadow(0 0 38px rgba(233, 213, 255, 0.95))
+            drop-shadow(0 0 65px rgba(56, 189, 248, 0.7))
+            drop-shadow(0 0 90px rgba(168, 85, 247, 0.45));
+  }
+}
+
+.footer-signature-active {
+  animation: footerSignaturePulse 5s ease-in-out infinite;
 }
 
 @keyframes scrollArrowLoop {
