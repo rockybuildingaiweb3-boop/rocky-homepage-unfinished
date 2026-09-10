@@ -66,6 +66,7 @@ import {
   siOllama,
   siHuggingface,
   siHaystack,
+  siLanggraph,
 } from 'simple-icons';
 
 export interface SimpleIconData {
@@ -166,6 +167,7 @@ const VERIFIED_SIMPLE_ICONS: Record<string, SimpleIconData> = {
   ollama: siOllama,
   huggingface: siHuggingface,
   haystack: siHaystack,
+  langgraph: siLanggraph,
 };
 
 /**
@@ -177,6 +179,10 @@ const LOCAL_SVG_ASSETS: Record<string, string> = {
   embeddingmodels: '/assets/icons/rag.svg',
   agentic: '/assets/icons/agentic.svg',
   mcp: '/assets/icons/agentic.svg',
+  playwright: '/assets/icons/playwright.svg',
+  pinecone: '/assets/icons/pinecone.svg',
+  weaviate: '/assets/icons/weaviate.svg',
+  llamaindex: '/assets/icons/llamaindex.svg',
 };
 
 /**

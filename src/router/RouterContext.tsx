@@ -1,16 +1,76 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
-interface RouterContextType {
-  currentPath: string;
-  isStudio: boolean;
-  navigate: (to: string) => void;
+export type PageFamily =
+  | 'exhibition'
+  | 'studio-hub'
+  | 'case-study'
+  | 'editorial'
+  | 'career'
+  | 'not-found';
+
+export interface RouteMatch {
+  routeId: string;
+  family: PageFamily;
+  path: string;
+  params: Record<string, string>;
+  isExact: boolean;
 }
 
-const RouterContext = createContext<RouterContextType>({
-  currentPath: '/',
-  isStudio: false,
-  navigate: () => {},
-});
+interface RouteDefinition {
+  id: string;
+  family: PageFamily;
+  pattern: RegExp;
+  paramKeys: string[];
+}
+
+/**
+ * Authoritative Same-Origin Route Table
+ * Ordered by matching precedence (specific parameterized subroutes before general room wildcards).
+ */
+export const ROUTE_DEFINITIONS: RouteDefinition[] = [
+  // 1. Home / Cinematic Exhibition
+  {
+    id: 'home',
+    family: 'exhibition',
+    pattern: /^\/?$/,
+    paramKeys: [],
+  },
+  // 2. Studio Hub (Building Entrance)
+  {
+    id: 'studio-hub',
+    family: 'studio-hub',
+    pattern: /^\/studio\/?$/,
+    paramKeys: [],
+  },
+  // 3. Editorial Article (/studio/blog/:slug)
+  {
+    id: 'editorial-article',
+    family: 'editorial',
+    pattern: /^\/studio\/blog\/([a-zA-Z0-9_-]+)\/?$/,
+    paramKeys: ['slug'],
+  },
+  // 4. Editorial Index (/studio/blog)
+  {
+    id: 'editorial-index',
+    family: 'editorial',
+    pattern: /^\/studio\/blog\/?$/,
+    paramKeys: [],
+  },
+  // 5. Career Dossier (/studio/career)
+  {
+    id: 'career',
+    family: 'career',
+    pattern: /^\/studio\/career\/?$/,
+    paramKeys: [],
+  },
+  // 6. Project Case Study (/studio/:projectId)
+  {
+    id: 'case-study',
+    family: 'case-study',
+    pattern: /^\/studio\/([a-zA-Z0-9_-]+)\/?$/,
+    paramKeys: ['projectId'],
+  },
+];
 
 export const normalizePath = (rawPath: string): string => {
   const clean = rawPath.split('?')[0].split('#')[0].trim();
@@ -18,6 +78,47 @@ export const normalizePath = (rawPath: string): string => {
   if (clean.length > 1 && clean.endsWith('/')) return clean.slice(0, -1);
   return clean;
 };
+
+export function matchRoute(rawPath: string): RouteMatch {
+  const normalized = normalizePath(rawPath);
+  for (const def of ROUTE_DEFINITIONS) {
+    const match = normalized.match(def.pattern);
+    if (match) {
+      const params: Record<string, string> = {};
+      def.paramKeys.forEach((key, index) => {
+        params[key] = match[index + 1];
+      });
+      return {
+        routeId: def.id,
+        family: def.family,
+        path: normalized,
+        params,
+        isExact: true,
+      };
+    }
+  }
+  return {
+    routeId: 'not-found',
+    family: 'not-found',
+    path: normalized,
+    params: {},
+    isExact: false,
+  };
+}
+
+interface RouterContextType {
+  currentPath: string;
+  currentRoute: RouteMatch;
+  isStudio: boolean;
+  navigate: (to: string) => void;
+}
+
+const RouterContext = createContext<RouterContextType>({
+  currentPath: '/',
+  currentRoute: matchRoute('/'),
+  isStudio: false,
+  navigate: () => {},
+});
 
 export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -52,10 +153,11 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   }, [currentPath]);
 
-  const isStudio = currentPath === '/studio' || currentPath.startsWith('/studio/');
+  const currentRoute = useMemo(() => matchRoute(currentPath), [currentPath]);
+  const isStudio = currentRoute.family !== 'exhibition';
 
   return (
-    <RouterContext.Provider value={{ currentPath, isStudio, navigate }}>
+    <RouterContext.Provider value={{ currentPath, currentRoute, isStudio, navigate }}>
       {children}
     </RouterContext.Provider>
   );

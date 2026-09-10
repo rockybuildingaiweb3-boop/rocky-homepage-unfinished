@@ -20,8 +20,6 @@ export interface WorkItem {
   type?: WorkItemType;
   title: string;
   image?: string;
-  destination?: string;
-  route?: string;
   details: WorkDetails;
   date?: string;
   roles: string[];

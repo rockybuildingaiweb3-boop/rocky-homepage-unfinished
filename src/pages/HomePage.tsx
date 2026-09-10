@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
-import { WorkItem, SiteData } from '../../types';
-import { Navbar, Footer } from '../layout';
-import { HomeSection, WorkSection, SkillsSection } from '../sections';
-import { useScrollSpy } from '../../features/scroll';
-import { useRouter } from '../../router/RouterContext';
+import { WorkItem, SiteData } from '../types';
+import { Navbar, Footer } from '../components/layout';
+import { HomeSection, WorkSection, SkillsSection } from '../components/sections';
+import { useScrollSpy } from '../features/scroll';
+import { useRouter } from '../router/RouterContext';
 
 interface HomePageProps {
   workData: WorkItem[];
@@ -19,7 +19,7 @@ const SECTION_IDS = ['contact', 'skills', 'work', 'home'];
  * Orchestrates:
  * - Fixed brand navbar with active section scrollspy
  * - Hero botanical artwork & interactive cosmic transition
- * - Studio horizontal card slider & WebGL image distortion
+ * - Selected Work spatial horizontal slider & WebGL image distortion
  * - 8-row technical instruments constellation & planetary atmosphere
  * - Museum colophon footer with author seal signature
  */
@@ -74,3 +74,5 @@ export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
     </main>
   );
 };
+
+export default HomePage;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { WorkItem } from '../../../types';
+import { useRouter } from '../../../router/RouterContext';
 
 interface StudioProjectDetailsProps {
   item: WorkItem;
@@ -12,6 +13,8 @@ export const StudioProjectDetails: React.FC<StudioProjectDetailsProps> = ({
   index,
   onClose,
 }) => {
+  const { navigate } = useRouter();
+
   return (
     <div className="details-container">
       <div className="wrapper">
@@ -54,7 +57,20 @@ export const StudioProjectDetails: React.FC<StudioProjectDetailsProps> = ({
             </div>
           </div>
 
-          <div className="links">
+          <div className="links flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(`/studio/${item.id}`);
+              }}
+              data-cursor="pointer"
+              className="button link-wrapper interactive border border-purple-400/40 bg-purple-500/15 hover:bg-purple-500/30 text-white rounded-full px-3.5 py-1.5 transition-all duration-200 cursor-pointer"
+            >
+              <span className="link-title font-mono uppercase tracking-wider text-xs">
+                Case Study &nearr;
+              </span>
+            </button>
             {item.links?.map((link, idx) => (
               <a
                 key={`link-${idx}`}
@@ -62,7 +78,7 @@ export const StudioProjectDetails: React.FC<StudioProjectDetailsProps> = ({
                 target="_blank"
                 rel="noreferrer"
                 data-cursor="pointer"
-                className="button link-wrapper interactive text-purple-300 hover:text-white transition-colors"
+                className="button link-wrapper interactive text-purple-300 hover:text-white transition-colors py-1.5"
               >
                 <span className="link-title font-mono uppercase tracking-wider text-xs">
                   {link.text} &rarr;

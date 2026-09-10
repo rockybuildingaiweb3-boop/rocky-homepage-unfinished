@@ -1,17 +1,10 @@
 import { SiteData } from '../../types';
-import { fetchJsonData } from '../../utils';
-
-const SITE_DATA_URL = '/data/data.json';
+import { CANONICAL_SITE_DATA } from './siteData';
 
 /**
- * Domain loader for global site metadata (e.g. availability date)
+ * Domain loader for global site metadata.
+ * Returns authoritative static site data directly without unnecessary network roundtrips.
  */
 export async function loadSiteData(): Promise<SiteData> {
-  try {
-    const data = await fetchJsonData<SiteData>(SITE_DATA_URL);
-    return data || { availablity_date: '' };
-  } catch (err) {
-    console.error('Failed to load site data:', err);
-    return { availablity_date: '' };
-  }
+  return CANONICAL_SITE_DATA;
 }

@@ -24,7 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
   };
 
   const isHomeActive = activeSection === 'home';
-  const isStudioActive = activeSection === 'work' || activeSection === 'studio';
+  const isWorkActive = activeSection === 'work';
   const isSkillsActive = activeSection === 'skills';
   const isContactActive = activeSection === 'footer' || activeSection === 'contact';
 
@@ -71,17 +71,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
             <button
               onClick={() => handleNavClick('work')}
               className={`group border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
-                isStudioActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
+                isWorkActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
               }`}
             >
-              STUDIO
+              WORK
               <span
                 className={`absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
-                  isStudioActive
+                  isWorkActive
                     ? 'bg-purple-200 opacity-100 scale-x-100 shadow-[0_0_12px_2px_rgba(216,180,254,0.95),_0_0_24px_4px_rgba(168,85,247,0.6)]'
                     : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]'
                 }`}
               />
+            </button>
+          </li>
+          <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
+            <button
+              onClick={() => handleNavClick('studio')}
+              className="group border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded text-purple-200/90 hover:text-white"
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                STUDIO
+              </span>
+              <span className="absolute bottom-0 left-1 right-1 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]" />
             </button>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
@@ -267,9 +279,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
         <ul className="list-none flex flex-col justify-center w-full my-auto space-y-4">
           {[
             { id: 'home', num: '01', label: 'home', active: isHomeActive },
-            { id: 'work', num: '02', label: 'studio', active: isStudioActive },
-            { id: 'skills', num: '03', label: 'skills', active: isSkillsActive },
-            { id: 'contact', num: '04', label: 'contact', active: isContactActive },
+            { id: 'work', num: '02', label: 'work', active: isWorkActive },
+            { id: 'studio', num: '03', label: 'studio (building)', active: false },
+            { id: 'skills', num: '04', label: 'skills', active: isSkillsActive },
+            { id: 'contact', num: '05', label: 'contact', active: isContactActive },
           ].map((item) => (
             <li key={item.id} className="border-b border-white/[0.07] pb-3">
               <button
