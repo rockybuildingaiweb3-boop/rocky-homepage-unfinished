@@ -246,13 +246,13 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         {/* Core title and signature cluster */}
         <div className="relative flex flex-col items-center pointer-events-auto bg-transparent">
           {/* Handcrafted luminous signature placed with commanding presence above 'rocky' */}
-          <div className="absolute -top-[52px] sm:-top-[58px] md:-top-[68px] lg:-top-[78px] -left-[14px] sm:-left-[180px] md:-left-[240px] lg:-left-[300px] pointer-events-none z-20">
+          <div className="absolute -top-[46px] sm:-top-[58px] md:-top-[68px] lg:-top-[78px] left-[4%] sm:-left-[160px] md:-left-[220px] lg:-left-[280px] pointer-events-none z-20">
             <img
               ref={signatureRef}
               src="/assets/imgs/signature.svg"
               alt="Rocky Babcock handwritten signature"
               draggable={false}
-              className="signature-illuminated w-[55vw] sm:w-[42vw] md:w-[35vw] lg:w-[30vw] max-w-[440px] min-w-[210px] h-auto object-contain select-none will-change-transform rotate-[-3deg]"
+              className="signature-illuminated w-[50vw] sm:w-[40vw] md:w-[32vw] lg:w-[28vw] max-w-[420px] min-w-[190px] h-auto object-contain select-none will-change-transform rotate-[-3deg]"
             />
           </div>
 
@@ -302,11 +302,10 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           <div className="overflow-hidden mt-4 sm:mt-5 md:mt-6">
             <p
               ref={occRef}
-              className="m-0 text-xs sm:text-sm md:text-base text-white/95 tracking-[0.16em] font-normal lowercase text-center will-change-transform"
+              className="m-0 font-mono text-[11px] sm:text-xs md:text-[13px] text-white/90 tracking-[0.24em] font-light uppercase text-center will-change-transform"
               style={{
-                fontFamily: 'var(--body-font)',
                 filter:
-                  'drop-shadow(0 0 10px rgba(168, 85, 247, 0.35)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.80)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95))',
+                  'drop-shadow(0 0 10px rgba(168, 85, 247, 0.35)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.80))',
               }}
             >
               creative technologist &amp; frontend developer
@@ -315,38 +314,39 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
 
           {/* Personal Attitude / Philosophy Statement: Authentic & Poetic (Zero AI clichés) */}
           <div ref={mottoRef} className="overflow-hidden mt-3 sm:mt-4 max-w-xl text-center will-change-transform px-4">
-            <p className="m-0 motto-illuminated text-xs sm:text-sm md:text-[15px] font-normal tracking-[0.16em] text-white/95 leading-relaxed">
+            <p className="m-0 motto-illuminated text-xs sm:text-sm md:text-[15px] font-normal tracking-[0.18em] text-white/95 leading-relaxed">
               写有呼吸的代码，造看得见光的界面。
             </p>
-            <p className="mt-1 text-[11px] sm:text-xs font-mono tracking-[0.2em] text-purple-200/80 lowercase font-light">
-              crafting digital spaces with soul and light
+            <p className="mt-1.5 text-[10px] sm:text-[11px] font-mono tracking-[0.22em] text-white/55 uppercase font-light">
+              code with breath &bull; interfaces that see light
             </p>
           </div>
 
-          {/* Action Suite: Real Actions (Enter the Studio + Available for 2026) */}
+          {/* Action Suite: Editorial Actions (Enter the Studio + Available for 2026) */}
           <div
             ref={scrollCtaRef}
-            className="overflow-hidden mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 will-change-transform"
+            className="overflow-hidden mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-5 will-change-transform"
           >
             {/* Primary Action Button: Enter the Studio */}
             <button
               type="button"
               onClick={() => onNavigate?.('work')}
-              className="group relative inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full font-mono text-xs sm:text-sm tracking-[0.22em] uppercase text-white font-medium bg-gradient-to-r from-purple-600/70 via-fuchsia-600/60 to-indigo-600/70 hover:from-purple-500/90 hover:via-fuchsia-500/80 hover:to-indigo-500/90 border border-white/35 hover:border-white/70 shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_32px_rgba(216,180,254,0.7)] backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="group relative inline-flex items-center gap-3 px-6 py-2.5 rounded-full font-mono text-xs sm:text-[13px] tracking-[0.22em] uppercase text-white/95 hover:text-white bg-black/40 hover:bg-white/[0.08] border border-white/25 hover:border-white/70 shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(216,180,254,0.35)] backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white clickable"
               aria-label="Enter the Studio projects"
             >
+              <span className="text-purple-300 font-light text-sm select-none">&bull;</span>
               <span>enter the studio</span>
-              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 font-normal text-base">
-                →
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 font-light text-sm text-white/70">
+                &rarr;
               </span>
             </button>
 
             {/* Secondary Status Action: Available for 2026 */}
             <button
               type="button"
-              onClick={() => onNavigate?.('footer')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[11px] sm:text-xs tracking-[0.2em] text-white/85 hover:text-white bg-black/30 hover:bg-black/50 border border-white/20 hover:border-white/40 backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02]"
-              aria-label="Available for 2026 collaboration"
+              onClick={() => onNavigate?.('contact')}
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full font-mono text-[11px] sm:text-xs tracking-[0.2em] text-white/80 hover:text-white bg-black/25 hover:bg-black/45 border border-white/15 hover:border-white/35 backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.01] clickable"
+              aria-label="Available for collaboration"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -357,17 +357,18 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           </div>
 
           {/* Minimalist Floating Scroll Prompt */}
-          <div className="mt-3.5 opacity-60 hover:opacity-100 transition-opacity">
+          <div className="mt-4 opacity-50 hover:opacity-90 transition-opacity">
             <button
               type="button"
               onClick={handleScrollCueClick}
-              className="group flex items-center gap-1.5 font-mono text-[10px] tracking-[0.3em] uppercase text-white/70 hover:text-white bg-transparent border-none cursor-pointer p-1"
+              className="group flex items-center gap-2 font-mono text-[10px] tracking-[0.3em] uppercase text-white/60 hover:text-white bg-transparent border-none cursor-pointer p-1 clickable"
               aria-label="Scroll down to explore"
             >
-              <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+              <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">&darr;</span>
               <span>scroll to explore</span>
             </button>
           </div>
+
         </div>
       </div>
 

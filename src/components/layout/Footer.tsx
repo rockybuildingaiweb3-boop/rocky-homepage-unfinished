@@ -217,7 +217,7 @@ export const Footer: React.FC<FooterProps> = ({ siteData }) => {
               <br />
               <a
                 className="clickable button no-decor text-white/40 hover:text-white/80 transition-colors"
-                href="https://github.com/RockyBabcock/Rockyshomepage"
+                href="https://github.com/rockybuildingaiweb3-boop/rocky-homepage-unfinished"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -248,7 +248,9 @@ export const Footer: React.FC<FooterProps> = ({ siteData }) => {
                       className="flex flex-row items-center text-white/60 hover:text-white transition-all duration-200 group text-[13px] sm:text-[14px]"
                     >
                       {Icon && (
-                        <Icon className="text-[15px] flex-shrink-0 text-white/40 group-hover:text-cyan-400 group-hover:scale-110 transition-all duration-200" />
+                        <span className="text-[15px] flex-shrink-0 text-white/40 group-hover:text-cyan-400 group-hover:scale-110 transition-all duration-200">
+                          <Icon />
+                        </span>
                       )}
                       <span
                         className={`leading-relaxed whitespace-nowrap group-hover:translate-x-0.5 transition-transform duration-200 ${

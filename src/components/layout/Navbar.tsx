@@ -100,9 +100,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
             </button>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
-            <a
-              href="mailto:rockybuilding.aiweb3@gmail.com"
-              className={`group uppercase font-inherit text-inherit tracking-inherit no-underline clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
+            <button
+              onClick={() => handleNavClick('contact')}
+              className={`group border-none bg-transparent uppercase font-inherit text-inherit tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
                 isContactActive ? 'text-white font-semibold drop-shadow-[0_0_12px_rgba(216,180,254,0.9)]' : 'text-white/75 hover:text-white'
               }`}
             >
@@ -114,11 +114,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
                     : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]'
                 }`}
               />
-            </a>
+            </button>
           </li>
           <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
             <a
-              href="https://github.com/RockyBabcock/Rockyshomepage"
+              href="https://github.com/rockybuildingaiweb3-boop/rocky-homepage-unfinished"
               target="_blank"
               rel="noreferrer"
               className="text-white/75 uppercase font-inherit text-inherit tracking-inherit no-underline clickable hover:text-white transition-colors py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded"
@@ -156,65 +156,88 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Editorial Mobile Menu Drawer */}
       <div
-        className={`fixed top-0 right-0 h-screen bg-[#131314] z-[105] transition-all duration-700 ease-[cubic-bezier(0.58,0.14,0.06,0.97)] overflow-hidden flex flex-col justify-center px-[10vw] pt-[10vh] ${
-          mobileMenuActive ? 'w-screen left-0 pointer-events-auto' : 'w-0 pointer-events-none'
+        className={`fixed top-0 right-0 h-screen bg-[#05030d]/98 backdrop-blur-2xl z-[105] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden flex flex-col justify-between px-8 sm:px-12 py-16 ${
+          mobileMenuActive ? 'w-screen left-0 pointer-events-auto opacity-100' : 'w-0 pointer-events-none opacity-0'
         }`}
       >
-        <ul className="list-none flex flex-col justify-center w-full m-0 p-0">
-          <li className="font-[family-name:var(--body-font)] font-bold lowercase text-[9vw] py-[2vh] border-b border-white/20">
-            <button
-              onClick={() => handleNavClick('home')}
-              className={`border-none bg-transparent font-inherit text-inherit cursor-pointer text-left w-full clickable transition-all ${
-                isHomeActive ? 'text-white font-extrabold pl-2 border-l-2 border-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse' : 'text-white/60'
-              }`}
-            >
-              home
-            </button>
-          </li>
-          <li className="font-[family-name:var(--body-font)] font-bold lowercase text-[9vw] py-[2vh] border-b border-white/20">
-            <button
-              onClick={() => handleNavClick('work')}
-              className={`border-none bg-transparent font-inherit text-inherit cursor-pointer text-left w-full clickable transition-all ${
-                isStudioActive ? 'text-white font-extrabold pl-2 border-l-2 border-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse' : 'text-white/60'
-              }`}
-            >
-              studio
-            </button>
-          </li>
-          <li className="font-[family-name:var(--body-font)] font-bold lowercase text-[9vw] py-[2vh] border-b border-white/20">
-            <button
-              onClick={() => handleNavClick('skills')}
-              className={`border-none bg-transparent font-inherit text-inherit cursor-pointer text-left w-full clickable transition-all ${
-                isSkillsActive ? 'text-white font-extrabold pl-2 border-l-2 border-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse' : 'text-white/60'
-              }`}
-            >
-              skills
-            </button>
-          </li>
-          <li className="font-[family-name:var(--body-font)] font-bold lowercase text-[9vw] py-[2vh] border-b border-white/20">
+        <div className="w-full flex justify-between items-center border-b border-white/10 pb-6 mt-4">
+          <span className="font-mono text-xs tracking-[0.25em] uppercase text-white/50">
+            [ navigation &bull; index ]
+          </span>
+          <span className="font-mono text-xs tracking-[0.25em] uppercase text-purple-300/70">
+            2026
+          </span>
+        </div>
+
+        <ul className="list-none flex flex-col justify-center w-full my-auto space-y-4">
+          {[
+            { id: 'home', num: '01', label: 'home', active: isHomeActive },
+            { id: 'work', num: '02', label: 'studio', active: isStudioActive },
+            { id: 'skills', num: '03', label: 'skills', active: isSkillsActive },
+            { id: 'contact', num: '04', label: 'contact', active: isContactActive },
+          ].map((item) => (
+            <li key={item.id} className="border-b border-white/[0.07] pb-3">
+              <button
+                onClick={() => handleNavClick(item.id)}
+                className="w-full flex items-center justify-between bg-transparent border-none cursor-pointer py-2 text-left group"
+              >
+                <div className="flex items-baseline gap-4">
+                  <span className="font-mono text-xs tracking-widest text-purple-300/60 font-light">
+                    {item.num}
+                  </span>
+                  <span
+                    className={`font-mono text-xl sm:text-2xl uppercase tracking-[0.18em] transition-all duration-300 ${
+                      item.active
+                        ? 'text-white font-medium pl-1'
+                        : 'text-white/60 group-hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+                {item.active && (
+                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple-300 px-2 py-0.5 rounded border border-purple-400/30 bg-purple-500/10">
+                    current
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+          <li className="border-b border-white/[0.07] pb-3">
             <a
-              href="mailto:rockybuilding.aiweb3@gmail.com"
-              className={`no-underline font-inherit text-inherit block w-full clickable transition-all ${
-                isContactActive ? 'text-white font-extrabold pl-2 border-l-2 border-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse' : 'text-white/60'
-              }`}
-            >
-              contact
-            </a>
-          </li>
-          <li className="font-[family-name:var(--body-font)] font-bold lowercase text-[9vw] py-[2vh]">
-            <a
-              href="https://github.com/RockyBabcock/Rockyshomepage"
+              href="https://github.com/rockybuildingaiweb3-boop/rocky-homepage-unfinished"
               target="_blank"
               rel="noreferrer"
-              className="text-white/60 no-underline font-inherit text-inherit block w-full clickable hover:text-white transition-colors"
+              className="w-full flex items-center justify-between no-underline py-2 group"
             >
-              git
+              <div className="flex items-baseline gap-4">
+                <span className="font-mono text-xs tracking-widest text-purple-300/60 font-light">
+                  05
+                </span>
+                <span className="font-mono text-xl sm:text-2xl uppercase tracking-[0.18em] text-white/60 group-hover:text-white transition-colors">
+                  github ↗
+                </span>
+              </div>
             </a>
           </li>
         </ul>
+
+        {/* Drawer Footer info */}
+        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <a
+            href="mailto:rockybuilding.aiweb3@gmail.com"
+            className="font-mono text-xs tracking-wide text-white/60 hover:text-white no-underline transition-colors"
+          >
+            rockybuilding.aiweb3@gmail.com
+          </a>
+          <span className="font-mono text-[11px] tracking-widest text-white/40 uppercase">
+            creative technologist
+          </span>
+        </div>
       </div>
+
     </nav>
   );
 };

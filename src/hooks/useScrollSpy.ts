@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject } from 'react';
+import React, { useState, useEffect, RefObject } from 'react';
 
 export interface UseScrollSpyOptions {
   sectionIds: string[];

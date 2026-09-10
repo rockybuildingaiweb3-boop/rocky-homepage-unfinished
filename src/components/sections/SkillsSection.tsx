@@ -37,6 +37,9 @@ export const SkillsSection: React.FC = () => {
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center relative z-10">
         {/* Editorial Minimalist Title - Serene museum atmosphere matching Hero 'rocky babcock' */}
         <div className="w-full text-center flex flex-col items-center mb-6 sm:mb-8">
+          <span className="font-mono text-[10px] sm:text-xs tracking-[0.28em] uppercase text-white/45 mb-2 select-none">
+            [ 02 // TECHNICAL CONSTELLATION ]
+          </span>
           <h2
             className="text-2xl sm:text-3xl md:text-4xl font-normal lowercase tracking-wide text-white/90 select-none"
             style={{ fontFamily: 'var(--title-font)' }}

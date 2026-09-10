@@ -20,21 +20,56 @@ export const SkillsPlanetBackground: React.FC<SkillsPlanetBackgroundProps> = ({
 }) => {
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Viewport IntersectionObserver to pause video playback when off-screen
+    const container = containerRef.current;
+    let observer: IntersectionObserver | null = null;
+
+    if (container && videoRef.current) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!videoRef.current) return;
+          if (entry.isIntersecting && !prefersReducedMotion) {
+            videoRef.current.play().catch(() => {});
+          } else {
+            videoRef.current.pause();
+          }
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(container);
+    }
+
+    if (prefersReducedMotion) return;
+
+    let rafId: number | null = null;
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const clientX = e.clientX - rect.left - rect.width / 2;
-      const clientY = e.clientY - rect.top - rect.height / 2;
-      setMouseOffset({
-        x: (clientX / rect.width) * 16,
-        y: (clientY / rect.height) * 10,
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const clientX = e.clientX - rect.left - rect.width / 2;
+        const clientY = e.clientY - rect.top - rect.height / 2;
+        setMouseOffset({
+          x: (clientX / rect.width) * 16,
+          y: (clientY / rect.height) * 10,
+        });
       });
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (observer) observer.disconnect();
+    };
   }, []);
 
   return (
@@ -76,6 +111,7 @@ export const SkillsPlanetBackground: React.FC<SkillsPlanetBackgroundProps> = ({
         }}
       >
         <video
+          ref={videoRef}
           className="w-full h-full object-cover min-w-[1100px] opacity-70 sm:opacity-80 pointer-events-none select-none mix-blend-screen"
           preload="auto"
           playsInline

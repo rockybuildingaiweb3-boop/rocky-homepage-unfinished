@@ -128,16 +128,22 @@ export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone, onFinish 
 
   return (
     <div
-      className={`fixed inset-0 w-screen h-screen flex flex-col justify-center items-center z-[1000] bg-[#050408] transition-opacity duration-700 ease-out select-none ${
+      className={`fixed inset-0 w-screen h-screen flex flex-col justify-center items-center z-[1000] bg-black transition-opacity duration-700 ease-out select-none ${
         isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       aria-hidden={isExiting}
     >
-      {/* Deep celestial starlight vignette */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.18)_0%,rgba(10,5,24,0.6)_60%,#050408_100%)]"
-        aria-hidden="true"
-      />
+      {/* Background visual asset: User-provided dark studio rose */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none bg-black flex items-center justify-center z-0">
+        <img
+          src="/assets/imgs/loader-flower.jpg"
+          alt="Ceremony visual"
+          className="w-full h-full object-contain sm:object-cover object-center select-none pointer-events-none transition-opacity duration-1000 ease-out"
+          style={{
+            opacity: phase === 'black' ? 0.25 : 0.9,
+          }}
+        />
+      </div>
 
       {/* Skip button (可跳过) in upper right */}
       <button
@@ -152,82 +158,7 @@ export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone, onFinish 
       </button>
 
       {/* Main Ceremonial Container */}
-      <div className="relative flex flex-col items-center justify-center w-full max-w-4xl px-6">
-        {/* ─────────────────────────────────────────────────────────────
-            STAGE 2: 花亮起来 (TULIP WATERCOLOR BLOSSOM LIGHTS UP)
-            Unfurls behind signature with organic watercolor petals & soft warm glow
-           ───────────────────────────────────────────────────────────── */}
-        <div
-          className={`absolute pointer-events-none transition-all duration-1000 ease-out ${
-            phase === 'flower' || phase === 'name' || phase === 'exit'
-              ? 'opacity-85 scale-100 filter blur-0'
-              : 'opacity-0 scale-75 filter blur-md'
-          }`}
-          style={{
-            width: 'min(70vw, 420px)',
-            height: 'min(70vw, 420px)',
-            top: '50%',
-            left: '50%',
-            transform: `translate(-50%, -50%) ${
-              phase === 'flower' || phase === 'name' || phase === 'exit' ? 'scale(1)' : 'scale(0.7)'
-            }`,
-          }}
-          aria-hidden="true"
-        >
-          {/* Radial watercolor halo */}
-          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(244,63,94,0.45)_0%,rgba(168,85,247,0.35)_40%,rgba(234,179,8,0.15)_65%,transparent_80%)] animate-pulse opacity-70 filter blur-xl" />
-
-          {/* Luminous Tulip Blossom Silhouette SVG */}
-          <svg
-            viewBox="0 0 200 200"
-            className="w-full h-full object-contain filter drop-shadow-[0_0_24px_rgba(244,63,94,0.55)]"
-            fill="none"
-          >
-            <defs>
-              <linearGradient id="ceremony-petal-grad-1" x1="0%" y1="100%" x2="50%" y2="0%">
-                <stop offset="0%" stopColor="#be185d" stopOpacity="0.75" />
-                <stop offset="50%" stopColor="#f43f5e" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#fda4af" stopOpacity="0.95" />
-              </linearGradient>
-              <linearGradient id="ceremony-petal-grad-2" x1="100%" y1="100%" x2="50%" y2="0%">
-                <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.75" />
-                <stop offset="60%" stopColor="#c084fc" stopOpacity="0.85" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.95" />
-              </linearGradient>
-            </defs>
-
-            {/* Left Petal */}
-            <path
-              d="M 100 160 C 60 140, 45 90, 70 50 C 85 75, 95 110, 100 160 Z"
-              fill="url(#ceremony-petal-grad-1)"
-              className="transition-transform duration-1000 ease-out"
-              style={{
-                transformOrigin: '100px 160px',
-                transform: phase !== 'black' && phase !== 'signature' ? 'rotate(-6deg)' : 'rotate(0deg)',
-              }}
-            />
-            {/* Right Petal */}
-            <path
-              d="M 100 160 C 140 140, 155 90, 130 50 C 115 75, 105 110, 100 160 Z"
-              fill="url(#ceremony-petal-grad-2)"
-              className="transition-transform duration-1000 ease-out"
-              style={{
-                transformOrigin: '100px 160px',
-                transform: phase !== 'black' && phase !== 'signature' ? 'rotate(6deg)' : 'rotate(0deg)',
-              }}
-            />
-            {/* Center Crown Petal */}
-            <path
-              d="M 100 165 C 80 130, 80 80, 100 35 C 120 80, 120 130, 100 165 Z"
-              fill="url(#ceremony-petal-grad-1)"
-              opacity="0.95"
-            />
-            {/* Golden Pollen Core Stardust */}
-            <circle cx="100" cy="95" r="4" fill="#fef08a" className="filter drop-shadow-[0_0_8px_#facc15]" />
-            <circle cx="94" cy="85" r="2.5" fill="#ffffff" className="filter drop-shadow-[0_0_6px_#ffffff]" />
-            <circle cx="106" cy="88" r="2.5" fill="#ffffff" className="filter drop-shadow-[0_0_6px_#ffffff]" />
-          </svg>
-        </div>
+      <div className="relative flex flex-col items-center justify-center w-full max-w-4xl px-6 z-10">
 
         {/* ─────────────────────────────────────────────────────────────
             STAGE 1: 签名一笔写出 (SIGNATURE STROKE DRAWING)

@@ -72,8 +72,25 @@ export class MeshRenderer {
     this.renderer.setSize(this.dimensions.width, this.dimensions.height);
   };
 
+  isPaused = false;
+
+  pause(): void {
+    if (this.isPaused) return;
+    this.isPaused = true;
+    if (this.animFrameId) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = null;
+    }
+  }
+
+  resume(): void {
+    if (!this.isPaused || this.isDestroyed) return;
+    this.isPaused = false;
+    this.render();
+  }
+
   render(): void {
-    if (this.isDestroyed) return;
+    if (this.isDestroyed || this.isPaused) return;
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }

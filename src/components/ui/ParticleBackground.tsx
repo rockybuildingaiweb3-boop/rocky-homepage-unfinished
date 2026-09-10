@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { Component, useState, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as random from 'maath/random';
@@ -221,28 +221,35 @@ const StarBackground2D: React.FC = () => {
   return <canvas ref={canvasRef} className="w-full h-full block" />;
 };
 
+interface WebGLErrorBoundaryProps {
+  fallback: React.ReactNode;
+  children: React.ReactNode;
+}
+
+interface WebGLErrorBoundaryState {
+  hasError: boolean;
+}
+
 /**
  * WebGLErrorBoundary
  * Catches any WebGL context creation error or GPU failure and gracefully falls back to 2D
  */
-class WebGLErrorBoundary extends React.Component<
-  { fallback: React.ReactNode; children: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { fallback: React.ReactNode; children: React.ReactNode }) {
+class WebGLErrorBoundary extends Component<WebGLErrorBoundaryProps, WebGLErrorBoundaryState> {
+  override state: WebGLErrorBoundaryState = { hasError: false };
+
+  constructor(props: WebGLErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(): WebGLErrorBoundaryState {
     return { hasError: true };
   }
 
-  componentDidCatch(error: unknown) {
+  override componentDidCatch(error: unknown) {
     console.warn('WebGL not available or disabled, using 2D canvas fallback:', error);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return this.props.fallback;
     }
@@ -265,7 +272,6 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
         <WebGLErrorBoundary fallback={<StarBackground2D />}>
           <Canvas
             camera={{ position: [0, 0, 1] }}
-            style={{ pointerEvents: 'none' }}
             gl={{
               powerPreference: 'high-performance',
               failIfMajorPerformanceCaveat: false,

@@ -292,9 +292,30 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
 
     const timer = setTimeout(initImageRenderer, 150);
 
+    const container = containerRef.current;
+    let observer: IntersectionObserver | null = null;
+    if (container) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (rendererRef.current) {
+            if (entry.isIntersecting) {
+              rendererRef.current.resume();
+            } else {
+              rendererRef.current.pause();
+            }
+          }
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(container);
+    }
+
     return () => {
       isCancelled = true;
       clearTimeout(timer);
+      if (observer) {
+        observer.disconnect();
+      }
       if (rendererRef.current) {
         rendererRef.current.destroy();
         rendererRef.current = null;
@@ -358,10 +379,12 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
 
       <div
         ref={contentWrapperRef}
+        data-cursor="drag"
         className={`content-wrapper ${isDragging ? 'is-dragging' : ''} ${
           currentActive >= 0 ? 'disabled' : ''
         }`}
-        role="listbox"
+        role="region"
+        aria-label="Interactive project showcase"
         tabIndex={0}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
@@ -383,6 +406,17 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                   <div
                     ref={(el) => {
                       itemRefs.current[i] = el;
+                    }}
+                    data-cursor="view"
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isActive}
+                    aria-label={`View project details for ${item.title}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleActiveItem(i);
+                      }
                     }}
                     className={`list-item clickable passive ${
                       isActive ? 'active' : ''
@@ -412,7 +446,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                         isTextHidden ? 'hidden' : ''
                       }`}
                     >
-                      <p className="item-index">
+                      <p className="item-index font-mono">
                         {i < 9 ? `0${i + 1}` : `${i + 1}`}
                       </p>
                     </div>
@@ -433,7 +467,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                             toggleActiveItem(i);
                           }}
                         >
-                          view
+                          view &rarr;
                         </button>
                       </div>
                     </div>
@@ -451,13 +485,13 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
               {/* Top Align: Index + Line + Summary Caption */}
               <div className="top-align">
                 <div className="wrapper">
-                  <div className="index">
+                  <div className="index font-mono">
                     {currentActive < 9
                       ? `0${currentActive + 1}`
                       : currentActive + 1}
                   </div>
                   <span className="line" />
-                  <h6 className="caption">
+                  <h6 className="caption font-mono">
                     {workData[currentActive].details.summary}
                   </h6>
                 </div>
@@ -470,6 +504,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                 </h1>
                 <button
                   type="button"
+                  data-cursor="pointer"
                   className="close-button-wrapper interactive"
                   onClick={() => toggleActiveItem(currentActive)}
                   aria-label="Close project view"
@@ -488,7 +523,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
 
                 <div className="roles">
                   <div className="wrapper">
-                    <p className="descriptor">Role</p>
+                    <p className="descriptor font-mono">Role</p>
                     <ul>
                       {workData[currentActive].roles.map((role) => (
                         <li key={role}>{`+ ${role}`}</li>
@@ -505,9 +540,10 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                         href={link.link}
                         target="_blank"
                         rel="noreferrer"
-                        className="button"
+                        data-cursor="link"
+                        className="button font-mono"
                       >
-                        {link.text}
+                        {link.text} &rarr;
                       </a>
                     ))}
                   </div>
@@ -517,6 +553,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
           </div>
         )}
       </div>
+
     </div>
   );
 };

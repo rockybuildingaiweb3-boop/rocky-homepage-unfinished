@@ -6,7 +6,7 @@ import { useIsMobile } from './hooks/useIsMobile';
 import { usePreloadAssets } from './hooks/usePreloadAssets';
 import { useScrollSpy } from './hooks/useScrollSpy';
 
-const SECTION_IDS = ['footer', 'skills', 'work', 'home'];
+const SECTION_IDS = ['contact', 'skills', 'work', 'home'];
 
 export default function App() {
   const isMobile = useIsMobile();
@@ -27,7 +27,7 @@ export default function App() {
       return;
     }
     const resolvedId =
-      targetId === 'studio' ? 'work' : targetId === 'contact' ? 'footer' : targetId;
+      targetId === 'studio' ? 'work' : targetId === 'footer' ? 'contact' : targetId;
     const targetEl = document.getElementById(resolvedId);
     if (targetEl) {
       const headerOffset10vh = window.innerHeight * 0.1;
@@ -58,7 +58,7 @@ export default function App() {
       <div className="cinematic-grain" aria-hidden="true" />
 
       {/* Main scrolling content */}
-      <div className="w-full min-h-screen relative z-10 overflow-x-hidden">
+      <main className="w-full min-h-screen relative z-10 overflow-x-hidden">
         <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
 
         {/* Atmospheric 3D Starfield & Spatial Depth Layer */}
@@ -71,7 +71,7 @@ export default function App() {
         <SkillsSection />
 
         <Footer siteData={siteData} />
-      </div>
+      </main>
     </>
   );
 }
