@@ -71,6 +71,8 @@ body {
   position: relative;
   width: 100vw;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .work-click-area .content-wrapper {
@@ -79,6 +81,9 @@ body {
   cursor: grab;
   position: relative;
   width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
 }
 
 .work-click-area .content-wrapper.is-dragging {
@@ -314,6 +319,8 @@ ul.work-list {
   opacity: 1;
   transition: opacity 0.5s ease;
   will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 ul.work-list.hold .list-item {
@@ -331,6 +338,9 @@ ul.work-list .list-item {
   z-index: 3;
   margin-right: 6vw;
   transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1), height 0.7s cubic-bezier(0.25, 1, 0.5, 1), margin 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 ul.work-list .list-item * {
@@ -371,6 +381,8 @@ ul.work-list .list-item .img-wrapper {
   border: 1px solid rgba(255, 255, 255, 0.07);
   background-color: #1a1a1c;
   transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1), margin 0.7s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.45s ease, border-color 0.45s ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 ul.work-list .list-item:hover .img-wrapper {
@@ -392,6 +404,10 @@ ul.work-list .list-item .img-wrapper img {
   transform: translate(-50%, -50%);
   opacity: 0.5;
   transition: opacity 0.4s ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 ul.work-list .list-item.active .img-wrapper img {

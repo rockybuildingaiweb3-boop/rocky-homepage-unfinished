@@ -34,26 +34,30 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
   useEffect(() => {
     if (isMobile) return;
 
-    const getTargetMode = (target: HTMLElement | null, isDown: boolean): { mode: CursorMode; isPointerLike: boolean } => {
-      if (!target) return { mode: 'default', isPointerLike: false };
+    const getTargetMode = (target: HTMLElement | null, isDown: boolean): { mode: CursorMode; isMagnetic: boolean } => {
+      if (!target) return { mode: 'default', isMagnetic: false };
 
       // 1. Close button and direct action buttons always take priority
       if (
         target.closest('.close-button, .close-button-wrapper') ||
         target.closest('[data-cursor="pointer"]')
       ) {
-        return { mode: 'pointer', isPointerLike: true };
+        return { mode: 'pointer', isMagnetic: true };
       }
 
-      // 2. Project card hovering triggers 'view'
+      // 2. Project card hovering triggers 'view' (follows pointer directly with VIEW badge)
       const cursorAttr = target.closest('[data-cursor]')?.getAttribute('data-cursor');
       if (cursorAttr === 'view' || target.closest('.list-item')) {
-        return { mode: 'view', isPointerLike: true };
+        // When mouse is pressed and dragging over card, switch to dragging
+        if (isDown) {
+          return { mode: 'dragging', isMagnetic: false };
+        }
+        return { mode: 'view', isMagnetic: false };
       }
 
       // 3. Draggable Studio area triggers 'drag' or 'dragging'
       if (cursorAttr === 'drag' || target.closest('.content-wrapper')) {
-        return { mode: isDown ? 'dragging' : 'drag', isPointerLike: false };
+        return { mode: isDown ? 'dragging' : 'drag', isMagnetic: false };
       }
 
       // 4. Standard interactive elements (buttons, links, navigation items)
@@ -62,41 +66,46 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
           'button, a, [role="button"], .clickable, .cursor-pointer, .interactive, input, select, textarea'
         ) !== null
       ) {
-        return { mode: 'pointer', isPointerLike: true };
+        return { mode: 'pointer', isMagnetic: true };
       }
 
       // 5. Computed cursor check fallback
       try {
         const computed = window.getComputedStyle(target).cursor;
         if (computed === 'pointer') {
-          return { mode: 'pointer', isPointerLike: true };
+          return { mode: 'pointer', isMagnetic: true };
         }
         if (computed === 'grab' || computed === 'grabbing') {
-          return { mode: isDown ? 'dragging' : 'drag', isPointerLike: false };
+          return { mode: isDown ? 'dragging' : 'drag', isMagnetic: false };
         }
       } catch {
         // Ignore style access error
       }
 
-      return { mode: 'default', isPointerLike: false };
+      return { mode: 'default', isMagnetic: false };
     };
 
     const handleMouseMove = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
-      const { mode: detectedMode, isPointerLike } = getTargetMode(target, isMouseDownRef.current || e.buttons === 1);
+      const { mode: detectedMode, isMagnetic } = getTargetMode(target, isMouseDownRef.current || e.buttons === 1);
       setMode(detectedMode);
 
-      if (isPointerLike && target) {
+      if (isMagnetic && target) {
         const interactiveEl =
-          target.closest('.clickable, button, a, [role="button"], .interactive, .close-button-wrapper, .list-item') ||
+          target.closest('.close-button-wrapper, button, a, .item-link') ||
           target;
         const rect = interactiveEl.getBoundingClientRect();
-        const midX = rect.left + rect.width / 2;
-        const midY = rect.top + rect.height / 2;
-        targetPos.current = {
-          x: midX + (midX - e.clientX) * 0.15,
-          y: midY + (midY - e.clientY) * 0.15,
-        };
+        // Only apply subtle magnetic pull if element is reasonably small (< 180px)
+        if (rect.width <= 180 && rect.height <= 180) {
+          const midX = rect.left + rect.width / 2;
+          const midY = rect.top + rect.height / 2;
+          targetPos.current = {
+            x: midX + (midX - e.clientX) * 0.15,
+            y: midY + (midY - e.clientY) * 0.15,
+          };
+        } else {
+          targetPos.current = { x: e.clientX, y: e.clientY };
+        }
       } else {
         targetPos.current = {
           x: e.clientX,

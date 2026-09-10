@@ -33,9 +33,10 @@ export class SliderImageMesh extends ImageMesh {
 
   createMesh(): void {
     super.createMesh();
-    // Hide original image element so the Three.js shader-warped mesh renders in place
-    if (this.element.parentElement) {
-      this.element.parentElement.style.visibility = 'hidden';
+    // Hide original image element visually so the Three.js shader-warped mesh renders in place
+    // but keep .img-wrapper visible and hit-testable in the DOM for clicks and hover
+    if (this.element) {
+      this.element.style.opacity = '0';
     }
   }
 
@@ -66,8 +67,8 @@ export class SliderImageMesh extends ImageMesh {
   }
 
   destroy(): void {
-    if (this.element.parentElement) {
-      this.element.parentElement.style.visibility = 'visible';
+    if (this.element) {
+      this.element.style.opacity = '';
     }
     super.destroy();
   }

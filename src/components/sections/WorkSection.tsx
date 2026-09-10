@@ -30,9 +30,13 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rendererRef = useRef<ImageRenderer | null>(null);
-  const dragDistanceRef = useRef<number>(0);
-  const sliderProgressRef = useRef<number>(0);
-  const touchStartPos = useRef({ x: 0, y: 0 });
+  const pointerStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const lastPointerRef = useRef({ x: 0, time: 0 });
+  const velocityRef = useRef(0);
+  const dragDistanceRef = useRef(0);
+  const isDragConfirmedRef = useRef(false);
+  const hasJustDraggedRef = useRef(false);
+  const sliderProgressRef = useRef(0);
 
   // Slider physics state strictly mirroring Musab's WorkSlider class
   const sliderState = useRef({
@@ -41,7 +45,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
     currentPosition: 0,
     targetPosition: 0,
     initialPosition: 0,
-    offsetSpeed: 5000,
+    offsetSpeed: 1920,
     lerpSpeed: 0.1,
     speed: 0,
     active: false,
@@ -62,40 +66,77 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
       return;
     }
 
+    // Only respond to primary left click
+    if (e.button !== 0) return;
+
+    // Prevent native text selection or ghost-image dragging
+    e.preventDefault();
+
     dragDistanceRef.current = 0;
+    isDragConfirmedRef.current = false;
+    pointerStartRef.current = { x: e.clientX, y: e.clientY, time: performance.now() };
+    lastPointerRef.current = { x: e.clientX, time: performance.now() };
+    velocityRef.current = 0;
+
     sliderState.current.initialMouseX = e.clientX;
     sliderState.current.currentMouseX = e.clientX;
+    const clientWidth = document.body.clientWidth || window.innerWidth;
+    sliderState.current.offsetSpeed = clientWidth;
     sliderState.current.active = true;
-    setIsDragging(true);
 
-    if (listRef.current) {
-      const style = window.getComputedStyle(listRef.current);
-      const transform =
-        style.transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : style.transform;
-      const matrix = new DOMMatrix(transform);
-      sliderState.current.initialPosition = matrix.m41;
-      sliderState.current.targetPosition = matrix.m41;
-      sliderState.current.currentPosition = matrix.m41;
-    }
+    // Direct assignment prevents forced layout reflows and stutter
+    sliderState.current.initialPosition = sliderState.current.currentPosition;
+    sliderState.current.targetPosition = sliderState.current.currentPosition;
+    setIsDragging(true);
   };
 
   // Mouse drag: onRelease
   const handleMouseUp = useCallback(() => {
+    if (!sliderState.current.active) return;
+
     sliderState.current.active = false;
     setIsDragging(false);
+
+    if (isDragConfirmedRef.current) {
+      hasJustDraggedRef.current = true;
+      // Natural momentum deceleration on release
+      const momentum = velocityRef.current * 160;
+      sliderState.current.targetPosition += momentum;
+      setTimeout(() => {
+        hasJustDraggedRef.current = false;
+      }, 100);
+    }
   }, []);
 
   // Mouse drag: onMouseMove
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!sliderState.current.active) return;
-    dragDistanceRef.current += Math.abs(e.movementX || 0);
+
+    const dx = e.clientX - pointerStartRef.current.x;
+    const dy = e.clientY - pointerStartRef.current.y;
+    const dist = Math.hypot(dx, dy);
+    dragDistanceRef.current = dist;
+
+    if (dist >= 8) {
+      isDragConfirmedRef.current = true;
+    }
+
+    // Measure instant velocity for momentum
+    const now = performance.now();
+    const dt = Math.max(1, now - lastPointerRef.current.time);
+    const stepDx = e.clientX - lastPointerRef.current.x;
+    const instantVelocity = stepDx / dt;
+    velocityRef.current = velocityRef.current * 0.4 + instantVelocity * 0.6;
+    lastPointerRef.current = { x: e.clientX, time: now };
+
     sliderState.current.currentMouseX = e.clientX;
     const diff =
       (sliderState.current.currentMouseX - sliderState.current.initialMouseX) * -1;
+    const clientWidth = document.body.clientWidth || window.innerWidth;
     sliderState.current.targetPosition =
       Math.round(
         (sliderState.current.initialPosition -
-          sliderState.current.offsetSpeed * (diff / document.body.clientWidth)) *
+          sliderState.current.offsetSpeed * (diff / clientWidth)) *
           100
       ) / 100;
   }, []);
@@ -113,49 +154,63 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
       return;
     }
 
+    const touch = e.touches[0];
     dragDistanceRef.current = 0;
-    const clientX = e.touches[0].clientX;
-    const clientY = e.touches[0].clientY;
-    touchStartPos.current = { x: clientX, y: clientY };
-    sliderState.current.initialMouseX = clientX;
-    sliderState.current.currentMouseX = clientX;
-    sliderState.current.active = true;
-    setIsDragging(true);
+    isDragConfirmedRef.current = false;
+    pointerStartRef.current = { x: touch.clientX, y: touch.clientY, time: performance.now() };
+    lastPointerRef.current = { x: touch.clientX, time: performance.now() };
+    velocityRef.current = 0;
 
-    if (listRef.current) {
-      const style = window.getComputedStyle(listRef.current);
-      const transform =
-        style.transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : style.transform;
-      const matrix = new DOMMatrix(transform);
-      sliderState.current.initialPosition = matrix.m41;
-      sliderState.current.targetPosition = matrix.m41;
-      sliderState.current.currentPosition = matrix.m41;
-    }
+    sliderState.current.initialMouseX = touch.clientX;
+    sliderState.current.currentMouseX = touch.clientX;
+    const clientWidth = document.body.clientWidth || window.innerWidth;
+    sliderState.current.offsetSpeed = clientWidth;
+    sliderState.current.active = true;
+
+    sliderState.current.initialPosition = sliderState.current.currentPosition;
+    sliderState.current.targetPosition = sliderState.current.currentPosition;
+    setIsDragging(true);
   };
 
   // Touch drag: onTouchMove
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!sliderState.current.active) return;
-    const clientX = e.touches[0].clientX;
-    const clientY = e.touches[0].clientY;
-    const dX = Math.abs(clientX - touchStartPos.current.x);
-    const dY = Math.abs(clientY - touchStartPos.current.y);
+    const touch = e.touches[0];
+    const dx = touch.clientX - pointerStartRef.current.x;
+    const dy = touch.clientY - pointerStartRef.current.y;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
 
     // If vertical gesture on mobile, release slider so native page scroll continues
-    if (dY > dX && dY > 8 && dragDistanceRef.current < 15) {
+    if (absDy > absDx && absDy > 10 && !isDragConfirmedRef.current) {
       sliderState.current.active = false;
       setIsDragging(false);
       return;
     }
 
-    dragDistanceRef.current += Math.abs(clientX - sliderState.current.currentMouseX);
-    sliderState.current.currentMouseX = clientX;
+    // User is dragging horizontally: prevent accidental page scrolling
+    if (absDx >= 8) {
+      isDragConfirmedRef.current = true;
+      if (e.cancelable) e.preventDefault();
+    }
+
+    dragDistanceRef.current = Math.hypot(dx, dy);
+
+    const now = performance.now();
+    const dt = Math.max(1, now - lastPointerRef.current.time);
+    const stepDx = touch.clientX - lastPointerRef.current.x;
+    const instantVelocity = stepDx / dt;
+    velocityRef.current = velocityRef.current * 0.4 + instantVelocity * 0.6;
+    lastPointerRef.current = { x: touch.clientX, time: now };
+
+    sliderState.current.currentMouseX = touch.clientX;
     const diff =
       (sliderState.current.currentMouseX - sliderState.current.initialMouseX) * -1;
+    const clientWidth = document.body.clientWidth || window.innerWidth;
     sliderState.current.targetPosition =
       Math.round(
         (sliderState.current.initialPosition -
-          sliderState.current.offsetSpeed * (diff / document.body.clientWidth)) *
+          sliderState.current.offsetSpeed * (diff / clientWidth)) *
           100
       ) / 100;
   }, []);
@@ -187,13 +242,15 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleMouseUp);
+    window.addEventListener('touchcancel', handleMouseUp);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleMouseUp);
+      window.removeEventListener('touchcancel', handleMouseUp);
     };
   }, [handleMouseMove, handleMouseUp, handleTouchMove]);
 
@@ -418,10 +475,13 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                     className={`list-item clickable passive ${
                       isActive ? 'active' : ''
                     } ${isAmbient ? 'ambient' : ''}`}
-                    onClick={() => {
-                      if (dragDistanceRef.current < 8) {
-                        toggleActiveItem(i);
+                    onClick={(e) => {
+                      if (hasJustDraggedRef.current || dragDistanceRef.current >= 8) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
                       }
+                      toggleActiveItem(i);
                     }}
                   >
                     {/* Image Wrapper */}
