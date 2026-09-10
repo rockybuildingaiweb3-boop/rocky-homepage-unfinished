@@ -33,14 +33,12 @@ export function matchRoute(rawPath: string): RouteMatch {
 interface RouterContextType {
   currentPath: string;
   currentRoute: RouteMatch;
-  isStudio: boolean;
   navigate: (to: string) => void;
 }
 
 const RouterContext = createContext<RouterContextType>({
   currentPath: '/',
   currentRoute: matchRoute('/'),
-  isStudio: false,
   navigate: () => {},
 });
 
@@ -63,17 +61,8 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const currentRoute = matchRoute(currentPath);
-
   return (
-    <RouterContext.Provider
-      value={{
-        currentPath,
-        currentRoute,
-        isStudio: currentRoute.family === 'studio',
-        navigate,
-      }}
-    >
+    <RouterContext.Provider value={{ currentPath, currentRoute: matchRoute(currentPath), navigate }}>
       {children}
     </RouterContext.Provider>
   );
