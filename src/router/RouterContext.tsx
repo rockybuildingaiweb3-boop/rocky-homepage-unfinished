@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
-export type PageFamily =
-  | 'exhibition'
-  | 'studio-hub'
-  | 'case-study'
-  | 'editorial'
-  | 'career'
-  | 'not-found';
+export type PageFamily = 'exhibition' | 'studio' | 'not-found';
 
 export interface RouteMatch {
   routeId: string;
@@ -24,51 +18,22 @@ interface RouteDefinition {
 }
 
 /**
- * Authoritative Same-Origin Route Table
- * Ordered by matching precedence (specific parameterized subroutes before general room wildcards).
+ * Authoritative Route Table
+ * HOME -> /
+ * STUDIO -> /studio
  */
 export const ROUTE_DEFINITIONS: RouteDefinition[] = [
-  // 1. Home / Cinematic Exhibition
   {
     id: 'home',
     family: 'exhibition',
     pattern: /^\/?$/,
     paramKeys: [],
   },
-  // 2. Studio Hub (Building Entrance)
   {
-    id: 'studio-hub',
-    family: 'studio-hub',
-    pattern: /^\/studio\/?$/,
+    id: 'studio',
+    family: 'studio',
+    pattern: /^\/studio(?:\/.*)?$/,
     paramKeys: [],
-  },
-  // 3. Editorial Article (/studio/blog/:slug)
-  {
-    id: 'editorial-article',
-    family: 'editorial',
-    pattern: /^\/studio\/blog\/([a-zA-Z0-9_-]+)\/?$/,
-    paramKeys: ['slug'],
-  },
-  // 4. Editorial Index (/studio/blog)
-  {
-    id: 'editorial-index',
-    family: 'editorial',
-    pattern: /^\/studio\/blog\/?$/,
-    paramKeys: [],
-  },
-  // 5. Career Dossier (/studio/career)
-  {
-    id: 'career',
-    family: 'career',
-    pattern: /^\/studio\/career\/?$/,
-    paramKeys: [],
-  },
-  // 6. Project Case Study (/studio/:projectId)
-  {
-    id: 'case-study',
-    family: 'case-study',
-    pattern: /^\/studio\/([a-zA-Z0-9_-]+)\/?$/,
-    paramKeys: ['projectId'],
   },
 ];
 
@@ -146,7 +111,6 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     window.history.pushState({}, '', target);
     setCurrentPath(target);
 
-    // Smoothly reposition window to top of incoming view
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
@@ -154,7 +118,7 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [currentPath]);
 
   const currentRoute = useMemo(() => matchRoute(currentPath), [currentPath]);
-  const isStudio = currentRoute.family !== 'exhibition';
+  const isStudio = currentRoute.family === 'studio';
 
   return (
     <RouterContext.Provider value={{ currentPath, currentRoute, isStudio, navigate }}>

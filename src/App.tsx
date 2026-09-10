@@ -10,7 +10,6 @@ import { usePreloadAssets } from './hooks/usePreloadAssets';
  * PortfolioApp
  *
  * Coordinates global systems, active route family resolution, and asset preloading.
- * Decoupled from detailed component implementations and slider physics.
  */
 function PortfolioApp() {
   const isMobile = useIsMobile();
@@ -22,7 +21,7 @@ function PortfolioApp() {
       {currentRoute.family === 'exhibition' ? (
         <HomePage workData={workData} siteData={siteData} />
       ) : (
-        <StudioPageResolver workData={workData} siteData={siteData} />
+        <StudioPageResolver />
       )}
     </GlobalShell>
   );
