@@ -1,74 +1,33 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export type PageFamily = 'exhibition' | 'studio' | 'not-found';
 
 export interface RouteMatch {
-  routeId: string;
+  routeId: 'home' | 'studio' | 'not-found';
   family: PageFamily;
   path: string;
-  params: Record<string, string>;
   isExact: boolean;
 }
 
-interface RouteDefinition {
-  id: string;
-  family: PageFamily;
-  pattern: RegExp;
-  paramKeys: string[];
-}
-
-/**
- * Authoritative Route Table
- * HOME -> /
- * STUDIO -> /studio
- */
-export const ROUTE_DEFINITIONS: RouteDefinition[] = [
-  {
-    id: 'home',
-    family: 'exhibition',
-    pattern: /^\/?$/,
-    paramKeys: [],
-  },
-  {
-    id: 'studio',
-    family: 'studio',
-    pattern: /^\/studio(?:\/.*)?$/,
-    paramKeys: [],
-  },
-];
-
-export const normalizePath = (rawPath: string): string => {
+export function normalizePath(rawPath: string): string {
   const clean = rawPath.split('?')[0].split('#')[0].trim();
-  if (!clean || clean === '') return '/';
+  if (!clean) return '/';
   if (clean.length > 1 && clean.endsWith('/')) return clean.slice(0, -1);
   return clean;
-};
+}
 
 export function matchRoute(rawPath: string): RouteMatch {
-  const normalized = normalizePath(rawPath);
-  for (const def of ROUTE_DEFINITIONS) {
-    const match = normalized.match(def.pattern);
-    if (match) {
-      const params: Record<string, string> = {};
-      def.paramKeys.forEach((key, index) => {
-        params[key] = match[index + 1];
-      });
-      return {
-        routeId: def.id,
-        family: def.family,
-        path: normalized,
-        params,
-        isExact: true,
-      };
-    }
+  const path = normalizePath(rawPath);
+
+  if (path === '/') {
+    return { routeId: 'home', family: 'exhibition', path, isExact: true };
   }
-  return {
-    routeId: 'not-found',
-    family: 'not-found',
-    path: normalized,
-    params: {},
-    isExact: false,
-  };
+
+  if (path === '/studio') {
+    return { routeId: 'studio', family: 'studio', path, isExact: true };
+  }
+
+  return { routeId: 'not-found', family: 'not-found', path, isExact: false };
 }
 
 interface RouterContextType {
@@ -86,76 +45,38 @@ const RouterContext = createContext<RouterContextType>({
 });
 
 export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentPath, setCurrentPath] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return normalizePath(window.location.pathname);
-    }
-    return '/';
-  });
+  const [currentPath, setCurrentPath] = useState(() =>
+    typeof window === 'undefined' ? '/' : normalizePath(window.location.pathname)
+  );
 
-  // Keep state synchronized with browser back/forward buttons
   useEffect(() => {
-    const handleLocationChange = () => {
-      const normalized = normalizePath(window.location.pathname);
-      setCurrentPath(normalized);
-    };
-
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
+    const onPopState = () => setCurrentPath(normalizePath(window.location.pathname));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  const navigate = useCallback((to: string) => {
+  const navigate = (to: string) => {
     const target = normalizePath(to);
     if (target === currentPath) return;
-
     window.history.pushState({}, '', target);
     setCurrentPath(target);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  }, [currentPath]);
-
-  const currentRoute = useMemo(() => matchRoute(currentPath), [currentPath]);
-  const isStudio = currentRoute.family === 'studio';
+  const currentRoute = matchRoute(currentPath);
 
   return (
-    <RouterContext.Provider value={{ currentPath, currentRoute, isStudio, navigate }}>
+    <RouterContext.Provider
+      value={{
+        currentPath,
+        currentRoute,
+        isStudio: currentRoute.family === 'studio',
+        navigate,
+      }}
+    >
       {children}
     </RouterContext.Provider>
   );
 };
 
-export const useRouter = (): RouterContextType => useContext(RouterContext);
-
-interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  to: string;
-  children: React.ReactNode;
-}
-
-export const Link: React.FC<LinkProps> = ({ to, children, onClick, ...props }) => {
-  const { navigate } = useRouter();
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    onClick?.(e);
-    if (
-      !e.defaultPrevented &&
-      e.button === 0 &&
-      !e.metaKey &&
-      !e.ctrlKey &&
-      !e.shiftKey &&
-      !e.altKey &&
-      !props.target
-    ) {
-      e.preventDefault();
-      navigate(to);
-    }
-  };
-
-  return (
-    <a href={to} onClick={handleClick} {...props}>
-      {children}
-    </a>
-  );
-};
+export const useRouter = () => useContext(RouterContext);
