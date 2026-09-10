@@ -1,98 +1,78 @@
-import { useState, useEffect } from 'react';
-import { SiteData, WorkItem } from '../types';
+import { useEffect, useState } from 'react';
+import { SiteData } from '../types';
 import { loadSiteData } from '../data/site/loader';
-import { loadImage, devMsg, fetchJsonData } from '../utils';
+import { loadImage, devMsg } from '../utils';
 
 export interface PreloadAssetsResult {
   loading: boolean;
   loadingDone: boolean;
   progress: number;
   siteData: SiteData | null;
-  workData: WorkItem[];
 }
 
-/**
- * Hook to manage portfolio data fetching, asset preloading, and smooth loader dismiss transitions
- */
+const CRITICAL_ASSETS = [
+  '/assets/imgs/loader-flower.jpg',
+  '/assets/imgs/home-back.jpg',
+  '/assets/imgs/logo-rb-cyber.svg',
+  '/assets/imgs/signature.svg',
+];
+
 export function usePreloadAssets(): PreloadAssetsResult {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [loadingDone, setLoadingDone] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(10);
+  const [loading, setLoading] = useState(true);
+  const [loadingDone, setLoadingDone] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [siteData, setSiteData] = useState<SiteData | null>(null);
-  const [workData, setWorkData] = useState<WorkItem[]>([]);
 
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
-    async function loadPortfolio() {
+    const load = async () => {
       try {
-        const [wData, sData] = await Promise.all([
-          fetchJsonData<WorkItem[]>('/data/work-data.json'),
-          loadSiteData(),
-        ]);
+        const data = await loadSiteData();
+        if (!mounted) return;
+        setSiteData(data);
+        setProgress(20);
 
-        if (!isMounted) return;
-        setWorkData(wData || []);
-        setSiteData(sData);
-        setProgress(30);
-
-        // Preload key images essential for initial presentation
-        const criticalImages = [
-          '/assets/imgs/loader-flower.jpg',
-          '/assets/imgs/home-back.jpg',
-          '/assets/imgs/logo-rb-cyber.svg',
-          '/assets/imgs/signature.svg',
-          ...wData.map((item) => `/assets/imgs/work-back/${item.id}/cover.jpg`),
-        ];
-
-        let loadedCount = 0;
-        const total = criticalImages.length;
-
+        let loaded = 0;
         await Promise.all(
-          criticalImages.map(async (src) => {
+          CRITICAL_ASSETS.map(async (src) => {
             try {
               await loadImage(src);
             } catch {
-              // Ignore single image failure to avoid blocking app
+              // A single decorative asset must not block the page.
             }
-            if (isMounted) {
-              loadedCount++;
-              const calculated = 30 + Math.round((loadedCount / total) * 70);
-              setProgress(calculated);
+            if (mounted) {
+              loaded += 1;
+              setProgress(20 + Math.round((loaded / CRITICAL_ASSETS.length) * 80));
             }
           })
         );
 
-        if (!isMounted) return;
+        if (!mounted) return;
         setProgress(100);
-
-        // Finish loader transition:
-        // Wait 250ms -> setLoadingDone(true) triggers right: 0; width: 0 wipe -> overlay fade
         setTimeout(() => {
-          if (!isMounted) return;
+          if (!mounted) return;
           setLoadingDone(true);
           setTimeout(() => {
-            if (!isMounted) return;
+            if (!mounted) return;
             setLoading(false);
             devMsg();
           }, 1550);
         }, 250);
-      } catch (err) {
-        console.error('Failed to load portfolio:', err);
-        if (isMounted) {
-          setProgress(100);
-          setLoadingDone(true);
-          setLoading(false);
-        }
+      } catch (error) {
+        console.error('Failed to load site data:', error);
+        if (!mounted) return;
+        setProgress(100);
+        setLoadingDone(true);
+        setLoading(false);
       }
-    }
+    };
 
-    loadPortfolio();
-
+    load();
     return () => {
-      isMounted = false;
+      mounted = false;
     };
   }, []);
 
-  return { loading, loadingDone, progress, siteData, workData };
+  return { loading, loadingDone, progress, siteData };
 }
