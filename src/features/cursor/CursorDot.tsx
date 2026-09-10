@@ -2,17 +2,16 @@ import React, { useEffect, useRef } from 'react';
 
 export interface CursorDotProps {
   isMobile?: boolean;
-  disabled?: boolean;
 }
 
-export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled = false }) => {
+export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false }) => {
   const ref = useRef<HTMLDivElement>(null);
   const target = useRef({ x: -100, y: -100 });
   const position = useRef({ x: -100, y: -100 });
   const frame = useRef<number | null>(null);
 
   useEffect(() => {
-    if (isMobile || disabled) return;
+    if (isMobile) return;
 
     const onMove = (event: MouseEvent) => {
       target.current = { x: event.clientX, y: event.clientY };
@@ -21,9 +20,11 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
     const animate = () => {
       position.current.x += (target.current.x - position.current.x) * 0.28;
       position.current.y += (target.current.y - position.current.y) * 0.28;
+
       if (ref.current) {
         ref.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0)`;
       }
+
       frame.current = requestAnimationFrame(animate);
     };
 
@@ -34,9 +35,9 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
       window.removeEventListener('mousemove', onMove);
       if (frame.current !== null) cancelAnimationFrame(frame.current);
     };
-  }, [isMobile, disabled]);
+  }, [isMobile]);
 
-  if (isMobile || disabled) return null;
+  if (isMobile) return null;
 
   return (
     <div
