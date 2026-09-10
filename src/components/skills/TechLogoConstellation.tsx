@@ -12,11 +12,14 @@ interface TechLogoConstellationProps {
 
 const CATEGORY_LEGENDS = [
   { id: 'all', label: 'all', row: 0 },
-  { id: 'motion', label: 'motion', row: 1 },
+  { id: 'frontend', label: 'frontend', row: 1 },
   { id: 'space', label: 'space', row: 2 },
   { id: 'systems', label: 'systems', row: 3 },
-  { id: 'chain', label: 'chain', row: 4 },
-  { id: 'ai', label: 'ai', row: 5 },
+  { id: 'web3', label: 'web3', row: 4 },
+  { id: 'models', label: 'models', row: 5 },
+  { id: 'agents', label: 'agents', row: 6 },
+  { id: 'retrieval', label: 'retrieval', row: 7 },
+  { id: 'engineering', label: 'engineering', row: 8 },
 ] as const;
 
 export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
@@ -137,8 +140,8 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* ─── 5-ROW CONSTELLATION: EXACTLY 80 CURATED SKILLS (16 PER ROW) ─── */}
-      <div className="w-full max-w-[1340px] flex flex-col items-center justify-center gap-y-6 sm:gap-y-8 md:gap-y-9 px-2 sm:px-4">
+      {/* ─── 8-ROW CONSTELLATION: EXACTLY 80 CURATED SKILLS (10 PER ROW) ─── */}
+      <div className="w-full max-w-[1240px] flex flex-col items-center justify-center gap-y-5 sm:gap-y-6 md:gap-y-7 px-2 sm:px-4">
         {SKILL_ROWS.map((rowDef, rowIndex) => {
           const rowSkills = SKILLS_BY_ROW[rowDef.row] || [];
           const isRowFiltered =
@@ -147,11 +150,11 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
           return (
             <motion.div
               key={`row-${rowDef.row}`}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: rowIndex * 0.05 }}
-              className={`w-full flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-4 md:gap-x-5 lg:gap-x-6 gap-y-2.5 sm:gap-y-3.5 transition-all duration-400 ${
+              transition={{ duration: 0.35, delay: rowIndex * 0.04 }}
+              className={`w-full flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-5 md:gap-x-6 lg:gap-x-8 gap-y-2.5 sm:gap-y-3 transition-all duration-400 ${
                 isRowFiltered
                   ? 'opacity-15 scale-[0.97] pointer-events-none filter grayscale'
                   : 'opacity-100 scale-100'

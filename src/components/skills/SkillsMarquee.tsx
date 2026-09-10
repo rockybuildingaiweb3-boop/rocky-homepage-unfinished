@@ -20,13 +20,11 @@ const getSkill = (id: string): SkillItem => {
   );
 };
 
-// Track 1: Rows 1 & 2 (Frontend, Interaction, 3D & Graphics) - 20 unique skills
-const TRACK_1_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row === 1 || s.row === 2);
+// Track 1: Rows 1, 2, 3 & 4 (Frontend, 3D Graphics, Backend & Web3) - 40 unique skills
+const TRACK_1_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row <= 4);
 
-// Track 2: Rows 3, 4 & 5 (Backend, Systems, Web3 & AI Engineering) - 30 unique skills
-const TRACK_2_SKILLS: SkillItem[] = SKILLS_DATA.filter(
-  (s) => s.row === 3 || s.row === 4 || s.row === 5
-);
+// Track 2: Rows 5, 6, 7 & 8 (AI Models, AI Agents, RAG & Engineering Stability) - 40 unique skills
+const TRACK_2_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row >= 5);
 
 interface SkillsMarqueeProps {
   activeSkillId?: string;
