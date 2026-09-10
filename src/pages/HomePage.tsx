@@ -1,18 +1,17 @@
 import React, { useCallback } from 'react';
-import { WorkItem, SiteData } from '../types';
+import { SiteData } from '../types';
 import { Navbar, Footer } from '../components/layout';
-import { HomeSection, WorkSection } from '../components/sections';
+import { HomeSection } from '../components/sections';
 import { useScrollSpy } from '../features/scroll';
 import { useRouter } from '../router/RouterContext';
 
 interface HomePageProps {
-  workData: WorkItem[];
   siteData: SiteData | null;
 }
 
-const SECTION_IDS = ['contact', 'work', 'home'];
+const SECTION_IDS = ['contact', 'home'];
 
-export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
+export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
   const { navigate } = useRouter();
   const { scrollY, activeSection, setActiveSection } = useScrollSpy({
     sectionIds: SECTION_IDS,
@@ -50,7 +49,6 @@ export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
     <main className="w-full min-h-screen relative z-10 overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
       <HomeSection scrollY={scrollY} onNavigate={handleNavigate} />
-      <WorkSection workData={workData} />
       <Footer siteData={siteData} onNavigateRoute={navigate} />
     </main>
   );
