@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { WorkItem, SiteData } from '../types';
 import { Navbar, Footer } from '../components/layout';
-import { HomeSection, WorkSection, SkillsSection } from '../components/sections';
+import { HomeSection, WorkSection } from '../components/sections';
 import { useScrollSpy } from '../features/scroll';
 import { useRouter } from '../router/RouterContext';
 
@@ -10,19 +10,8 @@ interface HomePageProps {
   siteData: SiteData | null;
 }
 
-const SECTION_IDS = ['contact', 'skills', 'work', 'home'];
+const SECTION_IDS = ['contact', 'work', 'home'];
 
-/**
- * HomePage
- * 
- * The cinematic entrance to Rocky Babcock's digital exhibition.
- * Orchestrates:
- * - Fixed brand navbar with active section scrollspy
- * - Hero botanical artwork & interactive cosmic transition
- * - Selected Work spatial horizontal slider & WebGL image distortion
- * - 8-row technical instruments constellation & planetary atmosphere
- * - Museum colophon footer with author seal signature
- */
 export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
   const { navigate } = useRouter();
   const { scrollY, activeSection, setActiveSection } = useScrollSpy({
@@ -31,7 +20,6 @@ export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
 
   const handleNavigate = useCallback(
     (targetId: string) => {
-      // Direct studio route gateway
       if (targetId === 'studio' || targetId === '/studio') {
         navigate('/studio');
         return;
@@ -40,8 +28,6 @@ export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
         navigate(targetId);
         return;
       }
-
-      // Smooth in-page section scrolling
       if (targetId === 'home') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setActiveSection('home');
@@ -63,13 +49,8 @@ export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
   return (
     <main className="w-full min-h-screen relative z-10 overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
-
       <HomeSection scrollY={scrollY} onNavigate={handleNavigate} />
-
       <WorkSection workData={workData} />
-
-      <SkillsSection />
-
       <Footer siteData={siteData} onNavigateRoute={navigate} />
     </main>
   );
