@@ -1,64 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Questrial&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
-@import url('https://use.typekit.net/goc4cow.css');
 @import "tailwindcss";
 
 :root {
-  --c-light: #F4F6F8;
-  --c-dark-grey: #212B36;
   --title-font: 'freight-big-pro', 'Playfair Display', Georgia, serif;
   --body-font: 'Questrial', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-.cursive {
-  font-family: 'Cedarville Cursive', cursive;
-}
-
-.Welcome-text {
-  background: linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.4),
-      rgba(255, 255, 255, 0.4)
-    ),
-    linear-gradient(90.01deg, #e59cff 0.01%, #ba9cff 50.01%, #9cb2ff 100%);
-  background-blend-mode: normal, screen;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.Welcome-box {
-  isolation: isolate;
-  overflow: hidden;
-  align-items: center;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border-radius: 32px;
-  box-shadow: inset 0 -7px 11px #a48fff22;
-  display: flex;
-  position: relative;
-  width: max-content;
-  transition: 0.45s cubic-bezier(0.6, 0.6, 0, 1) box-shadow;
-}
-
-.button-primary {
-  background: linear-gradient(
-      180deg,
-      rgba(60, 8, 126, 0) 0%,
-      rgba(60, 8, 126, 0.32) 100%
-    ),
-    rgba(113, 47, 255, 0.12);
-  box-shadow: inset 0 0 12px #bf97ff3d;
-}
-
-.button-primary:hover {
-  background: linear-gradient(
-      180deg,
-      rgba(60, 8, 126, 0) 0%,
-      rgba(60, 8, 126, 0.42) 100%
-    ),
-    rgba(113, 47, 255, 0.24);
-  box-shadow: inset 0 0 12px #bf97ff70;
 }
 
 * {
@@ -1085,55 +1030,6 @@ ul.work-list .list-item .text-wrapper .item-title {
   animation: footerSignaturePulse 5s ease-in-out infinite;
 }
 
-@keyframes scrollArrowLoop {
-  0% {
-    transform: translateY(-120%);
-  }
-  30% {
-    transform: translateY(0%);
-  }
-  70% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(120%);
-  }
-}
-
-/* Subtle floating spatial depth effect */
-@keyframes spatialFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-5px) rotate(0.4deg);
-  }
-}
-
-@keyframes spatialFloatSlow {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-7px);
-  }
-}
-
-.spatial-float {
-  animation: spatialFloat 8s ease-in-out infinite;
-}
-
-.spatial-float-slow {
-  animation: spatialFloatSlow 11s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spatial-float,
-  .spatial-float-slow {
-    animation: none !important;
-  }
-}
-
 /* ─── ARSALAN KALEEM INSPIRED TRANSPARENT MARQUEE ───────────────────────── */
 .marquee-band {
   position: relative;
@@ -1233,8 +1129,6 @@ ul.work-list .list-item .text-wrapper .item-title {
   .marquee-track-reverse,
   .hero-title-illuminated,
   .scroll-cue-float,
-  .footer-signature-sheen,
-  .nav-glow-underline,
   .celestial-spin,
   .celestial-pulse,
   .celestial-flare,

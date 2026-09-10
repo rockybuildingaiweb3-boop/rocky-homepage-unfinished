@@ -7,7 +7,6 @@ import {
   RxLinkedinLogo,
   RxHeart,
   RxEnvelopeClosed,
-  RxCode,
   RxArchive,
 } from 'react-icons/rx';
 import { FaYoutube, FaSpotify, FaTelegramPlane } from 'react-icons/fa';

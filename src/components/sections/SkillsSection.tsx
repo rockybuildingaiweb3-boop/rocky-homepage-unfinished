@@ -4,24 +4,18 @@ import { TechLogoConstellation } from '../skills/TechLogoConstellation';
 import { SkillsPlanetBackground } from '../skills/SkillsPlanetBackground';
 import { SkillsMarquee } from '../skills/SkillsMarquee';
 
-interface SkillsSectionProps {
-  onSelectProject?: (projectId: string) => void;
-}
-
 /**
  * SkillsSection
  * 
  * Space-portfolio cosmic atmosphere with full bidirectional linkage:
  * 1. Signature cosmic purple planet rotating in full ambient view (/videos/skills-bg.webm)
  * 2. Elegant minimalist header:
- *    - "✧ Crafting with modern technologies" floating badge
- *    - "Skills & Technologies" clean title
- *    - "Making digital experiences with modern technology." subtitle
+ *    - "instruments" clean editorial title
  * 3. 5-row constellation of frameless, floating official brand logos (50 items total, 10 per row)
  * 4. Micro-telemetry floating HUD for active/hovered skill
  * 5. Subtle dual-track kinetic marquee at the base, 100% linked in real-time with the constellation!
  */
-export const SkillsSection: React.FC<SkillsSectionProps> = ({ onSelectProject }) => {
+export const SkillsSection: React.FC = () => {
   // Default selected skill (React or TypeScript)
   const [selectedSkill, setSelectedSkill] = useState<SkillItem>(
     SKILLS_DATA.find((s) => s.id === 'react') || SKILLS_DATA[0]

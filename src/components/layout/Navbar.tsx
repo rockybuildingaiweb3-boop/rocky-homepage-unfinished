@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface NavbarProps {
   onNavigate: (targetId: string) => void;
@@ -7,19 +8,13 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'home' }) => {
   const [mobileMenuActive, setMobileMenuActive] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile(768);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 950);
-      if (window.innerWidth > 950) {
-        setMobileMenuActive(false);
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (!isMobile) {
+      setMobileMenuActive(false);
+    }
+  }, [isMobile]);
 
   const handleNavClick = (targetId: string) => {
     setMobileMenuActive(false);

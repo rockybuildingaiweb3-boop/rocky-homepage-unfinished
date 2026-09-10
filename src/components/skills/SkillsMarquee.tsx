@@ -6,20 +6,18 @@ import { playMechanicalClick } from './audio';
 
 // Helper to safely fetch skill data by ID
 const getSkill = (id: string): SkillItem => {
-  const found = SKILLS_DATA.find((s) => s.id === id);
-  if (found) return found;
-  return {
-    id,
-    name: id.toUpperCase(),
-    row: 1,
-    rowTitle: 'Core Stack',
-    category: 'Technology',
-    brandColor: '#A855F7',
-    positioning: `${id} platform architecture`,
-    experience: `Production integration with ${id}`,
-    tags: [id],
-    shortDescription: `Crafting high-velocity web experiences with ${id} 🚀`,
-  };
+  return (
+    SKILLS_DATA.find((s) => s.id === id) || {
+      id,
+      name: id.toUpperCase(),
+      slug: id,
+      row: 1,
+      rowTitle: 'Core Stack',
+      category: 'Technology',
+      brandColor: '#A855F7',
+      shortDescription: `Crafting high-velocity web experiences with ${id} 🚀`,
+    }
+  );
 };
 
 // Track 1: Rows 1 & 2 (Frontend, Interaction, 3D & Graphics) - Strictly De-duplicated (20 unique skills)

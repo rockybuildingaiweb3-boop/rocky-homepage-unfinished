@@ -6,7 +6,6 @@ import { ImageRenderer } from '../../effects/work-slider/renderer';
 
 interface WorkSectionProps {
   workData: WorkItem[];
-  onSelectDestination?: (destination: string, item: WorkItem) => void;
 }
 
 /**
@@ -19,10 +18,7 @@ interface WorkSectionProps {
  * - Details layout: top-align (index + line + summary), mid-align (title + close button), bottom-align (paragraph + roles + links)
  * - Zero artificial clutter or cramped banners
  */
-export const WorkSection: React.FC<WorkSectionProps> = ({
-  workData,
-  onSelectDestination,
-}) => {
+export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
   const [currentActive, setCurrentActive] = useState<number>(-1);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [sliderProgress, setSliderProgress] = useState<number>(0);

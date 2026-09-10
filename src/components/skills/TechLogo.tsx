@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SKILL_ICONS } from '../../data/skillIcons';
+import { SKILL_ICONS } from '../../data/skills';
 
 export interface TechLogoProps {
   id?: string;

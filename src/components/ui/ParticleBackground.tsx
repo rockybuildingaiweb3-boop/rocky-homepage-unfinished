@@ -6,7 +6,6 @@ import type { Points as PointsType } from 'three';
 import { isWebGLAvailable } from '../../utils';
 
 export interface ParticleBackgroundProps {
-  scrollY?: number;
   className?: string;
 }
 
@@ -283,7 +282,5 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
     </div>
   );
 };
-
-export const StarsCanvas = ParticleBackground;
 
 export default ParticleBackground;
