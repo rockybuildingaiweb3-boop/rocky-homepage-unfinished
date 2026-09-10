@@ -2,8 +2,13 @@ import React from 'react';
 import { Navbar, Footer } from '../components/layout';
 import { HomeSection, SkillsSection } from '../components/sections';
 import { useRouter } from '../router/RouterContext';
+import { SiteData } from '../types';
 
-export const HomePage: React.FC = () => {
+interface HomePageProps {
+  siteData?: SiteData | null;
+}
+
+export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
   const { navigate } = useRouter();
 
   const handleNavigate = (target: string) => {
@@ -27,7 +32,7 @@ export const HomePage: React.FC = () => {
       <Navbar onNavigate={handleNavigate} />
       <HomeSection onNavigate={handleNavigate} />
       <SkillsSection />
-      <Footer />
+      <Footer siteData={siteData} onNavigateRoute={navigate} />
     </main>
   );
 };
