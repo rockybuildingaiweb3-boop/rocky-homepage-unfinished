@@ -9,51 +9,12 @@ interface FlowerCluster {
   palette: [number, number, number][]; // Authentic watercolor pigments sampled from the artwork
 }
 
-// 15 distinct botanical flower heads directly catalogued from home-back.jpg
+// Bottom garden flower heads sampled directly from the lower botanical regions of home-back.jpg
 const FLOWER_CLUSTERS: FlowerCluster[] = [
   {
-    id: 'top-left-gold',
-    imgX: 0.08,
-    imgY: 0.16,
-    spreadX: 0.035,
-    spreadY: 0.045,
-    palette: [
-      [225, 175, 75],
-      [245, 210, 110],
-      [205, 145, 50],
-      [240, 195, 90],
-    ],
-  },
-  {
-    id: 'left-white',
-    imgX: 0.11,
-    imgY: 0.42,
-    spreadX: 0.04,
-    spreadY: 0.05,
-    palette: [
-      [245, 242, 248],
-      [228, 225, 238],
-      [250, 235, 240],
-      [215, 220, 235],
-    ],
-  },
-  {
-    id: 'left-violet',
-    imgX: 0.14,
-    imgY: 0.55,
-    spreadX: 0.035,
-    spreadY: 0.045,
-    palette: [
-      [135, 75, 145],
-      [155, 90, 168],
-      [115, 55, 125],
-      [170, 105, 180],
-    ],
-  },
-  {
-    id: 'left-coral-tulip',
+    id: 'bottom-left-coral',
     imgX: 0.18,
-    imgY: 0.66,
+    imgY: 0.74,
     spreadX: 0.045,
     spreadY: 0.05,
     palette: [
@@ -64,35 +25,22 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'mid-left-yellow',
-    imgX: 0.30,
-    imgY: 0.57,
-    spreadX: 0.04,
-    spreadY: 0.055,
-    palette: [
-      [240, 195, 75],
-      [250, 215, 105],
-      [215, 160, 55],
-      [245, 185, 80],
-    ],
-  },
-  {
-    id: 'mid-left-purple',
-    imgX: 0.39,
-    imgY: 0.52,
+    id: 'bottom-left-violet',
+    imgX: 0.14,
+    imgY: 0.72,
     spreadX: 0.035,
     spreadY: 0.045,
     palette: [
-      [125, 60, 130],
-      [105, 45, 110],
-      [160, 95, 170],
-      [145, 75, 150],
+      [135, 75, 145],
+      [155, 90, 168],
+      [115, 55, 125],
+      [170, 105, 180],
     ],
   },
   {
-    id: 'lower-rose-white',
+    id: 'bottom-rose-white',
     imgX: 0.31,
-    imgY: 0.85,
+    imgY: 0.86,
     spreadX: 0.045,
     spreadY: 0.045,
     palette: [
@@ -103,9 +51,9 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'lower-crimson',
+    id: 'bottom-crimson-tulip',
     imgX: 0.38,
-    imgY: 0.74,
+    imgY: 0.76,
     spreadX: 0.04,
     spreadY: 0.045,
     palette: [
@@ -116,22 +64,35 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'center-luminous-white',
-    imgX: 0.53,
-    imgY: 0.52,
-    spreadX: 0.05,
-    spreadY: 0.06,
+    id: 'bottom-amber-yellow',
+    imgX: 0.33,
+    imgY: 0.80,
+    spreadX: 0.04,
+    spreadY: 0.05,
     palette: [
-      [252, 252, 255],
-      [238, 242, 250],
-      [248, 245, 238],
-      [225, 235, 245],
+      [240, 195, 75],
+      [250, 215, 105],
+      [215, 160, 55],
+      [245, 185, 80],
     ],
   },
   {
-    id: 'center-deep-purple',
+    id: 'bottom-ruby-center',
+    imgX: 0.48,
+    imgY: 0.84,
+    spreadX: 0.045,
+    spreadY: 0.05,
+    palette: [
+      [215, 65, 70],
+      [190, 48, 56],
+      [235, 110, 85],
+      [180, 40, 50],
+    ],
+  },
+  {
+    id: 'bottom-deep-purple',
     imgX: 0.59,
-    imgY: 0.73,
+    imgY: 0.78,
     spreadX: 0.04,
     spreadY: 0.05,
     palette: [
@@ -142,9 +103,9 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'mid-right-coral',
+    id: 'bottom-mid-coral',
     imgX: 0.67,
-    imgY: 0.62,
+    imgY: 0.74,
     spreadX: 0.045,
     spreadY: 0.05,
     palette: [
@@ -155,9 +116,9 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'mid-right-gold',
+    id: 'bottom-gold-tulip',
     imgX: 0.72,
-    imgY: 0.77,
+    imgY: 0.80,
     spreadX: 0.04,
     spreadY: 0.045,
     palette: [
@@ -168,9 +129,9 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'right-luminous-white',
+    id: 'bottom-pearl-white',
     imgX: 0.80,
-    imgY: 0.63,
+    imgY: 0.76,
     spreadX: 0.045,
     spreadY: 0.05,
     palette: [
@@ -181,9 +142,9 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'right-deep-violet',
-    imgX: 0.93,
-    imgY: 0.63,
+    id: 'bottom-right-violet',
+    imgX: 0.92,
+    imgY: 0.76,
     spreadX: 0.035,
     spreadY: 0.045,
     palette: [
@@ -194,9 +155,9 @@ const FLOWER_CLUSTERS: FlowerCluster[] = [
     ],
   },
   {
-    id: 'top-right-coral-rose',
-    imgX: 0.91,
-    imgY: 0.23,
+    id: 'bottom-right-coral',
+    imgX: 0.86,
+    imgY: 0.83,
     spreadX: 0.045,
     spreadY: 0.05,
     palette: [
@@ -347,19 +308,27 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
     if (!ctx) return;
 
     const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    ctx.clearRect(0, 0, width, height);
+    const canvasH = canvas.clientHeight;
+    const heroH = typeof window !== 'undefined' ? window.innerHeight : canvasH / 1.15;
+    ctx.clearRect(0, 0, width, canvasH);
 
     if (p <= 0.15) return;
 
     const particles = particlesRef.current;
     const liftFactor = Math.pow(Math.max(0, p - 0.15) / 0.85, 1.35);
+    const maxLift = Math.min(130, heroH * 0.14);
+    const bandCeiling = heroH * 0.70;
 
     for (let i = 0; i < particles.length; i += 2) {
       const pt = particles[i];
-      const y = pt.originY - liftFactor * (height * 0.9 + pt.liftVelocity * 100);
-      const x = pt.originX + Math.sin(i) * 20 * p;
-      const alpha = Math.min(0.8, (p - 0.15) * 1.5) * (pt.depth > 1 ? 0.9 : 0.6);
+      const y = pt.originY - liftFactor * (maxLift + pt.liftVelocity * 15);
+      const x = pt.originX + Math.sin(i) * 15 * p;
+
+      const ceilingFade = Math.min(1, Math.max(0, (y - (bandCeiling - 35)) / 55));
+      const floorFade = Math.min(1, Math.max(0, (canvasH - y) / 45));
+      const alpha = Math.min(0.8, (p - 0.15) * 1.5) * (pt.depth > 1 ? 0.9 : 0.6) * ceilingFade * floorFade;
+
+      if (alpha <= 0.01) continue;
 
       ctx.save();
       ctx.translate(x, y);
@@ -393,9 +362,10 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
     const p = smoothedProgressRef.current;
 
     const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+    const canvasH = canvas.clientHeight;
+    const heroH = typeof window !== 'undefined' ? window.innerHeight : canvasH / 1.15;
 
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, canvasH);
 
     // Sleep condition: when scroll is near zero and progress has settled
     if (p <= 0.01 && targetProgress <= 0.01) {
@@ -405,11 +375,6 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
     }
 
     // Continuous conceptual progression blending factors
-    // 0.00 - 0.15: invisible
-    // 0.15 - 0.35: subtle petal presence
-    // 0.35 - 0.55: petal fragments lifting away
-    // 0.55 - 0.75: fragments break into smaller luminous particles
-    // 0.75 - 1.00: fine cosmic dust merging with nebula
     const activityAlpha = Math.min(1, Math.max(0, (p - 0.14) / 0.14));
     const petalFactor = Math.max(0, 1 - Math.max(0, (p - 0.42) / 0.25));
     const shardFactor =
@@ -422,17 +387,19 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
     const liftFactor = Math.pow(Math.max(0, p - 0.15) / 0.85, 1.38);
 
     const particles = particlesRef.current;
+    const maxLift = Math.min(130, heroH * 0.14);
+    const bandCeiling = heroH * 0.70; // Strict boundary: typography is kept 100% clean
 
     for (let i = 0; i < particles.length; i++) {
       const pt = particles[i];
 
-      // 1. Aerodynamic Position Integration
-      const targetY = pt.originY - liftFactor * (height * 0.96 + pt.liftVelocity * 150);
+      // 1. Aerodynamic Position Integration (Shallow upward drift)
+      const targetY = pt.originY - liftFactor * (maxLift + pt.liftVelocity * 22);
       pt.y += (targetY - pt.y) * 0.12 * dt;
 
       const flow = getCurlFlow(pt.x, pt.y, now, width);
-      const windSpread = (Math.sin(now * 0.0008 + pt.driftSeed) * 0.9 + pt.driftSeed * 0.2) * p;
-      pt.x += (flow.vx * pt.depth * 1.35 + windSpread) * dt;
+      const windSpread = (Math.sin(now * 0.0008 + pt.driftSeed) * 0.7 + pt.driftSeed * 0.18) * p;
+      pt.x += (flow.vx * pt.depth * 1.1 + windSpread) * dt;
 
       // 2. 3D Tumbling, Flutter & Pitch Rocking
       pt.rotAngle += (pt.rotSpeed + flow.vx * 0.018) * dt * (1 + p * 1.4);
@@ -453,12 +420,20 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
       const curG = Math.round(g0 + (cosmicG - g0) * colorShift);
       const curB = Math.round(b0 + (cosmicB - b0) * colorShift);
 
-      // Depth-based alpha variation (foreground brighter, background dimmer)
+      // Depth-based alpha variation
       const depthAlpha = pt.depth >= 1.0 ? 0.92 : pt.depth <= 0.6 ? 0.58 : 0.78;
-      // Gentle boundary dissipation at upper edge
-      const boundaryDissipation = Math.min(1, Math.max(0, (pt.y + 60) / 120));
-      const particleAlpha = activityAlpha * depthAlpha * boundaryDissipation;
 
+      // ─────────────────────────────────────────────────────────────
+      // STRICT SHALLOW ATMOSPHERIC BAND MASK
+      // Ensures particles NEVER reach center screen, typography, or navigation.
+      // ─────────────────────────────────────────────────────────────
+      const ceilingFade = Math.min(1, Math.max(0, (pt.y - (bandCeiling - 35)) / 55));
+      const floorFade = Math.min(1, Math.max(0, (canvasH - pt.y) / 45));
+      const bandMask = ceilingFade * floorFade;
+
+      if (bandMask <= 0.005) continue;
+
+      const particleAlpha = activityAlpha * depthAlpha * bandMask;
       if (particleAlpha <= 0.01) continue;
 
       ctx.save();
@@ -570,31 +545,31 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
     const setupCanvas = () => {
       if (!canvas) return;
       const width = window.innerWidth;
-      const height = window.innerHeight;
+      const heroHeight = window.innerHeight;
+      const canvasHeight = Math.floor(heroHeight * 1.15);
 
       // Handle high-DPI screens without degrading performance (cap at 2x)
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
+      canvas.height = Math.floor(canvasHeight * dpr);
 
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.scale(dpr, dpr);
       }
 
-      initParticles(width, height);
+      initParticles(width, heroHeight, canvasHeight);
 
       if (reducedMotionRef.current) {
         renderStaticFrame(progressRef.current);
       }
     };
 
-    const initParticles = (width: number, height: number) => {
-      // Responsive particle count: ~55 on mobile, ~80 on tablet, ~105 on desktop
-      const totalCount = Math.max(50, Math.min(110, Math.floor(width / 18)));
+    const initParticles = (width: number, heroHeight: number, canvasHeight: number) => {
+      // Responsive particle count: ~40 on mobile, ~60 on tablet, ~85 on desktop
+      const totalCount = Math.max(40, Math.min(85, Math.floor(width / 22)));
       const list: PetalParticle[] = [];
 
-      // Generate particles deterministically distributed among the 15 flower heads
       for (let i = 0; i < totalCount; i++) {
         const cluster = FLOWER_CLUSTERS[i % FLOWER_CLUSTERS.length];
         const pChoice = cluster.palette[i % cluster.palette.length];
@@ -605,10 +580,13 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
         const normX = cluster.imgX + Math.cos(angle) * cluster.spreadX * dist;
         const normY = cluster.imgY + Math.sin(angle) * cluster.spreadY * dist;
 
-        const coords = mapArtworkCoords(normX, normY, width, height);
+        const coords = mapArtworkCoords(normX, normY, width, heroHeight);
+
+        // Allow some particles to extend into the zone slightly below hero
+        const yOffset = Math.random() < 0.35 ? Math.random() * 0.10 * heroHeight : 0;
+        const finalY = Math.min(canvasHeight - 15, coords.y + yOffset);
 
         // 3-Tier spatial depth distribution:
-        // 35% Deep Background (0.4-0.65), 45% Midground (0.75-1.05), 20% Foreground (1.15-1.4)
         const tierRoll = Math.random();
         let depth: number;
         if (tierRoll < 0.35) {
@@ -624,18 +602,18 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
           normX,
           normY,
           originX: coords.x,
-          originY: coords.y,
+          originY: finalY,
           x: coords.x,
-          y: coords.y,
+          y: finalY,
           depth,
-          size: (7 + Math.random() * 8) * (depth > 1 ? 1.15 : depth < 0.6 ? 0.8 : 1.0),
-          aspect: 1.8 + Math.random() * 1.4, // slender petal aspect ratio
+          size: (6 + Math.random() * 7) * (depth > 1 ? 1.15 : depth < 0.6 ? 0.8 : 1.0),
+          aspect: 1.8 + Math.random() * 1.3, // slender petal aspect ratio
           curvature: (Math.random() - 0.5) * 1.8,
           baseR: pChoice[0],
           baseG: pChoice[1],
           baseB: pChoice[2],
           highlightShift: Math.random(),
-          liftVelocity: 0.85 + Math.random() * 1.3,
+          liftVelocity: 0.85 + Math.random() * 1.2,
           driftSeed: (Math.random() - 0.5) * 2.2,
           rotAngle: Math.random() * Math.PI * 2,
           rotSpeed: (Math.random() - 0.5) * 0.035,
@@ -666,8 +644,8 @@ export const PetalDissolveCanvas: React.FC<PetalDissolveCanvasProps> = ({ progre
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none z-[8]"
-      style={{ pointerEvents: 'none' }}
+      className="absolute top-0 left-0 w-full pointer-events-none z-[8]"
+      style={{ pointerEvents: 'none', height: '115%' }}
       aria-hidden="true"
     />
   );

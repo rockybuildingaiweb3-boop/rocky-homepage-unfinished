@@ -179,7 +179,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     <section
       id="home"
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden box-border select-none flex items-center justify-center transition-colors duration-500"
+      className="relative w-full h-screen overflow-visible box-border select-none flex items-center justify-center transition-colors duration-500"
       style={{
         backgroundColor: dayToNightProgress > 0.45 ? '#06040f' : '#ebe8e1',
       }}
