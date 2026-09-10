@@ -4,4 +4,3 @@ export { SkillsMarquee } from './SkillsMarquee';
 export { SkillsPlanetBackground } from './SkillsPlanetBackground';
 export { resolveSkillIcon } from './iconResolver';
 export type { ResolvedIcon } from './iconResolver';
-export * from './audio';
