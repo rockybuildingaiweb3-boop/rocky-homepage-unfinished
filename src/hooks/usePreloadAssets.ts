@@ -37,6 +37,7 @@ export function usePreloadAssets(): PreloadAssetsResult {
 
         // Preload key images essential for initial presentation
         const criticalImages = [
+          '/assets/imgs/loader-flower.jpg',
           '/assets/imgs/home-back.jpg',
           '/assets/imgs/logo-rb-cyber.svg',
           '/assets/imgs/signature.svg',

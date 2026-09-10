@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Navbar, Footer, Loader } from './components/layout';
 import { HomeSection, WorkSection, SkillsSection } from './components/sections';
 import { CursorDot, ParticleBackground } from './components/ui';
@@ -17,7 +17,7 @@ export default function App() {
     sectionIds: SECTION_IDS,
   });
 
-  const handleNavigate = (targetId: string) => {
+  const handleNavigate = useCallback((targetId: string) => {
     if (targetId === 'home') {
       window.scrollTo({
         top: 0,
@@ -38,7 +38,7 @@ export default function App() {
       });
       setActiveSection(resolvedId);
     }
-  };
+  }, [setActiveSection]);
 
   return (
     <>

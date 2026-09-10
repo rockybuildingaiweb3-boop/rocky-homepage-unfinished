@@ -38,6 +38,11 @@ export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone, onFinish 
 
   const startTimeRef = useRef<number>(performance.now());
   const reqAnimRef = useRef<number | null>(null);
+  const progressRef = useRef<number>(progress);
+
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
 
   // Check if session has already experienced the ceremony
   useEffect(() => {
@@ -73,11 +78,11 @@ export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone, onFinish 
         setPhase('signature');
         const drawNorm = (elapsed - 400) / 1400; // 0 -> 1
         // Harmonize time-based stroke drawing with actual network progress
-        const networkNorm = Math.min(1, progress / 100);
+        const networkNorm = Math.min(1, progressRef.current / 100);
         const combined = Math.max(drawNorm, networkNorm * 0.95);
         setStrokeProgress(Math.min(1, combined));
       }
-      // 3. Stage 2: 1.8s - 2.5s (花亮起来 / Watercolor Tulip Blossom lights up)
+      // 3. Stage 2: 1.8s - 2.5s (花亮起来 / Studio Rose lights up)
       else if (elapsed < 2500) {
         setPhase('flower');
         setStrokeProgress(1);
@@ -103,7 +108,7 @@ export const Loader: React.FC<LoaderProps> = ({ progress, loadingDone, onFinish 
     return () => {
       if (reqAnimRef.current) cancelAnimationFrame(reqAnimRef.current);
     };
-  }, [progress, isExiting]);
+  }, [isExiting]);
 
   const handleCeremonyComplete = () => {
     try {

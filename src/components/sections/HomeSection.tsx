@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NebulaBackground } from './NebulaBackground';
-import { PetalDissolveCanvas } from './PetalDissolveCanvas';
 import { VISUAL_CONSTANTS } from '../../constants/visual';
 
 interface HomeSectionProps {
@@ -95,62 +94,75 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     }
 
     // Only start entrance stagger after artwork image is loaded or after brief safety delay
-    let timeoutId: NodeJS.Timeout;
+    const timeouts: (ReturnType<typeof setTimeout>)[] = [];
+
+    const schedule = (fn: () => void, delay: number) => {
+      timeouts.push(setTimeout(fn, delay));
+    };
 
     const startAwakening = () => {
       setNebulaReady(true);
 
       if (word1Ref.current) {
-        setTimeout(() => {
-          word1Ref.current!.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
-          word1Ref.current!.style.opacity = '1';
+        schedule(() => {
+          if (word1Ref.current) {
+            word1Ref.current.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
+            word1Ref.current.style.opacity = '1';
+          }
         }, 160);
       }
 
       if (word2Ref.current) {
-        setTimeout(() => {
-          word2Ref.current!.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
-          word2Ref.current!.style.opacity = '1';
+        schedule(() => {
+          if (word2Ref.current) {
+            word2Ref.current.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
+            word2Ref.current.style.opacity = '1';
+          }
         }, 300);
       }
 
       if (signatureRef.current) {
-        setTimeout(() => {
-          signatureRef.current!.style.opacity = '1';
-          signatureRef.current!.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(-4deg)';
+        schedule(() => {
+          if (signatureRef.current) {
+            signatureRef.current.style.opacity = '1';
+            signatureRef.current.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(-4deg)';
+          }
         }, 440);
       }
 
       if (occRef.current) {
-        setTimeout(() => {
-          occRef.current!.style.opacity = '1';
-          occRef.current!.style.transform = 'translate3d(0, 0, 0)';
+        schedule(() => {
+          if (occRef.current) {
+            occRef.current.style.opacity = '1';
+            occRef.current.style.transform = 'translate3d(0, 0, 0)';
+          }
         }, 620);
       }
 
       if (mottoRef.current) {
-        setTimeout(() => {
-          mottoRef.current!.style.opacity = '1';
-          mottoRef.current!.style.transform = 'translate3d(0, 0, 0)';
+        schedule(() => {
+          if (mottoRef.current) {
+            mottoRef.current.style.opacity = '1';
+            mottoRef.current.style.transform = 'translate3d(0, 0, 0)';
+          }
         }, 720);
       }
 
       if (scrollCtaRef.current) {
-        setTimeout(() => {
-          scrollCtaRef.current!.style.opacity = '1';
-          scrollCtaRef.current!.style.transform = 'translate3d(0, 0, 0)';
+        schedule(() => {
+          if (scrollCtaRef.current) {
+            scrollCtaRef.current.style.opacity = '1';
+            scrollCtaRef.current.style.transform = 'translate3d(0, 0, 0)';
+          }
         }, 840);
       }
     };
 
-    if (imageLoaded) {
-      timeoutId = setTimeout(startAwakening, 120);
-    } else {
-      // Fallback in case image takes time or is already in cache
-      timeoutId = setTimeout(startAwakening, 600);
-    }
+    schedule(startAwakening, imageLoaded ? 120 : 600);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      timeouts.forEach((id) => clearTimeout(id));
+    };
   }, [imageLoaded]);
 
   // Multi-tier parallax offsets for deep dimensional separation
@@ -179,7 +191,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     <section
       id="home"
       ref={sectionRef}
-      className="relative w-full h-screen overflow-visible box-border select-none flex items-center justify-center transition-colors duration-500"
+      className="relative w-full h-screen overflow-hidden box-border select-none flex items-center justify-center transition-colors duration-500"
       style={{
         backgroundColor: dayToNightProgress > 0.45 ? '#06040f' : '#ebe8e1',
       }}
@@ -212,13 +224,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           }`}
         />
       </div>
-
-      {/* ─────────────────────────────────────────────────────────────
-          LAYER 1.2: PETAL PARTICLE DISSOLUTION (花瓣粒子化)
-          As user scrolls towards Studio, watercolor petals lift off the garden,
-          swirl in the wind, and disintegrate into luminous stardust.
-         ───────────────────────────────────────────────────────────── */}
-      <PetalDissolveCanvas progress={dayToNightProgress} />
 
       {/* ─────────────────────────────────────────────────────────────
           LAYER 1.5 & LAYER 2: CELESTIAL ACCRETION DISK NEBULA

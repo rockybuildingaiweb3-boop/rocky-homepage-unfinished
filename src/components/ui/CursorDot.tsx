@@ -6,22 +6,22 @@ interface CursorDotProps {
   disabled?: boolean;
 }
 
-type CursorMode = 'default' | 'pointer' | 'drag' | 'view' | 'link';
-
 export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled = false }) => {
-  const [mode, setMode] = useState<CursorMode>('default');
-  const [isVisible, setIsVisible] = useState(false);
+  const [hover, setHover] = useState(false);
   const [introDisabled, setIntroDisabled] = useState(true);
 
+  // Core bead ref & trailing aura ref
   const coreRef = useRef<HTMLDivElement>(null);
   const auraRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
+  const trail1Ref = useRef<HTMLDivElement>(null);
+  const trail2Ref = useRef<HTMLDivElement>(null);
 
   const targetPos = useRef({ x: -100, y: -100 });
   const corePos = useRef({ x: -100, y: -100 });
   const auraPos = useRef({ x: -100, y: -100 });
+  const trail1Pos = useRef({ x: -100, y: -100 });
+  const trail2Pos = useRef({ x: -100, y: -100 });
   const animFrameId = useRef<number | null>(null);
-  const isRunningRef = useRef<boolean>(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIntroDisabled(false), 300);
@@ -31,53 +31,26 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
   useEffect(() => {
     if (isMobile) return;
 
-    // Check reduced motion
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) return;
-
-    const startLoopIfNeeded = () => {
-      if (!isRunningRef.current) {
-        isRunningRef.current = true;
-        animFrameId.current = requestAnimationFrame(animate);
-      }
-    };
-
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isVisible) setIsVisible(true);
-
       const target = e.target as HTMLElement | null;
-      let detectedMode: CursorMode = 'default';
-
+      let cursor = 'default';
       if (target) {
-        const explicitCursor = target.closest('[data-cursor]')?.getAttribute('data-cursor');
-        if (explicitCursor === 'view') {
-          detectedMode = 'view';
-        } else if (explicitCursor === 'drag') {
-          detectedMode = 'drag';
-        } else if (target.closest('a')) {
-          detectedMode = 'link';
-        } else {
-          const computedCursor = window.getComputedStyle(target).cursor;
-          if (computedCursor === 'pointer' || target.closest('.clickable') !== null || target.closest('button')) {
-            detectedMode = 'pointer';
-          }
-        }
+        cursor = window.getComputedStyle(target).cursor;
       }
+      const isPointer =
+        cursor === 'pointer' ||
+        target?.closest('button, a, [role="button"], .clickable, .cursor-pointer, .interactive') !== null;
+      setHover(isPointer);
 
-      setMode(detectedMode);
-
-      // Mild magnetic pull on clickable items
-      if ((detectedMode === 'pointer' || detectedMode === 'link') && target) {
-        const interactiveEl = target.closest('.clickable') || target.closest('button') || target.closest('a') || target;
+      if (isPointer && target) {
+        const interactiveEl =
+          target.closest('.clickable, button, a, [role="button"], .interactive') || target;
         const rect = interactiveEl.getBoundingClientRect();
         const midX = rect.left + rect.width / 2;
         const midY = rect.top + rect.height / 2;
         targetPos.current = {
-          x: midX + (e.clientX - midX) * 0.45,
-          y: midY + (e.clientY - midY) * 0.45,
+          x: midX + (midX - e.clientX) * 0.15,
+          y: midY + (midY - e.clientY) * 0.15,
         };
       } else {
         targetPos.current = {
@@ -85,137 +58,124 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
           y: e.clientY,
         };
       }
-
-      startLoopIfNeeded();
     };
 
-    const handleMouseLeave = () => {
-      setIsVisible(false);
-    };
-
-    const handleMouseEnter = () => {
-      setIsVisible(true);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
+    window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
-      const dxCore = targetPos.current.x - corePos.current.x;
-      const dyCore = targetPos.current.y - corePos.current.y;
-      const dxAura = targetPos.current.x - auraPos.current.x;
-      const dyAura = targetPos.current.y - auraPos.current.y;
+      // 1. Core snappy follower (fast response)
+      const tCore = 0.52;
+      corePos.current.x += easeInOutQuad(tCore) * (targetPos.current.x - corePos.current.x);
+      corePos.current.y += easeInOutQuad(tCore) * (targetPos.current.y - corePos.current.y);
 
-      // 1. Core snappy follower
-      const tCore = 0.45;
-      corePos.current.x += easeInOutQuad(tCore) * dxCore;
-      corePos.current.y += easeInOutQuad(tCore) * dyCore;
+      // 2. Trailing chromatic halo follower (organic celestial lag)
+      const tAura = 0.18;
+      auraPos.current.x += easeInOutQuad(tAura) * (targetPos.current.x - auraPos.current.x);
+      auraPos.current.y += easeInOutQuad(tAura) * (targetPos.current.y - auraPos.current.y);
 
-      // 2. Aura follower
-      const tAura = 0.22;
-      auraPos.current.x += easeInOutQuad(tAura) * dxAura;
-      auraPos.current.y += easeInOutQuad(tAura) * dyAura;
+      // 3. Stardust trail particle 1 (lagging further behind)
+      const tTrail1 = 0.11;
+      trail1Pos.current.x += easeInOutQuad(tTrail1) * (targetPos.current.x - trail1Pos.current.x);
+      trail1Pos.current.y += easeInOutQuad(tTrail1) * (targetPos.current.y - trail1Pos.current.y);
 
+      // 4. Stardust trail particle 2 (ethereal comet tail)
+      const tTrail2 = 0.07;
+      trail2Pos.current.x += easeInOutQuad(tTrail2) * (targetPos.current.x - trail2Pos.current.x);
+      trail2Pos.current.y += easeInOutQuad(tTrail2) * (targetPos.current.y - trail2Pos.current.y);
+
+      // Apply GPU translate3d transforms
       if (coreRef.current) {
         coreRef.current.style.transform = `translate3d(${corePos.current.x}px, ${corePos.current.y}px, 0px)`;
       }
       if (auraRef.current) {
         auraRef.current.style.transform = `translate3d(${auraPos.current.x}px, ${auraPos.current.y}px, 0px)`;
       }
-
-      // Check if settled (idle) to conserve CPU/GPU
-      const isSettled =
-        Math.abs(dxCore) < 0.1 &&
-        Math.abs(dyCore) < 0.1 &&
-        Math.abs(dxAura) < 0.1 &&
-        Math.abs(dyAura) < 0.1;
-
-      if (isSettled) {
-        isRunningRef.current = false;
-        animFrameId.current = null;
-      } else {
-        animFrameId.current = requestAnimationFrame(animate);
+      if (trail1Ref.current) {
+        trail1Ref.current.style.transform = `translate3d(${trail1Pos.current.x}px, ${trail1Pos.current.y}px, 0px)`;
       }
+      if (trail2Ref.current) {
+        trail2Ref.current.style.transform = `translate3d(${trail2Pos.current.x}px, ${trail2Pos.current.y}px, 0px)`;
+      }
+
+      animFrameId.current = requestAnimationFrame(animate);
     };
+
+    animFrameId.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
       if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
     };
-  }, [isMobile, isVisible]);
+  }, [isMobile]);
 
   if (isMobile) return null;
 
-  const isDisabled = introDisabled || disabled || !isVisible;
-
-  const isInteractive = mode === 'pointer' || mode === 'link';
-  const isSpecial = mode === 'drag' || mode === 'view';
+  const isDisabled = introDisabled || disabled;
 
   return (
     <>
-      {/* Precision Aura Ring */}
-      <div
-        ref={auraRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform"
-        style={{ opacity: isDisabled ? 0 : 1, transition: 'opacity 0.25s ease' }}
-      >
+      {/* Trail 2 - 最远拖尾 (Ethereal Violet Stardust) */}
+      <div ref={trail2Ref} className="fixed top-0 left-0 pointer-events-none z-[9997] will-change-transform">
         <div
-          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out flex items-center justify-center"
+          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isSpecial ? '64px' : isInteractive ? '42px' : '26px',
-            height: isSpecial ? '64px' : isInteractive ? '42px' : '26px',
-            background: isSpecial
-              ? 'rgba(19, 13, 33, 0.7)'
-              : isInteractive
-              ? 'rgba(216, 180, 254, 0.08)'
-              : 'transparent',
-            border: isSpecial
-              ? '1px solid rgba(216, 180, 254, 0.6)'
-              : isInteractive
-              ? '1px solid rgba(255, 255, 255, 0.5)'
-              : '1px solid rgba(255, 255, 255, 0.25)',
-            boxShadow: isSpecial
-              ? '0 0 20px rgba(168, 85, 247, 0.4), inset 0 0 12px rgba(168, 85, 247, 0.2)'
-              : isInteractive
-              ? '0 0 12px rgba(216, 180, 254, 0.35)'
-              : 'none',
-            backdropFilter: isSpecial ? 'blur(4px)' : 'none',
+            width: isDisabled ? 0 : hover ? '20px' : '15px',
+            height: isDisabled ? 0 : hover ? '20px' : '15px',
+            opacity: isDisabled ? 0 : hover ? 0.65 : 0.45,
+            background: 'radial-gradient(circle, rgba(168,85,247,0.95) 0%, rgba(139,92,246,0.5) 50%, transparent 80%)',
+            filter: 'blur(2.5px)',
           }}
-        >
-          {/* Contextual Tag Label inside aura for special states */}
-          {isSpecial && (
-            <span
-              ref={labelRef}
-              className="font-mono text-[9px] tracking-[0.2em] uppercase text-white/90 select-none pointer-events-none"
-            >
-              {mode === 'drag' ? '↔ drag' : 'view'}
-            </span>
-          )}
-        </div>
+        />
       </div>
 
-      {/* Center Core Micro-Dot */}
-      <div
-        ref={coreRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform"
-        style={{ opacity: isDisabled ? 0 : isSpecial ? 0 : 1, transition: 'opacity 0.2s ease' }}
-      >
+      {/* Trail 1 - 近拖尾 (Luminous Purple Core) */}
+      <div ref={trail1Ref} className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform">
         <div
-          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-150 ease-out"
+          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
           style={{
-            width: isInteractive ? '7px' : '5px',
-            height: isInteractive ? '7px' : '5px',
-            backgroundColor: '#ffffff',
-            boxShadow: isInteractive
-              ? '0 0 8px 2px rgba(255, 255, 255, 0.9), 0 0 14px 3px rgba(216, 180, 254, 0.6)'
-              : '0 0 4px 1px rgba(255, 255, 255, 0.7)',
+            width: isDisabled ? 0 : hover ? '26px' : '19px',
+            height: isDisabled ? 0 : hover ? '26px' : '19px',
+            opacity: isDisabled ? 0 : hover ? 0.8 : 0.6,
+            background: 'radial-gradient(circle, rgba(216,180,254,0.98) 0%, rgba(168,85,247,0.7) 45%, rgba(99,102,241,0.3) 75%, transparent 100%)',
+            filter: 'blur(1.8px)',
+          }}
+        />
+      </div>
+
+      {/* Aura 光晕 (Chromatic Celestial Halo) */}
+      <div ref={auraRef} className="fixed top-0 left-0 pointer-events-none z-[9998] will-change-transform">
+        <div
+          className="rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out"
+          style={{
+            width: isDisabled ? 0 : hover ? '88px' : '58px',
+            height: isDisabled ? 0 : hover ? '88px' : '58px',
+            opacity: isDisabled ? 0 : hover ? 1 : 0.85,
+            background: hover
+              ? 'radial-gradient(circle, rgba(255,255,255,0.45) 0%, rgba(216,180,254,0.55) 30%, rgba(168,85,247,0.35) 60%, transparent 100%)'
+              : 'radial-gradient(circle, rgba(192,132,252,0.45) 0%, rgba(139,92,246,0.3) 40%, rgba(56,189,248,0.15) 70%, transparent 100%)',
+            boxShadow: hover
+              ? '0 0 36px 10px rgba(192,132,252,0.85), 0 0 65px 18px rgba(147,51,234,0.45)'
+              : '0 0 24px 6px rgba(168,85,247,0.55), 0 0 45px 12px rgba(99,102,241,0.3)',
+            border: hover ? '1.5px solid rgba(230,210,255,0.7)' : '1px solid rgba(255,255,255,0.3)',
+          }}
+        />
+      </div>
+
+      {/* Core 核心 (Luminous Diamond Point) */}
+      <div ref={coreRef} className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform">
+        <div
+          className="rounded-full transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2"
+          style={{
+            width: isDisabled ? 0 : hover ? '18px' : '11px',
+            height: isDisabled ? 0 : hover ? '18px' : '11px',
+            opacity: isDisabled ? 0 : 1,
+            backgroundColor: hover ? '#fdf4ff' : '#ffffff',
+            boxShadow: hover
+              ? `0 0 14px 4px #fff, 0 0 32px 10px rgba(216,180,254,0.95), 0 0 54px 16px rgba(168,85,247,0.6)`
+              : `0 0 10px 2px #fff, 0 0 20px 6px rgba(192,132,252,0.75), 0 0 36px 10px rgba(139,92,246,0.4)`,
           }}
         />
       </div>
     </>
   );
 };
-

@@ -25,32 +25,41 @@ export function useScrollSpy({
   const [activeSection, setActiveSection] = useState<string>(sectionIds[0] || 'home');
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleScrollUpdate = () => {
-      const scrollPos =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        scrollContainerRef?.current?.scrollTop ||
-        0;
-      setScrollY(scrollPos);
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const scrollPos =
+          window.scrollY ||
+          document.documentElement.scrollTop ||
+          scrollContainerRef?.current?.scrollTop ||
+          0;
+        setScrollY(scrollPos);
 
-      const windowH = window.innerHeight;
+        const windowH = window.innerHeight;
 
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el) {
-          const top = el.offsetTop - windowH * offsetRatio;
-          if (scrollPos >= top) {
-            setActiveSection(id);
-            break;
+        for (const id of sectionIds) {
+          const el = document.getElementById(id);
+          if (el) {
+            const top = el.offsetTop - windowH * offsetRatio;
+            if (scrollPos >= top) {
+              setActiveSection(id);
+              break;
+            }
           }
         }
-      }
+      });
     };
 
     window.addEventListener('scroll', handleScrollUpdate, { passive: true });
     handleScrollUpdate();
 
-    return () => window.removeEventListener('scroll', handleScrollUpdate);
+    return () => {
+      window.removeEventListener('scroll', handleScrollUpdate);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [sectionIds, scrollContainerRef, offsetRatio]);
 
   return { scrollY, setScrollY, activeSection, setActiveSection };

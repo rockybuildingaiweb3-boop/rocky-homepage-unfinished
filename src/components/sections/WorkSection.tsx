@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { getGPUTier } from 'detect-gpu';
 import { WorkItem } from '../../types';
-import { lerp } from '../../utils';
+import { lerp, isWebGLAvailable } from '../../utils';
 import { ImageRenderer } from '../../effects/work-slider/renderer';
 
 interface WorkSectionProps {
@@ -184,8 +184,8 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
     const loop = () => {
       if (listRef.current) {
         if (currentActive < 0) {
-          let endPoint = listRef.current.offsetWidth - document.body.clientWidth;
-          if (endPoint < 0) endPoint = listRef.current.offsetWidth;
+          const totalWidth = Math.max(listRef.current.scrollWidth, listRef.current.offsetWidth);
+          const endPoint = Math.max(0, totalWidth - window.innerWidth);
           // Boundary checks
           if (sliderState.current.targetPosition > 0) {
             sliderState.current.targetPosition = 0;
@@ -265,9 +265,9 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
         const gpuTier = await getGPUTier();
         if (isCancelled) return;
 
-        // Exactly matching Musab-Hassan's condition: tier >= 2, not mobile, fps >= 30
+        // Allow Three.js on WebGL-capable desktop devices
         const canRunThree =
-          gpuTier.tier >= 2 && !gpuTier.isMobile && (gpuTier.fps ?? 60) >= 30;
+          (gpuTier.tier >= 1 || isWebGLAvailable()) && !gpuTier.isMobile;
 
         if (canRunThree && mountContainer) {
           const validImages = imgRefs.current.filter(
@@ -292,30 +292,9 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
 
     const timer = setTimeout(initImageRenderer, 150);
 
-    const container = containerRef.current;
-    let observer: IntersectionObserver | null = null;
-    if (container) {
-      observer = new IntersectionObserver(
-        ([entry]) => {
-          if (rendererRef.current) {
-            if (entry.isIntersecting) {
-              rendererRef.current.resume();
-            } else {
-              rendererRef.current.pause();
-            }
-          }
-        },
-        { threshold: 0.05 }
-      );
-      observer.observe(container);
-    }
-
     return () => {
       isCancelled = true;
       clearTimeout(timer);
-      if (observer) {
-        observer.disconnect();
-      }
       if (rendererRef.current) {
         rendererRef.current.destroy();
         rendererRef.current = null;
@@ -422,7 +401,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
                       isActive ? 'active' : ''
                     } ${isAmbient ? 'ambient' : ''}`}
                     onClick={() => {
-                      if (!isDragging && dragDistanceRef.current < 6) {
+                      if (dragDistanceRef.current < 8) {
                         toggleActiveItem(i);
                       }
                     }}

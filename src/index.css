@@ -309,6 +309,7 @@ ul.work-list {
   flex-direction: row;
   align-items: center;
   height: 75vh;
+  width: max-content;
   min-width: min-content;
   opacity: 1;
   transition: opacity 0.5s ease;
