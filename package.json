@@ -8,8 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit",
-    "validate:skills": "node scripts/validate-icons.mjs"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
