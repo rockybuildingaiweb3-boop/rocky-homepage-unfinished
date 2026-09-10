@@ -14,11 +14,11 @@ export interface TechLogoProps {
 /**
  * TechLogo
  * 
- * Clean Presentation Component for Technical Skill Logos:
+ * Presentation Component for Technical Skill Logos:
  * 1. Resolves icons via local package simple-icons & verified local SVGs (no flaky CDN dependency).
  * 2. Strictly adheres to official brand paths without custom hand-drawn/hallucinated SVGs.
  * 3. Supports controlled monochrome tinting via `color` prop or uses official brand hex.
- * 4. Gracefully displays standardized monogram badge for conceptual/unbranded skills.
+ * 4. Renders intentional, high-contrast engineering specification badges for unbranded technologies.
  */
 export const TechLogo: React.FC<TechLogoProps> = ({
   id = '',
@@ -71,10 +71,24 @@ export const TechLogo: React.FC<TechLogoProps> = ({
     );
   }
 
-  // 3. Controlled fallback: clean standardized monogram badge without fabricating fake logos
+  // 3. Approved Neutral Technical Specification Badge for unbranded/standard concepts
+  if (resolved.kind === 'neutral') {
+    return (
+      <span
+        className={`inline-flex items-center justify-center rounded-md bg-white/[0.05] text-white/80 font-mono font-medium text-[11px] tracking-wider select-none shrink-0 border border-white/20 shadow-inner ${className}`}
+        style={size ? { width: `${size}px`, height: `${size}px` } : undefined}
+        title={`[Technical Standard / Specification] ${displayName}: ${resolved.neutralReason || ''}`}
+        aria-label={`Specification: ${displayName}`}
+      >
+        {resolved.fallbackText}
+      </span>
+    );
+  }
+
+  // 4. Defensive fallback
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-lg bg-white/10 text-white/90 font-mono font-bold text-xs select-none shrink-0 border border-white/10 ${className}`}
+      className={`inline-flex items-center justify-center rounded-md bg-white/10 text-white/70 font-mono text-xs select-none shrink-0 border border-white/10 ${className}`}
       style={size ? { width: `${size}px`, height: `${size}px` } : undefined}
       title={displayName}
     >
