@@ -217,3 +217,43 @@ export function resolveSkillIcon(
     fallbackText,
   };
 }
+
+export interface IconValidationResult {
+  valid: boolean;
+  kind: 'svg-path' | 'local-svg' | 'fallback';
+  error?: string;
+}
+
+/**
+ * Diagnostic validator to verify that an icon identifier resolves properly
+ * and does not produce broken paths or missing assets.
+ */
+export function validateSkillIcon(
+  id: string,
+  slug?: string,
+  name?: string
+): IconValidationResult {
+  if (!id) {
+    return { valid: false, kind: 'fallback', error: 'Skill id is required' };
+  }
+  const resolved = resolveSkillIcon(id, slug, name);
+  if (resolved.kind === 'svg-path') {
+    if (!resolved.path || resolved.path.length < 10) {
+      return { valid: false, kind: resolved.kind, error: 'Empty or invalid SVG path' };
+    }
+    return { valid: true, kind: resolved.kind };
+  }
+  if (resolved.kind === 'local-svg') {
+    if (!resolved.url) {
+      return { valid: false, kind: resolved.kind, error: 'Missing local SVG url' };
+    }
+    return { valid: true, kind: resolved.kind };
+  }
+  if (resolved.kind === 'fallback') {
+    if (!resolved.fallbackText || resolved.fallbackText.length < 2) {
+      return { valid: false, kind: resolved.kind, error: 'Invalid fallback text monogram' };
+    }
+    return { valid: true, kind: resolved.kind };
+  }
+  return { valid: false, kind: 'fallback', error: 'Unrecognized resolution kind' };
+}

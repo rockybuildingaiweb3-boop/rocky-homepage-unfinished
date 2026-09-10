@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { SiteData, WorkItem } from '../types';
-import { fetchJsonData, loadImage, devMsg } from '../utils';
+import { loadStudioData } from '../data/studio/loader';
+import { loadSiteData } from '../data/site/loader';
+import { loadImage, devMsg } from '../utils';
 
 export interface PreloadAssetsResult {
   loading: boolean;
@@ -26,8 +28,8 @@ export function usePreloadAssets(): PreloadAssetsResult {
     async function loadPortfolio() {
       try {
         const [wData, sData] = await Promise.all([
-          fetchJsonData<WorkItem[]>('/data/work-data.json').catch(() => []),
-          fetchJsonData<SiteData>('/data/data.json').catch(() => ({ availablity_date: '' })),
+          loadStudioData(),
+          loadSiteData(),
         ]);
 
         if (!isMounted) return;
