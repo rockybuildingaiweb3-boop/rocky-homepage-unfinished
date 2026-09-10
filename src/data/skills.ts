@@ -75,619 +75,1183 @@ export const PROJECT_NAMES: Record<
 };
 
 export const SKILLS_DATA: SkillItem[] = [
-  // ─── ROW 1: Core Frontend & Kinetic Motion (10) ───
   {
-    id: 'typescript',
-    name: 'TypeScript',
-    slug: 'typescript',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Static Typing & Tooling',
-    brandColor: '#3178C6',
-    shortDescription: 'Strict structural contracts saving lives before production runtime 🛡️',
-    positioning: 'Strict Type System & Advanced Generics Architecture',
-    relatedProjects: ['chronos', 'aurora', 'marymount'],
+    "id": "typescript",
+    "name": "TypeScript",
+    "slug": "typescript",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Static Typing & Tooling",
+    "brandColor": "#3178C6",
+    "shortDescription": "Strict structural contracts saving lives before production runtime 🛡️",
+    "positioning": "Strict Type System & Advanced Generics Architecture",
+    "relatedProjects": [
+      "chronos",
+      "aurora",
+      "marymount"
+    ]
   },
   {
-    id: 'javascript',
-    name: 'JavaScript',
-    slug: 'javascript',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Language Core',
-    brandColor: '#F7DF1E',
-    shortDescription: 'The asynchronous event-driven backbone of the modern web 🌐',
-    positioning: 'Modern ECMAScript & Asynchronous Event Systems',
-    relatedProjects: ['v1', 'lcml'],
+    "id": "javascript",
+    "name": "JavaScript",
+    "slug": "javascript",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Language Core",
+    "brandColor": "#F7DF1E",
+    "shortDescription": "The asynchronous event-driven backbone of the modern web 🌐",
+    "positioning": "Modern ECMAScript & Asynchronous Event Systems",
+    "relatedProjects": [
+      "lcml",
+      "grillzzy",
+      "v1"
+    ]
   },
   {
-    id: 'react',
-    name: 'React',
-    slug: 'react',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'UI Architecture',
-    brandColor: '#61DAFB',
-    shortDescription: 'UI = f(state), declared once, rendered everywhere ⚛️✨',
-    positioning: 'Component Composition & Concurrent Rendering State',
-    relatedProjects: ['chronos', 'marymount', 'aurora'],
+    "id": "react",
+    "name": "React 19",
+    "slug": "react",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Component Architecture",
+    "brandColor": "#61DAFB",
+    "shortDescription": "UI = f(state), declared once, rendered everywhere with concurrent fiber ⚛️",
+    "positioning": "Concurrent React Architecture & Custom Hooks Ecosystem",
+    "relatedProjects": [
+      "chronos",
+      "aurora",
+      "marymount",
+      "lcml"
+    ]
   },
   {
-    id: 'nextjs',
-    name: 'Next.js',
-    slug: 'nextdotjs',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Full-Stack Framework',
-    brandColor: '#FFFFFF',
-    shortDescription: 'Full-stack React Server Components and Edge routing at light speed ⚡',
-    positioning: 'Server-Side Rendering & Edge Network Deployments',
-    relatedProjects: ['chronos', 'lcml'],
+    "id": "nextdotjs",
+    "name": "Next.js",
+    "slug": "nextdotjs",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Full-Stack Framework",
+    "brandColor": "#FFFFFF",
+    "shortDescription": "Full-stack React Server Components and edge routing at light speed ⚡",
+    "positioning": "Server Actions, Streaming SSR & Edge Optimization",
+    "relatedProjects": [
+      "marymount",
+      "chronos"
+    ]
   },
   {
-    id: 'svelte',
-    name: 'Svelte',
-    slug: 'svelte',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Compiler Framework',
-    brandColor: '#FF3E00',
-    shortDescription: 'Compile-time reactive bindings with zero virtual DOM overhead 🚀',
-    positioning: 'Disappearing Framework & Run-Time Reactivity',
-    relatedProjects: ['aurora'],
+    "id": "svelte",
+    "name": "Svelte 5",
+    "slug": "svelte",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Reactive Compiler",
+    "brandColor": "#FF3E00",
+    "shortDescription": "Compile-time reactive bindings with zero virtual DOM overhead 🚀",
+    "positioning": "Svelte Runes & Fine-Grained Reactive Primitives",
+    "relatedProjects": [
+      "v1",
+      "aurora"
+    ]
   },
   {
-    id: 'tailwind',
-    name: 'Tailwind CSS',
-    slug: 'tailwindcss',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Design Systems',
-    brandColor: '#06B6D4',
-    shortDescription: 'Utility classes hitting different fr fr 🌪️🔥',
-    positioning: 'Token-Driven Utility Design & Fluid Typography Systems',
-    relatedProjects: ['chronos', 'grillzzy', 'v1'],
+    "id": "tailwindcss",
+    "name": "Tailwind CSS",
+    "slug": "tailwindcss",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Utility-First Styling",
+    "brandColor": "#06B6D4",
+    "shortDescription": "Utility design tokens composing responsive layouts without leaving HTML 🌪️",
+    "positioning": "Design Token Systems & Kinetic Responsive Layouts",
+    "relatedProjects": [
+      "marymount",
+      "lcml",
+      "grillzzy"
+    ]
   },
   {
-    id: 'motion',
-    name: 'Framer Motion',
-    slug: 'framer',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Motion Physics',
-    brandColor: '#0055FF',
-    shortDescription: 'Silky spring physics and fluid gesture choreography 🪄',
-    positioning: 'Spring Physics Choreography & Spatial Layout Transitions',
-    relatedProjects: ['aurora', 'v1'],
+    "id": "framer",
+    "name": "Framer Motion",
+    "slug": "framer",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Kinetic Motion",
+    "brandColor": "#0055FF",
+    "shortDescription": "Silky spring physics and layout projection choreography 🪄",
+    "positioning": "Spring Physics Choreography & Micro-Interactions",
+    "relatedProjects": [
+      "chronos",
+      "v1",
+      "aurora"
+    ]
   },
   {
-    id: 'gsap',
-    name: 'GSAP',
-    slug: 'greensock',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Timeline Orchestration',
-    brandColor: '#88CE02',
-    shortDescription: 'High-performance timeline orchestration hitting solid 60fps 🎬',
-    positioning: 'Hardware-Accelerated Timeline Sequences & Kinetic Triggers',
-    relatedProjects: ['aurora', 'chronos'],
+    "id": "greensock",
+    "name": "GSAP",
+    "slug": "greensock",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Animation Engine",
+    "brandColor": "#88CE02",
+    "shortDescription": "High-performance timeline orchestration hitting solid 60fps 🎬",
+    "positioning": "ScrollTrigger Timelines & Kinetic Canvas Animations",
+    "relatedProjects": [
+      "aurora",
+      "chronos"
+    ]
   },
   {
-    id: 'html5',
-    name: 'HTML5',
-    slug: 'html5',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Semantic Foundations',
-    brandColor: '#E34F26',
-    shortDescription: 'Semantic structuring of digital information for the global web 📄',
-    positioning: 'Accessible Semantic Hierarchy & Canvas 2D/3D Contexts',
-    relatedProjects: ['v1', 'grillzzy'],
+    "id": "html5",
+    "name": "HTML5",
+    "slug": "html5",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Semantic Core",
+    "brandColor": "#E34F26",
+    "shortDescription": "Semantic structuring of digital information for accessibility & the global web 📄",
+    "positioning": "Semantic Web Standards, WAI-ARIA & Canvas Integration",
+    "relatedProjects": [
+      "marymount",
+      "lcml",
+      "grillzzy"
+    ]
   },
   {
-    id: 'vite',
-    name: 'Vite',
-    slug: 'vite',
-    row: 1,
-    rowTitle: 'Core Frontend & Kinetic Motion',
-    category: 'Build Tooling',
-    brandColor: '#646CFF',
-    shortDescription: 'Instantaneous hot module replacement and lightning bundle builds ⚡',
-    positioning: 'Native ES Modules Bundler & Lightning Build Pipeline',
-    relatedProjects: ['chronos', 'aurora'],
-  },
-
-  // ─── ROW 2: 3D Spatial Computing & Graphics (10) ───
-  {
-    id: 'threejs',
-    name: 'Three.js',
-    slug: 'threedotjs',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: '3D Web Engine',
-    brandColor: '#FFFFFF',
-    shortDescription: 'Bending WebGL pixels into dimensional cosmic reality 🌌',
-    positioning: 'Scene Graph Management & Real-Time Mathematical Meshes',
-    relatedProjects: ['aurora', 'v1'],
+    "id": "vite",
+    "name": "Vite",
+    "slug": "vite",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Build Tooling",
+    "brandColor": "#646CFF",
+    "shortDescription": "Instantaneous hot module replacement and lightning bundle builds ⚡",
+    "positioning": "ESM Dev Server & Rollup Production Optimization",
+    "relatedProjects": [
+      "chronos",
+      "aurora",
+      "v1"
+    ]
   },
   {
-    id: 'webgl',
-    name: 'WebGL',
-    slug: 'webgl',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Rasterization Pipeline',
-    brandColor: '#990000',
-    shortDescription: 'Low-level programmable GPU pipeline for infinite visual depth 🎮',
-    positioning: 'Direct Hardware Shader Pipeline & Custom Geometry Buffers',
-    relatedProjects: ['aurora'],
+    "id": "vuedotjs",
+    "name": "Vue.js",
+    "slug": "vuedotjs",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Progressive Framework",
+    "brandColor": "#4FC08D",
+    "shortDescription": "Intuitive Composition API and reactive reactivity system 💚",
+    "positioning": "Single-File Components & Pinia State Orchestration",
+    "relatedProjects": [
+      "grillzzy",
+      "lcml"
+    ]
   },
   {
-    id: 'webgpu',
-    name: 'WebGPU',
-    slug: 'webgpu',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Compute & Next-Gen Graphics',
-    brandColor: '#005A9C',
-    shortDescription: 'Next-generation compute shaders and high-throughput graphics ⚡',
-    positioning: 'Modern GPU Compute Shaders & Low-Overhead Rendering Passes',
-    relatedProjects: ['aurora'],
+    "id": "astro",
+    "name": "Astro",
+    "slug": "astro",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Islands Architecture",
+    "brandColor": "#BC52EE",
+    "shortDescription": "Zero-JS by default with dynamic island hydration 🚀",
+    "positioning": "Content-Driven Static Site Generation & Island Hydration",
+    "relatedProjects": [
+      "marymount",
+      "v1"
+    ]
   },
   {
-    id: 'opengl',
-    name: 'OpenGL / GLSL',
-    slug: 'opengl',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Shader Mathematics',
-    brandColor: '#5586A4',
-    shortDescription: 'Mathematical fragment shaders sculptured with pure light 🔮',
-    positioning: 'Procedural Raymarching, Volumetric Clouds & Lighting Passes',
-    relatedProjects: ['aurora', 'chronos'],
+    "id": "nuxt",
+    "name": "Nuxt",
+    "slug": "nuxt",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Universal Framework",
+    "brandColor": "#00DC82",
+    "shortDescription": "Hybrid rendering with auto-imports and Nitro server engine 🟢",
+    "positioning": "Vue-Powered Full-Stack Architecture & Universal Rendering",
+    "relatedProjects": [
+      "lcml"
+    ]
   },
   {
-    id: 'blender',
-    name: 'Blender 3D',
-    slug: 'blender',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Spatial Modeling',
-    brandColor: '#F5792A',
-    shortDescription: 'High-fidelity 3D modeling, UV unwrapping & spatial assets 📐',
-    positioning: 'Hard-Surface Mesh Topology, Lighting & Texture Baking',
-    relatedProjects: ['aurora'],
+    "id": "sass",
+    "name": "Sass / SCSS",
+    "slug": "sass",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "CSS Preprocessor",
+    "brandColor": "#CC6699",
+    "shortDescription": "Modular CSS architecture with mixins, functions, and nested rules 🎨",
+    "positioning": "Scalable Design System Architectures & Math Variables",
+    "relatedProjects": [
+      "marymount",
+      "grillzzy"
+    ]
   },
   {
-    id: 'unity',
-    name: 'Unity Engine',
-    slug: 'unity',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Interactive Physics',
-    brandColor: '#FFFFFF',
-    shortDescription: 'Real-time interactive 3D physics and immersive world simulation 🕹️',
-    positioning: 'Real-Time Physics Simulation & WebAssembly Exports',
-    relatedProjects: ['kic'],
+    "id": "webpack",
+    "name": "Webpack",
+    "slug": "webpack",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Module Bundler",
+    "brandColor": "#8DD6F9",
+    "shortDescription": "The battle-tested asset graph compiler of modern frontend ecosystems 📦",
+    "positioning": "Custom Loaders, Code Splitting & Chunk Optimization",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
   },
   {
-    id: 'unrealengine',
-    name: 'Unreal Engine',
-    slug: 'unrealengine',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Cinematic Graphics',
-    brandColor: '#0E1128',
-    shortDescription: 'Photorealistic Lumen lighting and Nanite geometry for virtual cinema 🎥',
-    positioning: 'Volumetric Atmospherics & Lumen Global Illumination',
-    relatedProjects: ['aurora'],
+    "id": "turborepo",
+    "name": "Turborepo",
+    "slug": "turborepo",
+    "row": 1,
+    "rowTitle": "Core Frontend & Kinetic Motion",
+    "category": "Monorepo System",
+    "brandColor": "#EF4444",
+    "shortDescription": "High-speed build system with remote caching for complex multi-package setups 🏎️",
+    "positioning": "Monorepo Pipeline Caching & Multi-Package Architecture",
+    "relatedProjects": [
+      "chronos",
+      "aurora"
+    ]
   },
   {
-    id: 'vulkan',
-    name: 'Vulkan API',
-    slug: 'vulkan',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Explicit GPU Driver',
-    brandColor: '#AC162C',
-    shortDescription: 'Explicit hardware GPU command queues and multi-threaded throughput 🌋',
-    positioning: 'Explicit Low-Level Device Queues & Memory Synchronization',
-    relatedProjects: ['aurora'],
+    "id": "threedotjs",
+    "name": "Three.js",
+    "slug": "threedotjs",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "3D WebGL Library",
+    "brandColor": "#FFFFFF",
+    "shortDescription": "Bending WebGL pixels into dimensional cosmic reality and interactive scenes 🌌",
+    "positioning": "Custom Shader Materials, Scene Graph Choreography & Three.js R3F",
+    "relatedProjects": [
+      "aurora",
+      "chronos"
+    ]
   },
   {
-    id: 'webassembly',
-    name: 'WebAssembly',
-    slug: 'webassembly',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Binary Runtime',
-    brandColor: '#654FF0',
-    shortDescription: 'Near-native bytecode execution in the browser sandbox ⚡',
-    positioning: 'Near-Native Computational Physics & DSP Audio Synthesis',
-    relatedProjects: ['chronos'],
+    "id": "webgl",
+    "name": "WebGL",
+    "slug": "webgl",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Graphics API",
+    "brandColor": "#990000",
+    "shortDescription": "Low-level programmable GPU pipeline for infinite visual depth and post-processing 🎮",
+    "positioning": "Raw GLSL Shader Pipelines, Framebuffers & GPU Particle Compute",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'godotengine',
-    name: 'Godot Engine',
-    slug: 'godotengine',
-    row: 2,
-    rowTitle: '3D Spatial Computing & Graphics',
-    category: 'Lightweight 3D Engine',
-    brandColor: '#478CBF',
-    shortDescription: 'Lightweight node-based scene hierarchy and fast 3D web deploy 🤖',
-    positioning: 'Node-Tree Scene Architectures & Compact Web Deployments',
-    relatedProjects: ['aurora'],
-  },
-
-  // ─── ROW 3: Backend, Systems & Cloud Infrastructure (10) ───
-  {
-    id: 'nodejs',
-    name: 'Node.js',
-    slug: 'nodedotjs',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Server Runtime',
-    brandColor: '#5FA04E',
-    shortDescription: 'Non-blocking asynchronous event loop runtime at scale 🟢',
-    positioning: 'High-Concurrency Asynchronous Event Loop Architecture',
-    relatedProjects: ['marymount', 'lcml', 'kic'],
+    "id": "webgpu",
+    "name": "WebGPU",
+    "slug": "webgpu",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Next-Gen GPU",
+    "brandColor": "#0088CC",
+    "shortDescription": "Next-generation compute shaders and high-throughput graphics directly in browsers ⚡",
+    "positioning": "WGSL Compute Shaders & Direct Hardware GPU Command Buffers",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'express',
-    name: 'Express.js',
-    slug: 'express',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'HTTP Framework',
-    brandColor: '#FFFFFF',
-    shortDescription: 'Minimalist, battle-tested HTTP routing engine 🚂',
-    positioning: 'Middleware Pipeline & RESTful API Gateways',
-    relatedProjects: ['marymount', 'lcml'],
+    "id": "opengl",
+    "name": "OpenGL",
+    "slug": "opengl",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Rendering Pipeline",
+    "brandColor": "#5586A4",
+    "shortDescription": "Mathematical fragment shaders sculptured with pure light and vertex transformations 🔮",
+    "positioning": "Cross-Platform 3D Rendering & Matrix Mathematics",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'nestjs',
-    name: 'NestJS',
-    slug: 'nestjs',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Enterprise Backend',
-    brandColor: '#E0234E',
-    shortDescription: 'Modular enterprise TypeScript architecture and dependency injection 🏛️',
-    positioning: 'Architectural Inversion of Control & Microservice Routing',
-    relatedProjects: ['marymount', 'kic'],
+    "id": "blender",
+    "name": "Blender 3D",
+    "slug": "blender",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "3D Modeling & DCC",
+    "brandColor": "#F5792A",
+    "shortDescription": "High-fidelity 3D modeling, UV unwrapping & spatial asset optimization 📐",
+    "positioning": "glTF 2.0 PBR Asset Optimization & Geometry Node Prototyping",
+    "relatedProjects": [
+      "aurora",
+      "chronos"
+    ]
   },
   {
-    id: 'postgresql',
-    name: 'PostgreSQL',
-    slug: 'postgresql',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Relational Database',
-    brandColor: '#4169E1',
-    shortDescription: 'Rock-solid relational transactions, ACID integrity & JSONB 🐘',
-    positioning: 'Relational Data Integrity, Advanced Indexing & JSONB',
-    relatedProjects: ['marymount', 'lcml', 'kic'],
+    "id": "unity",
+    "name": "Unity",
+    "slug": "unity",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Game Engine",
+    "brandColor": "#FFFFFF",
+    "shortDescription": "Real-time interactive 3D physics and immersive world simulation 🕹️",
+    "positioning": "C# Scripting, Universal Render Pipeline (URP) & WebGL Builds",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'supabase',
-    name: 'Supabase',
-    slug: 'supabase',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Backend as a Service',
-    brandColor: '#3ECF8E',
-    shortDescription: 'Postgres-native backend with instant realtime & auth ⚡',
-    positioning: 'Row Level Security & Real-Time Database Replication',
-    relatedProjects: ['chronos', 'marymount'],
+    "id": "unrealengine",
+    "name": "Unreal Engine",
+    "slug": "unrealengine",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Realtime Engine",
+    "brandColor": "#0E1128",
+    "shortDescription": "Photorealistic Lumen lighting and Nanite geometry for virtual cinema 🎥",
+    "positioning": "Lumen Realtime GI, Nanite Virtual Geometry & Blueprints",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'prisma',
-    name: 'Prisma ORM',
-    slug: 'prisma',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Type-Safe ORM',
-    brandColor: '#2D3748',
-    shortDescription: 'Next-generation type-safe ORM with automated migrations 💎',
-    positioning: 'Declarative Schema Modeling & Type-Safe Query Execution',
-    relatedProjects: ['marymount', 'lcml'],
+    "id": "vulkan",
+    "name": "Vulkan",
+    "slug": "vulkan",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Low-Level Graphics",
+    "brandColor": "#E52222",
+    "shortDescription": "Explicit hardware GPU command queues and multi-threaded throughput 🌋",
+    "positioning": "Explicit Multi-Threaded Command Submission & Memory Management",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'drizzle',
-    name: 'Drizzle ORM',
-    slug: 'drizzle',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Zero-Overhead ORM',
-    brandColor: '#C5F74F',
-    shortDescription: 'If you know SQL, you know Drizzle, zero overhead ⚡',
-    positioning: 'SQL-Like Fluid Type Inference & Serverless Edge Performance',
-    relatedProjects: ['chronos'],
+    "id": "webassembly",
+    "name": "WebAssembly",
+    "slug": "webassembly",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Bytecode Runtime",
+    "brandColor": "#654FF0",
+    "shortDescription": "Near-native bytecode execution in the browser sandbox for physics and heavy math ⚡",
+    "positioning": "Rust/C++ to Wasm Compilations & SharedArrayBuffer Physics Engines",
+    "relatedProjects": [
+      "chronos",
+      "aurora"
+    ]
   },
   {
-    id: 'redis',
-    name: 'Redis',
-    slug: 'redis',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'In-Memory Cache',
-    brandColor: '#FF4438',
-    shortDescription: 'Sub-millisecond in-memory caching and distributed pub/sub 🔴',
-    positioning: 'In-Memory Key-Value Caching & Distributed Pub/Sub Queues',
-    relatedProjects: ['kic', 'marymount'],
+    "id": "godotengine",
+    "name": "Godot Engine",
+    "slug": "godotengine",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Open Source Engine",
+    "brandColor": "#478CBF",
+    "shortDescription": "Lightweight node-based scene hierarchy and fast 3D web deploy 🤖",
+    "positioning": "Lightweight Scene Trees & Open-Source Realtime Spatial Simulations",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'graphql',
-    name: 'GraphQL',
-    slug: 'graphql',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Declarative API',
-    brandColor: '#E10098',
-    shortDescription: 'Ask for exactly what you need, nothing more nothing less 🕸️',
-    positioning: 'Schema-Driven Query Interfaces & Atomic Graph Stitching',
-    relatedProjects: ['lcml', 'kic'],
+    "id": "sketchfab",
+    "name": "Sketchfab",
+    "slug": "sketchfab",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "3D Ecosystem",
+    "brandColor": "#1CAAD9",
+    "shortDescription": "Realtime 3D model delivery and cloud PBR asset pipelines 🌐",
+    "positioning": "glTF Cloud Distribution & Web3D Model Inspection",
+    "relatedProjects": [
+      "aurora",
+      "chronos"
+    ]
   },
   {
-    id: 'docker',
-    name: 'Docker',
-    slug: 'docker',
-    row: 3,
-    rowTitle: 'Backend, Systems & Cloud Infrastructure',
-    category: 'Containerization',
-    brandColor: '#2496ED',
-    shortDescription: 'Consistent containerized runtimes from local to cloud 🐳',
-    positioning: 'Immutable Microservice Packaging & Production Orchestration',
-    relatedProjects: ['marymount', 'lcml'],
-  },
-
-  // ─── ROW 4: Web3 & Decentralized Protocols (10) ───
-  {
-    id: 'solidity',
-    name: 'Solidity',
-    slug: 'solidity',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Smart Contract Language',
-    brandColor: '#AA6746',
-    shortDescription: 'Turing-complete immutable logic secured on distributed state ⛓️',
-    positioning: 'EVM Contract Architecture & Gas-Optimized State Storage',
-    relatedProjects: ['chronos'],
+    "id": "cinema4d",
+    "name": "Cinema 4D",
+    "slug": "cinema4d",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Kinetic 3D Motion",
+    "brandColor": "#001E50",
+    "shortDescription": "Procedural 3D mograph, spline dynamics, and cinematic keyframing 🎬",
+    "positioning": "MoGraph Procedural Animation & Volumetric Rendering",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'ethereum',
-    name: 'Ethereum',
-    slug: 'ethereum',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Layer 1 Blockchain',
-    brandColor: '#627EEA',
-    shortDescription: 'Global decentralized state machine and consensus settlement 💎',
-    positioning: 'Decentralized Settlement Layer & Consensus Protocols',
-    relatedProjects: ['chronos'],
+    "id": "autodesk",
+    "name": "Autodesk",
+    "slug": "autodesk",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Precision CAD / 3D",
+    "brandColor": "#0696D7",
+    "shortDescription": "Industrial precision 3D design, topology curation, and spatial geometry 📐",
+    "positioning": "Spatial Geometry Pipelines & Parametric Topology Modeling",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'polygon',
-    name: 'Polygon',
-    slug: 'polygon',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Scaling Layer',
-    brandColor: '#7B3FE4',
-    shortDescription: 'Sub-second transactions and zk-rollup scaling for mass adoption 💜',
-    positioning: 'Zero-Knowledge Scalability & High-Throughput Execution',
-    relatedProjects: ['chronos'],
+    "id": "figma",
+    "name": "Figma",
+    "slug": "figma",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Interface & Spatial UI",
+    "brandColor": "#F24E1E",
+    "shortDescription": "Design systems, auto-layout tokens, and spatial UI prototyping 🎨",
+    "positioning": "Tokenized Design Systems & Shader Interaction Specs",
+    "relatedProjects": [
+      "chronos",
+      "marymount",
+      "v1"
+    ]
   },
   {
-    id: 'solana',
-    name: 'Solana',
-    slug: 'solana',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'High-Throughput L1',
-    brandColor: '#14F195',
-    shortDescription: 'Ultra-fast parallel transaction execution with Proof of History ⚡',
-    positioning: 'Parallel Sealevel Runtime & Proof-of-History Clocks',
-    relatedProjects: ['aurora'],
+    "id": "khronosgroup",
+    "name": "Khronos Group",
+    "slug": "khronosgroup",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Open Standards",
+    "brandColor": "#C8102E",
+    "shortDescription": "The global consortium defining glTF, WebGL, WebGPU, and OpenXR 🌐",
+    "positioning": "glTF 2.0 Specifications & Cross-Platform Graphics Standard Protocols",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'chainlink',
-    name: 'Chainlink',
-    slug: 'chainlink',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Decentralized Oracle',
-    brandColor: '#375BD2',
-    shortDescription: 'Tamper-proof real-world data oracles and cross-chain messaging 🔗',
-    positioning: 'Cryptographic Price Feeds & Cross-Chain Interoperability',
-    relatedProjects: ['chronos'],
+    "id": "meta",
+    "name": "Meta Horizon XR",
+    "slug": "meta",
+    "row": 2,
+    "rowTitle": "3D Spatial Computing & Graphics",
+    "category": "Spatial XR Hardware",
+    "brandColor": "#0081FB",
+    "shortDescription": "Immersive spatial computing, WebXR hand tracking, and 6DoF virtual environments 🥽",
+    "positioning": "WebXR Spatial Browsing & 6DoF Controller Choreography",
+    "relatedProjects": [
+      "aurora"
+    ]
   },
   {
-    id: 'alchemy',
-    name: 'Alchemy',
-    slug: 'alchemy',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Web3 Node Infrastructure',
-    brandColor: '#0052FF',
-    shortDescription: 'Enterprise blockchain node supercharging web3 developers ⚡',
-    positioning: 'Enterprise Node Infrastructure & Enhanced JSON-RPC Pipelines',
-    relatedProjects: ['chronos'],
+    "id": "nodedotjs",
+    "name": "Node.js",
+    "slug": "nodedotjs",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Backend Runtime",
+    "brandColor": "#5FA04E",
+    "shortDescription": "Non-blocking asynchronous event loop runtime powering scalable backend services 🟢",
+    "positioning": "V8 Engine Internals, Streams & Event-Driven Microservices",
+    "relatedProjects": [
+      "marymount",
+      "lcml",
+      "chronos"
+    ]
   },
   {
-    id: 'ipfs',
-    name: 'IPFS',
-    slug: 'ipfs',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Decentralized Storage',
-    brandColor: '#65C2CB',
-    shortDescription: 'Peer-to-peer hypermedia protocol for content-addressed files 🌐',
-    positioning: 'Content-Addressed Cryptographic Hash Storage Systems',
-    relatedProjects: ['aurora', 'chronos'],
+    "id": "express",
+    "name": "Express.js",
+    "slug": "express",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "HTTP Framework",
+    "brandColor": "#FFFFFF",
+    "shortDescription": "Minimalist, battle-tested HTTP routing engine and middleware pipeline 🚂",
+    "positioning": "RESTful API Engineering & Middleware Authentication Pipelines",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
   },
   {
-    id: 'web3dotjs',
-    name: 'Web3.js',
-    slug: 'web3dotjs',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Client Provider Library',
-    brandColor: '#F16822',
-    shortDescription: 'The foundational JavaScript interface to the Ethereum blockchain 🦊',
-    positioning: 'Wallet Connection Handshakes & Contract Event Subscriptions',
-    relatedProjects: ['chronos'],
+    "id": "nestjs",
+    "name": "NestJS",
+    "slug": "nestjs",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Enterprise Framework",
+    "brandColor": "#E0234E",
+    "shortDescription": "Modular enterprise TypeScript architecture, dependency injection & microservices 🏛️",
+    "positioning": "IoC Containers, Microservice Transport Layers & CQRS Architecture",
+    "relatedProjects": [
+      "marymount"
+    ]
   },
   {
-    id: 'bitcoin',
-    name: 'Bitcoin',
-    slug: 'bitcoin',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Hard Money Protocol',
-    brandColor: '#F7931A',
-    shortDescription: 'Decentralized cryptographic hard money and Nakamoto consensus ₿',
-    positioning: 'UTXO Transaction Model & Nakamoto Consensus Integrity',
-    relatedProjects: ['chronos'],
+    "id": "postgresql",
+    "name": "PostgreSQL",
+    "slug": "postgresql",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Relational Database",
+    "brandColor": "#4169E1",
+    "shortDescription": "Rock-solid relational transactions, ACID integrity, and advanced JSONB querying 🐘",
+    "positioning": "Index Optimization, pgvector Embeddings & Complex Analytical SQL",
+    "relatedProjects": [
+      "marymount",
+      "lcml",
+      "chronos"
+    ]
   },
   {
-    id: 'optimism',
-    name: 'Optimism',
-    slug: 'optimism',
-    row: 4,
-    rowTitle: 'Web3 & Decentralized Protocols',
-    category: 'Optimistic Rollup',
-    brandColor: '#FF0420',
-    shortDescription: 'Optimistic rollups scaling Ethereum with the open Superchain 🔴',
-    positioning: 'OP Stack Modularity & Fault-Proof L2 Execution',
-    relatedProjects: ['chronos'],
-  },
-
-  // ─── ROW 5: AI Engineering, LLMs & Agentic Systems (10) ───
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    slug: 'openai',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Frontier Intelligence',
-    brandColor: '#10A37F',
-    shortDescription: 'Frontier reasoning, multimodal intelligence, and structured function calling ⚡',
-    positioning: 'OpenAI API Architecture, Reasoning Models & Vision Pipelines',
-    relatedProjects: ['chronos', 'lcml'],
-    icon: '/assets/icons/openai.svg',
+    "id": "supabase",
+    "name": "Supabase",
+    "slug": "supabase",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "BaaS & Realtime",
+    "brandColor": "#3ECF8E",
+    "shortDescription": "Postgres-native backend with instant realtime replication and Row Level Security ⚡",
+    "positioning": "PostgreSQL Row-Level Security & Realtime WebSocket Replication",
+    "relatedProjects": [
+      "chronos",
+      "v1"
+    ]
   },
   {
-    id: 'chatgpt',
-    name: 'ChatGPT',
-    slug: 'chatgpt',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Conversational AI',
-    brandColor: '#74AA9C',
-    shortDescription: 'Conversational agent engineering, custom GPTs, and prompt synthesis 🤖',
-    positioning: 'Conversational UX, System Prompts & Structured Outputs',
-    relatedProjects: ['chronos'],
-    icon: '/assets/icons/chatgpt.svg',
+    "id": "prisma",
+    "name": "Prisma ORM",
+    "slug": "prisma",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Type-Safe ORM",
+    "brandColor": "#2D3748",
+    "shortDescription": "Next-generation type-safe ORM with automated migrations and relation modeling 💎",
+    "positioning": "Type-Safe Schema Modeling & Auto-Generated Query Engines",
+    "relatedProjects": [
+      "marymount",
+      "chronos"
+    ]
   },
   {
-    id: 'anthropic',
-    name: 'Anthropic Claude',
-    slug: 'anthropic',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Reasoning Models',
-    brandColor: '#D97706',
-    shortDescription: 'Frontier reasoning, long-context comprehension & Model Context Protocol 🧠',
-    positioning: 'Structured Tool Calling & Agentic Reasoning Architecture',
-    relatedProjects: ['chronos'],
+    "id": "drizzle",
+    "name": "Drizzle ORM",
+    "slug": "drizzle",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Lightweight ORM",
+    "brandColor": "#C5F74F",
+    "shortDescription": "If you know SQL, you know Drizzle; zero overhead with maximum type inference ⚡",
+    "positioning": "Serverless-Ready SQL Queries & Zero-Latency Edge Database Access",
+    "relatedProjects": [
+      "chronos"
+    ]
   },
   {
-    id: 'python',
-    name: 'Python',
-    slug: 'python',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'AI Ecosystem Core',
-    brandColor: '#3776AB',
-    shortDescription: 'The lingua franca of artificial intelligence, tensor math & pipelines 🐍',
-    positioning: 'Scientific Computing, NumPy Arrays & AI Backend Automation',
-    relatedProjects: ['lcml', 'aurora'],
+    "id": "redis",
+    "name": "Redis",
+    "slug": "redis",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "In-Memory Cache",
+    "brandColor": "#DC382D",
+    "shortDescription": "Sub-millisecond in-memory caching, distributed locks, and pub/sub streaming 🔴",
+    "positioning": "Rate Limiting, In-Memory Session Stores & Ephemeral Cache Layers",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
   },
   {
-    id: 'langchain',
-    name: 'LangChain',
-    slug: 'langchain',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Agentic Orchestration',
-    brandColor: '#1C3C3C',
-    shortDescription: 'Composing multi-step reasoning chains with contextual tools ⛓️',
-    positioning: 'Context Memory Stores & Retrieval-Augmented Tool Routing',
-    relatedProjects: ['chronos', 'marymount'],
+    "id": "graphql",
+    "name": "GraphQL",
+    "slug": "graphql",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Query Language",
+    "brandColor": "#E10098",
+    "shortDescription": "Ask for exactly what you need, nothing more, nothing less, across graph schemas 🕸️",
+    "positioning": "Federated Graph Schemas, DataLoader Caching & Strongly Typed Queries",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
   },
   {
-    id: 'agentic',
-    name: 'Agentic AI',
-    slug: 'agentic',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Autonomous Systems',
-    brandColor: '#8B5CF6',
-    shortDescription: 'Autonomous multi-agent loops, stateful workflows, and external execution 🧭',
-    positioning: 'Multi-Agent Tool Architecture & Task Decomposition Engines',
-    relatedProjects: ['chronos'],
-    icon: '/assets/icons/agentic.svg',
+    "id": "docker",
+    "name": "Docker",
+    "slug": "docker",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Containerization",
+    "brandColor": "#2496ED",
+    "shortDescription": "Consistent containerized runtimes from local dev to cloud Kubernetes clusters 🐳",
+    "positioning": "Multi-Stage Builds, Container Optimization & Deterministic Environments",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
   },
   {
-    id: 'rag',
-    name: 'RAG & Vector Search',
-    slug: 'rag',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Knowledge Retrieval',
-    brandColor: '#EC4899',
-    shortDescription: 'Retrieval-Augmented Generation with semantic embeddings and vector search 🔍',
-    positioning: 'Dense Vector Search, Chunking Strategies & Hybrid Retrieval',
-    relatedProjects: ['chronos', 'lcml'],
-    icon: '/assets/icons/rag.svg',
+    "id": "go",
+    "name": "Go / Golang",
+    "slug": "go",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Systems Language",
+    "brandColor": "#00ADD8",
+    "shortDescription": "Concurrent goroutines and high-performance compiled networking services 🐹",
+    "positioning": "High-Concurrency Goroutines, HTTP Multiplexing & Microservices",
+    "relatedProjects": [
+      "lcml",
+      "chronos"
+    ]
   },
   {
-    id: 'huggingface',
-    name: 'Hugging Face',
-    slug: 'huggingface',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Open ML Hub',
-    brandColor: '#FFD21E',
-    shortDescription: 'The open-source heartbeat of machine learning models and datasets 🤗',
-    positioning: 'Transformer Model Pipelines & Open-Weights Model Hub',
-    relatedProjects: ['chronos', 'aurora'],
+    "id": "rust",
+    "name": "Rust",
+    "slug": "rust",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Memory-Safe Systems",
+    "brandColor": "#DEA584",
+    "shortDescription": "Fearless concurrency with zero-cost abstractions and memory safety without GC 🦀",
+    "positioning": "Borrow Checker Systems, High-Performance Native Daemons & WebAssembly",
+    "relatedProjects": [
+      "aurora",
+      "chronos"
+    ]
   },
   {
-    id: 'pytorch',
-    name: 'PyTorch',
-    slug: 'pytorch',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Neural Networks',
-    brandColor: '#EE4C2C',
-    shortDescription: 'Dynamic neural network graphs and tensor mathematics on GPUs 🔥',
-    positioning: 'Autograd Tensor Mathematics & Deep Learning Training Graphs',
-    relatedProjects: ['aurora'],
+    "id": "mongodb",
+    "name": "MongoDB",
+    "slug": "mongodb",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Document Database",
+    "brandColor": "#47A248",
+    "shortDescription": "Flexible JSON document schemas with distributed sharding and aggregation pipelines 🍃",
+    "positioning": "Aggregation Frameworks, Geospatial Indexing & Flexible Documents",
+    "relatedProjects": [
+      "marymount",
+      "grillzzy"
+    ]
   },
   {
-    id: 'ollama',
-    name: 'Ollama',
-    slug: 'ollama',
-    row: 5,
-    rowTitle: 'AI Engineering, LLMs & Agentic Systems',
-    category: 'Local Inference',
-    brandColor: '#FFFFFF',
-    shortDescription: 'High-performance local LLM execution with zero-cloud latency and privacy 🦙',
-    positioning: 'Local Quantized Model Serving & Private Offline Inference',
-    relatedProjects: ['chronos'],
+    "id": "kubernetes",
+    "name": "Kubernetes",
+    "slug": "kubernetes",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Container Orchestration",
+    "brandColor": "#326CE5",
+    "shortDescription": "Automated deployment, scaling, and operational management of containerized workloads ☸️",
+    "positioning": "K8s Cluster Declarative Deployments & Auto-Scaling Pod Infrastructure",
+    "relatedProjects": [
+      "marymount"
+    ]
   },
+  {
+    "id": "nginx",
+    "name": "NGINX",
+    "slug": "nginx",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "Reverse Proxy & Edge",
+    "brandColor": "#009639",
+    "shortDescription": "High-performance reverse proxy, load balancing, and TLS termination at the edge 🌐",
+    "positioning": "Reverse Proxy Topology, SSL Termination & Edge Load Balancing",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
+  },
+  {
+    "id": "linux",
+    "name": "Linux Systems",
+    "slug": "linux",
+    "row": 3,
+    "rowTitle": "Backend, Systems & Cloud Infrastructure",
+    "category": "OS & Kernel",
+    "brandColor": "#FCC624",
+    "shortDescription": "The bedrock of cloud servers, POSIX shell automation, and kernel tuning 🐧",
+    "positioning": "POSIX Systems Programming, Bash Scripting & Cloud VPS Administration",
+    "relatedProjects": [
+      "marymount",
+      "lcml"
+    ]
+  },
+  {
+    "id": "solidity",
+    "name": "Solidity",
+    "slug": "solidity",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Smart Contract Language",
+    "brandColor": "#AA6746",
+    "shortDescription": "Turing-complete immutable logic secured on distributed EVM state ⛓️",
+    "positioning": "Gas Optimization, Reentrancy Protection & EVM Assembly / Yul",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "ethereum",
+    "name": "Ethereum",
+    "slug": "ethereum",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Decentralized Settlement",
+    "brandColor": "#627EEA",
+    "shortDescription": "Global decentralized state machine and cryptographic consensus settlement 💎",
+    "positioning": "EVM Architecture, ERC Standards & Decentralized Consensus Settlement",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "polygon",
+    "name": "Polygon",
+    "slug": "polygon",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Layer 2 Scaling",
+    "brandColor": "#8247E5",
+    "shortDescription": "Sub-second transactions and zk-rollup scaling for mass blockchain adoption 💜",
+    "positioning": "zkEVM Rollup Execution & High-Throughput Micro-Transactions",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "solana",
+    "name": "Solana",
+    "slug": "solana",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "High-Speed L1",
+    "brandColor": "#14F195",
+    "shortDescription": "Ultra-fast parallel transaction execution with Proof of History and Sealevel runtime ⚡",
+    "positioning": "Sealevel Parallel Execution, Anchor Framework & High-Speed Rust Programs",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "chainlink",
+    "name": "Chainlink",
+    "slug": "chainlink",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Decentralized Oracles",
+    "brandColor": "#375BD2",
+    "shortDescription": "Tamper-proof real-world data oracles and cross-chain interoperability (CCIP) 🔗",
+    "positioning": "Decentralized Oracle Networks, VRF & Cross-Chain Messaging (CCIP)",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "alchemy",
+    "name": "Alchemy",
+    "slug": "alchemy",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Node Infrastructure",
+    "brandColor": "#2563EB",
+    "shortDescription": "Enterprise blockchain node supercharging web3 developers with high availability ⚡",
+    "positioning": "Web3 JSON-RPC Infrastructure, Webhooks & Account Abstraction Bundlers",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "ipfs",
+    "name": "IPFS",
+    "slug": "ipfs",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Content-Addressed Storage",
+    "brandColor": "#65C2CB",
+    "shortDescription": "Peer-to-peer hypermedia protocol for content-addressed immutable files 🌐",
+    "positioning": "Content-Addressed Storage, Merkle DAGs & Decentralized Pinning",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "web3dotjs",
+    "name": "Web3.js",
+    "slug": "web3dotjs",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Blockchain Client SDK",
+    "brandColor": "#F16822",
+    "shortDescription": "The foundational JavaScript interface to the Ethereum blockchain and contract calls 🦊",
+    "positioning": "Contract ABI Encoding, Event Listening & Transaction Signing",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "bitcoin",
+    "name": "Bitcoin",
+    "slug": "bitcoin",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "P2P Electronic Cash",
+    "brandColor": "#F7931A",
+    "shortDescription": "Decentralized cryptographic hard money and pure Nakamoto proof-of-work consensus ₿",
+    "positioning": "UTXO Model, Script Primitives & Cryptographic Proof-of-Work Verification",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "optimism",
+    "name": "Optimism OP",
+    "slug": "optimism",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Optimistic Rollups",
+    "brandColor": "#FF0420",
+    "shortDescription": "Optimistic rollups scaling Ethereum with the open Superchain collective 🔴",
+    "positioning": "OP Stack Modularity, Fraud Proofs & Superchain Interoperability",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "polkadot",
+    "name": "Polkadot",
+    "slug": "polkadot",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Multichain Interoperability",
+    "brandColor": "#E6007A",
+    "shortDescription": "Heterogeneous multi-chain architecture connecting specialized parallel parachains 🌸",
+    "positioning": "Relay Chain Shared Security, Substrate SDK & Cross-Consensus Messaging (XCM)",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "walletconnect",
+    "name": "WalletConnect",
+    "slug": "walletconnect",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Universal Web3 Auth",
+    "brandColor": "#3B99FC",
+    "shortDescription": "The open protocol for connecting dApps securely to mobile crypto wallets via QR 📲",
+    "positioning": "Session Proposal Protocols, Cryptographic Handshakes & Web3Modal UX",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "near",
+    "name": "NEAR Protocol",
+    "slug": "near",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Sharded Layer-1",
+    "brandColor": "#000000",
+    "shortDescription": "Nightshade dynamic sharding and human-readable named accounts for smooth onboarding 🌈",
+    "positioning": "Nightshade Sharding Architecture & Rust Smart Contract Development",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "cardano",
+    "name": "Cardano",
+    "slug": "cardano",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Peer-Reviewed Proof of Stake",
+    "brandColor": "#0033AD",
+    "shortDescription": "Peer-reviewed cryptographic research and formally verified Haskell smart contracts 💙",
+    "positioning": "eUTxO Determinism, Formal Verification & Ouroboros Consensus",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "binance",
+    "name": "BNB Chain",
+    "slug": "binance",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "High-Volume L1",
+    "brandColor": "#F0B90B",
+    "shortDescription": "High-throughput dual-chain EVM ecosystem for decentralized finance and gaming 🟡",
+    "positioning": "Proof of Staked Authority & High-Volume DeFi Ecosystem Integration",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "coinbase",
+    "name": "Coinbase Onchain",
+    "slug": "coinbase",
+    "row": 4,
+    "rowTitle": "Web3 & Decentralized Protocols",
+    "category": "Developer Platform & MPC",
+    "brandColor": "#0052FF",
+    "shortDescription": "Institutional crypto gateway, onchain payments, Smart Wallet and MPC primitives 🔵",
+    "positioning": "Passkey Smart Wallets, Base L2 Integration & MPC Key Infrastructure",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "openai",
+    "name": "OpenAI",
+    "slug": "openai",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Frontier AI Core",
+    "brandColor": "#10A37F",
+    "shortDescription": "Frontier reasoning models, multimodal vision, and structured tool calling ⚡",
+    "positioning": "GPT-4o Reasoning Models, Responses API & Function Calling Workflows",
+    "relatedProjects": [
+      "chronos",
+      "aurora",
+      "lcml"
+    ],
+    "icon": "/assets/icons/openai.svg"
+  },
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "slug": "chatgpt",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Conversational Agents",
+    "brandColor": "#74AA9C",
+    "shortDescription": "Conversational agent engineering, custom GPT actions, and prompt synthesis 🤖",
+    "positioning": "Agent Prompt Architectures, Structured Schemas & Conversational Workflows",
+    "relatedProjects": [
+      "chronos",
+      "marymount"
+    ],
+    "icon": "/assets/icons/chatgpt.svg"
+  },
+  {
+    "id": "anthropic",
+    "name": "Anthropic Claude",
+    "slug": "anthropic",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Frontier Reasoning",
+    "brandColor": "#D97706",
+    "shortDescription": "Frontier reasoning, long-context comprehension & Model Context Protocol 🧠",
+    "positioning": "Structured Tool Calling & Agentic Reasoning Architecture",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "python",
+    "name": "Python",
+    "slug": "python",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "AI Ecosystem Core",
+    "brandColor": "#3776AB",
+    "shortDescription": "The lingua franca of artificial intelligence, tensor math & pipelines 🐍",
+    "positioning": "Scientific Computing, NumPy Arrays & AI Backend Automation",
+    "relatedProjects": [
+      "lcml",
+      "aurora"
+    ]
+  },
+  {
+    "id": "langchain",
+    "name": "LangChain",
+    "slug": "langchain",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Agentic Orchestration",
+    "brandColor": "#1C3C3C",
+    "shortDescription": "Composing multi-step reasoning chains with contextual tools ⛓️",
+    "positioning": "Context Memory Stores & Retrieval-Augmented Tool Routing",
+    "relatedProjects": [
+      "chronos",
+      "marymount"
+    ]
+  },
+  {
+    "id": "agentic",
+    "name": "AI Agents",
+    "slug": "agentic",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Autonomous Systems",
+    "brandColor": "#8B5CF6",
+    "shortDescription": "Autonomous multi-agent loops, stateful workflows, and external execution 🧭",
+    "positioning": "Multi-Agent Tool Architecture & Task Decomposition Engines",
+    "relatedProjects": [
+      "chronos"
+    ],
+    "icon": "/assets/icons/agentic.svg"
+  },
+  {
+    "id": "rag",
+    "name": "RAG & Vector Search",
+    "slug": "rag",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Knowledge Retrieval",
+    "brandColor": "#EC4899",
+    "shortDescription": "Retrieval-Augmented Generation with semantic embeddings and vector search 🔍",
+    "positioning": "Dense Vector Search, Chunking Strategies & Hybrid Retrieval",
+    "relatedProjects": [
+      "chronos",
+      "lcml"
+    ],
+    "icon": "/assets/icons/rag.svg"
+  },
+  {
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "slug": "huggingface",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Open ML Hub",
+    "brandColor": "#FFD21E",
+    "shortDescription": "The open-source heartbeat of machine learning models and datasets 🤗",
+    "positioning": "Transformer Model Pipelines & Open-Weights Model Hub",
+    "relatedProjects": [
+      "chronos",
+      "aurora"
+    ]
+  },
+  {
+    "id": "pytorch",
+    "name": "PyTorch",
+    "slug": "pytorch",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Neural Networks",
+    "brandColor": "#EE4C2C",
+    "shortDescription": "Dynamic neural network graphs and tensor mathematics on GPUs 🔥",
+    "positioning": "Autograd Tensor Mathematics & Deep Learning Training Graphs",
+    "relatedProjects": [
+      "aurora"
+    ]
+  },
+  {
+    "id": "ollama",
+    "name": "Ollama",
+    "slug": "ollama",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Local Inference",
+    "brandColor": "#FFFFFF",
+    "shortDescription": "High-performance local LLM execution with zero-cloud latency and privacy 🦙",
+    "positioning": "Local Quantized Model Serving & Private Offline Inference",
+    "relatedProjects": [
+      "chronos"
+    ]
+  },
+  {
+    "id": "fastapi",
+    "name": "FastAPI",
+    "slug": "fastapi",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Inference API Service",
+    "brandColor": "#009688",
+    "shortDescription": "Lightning-fast async Python APIs serving real-time model inference and embeddings ⚡",
+    "positioning": "High-Throughput ASGI Endpoints, Pydantic v2 & Async Model Streaming",
+    "relatedProjects": [
+      "chronos",
+      "lcml"
+    ]
+  },
+  {
+    "id": "tensorflow",
+    "name": "TensorFlow",
+    "slug": "tensorflow",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Production ML Platform",
+    "brandColor": "#FF6F00",
+    "shortDescription": "End-to-end open source platform for machine learning and TF Serving 🟠",
+    "positioning": "Production Tensor Graphs, SavedModel Pipelines & Edge Inference",
+    "relatedProjects": [
+      "lcml"
+    ]
+  },
+  {
+    "id": "jupyter",
+    "name": "Jupyter Notebooks",
+    "slug": "jupyter",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Data Science Environment",
+    "brandColor": "#F37626",
+    "shortDescription": "Interactive computational notebook environments for rapid AI experimentation 🪐",
+    "positioning": "Exploratory Data Analysis, Model Diagnostics & Live Prototyping",
+    "relatedProjects": [
+      "lcml"
+    ]
+  },
+  {
+    "id": "numpy",
+    "name": "NumPy",
+    "slug": "numpy",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Vector Mathematics",
+    "brandColor": "#013243",
+    "shortDescription": "Fundamental scientific package for N-dimensional vector arrays and linear algebra 🔢",
+    "positioning": "Vectorized N-Dimensional Array Math & Matrix Transformations",
+    "relatedProjects": [
+      "lcml",
+      "aurora"
+    ]
+  },
+  {
+    "id": "pandas",
+    "name": "Pandas",
+    "slug": "pandas",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Data Manipulation",
+    "brandColor": "#150458",
+    "shortDescription": "High-performance DataFrame structures for time-series and feature engineering 🐼",
+    "positioning": "Data Ingestion Pipelines, Feature Normalization & Tabular Cleaning",
+    "relatedProjects": [
+      "lcml"
+    ]
+  },
+  {
+    "id": "scikitlearn",
+    "name": "Scikit-Learn",
+    "slug": "scikitlearn",
+    "row": 5,
+    "rowTitle": "AI Engineering, LLMs & Agentic Systems",
+    "category": "Classical Machine Learning",
+    "brandColor": "#F7931E",
+    "shortDescription": "Simple and efficient tools for predictive data analysis and classical algorithms 📊",
+    "positioning": "Classification, Clustering, Regression & Cross-Validation Pipelines",
+    "relatedProjects": [
+      "lcml"
+    ]
+  }
 ];
 
 // Group skills by their designated row (1-5)

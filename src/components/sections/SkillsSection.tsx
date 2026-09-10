@@ -34,7 +34,7 @@ export const SkillsSection: React.FC = () => {
       <div className="dark-section-grain" aria-hidden="true" />
 
       {/* ─── 2. MAIN STRUCTURAL CONTENT CONTAINER ─── */}
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center relative z-10">
+      <div className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center relative z-10">
         {/* Editorial Minimalist Title - Serene museum atmosphere matching Hero 'rocky babcock' */}
         <div className="w-full text-center flex flex-col items-center mb-6 sm:mb-8">
           <span className="font-mono text-[10px] sm:text-xs tracking-[0.28em] uppercase text-white/45 mb-2 select-none">

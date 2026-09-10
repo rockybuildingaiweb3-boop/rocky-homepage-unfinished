@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SkillItem, SKILLS_BY_ROW, SKILL_ROWS, PROJECT_NAMES } from '../../data/skills';
+import { SkillItem, SKILLS_DATA, SKILLS_BY_ROW, SKILL_ROWS, PROJECT_NAMES } from '../../data/skills';
 import { TechLogo } from './TechLogo';
 import { getTechQuote } from '../../data/techQuotes';
 import { playMechanicalClick } from './audio';
@@ -43,12 +43,24 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
   const handleFilterClick = (row: number) => {
     playMechanicalClick();
     setSelectedCategoryRow(row);
+
+    // Filter synchronization requirement:
+    // If selected skill belongs to category, preserve it; otherwise select the first skill in that category
+    if (row !== 0) {
+      const activeSkill = SKILLS_DATA.find((s) => s.id === activeSkillId);
+      if (!activeSkill || activeSkill.row !== row) {
+        const firstSkillInRow = SKILLS_BY_ROW[row]?.[0];
+        if (firstSkillInRow) {
+          onSelectSkill?.(firstSkillInRow);
+        }
+      }
+    }
   };
 
   return (
     <div className="relative w-full flex flex-col items-center justify-center py-2 select-none">
-      {/* ─── CONSTELLATION LEGEND (No bulky pill buttons, no instrument panel casing) ─── */}
-      <nav aria-label="Constellation Legend" className="flex items-center justify-center flex-wrap gap-x-6 sm:gap-x-8 gap-y-2 mb-8 px-4 z-20">
+      {/* ─── CONSTELLATION LEGEND (Category Navigation) ─── */}
+      <nav aria-label="Constellation Legend" className="flex items-center justify-center flex-wrap gap-x-6 sm:gap-x-8 gap-y-2 mb-6 sm:mb-8 px-4 z-20">
         {CATEGORY_LEGENDS.map((cat, idx) => {
           const isActive = selectedCategoryRow === cat.row;
           return (
@@ -56,14 +68,14 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
               <button
                 type="button"
                 onClick={() => handleFilterClick(cat.row)}
-                className={`relative py-1 text-xs sm:text-[13px] tracking-[0.18em] lowercase font-mono transition-all duration-300 clickable cursor-pointer border-none bg-transparent p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-300 rounded ${
+                className={`relative py-1 text-xs sm:text-[13px] tracking-[0.2em] lowercase font-mono transition-all duration-300 clickable cursor-pointer border-none bg-transparent p-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-300 rounded ${
                   isActive
                     ? 'text-white/95 font-medium'
                     : 'text-white/40 hover:text-white/80'
                 }`}
               >
                 <span>{cat.label}</span>
-                {/* Understated lilac active underline — same lineage as top navbar */}
+                {/* Understated lilac active underline */}
                 <span
                   className={`absolute -bottom-1 left-0 right-0 h-[1.5px] rounded-full transition-all duration-300 pointer-events-none ${
                     isActive
@@ -92,17 +104,21 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md z-30 max-w-[95vw]"
+              className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.1] backdrop-blur-md z-30 max-w-[95vw] shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
             >
               <div className="flex items-center gap-2">
                 <span
                   className="w-2 h-2 rounded-full shrink-0 shadow-sm"
                   style={{ backgroundColor: hoveredSkill.brandColor }}
                 />
-                <span className="text-xs font-medium text-white tracking-wide">
+                <span className="text-xs font-semibold text-white tracking-wide">
                   {hoveredSkill.name}
                 </span>
               </div>
+
+              <span className="text-[11px] text-white/40 font-mono">
+                [{hoveredSkill.category}]
+              </span>
 
               {hoveredSkill.relatedProjects && hoveredSkill.relatedProjects.length > 0 && (
                 <span className="text-[11px] text-purple-300/80 font-mono">
@@ -113,7 +129,7 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
                 </span>
               )}
 
-              <span className="text-xs text-white/50 font-light max-w-[280px] truncate hidden md:inline">
+              <span className="text-xs text-white/60 font-light max-w-[320px] truncate hidden md:inline">
                 &ldquo;{getTechQuote(hoveredSkill.id, hoveredSkill.shortDescription || hoveredSkill.positioning)}&rdquo;
               </span>
             </motion.div>
@@ -121,8 +137,8 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* ─── 5-ROW CONSTELLATION: EXACT 50 SKILLS (10 PER ROW) ─── */}
-      <div className="w-full max-w-6xl flex flex-col items-center justify-center gap-y-7 sm:gap-y-9 md:gap-y-11 px-2 sm:px-4">
+      {/* ─── 5-ROW CONSTELLATION: EXACTLY 80 CURATED SKILLS (16 PER ROW) ─── */}
+      <div className="w-full max-w-[1340px] flex flex-col items-center justify-center gap-y-6 sm:gap-y-8 md:gap-y-9 px-2 sm:px-4">
         {SKILL_ROWS.map((rowDef, rowIndex) => {
           const rowSkills = SKILLS_BY_ROW[rowDef.row] || [];
           const isRowFiltered =
@@ -131,13 +147,13 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
           return (
             <motion.div
               key={`row-${rowDef.row}`}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: rowIndex * 0.07 }}
-              className={`w-full flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-7 md:gap-x-9 lg:gap-x-10 gap-y-3 transition-all duration-400 ${
+              transition={{ duration: 0.4, delay: rowIndex * 0.05 }}
+              className={`w-full flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-4 md:gap-x-5 lg:gap-x-6 gap-y-2.5 sm:gap-y-3.5 transition-all duration-400 ${
                 isRowFiltered
-                  ? 'opacity-20 scale-[0.98] pointer-events-none filter grayscale'
+                  ? 'opacity-15 scale-[0.97] pointer-events-none filter grayscale'
                   : 'opacity-100 scale-100'
               }`}
             >
@@ -159,7 +175,7 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
                       transition: { type: 'spring', stiffness: 450, damping: 18 },
                     }}
                     whileTap={{ scale: 0.92 }}
-                    className="group relative flex items-center justify-center p-2 sm:p-2.5 rounded-xl cursor-pointer focus:outline-none transition-transform duration-200 clickable"
+                    className="group relative flex items-center justify-center p-1.5 sm:p-2 md:p-2.5 rounded-xl cursor-pointer focus:outline-none transition-transform duration-200 clickable"
                     aria-label={skill.name}
                     title={`${skill.name} (${skill.category})`}
                   >
@@ -170,7 +186,7 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
                         className="absolute inset-0 rounded-full blur-xl pointer-events-none opacity-75"
                         style={{
                           backgroundColor: brandColor,
-                          transform: 'scale(1.4)',
+                          transform: 'scale(1.35)',
                         }}
                         transition={{ duration: 0.2 }}
                       />
@@ -191,8 +207,8 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
                         iconUrl={skill.icon}
                         name={skill.name}
                         color={brandColor}
-                        size={44}
-                        className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12"
+                        size={40}
+                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11"
                       />
                     </div>
 
