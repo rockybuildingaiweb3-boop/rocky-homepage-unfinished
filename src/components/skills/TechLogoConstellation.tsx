@@ -113,7 +113,7 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
 
               {hoveredSkill.relatedProjects && hoveredSkill.relatedProjects.length > 0 && (
                 <span className="text-[11px] text-purple-300/80 font-mono">
-                  · studio: {hoveredSkill.relatedProjects
+                  · project: {hoveredSkill.relatedProjects
                     .map((pid) => PROJECT_NAMES[pid]?.title || pid)
                     .slice(0, 1)
                     .join(', ')}

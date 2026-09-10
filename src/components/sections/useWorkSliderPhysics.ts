@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { lerp } from '../../../utils';
+import { lerp } from '../../utils';
 
-interface UseStudioSliderPhysicsProps {
+interface UseWorkSliderPhysicsProps {
   itemCount: number;
   currentActive: number;
   setCurrentActive: (index: number | ((prev: number) => number)) => void;
@@ -9,13 +9,13 @@ interface UseStudioSliderPhysicsProps {
   itemRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
 }
 
-export function useStudioSliderPhysics({
+export function useWorkSliderPhysics({
   itemCount,
   currentActive,
   setCurrentActive,
   listRef,
   itemRefs,
-}: UseStudioSliderPhysicsProps) {
+}: UseWorkSliderPhysicsProps) {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [sliderProgress, setSliderProgress] = useState<number>(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);

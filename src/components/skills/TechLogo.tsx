@@ -6,7 +6,7 @@ export interface TechLogoProps {
   slug?: string;
   className?: string;
   size?: number;
-  color?: string; // Optional Hex color (with or without '#') for monochrome/tinted SVG
+  color?: string;
   iconUrl?: string;
   name?: string;
 }
@@ -14,11 +14,16 @@ export interface TechLogoProps {
 /**
  * TechLogo
  * 
- * Presentation Component for Technical Skill Logos:
- * 1. Resolves icons via local package simple-icons & verified local SVGs (no flaky CDN dependency).
- * 2. Strictly adheres to official brand paths without custom hand-drawn/hallucinated SVGs.
- * 3. Supports controlled monochrome tinting via `color` prop or uses official brand hex.
- * 4. Renders intentional, high-contrast engineering specification badges for unbranded technologies.
+ * Canonical SVG-only presentation component for skills & technologies:
+ * 1. Resolves verified vector paths directly from `simple-icons`.
+ * 2. Resolves verified official SVG assets from `/assets/icons/`.
+ * 3. Genuinely unbranded standards render a neutral technical code glyph (< / >).
+ * 
+ * GUARANTEES:
+ * - ZERO initials / fallback letters pretending to be a logo.
+ * - ZERO emoji.
+ * - ZERO hand-drawn or invented SVGs.
+ * - ZERO substituted logos (GLSL ≠ OpenGL, R3F ≠ React, Draco ≠ Three.js, Canvas API ≠ HTML5).
  */
 export const TechLogo: React.FC<TechLogoProps> = ({
   id = '',
@@ -29,13 +34,13 @@ export const TechLogo: React.FC<TechLogoProps> = ({
   iconUrl,
   name,
 }) => {
-  const [imgError, setImgError] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const resolved = resolveSkillIcon(id, slug, name);
   const displayName = name || resolved.title || id;
 
-  // 1. Explicit iconUrl or local verified SVG asset
-  const targetUrl = !imgError ? (iconUrl || resolved.url) : null;
+  // 1. Explicit iconUrl or verified local SVG asset
+  const targetUrl = !hasError ? (iconUrl || (resolved.kind === 'local-svg' ? resolved.url : null)) : null;
   if (targetUrl) {
     return (
       <img
@@ -44,16 +49,16 @@ export const TechLogo: React.FC<TechLogoProps> = ({
         className={`object-contain pointer-events-none select-none shrink-0 transition-transform duration-200 ${className}`}
         style={size ? { width: `${size}px`, height: `${size}px` } : undefined}
         loading="lazy"
-        onError={() => setImgError(true)}
+        onError={() => setHasError(true)}
       />
     );
   }
 
-  // 2. Official verified SVG vector directly from simple-icons package
-  if (resolved.kind === 'svg-path' && resolved.path) {
+  // 2. Official Simple Icons vector path
+  if (resolved.kind === 'svg-path') {
     const fillColor = color
       ? (color.startsWith('#') ? color : `#${color}`)
-      : (resolved.hex ? `#${resolved.hex}` : 'currentColor');
+      : `#${resolved.hex}`;
 
     return (
       <svg
@@ -71,29 +76,30 @@ export const TechLogo: React.FC<TechLogoProps> = ({
     );
   }
 
-  // 3. Approved Neutral Technical Specification Badge for unbranded/standard concepts
-  if (resolved.kind === 'neutral') {
-    return (
-      <span
-        className={`inline-flex items-center justify-center rounded-md bg-white/[0.05] text-white/80 font-mono font-medium text-[11px] tracking-wider select-none shrink-0 border border-white/20 shadow-inner ${className}`}
-        style={size ? { width: `${size}px`, height: `${size}px` } : undefined}
-        title={`[Technical Standard / Specification] ${displayName}: ${resolved.neutralReason || ''}`}
-        aria-label={`Specification: ${displayName}`}
-      >
-        {resolved.fallbackText}
-      </span>
-    );
-  }
+  // 3. Genuinely unbranded standard / specification:
+  // Render a clean, neutral technical code glyph.
+  // NEVER initials! NEVER letters! NEVER fake logos!
+  const strokeColor = color
+    ? (color.startsWith('#') ? color : `#${color}`)
+    : 'rgba(255, 255, 255, 0.65)';
 
-  // 4. Defensive fallback
   return (
-    <span
-      className={`inline-flex items-center justify-center rounded-md bg-white/10 text-white/70 font-mono text-xs select-none shrink-0 border border-white/10 ${className}`}
+    <svg
+      role="img"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={strokeColor}
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`object-contain pointer-events-none select-none shrink-0 opacity-80 ${className}`}
       style={size ? { width: `${size}px`, height: `${size}px` } : undefined}
-      title={displayName}
+      aria-label={`Specification: ${displayName}`}
     >
-      {resolved.fallbackText}
-    </span>
+      <title>{`${displayName} (Technical Standard)`}</title>
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
   );
 };
 

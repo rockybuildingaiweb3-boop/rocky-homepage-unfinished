@@ -16,8 +16,6 @@ async function validateIcons() {
   const {
     resolveSkillIcon,
     GENUINELY_UNBRANDED_SKILLS,
-    LOCAL_SVG_ASSETS,
-    PACKAGE_ICONS,
   } = await import('../src/components/skills/iconResolver.ts');
 
   console.log(`Auditing ${SKILLS_DATA.length} skills across ${SKILL_ROWS.length} category rows.`);
@@ -68,7 +66,7 @@ async function validateIcons() {
       errors.push(`[${skill.id}] Invalid row index: ${skill.row}`);
     }
 
-    const isUnbranded = Boolean(GENUINELY_UNBRANDED_SKILLS[skill.id]);
+    const isApprovedUnbranded = Boolean(GENUINELY_UNBRANDED_SKILLS[skill.id]);
     const resolved = resolveSkillIcon(skill.id, skill.slug, skill.name);
 
     if (resolved.kind === 'svg-path') {
@@ -101,64 +99,83 @@ async function validateIcons() {
         }
       }
       stats.localSvg++;
-    } else if (resolved.kind === 'neutral') {
-      // For branded technologies, fallback = FAIL
-      if (!isUnbranded) {
+    } else if (resolved.kind === 'unbranded') {
+      if (!isApprovedUnbranded) {
         errors.push(
-          `[${skill.id}] UNRESOLVED BRANDED LOGO: Branded technology degraded to monogram without legitimate logo.`
+          `[${skill.id}] Branded technology "${skill.name}" has NO verified logo vector! (fallback = FAIL)`
         );
         stats.unresolvedBranded++;
       } else {
         stats.approvedNeutral++;
-        neutralList.push({
-          id: skill.id,
-          name: skill.name,
-          row: skill.row,
-          reason: resolved.neutralReason,
-        });
+        neutralList.push({ id: skill.id, name: skill.name, reason: GENUINELY_UNBRANDED_SKILLS[skill.id] });
       }
+    }
+
+    // 3. Strict prohibitions: Disallow incorrect brand substitutions
+    if (skill.id === 'glsl' && resolved.kind === 'svg-path' && resolved.title?.toLowerCase().includes('opengl')) {
+      errors.push(`[glsl] Incorrect logo substitution: GLSL must NOT use OpenGL logo.`);
+      stats.incorrectSubstitutions++;
+    }
+    if (skill.id === 'r3f' && resolved.kind === 'svg-path' && resolved.title?.toLowerCase() === 'react') {
+      errors.push(`[r3f] Incorrect logo substitution: React Three Fiber must NOT use React logo.`);
+      stats.incorrectSubstitutions++;
+    }
+    if (skill.id === 'draco' && resolved.kind === 'svg-path' && resolved.title?.toLowerCase().includes('three')) {
+      errors.push(`[draco] Incorrect logo substitution: Draco must NOT use Three.js logo.`);
+      stats.incorrectSubstitutions++;
+    }
+    if (skill.id === 'canvasapi' && resolved.kind === 'svg-path' && resolved.title?.toLowerCase().includes('html5')) {
+      errors.push(`[canvasapi] Incorrect logo substitution: Canvas API must NOT use HTML5 logo.`);
+      stats.incorrectSubstitutions++;
     }
   }
 
-  // 3. Row count validation (exactly 10 per row)
+  // Row distribution summary
+  console.log('Row distribution (Target: 10 per row):');
+  let rowDistributionPass = true;
   for (let r = 1; r <= 8; r++) {
-    if (rowCounts[r] !== 10) {
-      errors.push(`Row ${r} has ${rowCounts[r]} skills (expected exactly 10).`);
-    }
+    const count = rowCounts[r];
+    const isOk = count === 10;
+    if (!isOk) rowDistributionPass = false;
+    console.log(`  Row ${r}: ${count} skills ${isOk ? '✓' : '✗'}`);
   }
 
   if (duplicateIds.length > 0) {
-    errors.push(`Duplicate Skill IDs: ${duplicateIds.join(', ')}`);
+    errors.push(`Duplicate skill IDs detected: ${duplicateIds.join(', ')}`);
   }
   if (duplicateNames.length > 0) {
-    errors.push(`Duplicate Skill Names: ${duplicateNames.join(', ')}`);
+    errors.push(`Duplicate skill names detected: ${duplicateNames.join(', ')}`);
   }
 
-  const totalReconciled = stats.packageBacked + stats.localSvg + stats.approvedNeutral + stats.unresolvedBranded;
+  console.log('\n--- RESOLUTION BREAKDOWN ---');
+  console.log(`✓ Simple Icons package vectors: ${stats.packageBacked}`);
+  console.log(`✓ Verified local SVG assets:    ${stats.localSvg}`);
+  console.log(`✓ Approved neutral standards:   ${stats.approvedNeutral}`);
+  console.log(`✗ Unresolved branded logos:     ${stats.unresolvedBranded}`);
+  console.log(`✗ Broken local SVG files:       ${stats.brokenLocalSvgs}`);
+  console.log(`✗ Incorrect logo substitutions: ${stats.incorrectSubstitutions}`);
 
-  console.log('--- VALIDATION SUMMARY ---');
-  console.log(`Total skills:                              ${SKILLS_DATA.length} (expected 80)`);
-  console.log(`Rows verified (10 per row):                ${Object.values(rowCounts).every((c) => c === 10) ? '8/8 PASS' : 'FAIL'}`);
-  console.log(`Verified package icons (simple-icons):      ${stats.packageBacked}`);
-  console.log(`Verified local official SVGs:              ${stats.localSvg}`);
-  console.log(`Approved neutral specifications:           ${stats.approvedNeutral}`);
-  console.log(`Unresolved branded logos:                  ${stats.unresolvedBranded}`);
-  console.log(`Broken local SVGs:                         ${stats.brokenLocalSvgs}`);
-  console.log(`Incorrect logo substitutions:              ${stats.incorrectSubstitutions}`);
-  console.log(`Reconciliation check:                      ${totalReconciled}/80\n`);
+  console.log('\n--- APPROVED NEUTRAL STANDARDS (< / > SPECIFICATION ICON) ---');
+  for (const n of neutralList) {
+    console.log(`  · [${n.id}] ${n.name}: ${n.reason}`);
+  }
 
-  console.log('Approved Genuinely Unbranded Specifications:');
-  neutralList.forEach((n) => {
-    console.log(`  ✓ [Row ${n.row}] ${n.id.padEnd(16)} (${n.name.padEnd(20)}): ${n.reason}`);
-  });
-
-  if (errors.length > 0) {
-    console.error(`\n✖ STRICT VALIDATION FAILED WITH ${errors.length} ERRORS:\n`);
-    errors.forEach((err) => console.error(`  - ${err}`));
+  console.log('\n====================================================');
+  if (errors.length > 0 || !rowDistributionPass) {
+    console.error(`FAILED: ${errors.length} validation errors found.`);
+    for (const err of errors) {
+      console.error(`  - ${err}`);
+    }
     process.exit(1);
   }
 
-  console.log('\n✔ ALL 80 SKILLS VALIDATED. Zero unresolved branded logos, zero broken SVGs.\n');
+  if (SKILLS_DATA.length !== 80) {
+    console.error(`FAILED: Expected exactly 80 skills, got ${SKILLS_DATA.length}`);
+    process.exit(1);
+  }
+
+  console.log('SUCCESS: All 80 skills verified with 100% strict compliance.');
+  console.log('====================================================');
 }
 
 validateIcons().catch((err) => {
