@@ -34,10 +34,8 @@ export const TechLogo: React.FC<TechLogoProps> = ({
   const techSlug = iconDef?.slug || id.toLowerCase().trim() || 'code';
   const displayName = name || iconDef?.name || techSlug;
 
-  // Determine the exact Simple Icons CDN URL:
-  // If a specific color is passed, append clean hex (e.g., 'ffffff')
-  // Otherwise use the official Simple Icons SVG url
-  let targetUrl = iconUrl;
+  // Determine the exact icon URL (local official SVG or Simple Icons CDN)
+  let targetUrl = iconUrl || iconDef?.iconUrl;
   if (!targetUrl) {
     if (color) {
       const cleanHex = color.replace(/^#/, '').trim();

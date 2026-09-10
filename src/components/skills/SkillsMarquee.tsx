@@ -20,63 +20,13 @@ const getSkill = (id: string): SkillItem => {
   );
 };
 
-// Track 1: Rows 1 & 2 (Frontend, Interaction, 3D & Graphics) - Strictly De-duplicated (20 unique skills)
-const TRACK_1_SKILLS: SkillItem[] = [
-  getSkill('typescript'),
-  getSkill('javascript'),
-  getSkill('react'),
-  getSkill('nextjs'),
-  getSkill('svelte'),
-  getSkill('tailwind'),
-  getSkill('motion'),
-  getSkill('gsap'),
-  getSkill('html5'),
-  getSkill('vite'),
-  getSkill('threejs'),
-  getSkill('webgl'),
-  getSkill('webgpu'),
-  getSkill('opengl'),
-  getSkill('blender'),
-  getSkill('unity'),
-  getSkill('unrealengine'),
-  getSkill('vulkan'),
-  getSkill('webassembly'),
-  getSkill('godotengine'),
-];
+// Track 1: Rows 1 & 2 (Frontend, Interaction, 3D & Graphics) - 20 unique skills
+const TRACK_1_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row === 1 || s.row === 2);
 
-// Track 2: Rows 3, 4 & 5 (Backend, Systems, Web3 & AI Agents) - Strictly De-duplicated (30 unique skills)
-const TRACK_2_SKILLS: SkillItem[] = [
-  getSkill('nodejs'),
-  getSkill('express'),
-  getSkill('nestjs'),
-  getSkill('postgresql'),
-  getSkill('supabase'),
-  getSkill('prisma'),
-  getSkill('drizzle'),
-  getSkill('redis'),
-  getSkill('graphql'),
-  getSkill('docker'),
-  getSkill('solidity'),
-  getSkill('ethereum'),
-  getSkill('polygon'),
-  getSkill('solana'),
-  getSkill('chainlink'),
-  getSkill('alchemy'),
-  getSkill('ipfs'),
-  getSkill('web3dotjs'),
-  getSkill('bitcoin'),
-  getSkill('optimism'),
-  getSkill('anthropic'),
-  getSkill('langchain'),
-  getSkill('ollama'),
-  getSkill('huggingface'),
-  getSkill('pytorch'),
-  getSkill('python'),
-  getSkill('figma'),
-  getSkill('storybook'),
-  getSkill('git'),
-  getSkill('rive'),
-];
+// Track 2: Rows 3, 4 & 5 (Backend, Systems, Web3 & AI Engineering) - 30 unique skills
+const TRACK_2_SKILLS: SkillItem[] = SKILLS_DATA.filter(
+  (s) => s.row === 3 || s.row === 4 || s.row === 5
+);
 
 interface SkillsMarqueeProps {
   activeSkillId?: string;

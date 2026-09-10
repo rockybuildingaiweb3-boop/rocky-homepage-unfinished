@@ -335,7 +335,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             {/* Primary Action Button: Enter the Studio */}
             <button
               type="button"
-              onClick={() => onNavigate?.('work')}
+              onClick={() => onNavigate?.('studio')}
               className="group relative inline-flex items-center gap-3 px-6 py-2.5 rounded-full font-mono text-xs sm:text-[13px] tracking-[0.22em] uppercase text-white/95 hover:text-white bg-black/40 hover:bg-white/[0.08] border border-white/25 hover:border-white/70 shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(216,180,254,0.35)] backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white clickable"
               aria-label="Enter the Studio projects"
             >

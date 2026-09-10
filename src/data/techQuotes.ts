@@ -52,17 +52,17 @@ export const TECH_QUOTES: Record<string, string> = {
   bitcoin: 'Decentralized cryptographic hard money and Nakamoto consensus ₿',
   optimism: 'Optimistic rollups scaling Ethereum with the open Superchain 🔴',
 
-  // Row 5
-  anthropic: 'Frontier reasoning, long-context comprehension & Model Context Protocol 🧠',
+  // Row 5: AI Engineering, LLMs & Agentic Systems
+  openai: 'Frontier reasoning, multimodal intelligence, and structured function calling ⚡',
+  chatgpt: 'Conversational agent engineering, custom GPTs, and prompt synthesis 🤖',
+  anthropic: 'Constitutional reasoning, long-context comprehension & Model Context Protocol 🧠',
+  python: 'The lingua franca of artificial intelligence, tensor math & pipelines 🐍',
   langchain: 'Composing multi-step reasoning chains with contextual tools ⛓️',
-  ollama: 'High-performance local LLM execution with zero-cloud privacy 🦙',
+  agentic: 'Autonomous multi-agent loops, stateful workflows, and external execution 🧭',
+  rag: 'Retrieval-Augmented Generation with semantic embeddings and vector search 🔍',
   huggingface: 'The open-source heartbeat of machine learning models and datasets 🤗',
   pytorch: 'Dynamic neural network graphs and tensor mathematics on GPUs 🔥',
-  python: 'The lingua franca of artificial intelligence and machine learning 🐍',
-  figma: 'Design token systems translated into engineered precision 🎯',
-  storybook: 'Isolated component workshop and automated visual regression test 📚',
-  git: 'Distributed version control tracking every atomic commit 🌿',
-  rive: 'Interactive vector runtimes with real-time state machines 💫',
+  ollama: 'High-performance local LLM execution with zero-cloud privacy 🦙',
 };
 
 export function getTechQuote(skillId: string, fallback?: string): string {

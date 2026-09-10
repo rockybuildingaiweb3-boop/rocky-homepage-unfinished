@@ -16,7 +16,7 @@ const CATEGORY_LEGENDS = [
   { id: 'space', label: 'space', row: 2 },
   { id: 'systems', label: 'systems', row: 3 },
   { id: 'chain', label: 'chain', row: 4 },
-  { id: 'mind', label: 'mind', row: 5 },
+  { id: 'ai', label: 'ai', row: 5 },
 ] as const;
 
 export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
