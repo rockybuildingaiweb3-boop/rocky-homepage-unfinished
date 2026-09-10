@@ -1,54 +1,78 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { SiteData } from '../types';
 import { Navbar, Footer } from '../components/layout';
-import { HomeSection } from '../components/sections';
-import { useScrollSpy } from '../features/scroll';
 import { useRouter } from '../router/RouterContext';
 
 interface HomePageProps {
   siteData: SiteData | null;
 }
 
-const SECTION_IDS = ['contact', 'home'];
-
 export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
   const { navigate } = useRouter();
-  const { scrollY, activeSection, setActiveSection } = useScrollSpy({
-    sectionIds: SECTION_IDS,
-  });
-
-  const handleNavigate = useCallback(
-    (targetId: string) => {
-      if (targetId === 'studio' || targetId === '/studio') {
-        navigate('/studio');
-        return;
-      }
-      if (targetId.startsWith('/')) {
-        navigate(targetId);
-        return;
-      }
-      if (targetId === 'home') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setActiveSection('home');
-        return;
-      }
-
-      const resolvedId = targetId === 'footer' ? 'contact' : targetId;
-      const targetEl = document.getElementById(resolvedId);
-      if (targetEl) {
-        const headerOffset = window.innerHeight * 0.1;
-        const targetY = Math.max(0, targetEl.offsetTop - headerOffset);
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-        setActiveSection(resolvedId);
-      }
-    },
-    [navigate, setActiveSection]
-  );
 
   return (
-    <main className="w-full min-h-screen relative z-10 overflow-x-hidden">
-      <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
-      <HomeSection scrollY={scrollY} onNavigate={handleNavigate} />
+    <main className="relative z-10 w-full min-h-screen overflow-x-hidden">
+      <Navbar onNavigate={(target) => {
+        if (target === 'studio') {
+          navigate('/studio');
+          return;
+        }
+        if (target === 'contact') {
+          document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }} />
+
+      <section
+        id="home"
+        className="relative min-h-screen overflow-hidden flex items-center justify-center px-6 py-24"
+        aria-label="Rocky Babcock"
+      >
+        <img
+          src="/assets/imgs/home-back.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+          draggable={false}
+        />
+
+        <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
+
+        <div className="relative z-10 flex w-full max-w-5xl flex-col items-center text-center">
+          <img
+            src="/assets/imgs/signature.svg"
+            alt="Rocky Babcock"
+            className="mb-8 h-auto w-[min(58vw,420px)]"
+            draggable={false}
+          />
+
+          <h1
+            className="m-0 text-[clamp(4.5rem,12vw,10rem)] font-normal lowercase leading-[0.82] tracking-[-0.05em] text-white"
+            style={{ fontFamily: 'var(--title-font)' }}
+          >
+            <span className="block">rocky</span>
+            <span className="block">babcock</span>
+          </h1>
+
+          <p className="mt-8 font-mono text-xs uppercase tracking-[0.24em] text-white/85 sm:text-sm">
+            creative technologist &amp; frontend developer
+          </p>
+
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed tracking-[0.08em] text-white/80 sm:text-base">
+            写有呼吸的代码，造看得见光的界面。
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate('/studio')}
+            className="mt-10 rounded-full border border-white/30 px-6 py-3 font-mono text-xs uppercase tracking-[0.22em] text-white transition-colors hover:border-white hover:bg-white/10"
+          >
+            enter studio
+          </button>
+        </div>
+      </section>
+
       <Footer siteData={siteData} onNavigateRoute={navigate} />
     </main>
   );
