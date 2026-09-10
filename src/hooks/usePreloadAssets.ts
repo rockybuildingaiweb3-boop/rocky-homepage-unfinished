@@ -11,7 +11,6 @@ export interface PreloadAssetsResult {
 }
 
 const CRITICAL_ASSETS = [
-  '/assets/imgs/loader-flower.jpg',
   '/assets/imgs/home-back.jpg',
   '/assets/imgs/logo-rb-cyber.svg',
   '/assets/imgs/signature.svg',
@@ -36,11 +35,7 @@ export function usePreloadAssets(): PreloadAssetsResult {
         let loaded = 0;
         await Promise.all(
           CRITICAL_ASSETS.map(async (src) => {
-            try {
-              await loadImage(src);
-            } catch {
-              // A single decorative asset must not block the page.
-            }
+            await loadImage(src);
             if (mounted) {
               loaded += 1;
               setProgress(20 + Math.round((loaded / CRITICAL_ASSETS.length) * 80));
@@ -57,8 +52,8 @@ export function usePreloadAssets(): PreloadAssetsResult {
             if (!mounted) return;
             setLoading(false);
             devMsg();
-          }, 1550);
-        }, 250);
+          }, 500);
+        }, 150);
       } catch (error) {
         console.error('Failed to load site data:', error);
         if (!mounted) return;
