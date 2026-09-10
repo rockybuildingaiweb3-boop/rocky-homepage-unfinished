@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { SKILLS_DATA, SkillItem } from '../../data/skills';
 import { TechLogo } from './TechLogo';
-import { getTechQuote } from '../../data/techQuotes';
-import { playMechanicalClick } from './audio';
 
-// Track 1: Upper constellation rows (Frontend, 3D Graphics, Backend & Web3)
 const TRACK_1_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row <= 4);
-
-// Track 2: Lower constellation rows (AI Models, AI Agents, RAG & Engineering Stability)
 const TRACK_2_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row >= 5);
 
 interface SkillsMarqueeProps {
@@ -15,36 +10,18 @@ interface SkillsMarqueeProps {
   onSelectSkill?: (skill: SkillItem) => void;
 }
 
-/**
- * SkillsMarquee
- * 
- * 100% Transparent Seamless Flowing Marquee with bidirectional linkage:
- * - When user hovers an icon in the constellation, the matching item in this marquee
- *   radiantly glows with its brand color and pulsing active beacon.
- * - When user clicks or hovers any quote in this marquee, it immediately syncs back
- *   to the constellation, locks the skill in the HUD, and shifts the cosmic nebula tint!
- */
-export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({
-  activeSkillId,
-  onSelectSkill,
-}) => {
+export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({ activeSkillId, onSelectSkill }) => {
   const [hoveredSkillId, setHoveredSkillId] = useState<string | null>(null);
-
-  const handleItemClick = (skill: SkillItem) => {
-    playMechanicalClick();
-    onSelectSkill?.(skill);
-  };
 
   const renderMarqueeItem = (skill: SkillItem, keyPrefix: string) => {
     const isHovered = hoveredSkillId === skill.id;
     const isActive = activeSkillId === skill.id;
-    const quote = getTechQuote(skill.id, skill.shortDescription || skill.positioning);
 
     return (
       <button
         key={`${keyPrefix}-${skill.id}`}
         type="button"
-        onClick={() => handleItemClick(skill)}
+        onClick={() => onSelectSkill?.(skill)}
         onMouseEnter={() => {
           setHoveredSkillId(skill.id);
           onSelectSkill?.(skill);
@@ -56,23 +33,15 @@ export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({
             : 'border border-transparent hover:bg-white/[0.05]'
         }`}
       >
-        {/* Unified Glass Pod for the Logo */}
         <span className="flex items-center gap-2.5 shrink-0">
           <span
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center transition-transform duration-300 group-hover/quote:scale-110 shrink-0 relative"
             style={{
               borderColor: isHovered || isActive ? skill.brandColor : 'rgba(255, 255, 255, 0.12)',
-              boxShadow:
-                isHovered || isActive
-                  ? `0 0 16px ${skill.brandColor}80`
-                  : '0 2px 8px rgba(0,0,0,0.5)',
+              boxShadow: isHovered || isActive ? `0 0 16px ${skill.brandColor}80` : '0 2px 8px rgba(0,0,0,0.5)',
             }}
           >
-            <TechLogo
-              id={skill.id}
-              size={20}
-              color={isHovered || isActive ? skill.brandColor : undefined}
-            />
+            <TechLogo id={skill.id} size={20} />
             {isActive && (
               <span
                 className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-ping"
@@ -89,18 +58,11 @@ export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({
             }}
           >
             {skill.name}
-            {isActive && (
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-400/30">
-                ACTIVE
-              </span>
-            )}
           </span>
         </span>
 
-        {/* Separator */}
         <span className="text-purple-400/50 font-mono text-xs select-none">::</span>
 
-        {/* The One-Liner Quote */}
         <span
           className={`font-medium text-xs sm:text-sm tracking-normal transition-colors duration-200 ${
             isHovered || isActive
@@ -108,30 +70,20 @@ export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({
               : 'text-neutral-300 group-hover/quote:text-white'
           }`}
         >
-          &ldquo;{quote}&rdquo;
+          &ldquo;{skill.shortDescription || skill.positioning || ''}&rdquo;
         </span>
       </button>
     );
   };
 
-
   return (
     <div className="w-full flex flex-col gap-3 sm:gap-5 my-6 sm:my-10 select-none relative z-10">
-      {/* 
-        TRACK 1: Rows 1 to 4 Skills Stream (Flowing Forward / Left)
-        Completely transparent background so star particles flow right through.
-      */}
       <div className="marquee-band group">
         <div className="marquee-track marquee-track-forward">
           {TRACK_1_SKILLS.map((skill) => renderMarqueeItem(skill, 't1-a'))}
           {TRACK_1_SKILLS.map((skill) => renderMarqueeItem(skill, 't1-b'))}
         </div>
       </div>
-
-      {/* 
-        TRACK 2: Rows 5 to 8 Skills Stream (Flowing Reverse / Right)
-        Completely transparent background so star particles flow right through.
-      */}
       <div className="marquee-band group">
         <div className="marquee-track marquee-track-reverse">
           {TRACK_2_SKILLS.map((skill) => renderMarqueeItem(skill, 't2-a'))}
