@@ -164,7 +164,7 @@ const VERIFIED_SIMPLE_ICONS: Record<string, SimpleIconData> = {
  */
 const LOCAL_SVG_ASSETS: Record<string, string> = {
   openai: '/assets/icons/openai.svg',
-  chatgpt: '/assets/icons/chatgpt.svg',
+  chatgpt: '/assets/icons/openai.svg',
   rag: '/assets/icons/rag.svg',
   embeddingmodels: '/assets/icons/rag.svg',
   agentic: '/assets/icons/agentic.svg',

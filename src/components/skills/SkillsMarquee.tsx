@@ -4,26 +4,10 @@ import { TechLogo } from './TechLogo';
 import { getTechQuote } from '../../data/techQuotes';
 import { playMechanicalClick } from './audio';
 
-// Helper to safely fetch skill data by ID
-const getSkill = (id: string): SkillItem => {
-  return (
-    SKILLS_DATA.find((s) => s.id === id) || {
-      id,
-      name: id.toUpperCase(),
-      slug: id,
-      row: 1,
-      rowTitle: 'Core Stack',
-      category: 'Technology',
-      brandColor: '#A855F7',
-      shortDescription: `Crafting high-velocity web experiences with ${id} 🚀`,
-    }
-  );
-};
-
-// Track 1: Rows 1, 2, 3 & 4 (Frontend, 3D Graphics, Backend & Web3) - 40 unique skills
+// Track 1: Upper constellation rows (Frontend, 3D Graphics, Backend & Web3)
 const TRACK_1_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row <= 4);
 
-// Track 2: Rows 5, 6, 7 & 8 (AI Models, AI Agents, RAG & Engineering Stability) - 40 unique skills
+// Track 2: Lower constellation rows (AI Models, AI Agents, RAG & Engineering Stability)
 const TRACK_2_SKILLS: SkillItem[] = SKILLS_DATA.filter((s) => s.row >= 5);
 
 interface SkillsMarqueeProps {
@@ -35,7 +19,7 @@ interface SkillsMarqueeProps {
  * SkillsMarquee
  * 
  * 100% Transparent Seamless Flowing Marquee with bidirectional linkage:
- * - When user hovers an icon in the 5-row constellation, the matching item in this marquee
+ * - When user hovers an icon in the constellation, the matching item in this marquee
  *   radiantly glows with its brand color and pulsing active beacon.
  * - When user clicks or hovers any quote in this marquee, it immediately syncs back
  *   to the constellation, locks the skill in the HUD, and shifts the cosmic nebula tint!

@@ -14,51 +14,80 @@ export interface SkillItem {
 
 export interface SkillRowDefinition {
   row: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  id: string;
+  label: string;
   title: string;
   subtitle: string;
 }
 
 export const SKILL_ROWS: SkillRowDefinition[] = [
   {
-    "row": 1,
-    "title": "核心前端与交互动效",
-    "subtitle": "Core Frontend & Kinetic Motion"
+    row: 1,
+    id: 'frontend',
+    label: 'frontend',
+    title: '核心前端与交互动效',
+    subtitle: 'Core Frontend & Kinetic Motion',
   },
   {
-    "row": 2,
-    "title": "3D 空间计算与图形资产",
-    "subtitle": "3D Spatial Computing & Graphics"
+    row: 2,
+    id: 'space',
+    label: 'space',
+    title: '3D 空间计算与图形资产',
+    subtitle: '3D Spatial Computing & Graphics',
   },
   {
-    "row": 3,
-    "title": "服务端、数据与基础设施",
-    "subtitle": "Backend, Data & Infrastructure"
+    row: 3,
+    id: 'systems',
+    label: 'systems',
+    title: '服务端、数据与基础设施',
+    subtitle: 'Backend, Data & Infrastructure',
   },
   {
-    "row": 4,
-    "title": "Web3 与去中心化架构",
-    "subtitle": "Web3 & Decentralized Architecture"
+    row: 4,
+    id: 'web3',
+    label: 'web3',
+    title: 'Web3 与去中心化架构',
+    subtitle: 'Web3 & Decentralized Architecture',
   },
   {
-    "row": 5,
-    "title": "AI 模型与调用工程",
-    "subtitle": "AI Models & Inference Engineering"
+    row: 5,
+    id: 'models',
+    label: 'models',
+    title: 'AI 模型与调用工程',
+    subtitle: 'AI Models & Inference Engineering',
   },
   {
-    "row": 6,
-    "title": "AI Agent 与工作流编排",
-    "subtitle": "AI Agents & Workflow Orchestration"
+    row: 6,
+    id: 'agents',
+    label: 'agents',
+    title: 'AI Agent 与工作流编排',
+    subtitle: 'AI Agents & Workflow Orchestration',
   },
   {
-    "row": 7,
-    "title": "RAG 知识库与检索工程",
-    "subtitle": "RAG Knowledge Base & Retrieval"
+    row: 7,
+    id: 'retrieval',
+    label: 'retrieval',
+    title: 'RAG 知识库与检索工程',
+    subtitle: 'RAG Knowledge Base & Retrieval',
   },
   {
-    "row": 8,
-    "title": "工程化部署、测试与稳定性",
-    "subtitle": "Engineering Deployment, Testing & Reliability"
-  }
+    row: 8,
+    id: 'engineering',
+    label: 'engineering',
+    title: '工程化部署、测试与稳定性',
+    subtitle: 'Engineering Deployment, Testing & Reliability',
+  },
+];
+
+export interface SkillCategoryLegend {
+  id: string;
+  label: string;
+  row: number;
+}
+
+export const SKILL_CATEGORIES: SkillCategoryLegend[] = [
+  { id: 'all', label: 'all', row: 0 },
+  ...SKILL_ROWS.map((r) => ({ id: r.id, label: r.label, row: r.row })),
 ];
 
 export const PROJECT_NAMES: Record<
@@ -1282,32 +1311,12 @@ export const SKILLS_DATA: SkillItem[] = [
   }
 ];
 
-// Group skills by their designated row (1-8)
-export const SKILLS_BY_ROW: Record<number, SkillItem[]> = {
-  1: SKILLS_DATA.filter((s) => s.row === 1),
-  2: SKILLS_DATA.filter((s) => s.row === 2),
-  3: SKILLS_DATA.filter((s) => s.row === 3),
-  4: SKILLS_DATA.filter((s) => s.row === 4),
-  5: SKILLS_DATA.filter((s) => s.row === 5),
-  6: SKILLS_DATA.filter((s) => s.row === 6),
-  7: SKILLS_DATA.filter((s) => s.row === 7),
-  8: SKILLS_DATA.filter((s) => s.row === 8),
-};
-
-// Skill Icons mapping directly derived from SKILLS_DATA for TechLogo consumption
-export const SKILL_ICONS: Record<
-  string,
-  { id: string; slug: string; name: string; brandColor: string; cdnUrl: string; iconUrl?: string }
-> = Object.fromEntries(
-  SKILLS_DATA.map((s) => [
-    s.id,
-    {
-      id: s.id,
-      slug: s.slug,
-      name: s.name,
-      brandColor: s.brandColor,
-      cdnUrl: s.icon || `https://cdn.simpleicons.org/${s.slug}`,
-      iconUrl: s.icon,
-    },
-  ])
+// Dynamically group skills by their designated row definition
+export const SKILLS_BY_ROW: Record<number, SkillItem[]> = SKILL_ROWS.reduce<Record<number, SkillItem[]>>(
+  (acc, rowDef) => {
+    acc[rowDef.row] = SKILLS_DATA.filter((s) => s.row === rowDef.row);
+    return acc;
+  },
+  {}
 );
+

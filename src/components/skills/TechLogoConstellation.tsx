@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SkillItem, SKILLS_DATA, SKILLS_BY_ROW, SKILL_ROWS, PROJECT_NAMES } from '../../data/skills';
+import { SkillItem, SKILLS_DATA, SKILLS_BY_ROW, SKILL_ROWS, SKILL_CATEGORIES, PROJECT_NAMES } from '../../data/skills';
 import { TechLogo } from './TechLogo';
 import { getTechQuote } from '../../data/techQuotes';
 import { playMechanicalClick } from './audio';
@@ -9,18 +9,6 @@ interface TechLogoConstellationProps {
   activeSkillId?: string;
   onSelectSkill?: (skill: SkillItem) => void;
 }
-
-const CATEGORY_LEGENDS = [
-  { id: 'all', label: 'all', row: 0 },
-  { id: 'frontend', label: 'frontend', row: 1 },
-  { id: 'space', label: 'space', row: 2 },
-  { id: 'systems', label: 'systems', row: 3 },
-  { id: 'web3', label: 'web3', row: 4 },
-  { id: 'models', label: 'models', row: 5 },
-  { id: 'agents', label: 'agents', row: 6 },
-  { id: 'retrieval', label: 'retrieval', row: 7 },
-  { id: 'engineering', label: 'engineering', row: 8 },
-] as const;
 
 export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
   activeSkillId,
@@ -64,7 +52,7 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
     <div className="relative w-full flex flex-col items-center justify-center py-2 select-none">
       {/* ─── CONSTELLATION LEGEND (Category Navigation) ─── */}
       <nav aria-label="Constellation Legend" className="flex items-center justify-center flex-wrap gap-x-6 sm:gap-x-8 gap-y-2 mb-6 sm:mb-8 px-4 z-20">
-        {CATEGORY_LEGENDS.map((cat, idx) => {
+        {SKILL_CATEGORIES.map((cat, idx) => {
           const isActive = selectedCategoryRow === cat.row;
           return (
             <React.Fragment key={cat.id}>
@@ -87,7 +75,7 @@ export const TechLogoConstellation: React.FC<TechLogoConstellationProps> = ({
                   }`}
                 />
               </button>
-              {idx < CATEGORY_LEGENDS.length - 1 && (
+              {idx < SKILL_CATEGORIES.length - 1 && (
                 <span className="text-white/15 select-none text-[10px] hidden sm:inline" aria-hidden="true">
                   ·
                 </span>
