@@ -1,13 +1,8 @@
 import React from 'react';
-import { SiteData } from '../types';
 import { Navbar, Footer } from '../components/layout';
 import { useRouter } from '../router/RouterContext';
 
-interface HomePageProps {
-  siteData: SiteData | null;
-}
-
-export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
+export const HomePage: React.FC = () => {
   const { navigate } = useRouter();
 
   return (
@@ -62,18 +57,10 @@ export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
           <p className="mt-5 max-w-2xl text-sm leading-relaxed tracking-[0.08em] text-white/80 sm:text-base">
             写有呼吸的代码，造看得见光的界面。
           </p>
-
-          <button
-            type="button"
-            onClick={() => navigate('/studio')}
-            className="mt-10 rounded-full border border-white/30 px-6 py-3 font-mono text-xs uppercase tracking-[0.22em] text-white transition-colors hover:border-white hover:bg-white/10"
-          >
-            enter studio
-          </button>
         </div>
       </section>
 
-      <Footer siteData={siteData} onNavigateRoute={navigate} />
+      <Footer />
     </main>
   );
 };
