@@ -4,4 +4,6 @@ export { StudioProjects } from './modules/StudioProjects';
 export { StudioBlog } from './modules/StudioBlog';
 export { StudioCareer } from './modules/StudioCareer';
 export { StudioModulePlaceholder } from './modules/StudioModulePlaceholder';
+export * from './components';
+export * from './hooks';
 export * from './types';

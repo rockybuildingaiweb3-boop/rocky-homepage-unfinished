@@ -13,13 +13,29 @@ export interface WorkDetails {
   summary: string;
 }
 
+export type WorkItemType = 'project' | 'module';
+
 export interface WorkItem {
   id: string;
+  type?: WorkItemType;
   title: string;
   image?: string;
   destination?: string;
+  route?: string;
   details: WorkDetails;
   date?: string;
   roles: string[];
   links?: WorkLink[];
+}
+
+export type StudioModuleId = 'projects' | 'experiments' | 'blog' | 'life' | 'archive';
+
+export interface StudioModuleMeta {
+  id: StudioModuleId;
+  label: string;
+  code: string;
+  description: string;
+  path: string;
+  status: 'active' | 'upcoming';
+  count?: string;
 }

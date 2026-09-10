@@ -48,7 +48,7 @@ export const SkillsSection: React.FC = () => {
           </h2>
         </div>
 
-        {/* ─── 3. THE 5-ROW CONSTELLATION (50 SKILLS, 10 PER ROW) ─── */}
+        {/* ─── 3. THE TECHNICAL CONSTELLATION ─── */}
         <div className="w-full relative">
           <TechLogoConstellation
             activeSkillId={selectedSkill.id}
