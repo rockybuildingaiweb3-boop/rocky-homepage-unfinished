@@ -19,10 +19,7 @@ export class ImageRenderer extends MeshRenderer {
   }
 
   setup(): boolean {
-    const initialized = super.setup();
-    if (!initialized) return false;
-
-    // Assign SliderImageMesh instances to each loaded image
+    // Assign SliderImageMesh instances to each loaded image before starting render loop
     this.images.forEach((img) => {
       try {
         if (img && img.parentElement) {
@@ -33,6 +30,9 @@ export class ImageRenderer extends MeshRenderer {
         console.warn('Error creating SliderImageMesh for image:', err);
       }
     });
+
+    const initialized = super.setup();
+    if (!initialized) return false;
 
     return true;
   }

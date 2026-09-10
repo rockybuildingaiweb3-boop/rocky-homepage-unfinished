@@ -57,7 +57,12 @@ export class ImageMesh {
     const rect = this.element.getBoundingClientRect();
 
     const loader = new THREE.TextureLoader();
-    this.texture = loader.load(this.element.src);
+    loader.setCrossOrigin('anonymous');
+    this.texture = loader.load(this.element.src, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.needsUpdate = true;
+    });
+    this.texture.colorSpace = THREE.SRGBColorSpace;
 
     this.uniforms = {
       uTexture: { value: this.texture },

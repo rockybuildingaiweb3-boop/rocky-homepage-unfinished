@@ -32,6 +32,7 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
   const rendererRef = useRef<ImageRenderer | null>(null);
   const dragDistanceRef = useRef<number>(0);
   const sliderProgressRef = useRef<number>(0);
+  const touchStartPos = useRef({ x: 0, y: 0 });
 
   // Slider physics state strictly mirroring Musab's WorkSlider class
   const sliderState = useRef({
@@ -73,6 +74,8 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
         style.transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : style.transform;
       const matrix = new DOMMatrix(transform);
       sliderState.current.initialPosition = matrix.m41;
+      sliderState.current.targetPosition = matrix.m41;
+      sliderState.current.currentPosition = matrix.m41;
     }
   };
 
@@ -112,6 +115,8 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
 
     dragDistanceRef.current = 0;
     const clientX = e.touches[0].clientX;
+    const clientY = e.touches[0].clientY;
+    touchStartPos.current = { x: clientX, y: clientY };
     sliderState.current.initialMouseX = clientX;
     sliderState.current.currentMouseX = clientX;
     sliderState.current.active = true;
@@ -123,6 +128,8 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
         style.transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : style.transform;
       const matrix = new DOMMatrix(transform);
       sliderState.current.initialPosition = matrix.m41;
+      sliderState.current.targetPosition = matrix.m41;
+      sliderState.current.currentPosition = matrix.m41;
     }
   };
 
@@ -130,6 +137,17 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ workData }) => {
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!sliderState.current.active) return;
     const clientX = e.touches[0].clientX;
+    const clientY = e.touches[0].clientY;
+    const dX = Math.abs(clientX - touchStartPos.current.x);
+    const dY = Math.abs(clientY - touchStartPos.current.y);
+
+    // If vertical gesture on mobile, release slider so native page scroll continues
+    if (dY > dX && dY > 8 && dragDistanceRef.current < 15) {
+      sliderState.current.active = false;
+      setIsDragging(false);
+      return;
+    }
+
     dragDistanceRef.current += Math.abs(clientX - sliderState.current.currentMouseX);
     sliderState.current.currentMouseX = clientX;
     const diff =

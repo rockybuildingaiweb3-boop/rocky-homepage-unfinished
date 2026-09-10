@@ -51,6 +51,18 @@ export class SliderImageMesh extends ImageMesh {
     if (this.uniforms.uTime) {
       this.uniforms.uTime.value = this.clock.getElapsedTime() * 0.8;
     }
+    if (this.uniforms.uAlpha && this.dimensionsNode) {
+      const itemEl = this.dimensionsNode.closest('.list-item') as HTMLElement | null;
+      if (itemEl) {
+        if (itemEl.classList.contains('ambient')) {
+          this.uniforms.uAlpha.value = 0.28;
+        } else if (itemEl.classList.contains('active')) {
+          this.uniforms.uAlpha.value = 1.0;
+        } else {
+          this.uniforms.uAlpha.value = 0.85;
+        }
+      }
+    }
   }
 
   destroy(): void {
