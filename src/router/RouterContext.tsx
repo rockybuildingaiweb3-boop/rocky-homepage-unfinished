@@ -1,18 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-export type StudioRoute = 'projects' | 'blog' | 'career';
-
 interface RouterContextType {
   currentPath: string;
   isStudio: boolean;
-  studioModule: StudioRoute;
   navigate: (to: string) => void;
 }
 
 const RouterContext = createContext<RouterContextType>({
   currentPath: '/',
   isStudio: false,
-  studioModule: 'projects',
   navigate: () => {},
 });
 
@@ -49,25 +45,17 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     window.history.pushState({}, '', target);
     setCurrentPath(target);
 
-    // Smoothly reposition window to top of the incoming room/module
+    // Smoothly reposition window to top of incoming view
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
   }, [currentPath]);
 
-  const isStudio = currentPath.startsWith('/studio');
-  let studioModule: StudioRoute = 'projects';
-  if (currentPath.includes('/studio/blog')) {
-    studioModule = 'blog';
-  } else if (currentPath.includes('/studio/career')) {
-    studioModule = 'career';
-  } else if (currentPath.includes('/studio/projects') || currentPath === '/studio') {
-    studioModule = 'projects';
-  }
+  const isStudio = currentPath === '/studio' || currentPath.startsWith('/studio/');
 
   return (
-    <RouterContext.Provider value={{ currentPath, isStudio, studioModule, navigate }}>
+    <RouterContext.Provider value={{ currentPath, isStudio, navigate }}>
       {children}
     </RouterContext.Provider>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
+import { useBackgroundMusic } from '../../features/audio';
 
 interface NavbarProps {
   onNavigate: (targetId: string) => void;

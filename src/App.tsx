@@ -1,7 +1,7 @@
 import React from 'react';
 import { GlobalShell } from './components/layout';
 import { HomePage } from './components/pages';
-import { StudioShell } from './components/studio';
+import { StudioPageResolver } from './pages/studio/StudioPageResolver';
 import { RouterProvider, useRouter } from './router/RouterContext';
 import { useIsMobile } from './hooks/useIsMobile';
 import { usePreloadAssets } from './hooks/usePreloadAssets';
@@ -20,7 +20,7 @@ function PortfolioApp() {
   return (
     <GlobalShell progress={progress} loadingDone={loadingDone} isMobile={isMobile}>
       {isStudio ? (
-        <StudioShell workData={workData} siteData={siteData} />
+        <StudioPageResolver workData={workData} siteData={siteData} />
       ) : (
         <HomePage workData={workData} siteData={siteData} />
       )}

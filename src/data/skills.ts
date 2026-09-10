@@ -22,61 +22,61 @@ export interface SkillRowDefinition {
 
 export const SKILL_ROWS: SkillRowDefinition[] = [
   {
-    row: 1,
-    id: 'frontend',
-    label: 'frontend',
-    title: '核心前端与交互动效',
-    subtitle: 'Core Frontend & Kinetic Motion',
+    "row": 1,
+    "id": "frontend",
+    "label": "frontend",
+    "title": "Core Frontend & Interaction",
+    "subtitle": "Core Frontend & Kinetic Motion"
   },
   {
-    row: 2,
-    id: 'space',
-    label: 'space',
-    title: '3D 空间计算与图形资产',
-    subtitle: '3D Spatial Computing & Graphics',
+    "row": 2,
+    "id": "space",
+    "label": "space",
+    "title": "3D & Graphics",
+    "subtitle": "3D Spatial Computing & Graphics"
   },
   {
-    row: 3,
-    id: 'systems',
-    label: 'systems',
-    title: '服务端、数据与基础设施',
-    subtitle: 'Backend, Data & Infrastructure',
+    "row": 3,
+    "id": "systems",
+    "label": "systems",
+    "title": "Backend, Data & Infrastructure",
+    "subtitle": "Backend, Data & Infrastructure"
   },
   {
-    row: 4,
-    id: 'web3',
-    label: 'web3',
-    title: 'Web3 与去中心化架构',
-    subtitle: 'Web3 & Decentralized Architecture',
+    "row": 4,
+    "id": "web3",
+    "label": "web3",
+    "title": "Web3 & Decentralized",
+    "subtitle": "Web3 & Decentralized Architecture"
   },
   {
-    row: 5,
-    id: 'models',
-    label: 'models',
-    title: 'AI 模型与调用工程',
-    subtitle: 'AI Models & Inference Engineering',
+    "row": 5,
+    "id": "models",
+    "label": "models",
+    "title": "AI Models & SDKs",
+    "subtitle": "AI Models & Inference Engineering"
   },
   {
-    row: 6,
-    id: 'agents',
-    label: 'agents',
-    title: 'AI Agent 与工作流编排',
-    subtitle: 'AI Agents & Workflow Orchestration',
+    "row": 6,
+    "id": "agents",
+    "label": "agents",
+    "title": "AI Agent Frameworks",
+    "subtitle": "AI Agents & Workflow Orchestration"
   },
   {
-    row: 7,
-    id: 'retrieval',
-    label: 'retrieval',
-    title: 'RAG 知识库与检索工程',
-    subtitle: 'RAG Knowledge Base & Retrieval',
+    "row": 7,
+    "id": "retrieval",
+    "label": "retrieval",
+    "title": "RAG & Vector Databases",
+    "subtitle": "RAG Knowledge Base & Retrieval"
   },
   {
-    row: 8,
-    id: 'engineering',
-    label: 'engineering',
-    title: '工程化部署、测试与稳定性',
-    subtitle: 'Engineering Deployment, Testing & Reliability',
-  },
+    "row": 8,
+    "id": "engineering",
+    "label": "engineering",
+    "title": "DevOps, Testing & Observability",
+    "subtitle": "Engineering Deployment, Testing & Reliability"
+  }
 ];
 
 export interface SkillCategoryLegend {
@@ -119,21 +119,21 @@ export const PROJECT_NAMES: Record<
     image: '/assets/imgs/work-back/kic/cover.jpg',
   },
   grillzzy: {
-    title: 'Grillzzy Foods',
+    title: 'Grillzzy Online',
     number: '05',
-    category: 'Brand Website',
+    category: 'E-Commerce Platform',
     image: '/assets/imgs/work-back/grillzzy/cover.jpg',
   },
   aurora: {
-    title: 'Aurora Spatial',
+    title: 'Aurora Engine',
     number: '06',
-    category: 'Creative Experiment',
+    category: 'Agentic AI Workflows',
     image: '/assets/imgs/work-back/aurora/cover.jpg',
   },
   chronos: {
-    title: 'Chronos Studio',
+    title: 'Chronos Terminal',
     number: '07',
-    category: 'Algorithmic Design Tool',
+    category: 'Web3 & Financial Systems',
     image: '/assets/imgs/work-back/chronos/cover.jpg',
   },
 };
@@ -144,11 +144,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "TypeScript",
     "slug": "typescript",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
-    "category": "Static Typing",
+    "rowTitle": "Core Frontend & Interaction",
+    "category": "Language & Static Typing",
     "brandColor": "#3178C6",
-    "shortDescription": "Strict structural typing and compile-time contract enforcement 🛡️",
-    "positioning": "Advanced Generics & TypeScript Architecture",
+    "shortDescription": "Strict compile-time contracts and structural typing",
+    "positioning": "Strict Type System & Advanced Generics Architecture",
     "relatedProjects": [
       "chronos",
       "aurora",
@@ -160,10 +160,10 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "JavaScript",
     "slug": "javascript",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
+    "rowTitle": "Core Frontend & Interaction",
     "category": "Language Core",
     "brandColor": "#F7DF1E",
-    "shortDescription": "Modern ECMAScript runtime, asynchronous event loops & DOM pipelines 🌐",
+    "shortDescription": "Dynamic ECMAScript runtime, asynchronous event loops & modern web APIs",
     "positioning": "Modern ECMAScript & Asynchronous Event Systems",
     "relatedProjects": [
       "lcml",
@@ -176,10 +176,10 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "React",
     "slug": "react",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
-    "category": "UI Library",
+    "rowTitle": "Core Frontend & Interaction",
+    "category": "Component Architecture",
     "brandColor": "#61DAFB",
-    "shortDescription": "Concurrent rendering, fiber tree reconciliation & custom hooks ⚛️",
+    "shortDescription": "Concurrent rendering, fiber tree reconciliation & reactive state primitives",
     "positioning": "Concurrent React Architecture & Custom Hooks Ecosystem",
     "relatedProjects": [
       "chronos",
@@ -193,14 +193,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Next.js",
     "slug": "nextdotjs",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
+    "rowTitle": "Core Frontend & Interaction",
     "category": "Full-Stack Framework",
-    "brandColor": "#FFFFFF",
-    "shortDescription": "Server Actions, React Server Components & edge routing ⚡",
-    "positioning": "Server Actions, Streaming SSR & Edge Optimization",
+    "brandColor": "#000000",
+    "shortDescription": "Server Components, streaming SSR, and edge optimized routing",
+    "positioning": "Full-Stack Hybrid Rendering & Edge Infrastructure",
     "relatedProjects": [
       "marymount",
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -208,14 +208,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Svelte",
     "slug": "svelte",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
-    "category": "Reactive Compiler",
+    "rowTitle": "Core Frontend & Interaction",
+    "category": "Reactive Framework",
     "brandColor": "#FF3E00",
-    "shortDescription": "Compile-time reactive primitives with zero virtual DOM overhead 🚀",
-    "positioning": "Svelte Runes & Fine-Grained Reactive Primitives",
+    "shortDescription": "Compile-time reactive primitives with zero virtual DOM overhead",
+    "positioning": "Svelte 5 Runes & Reactive Component Compilation",
     "relatedProjects": [
-      "v1",
-      "aurora"
+      "v1"
     ]
   },
   {
@@ -223,14 +222,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Tailwind CSS",
     "slug": "tailwindcss",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
-    "category": "Styling Engine",
+    "rowTitle": "Core Frontend & Interaction",
+    "category": "Utility-First Styling",
     "brandColor": "#06B6D4",
-    "shortDescription": "Token-driven utility styling with responsive breakpoint fluidity 🌪️",
-    "positioning": "Design Token Systems & Kinetic Responsive Layouts",
+    "shortDescription": "Design token styling with responsive breakpoint fluidity",
+    "positioning": "Tailwind v4 Engine & Modern Atomic Styling Systems",
     "relatedProjects": [
-      "marymount",
-      "lcml",
+      "chronos",
+      "aurora",
       "grillzzy"
     ]
   },
@@ -239,15 +238,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Framer Motion",
     "slug": "framer",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
-    "category": "Motion Physics",
+    "rowTitle": "Core Frontend & Interaction",
+    "category": "Kinetic Physics",
     "brandColor": "#0055FF",
-    "shortDescription": "Spring physics choreography and layout projection animations 🪄",
-    "positioning": "Spring Physics Choreography & Micro-Interactions",
+    "shortDescription": "Spring physics choreography and gesture driven UI interactions",
+    "positioning": "Physical Animation Dynamics & Layout Projections",
     "relatedProjects": [
-      "chronos",
       "v1",
-      "aurora"
+      "chronos"
     ]
   },
   {
@@ -255,30 +253,29 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "GSAP",
     "slug": "greensock",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
+    "rowTitle": "Core Frontend & Interaction",
     "category": "Timeline Animation",
     "brandColor": "#88CE02",
-    "shortDescription": "High-performance scroll-triggered timeline orchestration 🎬",
-    "positioning": "ScrollTrigger Timelines & Kinetic Canvas Animations",
+    "shortDescription": "High-performance timeline sequencing and scroll-driven transformations",
+    "positioning": "High-Performance Timeline Sequencing & ScrollTrigger",
     "relatedProjects": [
-      "aurora",
-      "chronos"
+      "marymount",
+      "lcml"
     ]
   },
   {
     "id": "html5",
-    "name": "HTML5/Semantics",
+    "name": "HTML5",
     "slug": "html5",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
-    "category": "Semantic Web",
+    "rowTitle": "Core Frontend & Interaction",
+    "category": "Semantic Document Structure",
     "brandColor": "#E34F26",
-    "shortDescription": "Accessible semantic document structuring and WAI-ARIA standards 📄",
-    "positioning": "Semantic Web Standards, WAI-ARIA & DOM Integration",
+    "shortDescription": "Accessible semantic document structuring and WAI-ARIA standards",
+    "positioning": "Accessible Document Object Model & Microdata Architecture",
     "relatedProjects": [
-      "marymount",
-      "lcml",
-      "grillzzy"
+      "kic",
+      "lcml"
     ]
   },
   {
@@ -286,15 +283,15 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Vite",
     "slug": "vite",
     "row": 1,
-    "rowTitle": "核心前端与交互动效",
+    "rowTitle": "Core Frontend & Interaction",
     "category": "Build Tooling",
     "brandColor": "#646CFF",
-    "shortDescription": "Native ESM dev server and optimized Rollup production builds ⚡",
-    "positioning": "ESM Dev Server & Rollup Production Optimization",
+    "shortDescription": "Native ESM dev server and optimized Rollup production bundles",
+    "positioning": "Next-Generation Frontend Tooling & Bundle Optimization",
     "relatedProjects": [
       "chronos",
       "aurora",
-      "v1"
+      "grillzzy"
     ]
   },
   {
@@ -302,13 +299,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Three.js",
     "slug": "threedotjs",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "3D WebGL Library",
-    "brandColor": "#FFFFFF",
-    "shortDescription": "Scene graph hierarchies, procedural geometry, and custom shader materials 🌌",
-    "positioning": "Custom Shader Materials & Scene Graph Choreography",
+    "rowTitle": "3D & Graphics",
+    "category": "WebGL Scene Graph",
+    "brandColor": "#049EF4",
+    "shortDescription": "Scene graph hierarchies, lighting models, and procedural geometry",
+    "positioning": "WebGL 3D Scene Graphs & Procedural Mesh Synthesis",
     "relatedProjects": [
-      "aurora",
+      "v1",
       "chronos"
     ]
   },
@@ -317,27 +314,29 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "WebGL",
     "slug": "webgl",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Graphics API",
+    "rowTitle": "3D & Graphics",
+    "category": "Hardware Graphics API",
     "brandColor": "#990000",
-    "shortDescription": "Hardware-accelerated rasterization and framebuffer post-processing 🎮",
-    "positioning": "Raw GLSL Shader Pipelines & GPU Framebuffers",
+    "shortDescription": "Hardware-accelerated rasterization and framebuffer post-processing",
+    "positioning": "Low-Level Graphics Pipeline & Framebuffer Architecture",
     "relatedProjects": [
-      "aurora"
+      "v1",
+      "chronos"
     ]
   },
   {
     "id": "glsl",
     "name": "GLSL",
-    "slug": "opengl",
+    "slug": "glsl",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Shader Language",
+    "rowTitle": "3D & Graphics",
+    "category": "Shader Programming",
     "brandColor": "#5586A4",
-    "shortDescription": "Vertex displacement, fragment raymarching, and procedural noise math 🔮",
-    "positioning": "Fragment Shaders, Raymarching & Procedural Noise",
+    "shortDescription": "Vertex displacement, fragment raymarching, and procedural noise shaders",
+    "positioning": "Custom Vertex Displacement & Fragment Raymarching Shaders",
     "relatedProjects": [
-      "aurora"
+      "v1",
+      "chronos"
     ]
   },
   {
@@ -345,11 +344,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "WebGPU",
     "slug": "webgpu",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Next-Gen GPU",
-    "brandColor": "#0088CC",
-    "shortDescription": "Direct hardware command queues and high-throughput WGSL compute shaders ⚡",
-    "positioning": "WGSL Compute Shaders & Direct Hardware GPU Buffers",
+    "rowTitle": "3D & Graphics",
+    "category": "Next-Gen Compute & Graphics",
+    "brandColor": "#005A9C",
+    "shortDescription": "Direct hardware command queues and high-throughput WGSL compute shaders",
+    "positioning": "Hardware Compute Shaders & Next-Generation Web Rendering",
     "relatedProjects": [
       "aurora"
     ]
@@ -357,15 +356,15 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     "id": "r3f",
     "name": "React Three Fiber",
-    "slug": "react",
+    "slug": "r3f",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Declarative 3D",
-    "brandColor": "#61DAFB",
-    "shortDescription": "Declarative React reconciler for Three.js stateful canvas scenes 🪐",
-    "positioning": "Declarative Three.js Ecosystem & Drei Components",
+    "rowTitle": "3D & Graphics",
+    "category": "Declarative 3D Canvas",
+    "brandColor": "#E0234E",
+    "shortDescription": "Declarative React reconciler for Three.js stateful canvas scenes",
+    "positioning": "Declarative 3D Scene Reconciler & Drei Ecosystem",
     "relatedProjects": [
-      "aurora",
+      "v1",
       "chronos"
     ]
   },
@@ -374,14 +373,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Blender",
     "slug": "blender",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "3D Modeling DCC",
-    "brandColor": "#F5792A",
-    "shortDescription": "Subdivision surface modeling, UV unwrapping, and glTF optimization 📐",
-    "positioning": "glTF 2.0 PBR Asset Optimization & Geometry Nodes",
+    "rowTitle": "3D & Graphics",
+    "category": "3D Modeling & DCC",
+    "brandColor": "#E87D0D",
+    "shortDescription": "Subdivision modeling, UV unwrapping, and real-time glTF asset optimization",
+    "positioning": "Poly Modeling, Rigging & Real-Time glTF Pipeline",
     "relatedProjects": [
-      "aurora",
-      "chronos"
+      "v1",
+      "aurora"
     ]
   },
   {
@@ -389,56 +388,56 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Spline",
     "slug": "spline",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Interactive 3D Tool",
-    "brandColor": "#4D40FF",
-    "shortDescription": "Web-native interactive 3D assets, event triggers, and physics simulations 💫",
-    "positioning": "Interactive Web3D Asset Integration & Micro-3D Experiences",
+    "rowTitle": "3D & Graphics",
+    "category": "Interactive 3D Design",
+    "brandColor": "#5266EB",
+    "shortDescription": "Web-native 3D scenes, physics simulations, and state transition interactions",
+    "positioning": "Web-Native 3D Design & Interactive Event Triggers",
     "relatedProjects": [
-      "aurora"
+      "chronos"
     ]
   },
   {
     "id": "draco",
-    "name": "Draco/Meshopt",
+    "name": "Draco",
     "slug": "draco",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Mesh Compression",
-    "brandColor": "#8B5CF6",
-    "shortDescription": "High-ratio geometry compression reducing 3D web asset payloads 📦",
-    "positioning": "glTF Compression, Quantization & Web3D Performance",
+    "rowTitle": "3D & Graphics",
+    "category": "Geometry Compression",
+    "brandColor": "#F58220",
+    "shortDescription": "High-ratio geometry compression reducing 3D web asset transmission sizes",
+    "positioning": "3D Mesh Quantization & Buffer Optimization Pipeline",
     "relatedProjects": [
-      "aurora"
-    ]
-  },
-  {
-    "id": "uvbaking",
-    "name": "UV/Baking",
-    "slug": "uvbaking",
-    "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "Texture Pipeline",
-    "brandColor": "#EC4899",
-    "shortDescription": "Ambient occlusion, normal map baking, and texture atlas optimization 🎨",
-    "positioning": "PBR Texture Atlas Baking & Mobile GPU Optimization",
-    "relatedProjects": [
-      "aurora"
+      "v1"
     ]
   },
   {
     "id": "canvasapi",
     "name": "Canvas API",
-    "slug": "html5",
+    "slug": "canvasapi",
     "row": 2,
-    "rowTitle": "3D 空间计算与图形资产",
-    "category": "2D Graphics Engine",
-    "brandColor": "#E34F26",
-    "shortDescription": "Immediate mode 2D pixel rendering, particle physics, and image filters 🖌️",
-    "positioning": "2D Canvas Particle Simulations & Raster Manipulation",
+    "rowTitle": "3D & Graphics",
+    "category": "2D Pixel Manipulation",
+    "brandColor": "#F05032",
+    "shortDescription": "Immediate mode 2D pixel rendering, particle physics, and image filters",
+    "positioning": "Immediate Mode 2D Graphics & Particle Systems",
     "relatedProjects": [
-      "aurora",
-      "chronos"
+      "v1",
+      "lcml"
+    ]
+  },
+  {
+    "id": "babylondotjs",
+    "name": "Babylon.js",
+    "slug": "babylondotjs",
+    "row": 2,
+    "rowTitle": "3D & Graphics",
+    "category": "Real-Time 3D Engine",
+    "brandColor": "#BB464B",
+    "shortDescription": "Comprehensive real-time 3D engine with PBR shaders and spatial physics",
+    "positioning": "Browser Game Engine & Physical Materials Architecture",
+    "relatedProjects": [
+      "aurora"
     ]
   },
   {
@@ -446,15 +445,15 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Node.js",
     "slug": "nodedotjs",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "Backend Runtime",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "JavaScript Runtime",
     "brandColor": "#5FA04E",
-    "shortDescription": "Asynchronous event loop runtime powering scalable backend services 🟢",
-    "positioning": "Event-Driven Microservices & V8 Engine Optimization",
+    "shortDescription": "Asynchronous event loop runtime powering scalable backend microservices",
+    "positioning": "Event-Driven Server Architecture & Microservices",
     "relatedProjects": [
       "marymount",
-      "lcml",
-      "chronos"
+      "kic",
+      "grillzzy"
     ]
   },
   {
@@ -462,14 +461,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Express",
     "slug": "express",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "HTTP Framework",
-    "brandColor": "#FFFFFF",
-    "shortDescription": "Minimalist HTTP routing engine and middleware pipeline 🚂",
-    "positioning": "RESTful API Engineering & Middleware Security",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "HTTP Routing Engine",
+    "brandColor": "#000000",
+    "shortDescription": "Minimalist HTTP routing engine and robust middleware pipeline",
+    "positioning": "RESTful Middleware & API Routing Pipelines",
     "relatedProjects": [
       "marymount",
-      "lcml"
+      "kic"
     ]
   },
   {
@@ -477,14 +476,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "FastAPI",
     "slug": "fastapi",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "Inference API",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "Async Python Framework",
     "brandColor": "#009688",
-    "shortDescription": "High-throughput async Python APIs serving real-time model inference ⚡",
-    "positioning": "ASGI Endpoints, Pydantic v2 & Async Model Streaming",
+    "shortDescription": "High-throughput async Python APIs serving real-time model inference",
+    "positioning": "Asynchronous High-Throughput Model Serving",
     "relatedProjects": [
-      "chronos",
-      "lcml"
+      "aurora"
     ]
   },
   {
@@ -492,15 +490,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "PostgreSQL",
     "slug": "postgresql",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "Relational DB",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "Relational Database",
     "brandColor": "#4169E1",
-    "shortDescription": "ACID transactions, relational integrity, and pgvector embeddings 🐘",
-    "positioning": "Relational Schema Design & pgvector Embedding Stores",
+    "shortDescription": "ACID transactions, relational integrity, and robust indexing capabilities",
+    "positioning": "Relational Schema Design & ACID Transactional Systems",
     "relatedProjects": [
       "marymount",
-      "lcml",
-      "chronos"
+      "kic"
     ]
   },
   {
@@ -508,14 +505,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Supabase",
     "slug": "supabase",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "BaaS & Realtime",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "Open Source Backend",
     "brandColor": "#3ECF8E",
-    "shortDescription": "Postgres-native backend with instant realtime and Row Level Security ⚡",
-    "positioning": "Row-Level Security & Realtime WebSocket Replication",
+    "shortDescription": "Postgres-native backend with instant realtime and Row Level Security",
+    "positioning": "PostgreSQL-as-a-Service, Auth & Edge Realtime",
     "relatedProjects": [
-      "chronos",
-      "v1"
+      "aurora",
+      "chronos"
     ]
   },
   {
@@ -523,28 +520,27 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Prisma",
     "slug": "prisma",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
+    "rowTitle": "Backend, Data & Infrastructure",
     "category": "Type-Safe ORM",
     "brandColor": "#2D3748",
-    "shortDescription": "Declarative schema modeling and type-safe database query generation 💎",
-    "positioning": "Type-Safe Data Modeling & Automated Migrations",
+    "shortDescription": "Declarative schema modeling and type-safe database query generation",
+    "positioning": "Type-Safe Data Modeling & Automated Migration Engine",
     "relatedProjects": [
-      "marymount",
-      "chronos"
+      "marymount"
     ]
   },
   {
     "id": "drizzle",
-    "name": "Drizzle ORM",
+    "name": "Drizzle",
     "slug": "drizzle",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "Zero-Overhead ORM",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "Zero-Overhead SQL ORM",
     "brandColor": "#C5F74F",
-    "shortDescription": "SQL-like syntax, edge serverless compatibility, and zero runtime overhead ⚡",
-    "positioning": "Serverless Edge Queries & Lightweight SQL Execution",
+    "shortDescription": "SQL-like syntax, edge serverless compatibility, and zero runtime overhead",
+    "positioning": "Serverless Edge SQL ORM & Microsecond Query Planning",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -552,14 +548,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Redis",
     "slug": "redis",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
+    "rowTitle": "Backend, Data & Infrastructure",
     "category": "In-Memory Store",
-    "brandColor": "#DC382D",
-    "shortDescription": "Sub-millisecond in-memory caching, distributed locks, and pub/sub queues 🔴",
-    "positioning": "Distributed Caching, Session Stores & Rate Limiting",
+    "brandColor": "#FF4438",
+    "shortDescription": "Sub-millisecond in-memory caching, distributed locks, and pub/sub queues",
+    "positioning": "Distributed In-Memory Caching & Real-Time Event Brokers",
     "relatedProjects": [
-      "marymount",
-      "lcml"
+      "kic",
+      "grillzzy"
     ]
   },
   {
@@ -567,11 +563,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "tRPC",
     "slug": "trpc",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "End-to-End Types",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "End-to-End Type Safety",
     "brandColor": "#2596BE",
-    "shortDescription": "End-to-end type safety between client and server without code generation 🔗",
-    "positioning": "Full-Stack Type Inference & API Route Contracts",
+    "shortDescription": "End-to-end type safety between client and server without code generation",
+    "positioning": "Full-Stack Type Inference Across Network Boundaries",
     "relatedProjects": [
       "chronos"
     ]
@@ -581,14 +577,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "GraphQL",
     "slug": "graphql",
     "row": 3,
-    "rowTitle": "服务端、数据与基础设施",
-    "category": "Query Language",
+    "rowTitle": "Backend, Data & Infrastructure",
+    "category": "API Query Language",
     "brandColor": "#E10098",
-    "shortDescription": "Declarative data fetching across federated schemas with precise queries 🕸️",
-    "positioning": "Federated Schemas, DataLoader Caching & Strongly Typed Queries",
+    "shortDescription": "Declarative data fetching across federated schemas with precise queries",
+    "positioning": "Declarative Client Data Fetching & Federated Schemas",
     "relatedProjects": [
-      "marymount",
-      "lcml"
+      "marymount"
     ]
   },
   {
@@ -596,11 +591,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Solidity",
     "slug": "solidity",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
-    "category": "Smart Contracts",
-    "brandColor": "#AA6746",
-    "shortDescription": "Turing-complete immutable logic secured on distributed EVM state ⛓️",
-    "positioning": "Gas Optimization, Reentrancy Protection & EVM Assembly",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "Smart Contract Language",
+    "brandColor": "#363636",
+    "shortDescription": "Turing-complete immutable logic secured on distributed EVM state",
+    "positioning": "EVM Smart Contract Engineering & Gas Optimization",
     "relatedProjects": [
       "chronos"
     ]
@@ -610,11 +605,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "viem",
     "slug": "viem",
     "row": 4,
-    "rowTitle": "Web3 & 去中心化架构",
-    "category": "TypeScript Web3 SDK",
-    "brandColor": "#7042F8",
-    "shortDescription": "Lightweight, composable, and type-safe interface for Ethereum ⚡",
-    "positioning": "ABI Type Inference & High-Performance EVM Clients",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "TypeScript Ethereum Interface",
+    "brandColor": "#1E1E1E",
+    "shortDescription": "Lightweight, composable, and type-safe low-level interface for Ethereum",
+    "positioning": "High-Performance EVM Interface & Pure Function Primitives",
     "relatedProjects": [
       "chronos"
     ]
@@ -624,11 +619,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "wagmi",
     "slug": "wagmi",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
+    "rowTitle": "Web3 & Decentralized",
     "category": "React Web3 Hooks",
-    "brandColor": "#E11D48",
-    "shortDescription": "React hooks for wallet connection, contract interaction, and ENS lookup 🪝",
-    "positioning": "Reactive Wallet Connection & Contract Execution Hooks",
+    "brandColor": "#F5841F",
+    "shortDescription": "React hooks for wallet connection, contract interaction, and ENS lookup",
+    "positioning": "Declarative Ethereum React Hooks & Connector Lifecycle",
     "relatedProjects": [
       "chronos"
     ]
@@ -638,13 +633,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Ethers.js",
     "slug": "ethers",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
-    "category": "Blockchain Client",
-    "brandColor": "#2563EB",
-    "shortDescription": "Complete and compact library for interacting with Ethereum and wallets 📜",
-    "positioning": "Cryptographic Signing, RPC Providers & Contract Encoders",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "Ethereum Client SDK",
+    "brandColor": "#2535A0",
+    "shortDescription": "Complete and compact library for interacting with Ethereum and wallets",
+    "positioning": "Cryptographic Signing & Smart Contract Abstraction Layer",
     "relatedProjects": [
-      "chronos"
+      "chronos",
+      "v1"
     ]
   },
   {
@@ -652,11 +648,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Foundry",
     "slug": "foundry",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
+    "rowTitle": "Web3 & Decentralized",
     "category": "Smart Contract Toolchain",
-    "brandColor": "#F59E0B",
-    "shortDescription": "Blazing-fast Solidity testing, fuzzing, and EVM gas profiling in Rust 🛠️",
-    "positioning": "Invariant Testing, Fuzzing & Gas Optimization Workflows",
+    "brandColor": "#D35400",
+    "shortDescription": "Blazing-fast Solidity testing, fuzzing, and EVM gas profiling in Rust",
+    "positioning": "Rust-Powered Solidity Testing, Fuzzing & Gas Profiling",
     "relatedProjects": [
       "chronos"
     ]
@@ -666,27 +662,27 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Privy",
     "slug": "privy",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
-    "category": "Embedded Wallets",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "Embedded Auth & Wallets",
     "brandColor": "#6366F1",
-    "shortDescription": "Frictionless web3 onboarding with embedded passkey and social wallets 🔐",
-    "positioning": "Embedded MPC Wallets & Progressive Onboarding UX",
+    "shortDescription": "Frictionless web3 onboarding with embedded passkey and social wallets",
+    "positioning": "Progressive Web3 Onboarding & Embedded Self-Custody Wallets",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
     "id": "erc4337",
     "name": "ERC-4337",
-    "slug": "ethereum",
+    "slug": "erc4337",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
+    "rowTitle": "Web3 & Decentralized",
     "category": "Account Abstraction",
-    "brandColor": "#627EEA",
-    "shortDescription": "Smart contract accounts with user operations, paymasters, and session keys 🔑",
-    "positioning": "Account Abstraction, Gas Sponsorship & Multi-Call Bundlers",
+    "brandColor": "#8C4FFF",
+    "shortDescription": "Smart contract accounts with user operations, paymasters, and session keys",
+    "positioning": "Smart Contract Accounts, UserOps & Gas Paymasters",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -694,11 +690,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "The Graph",
     "slug": "thegraph",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
-    "category": "Indexing Protocol",
-    "brandColor": "#6742F1",
-    "shortDescription": "Decentralized indexing and GraphQL querying of blockchain state and events 📊",
-    "positioning": "Subgraphs, Event Indexing & Decoupled Web3 Queries",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "Blockchain Indexing Protocol",
+    "brandColor": "#0C0A1D",
+    "shortDescription": "Decentralized indexing and GraphQL querying of blockchain state and events",
+    "positioning": "Decentralized Subgraph Indexing & Real-Time Event Extraction",
     "relatedProjects": [
       "chronos"
     ]
@@ -708,11 +704,11 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "IPFS",
     "slug": "ipfs",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
-    "category": "Decentralized Storage",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "Distributed Storage",
     "brandColor": "#65C2CB",
-    "shortDescription": "Peer-to-peer hypermedia protocol for content-addressed immutable files 🌐",
-    "positioning": "Content-Addressed Storage & Merkle DAG Verification",
+    "shortDescription": "Peer-to-peer hypermedia protocol for content-addressed immutable files",
+    "positioning": "Content-Addressed Peer-to-Peer File Distribution",
     "relatedProjects": [
       "chronos"
     ]
@@ -720,60 +716,57 @@ export const SKILLS_DATA: SkillItem[] = [
   {
     "id": "siwe",
     "name": "SIWE",
-    "slug": "ethereum",
+    "slug": "siwe",
     "row": 4,
-    "rowTitle": "Web3 与去中心化架构",
-    "category": "Identity & Auth",
+    "rowTitle": "Web3 & Decentralized",
+    "category": "Cryptographic Authentication",
     "brandColor": "#627EEA",
-    "shortDescription": "Sign-In with Ethereum enabling decentralized cryptographic authentication 🪪",
-    "positioning": "EIP-4361 Authentication, Replay Protection & JWT Sessions",
+    "shortDescription": "Sign-In with Ethereum enabling decentralized cryptographic authentication",
+    "positioning": "EIP-4361 Cryptographic Session Authentication Standard",
     "relatedProjects": [
       "chronos"
     ]
   },
   {
     "id": "openai",
-    "name": "OpenAI API",
+    "name": "OpenAI",
     "slug": "openai",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Frontier AI API",
+    "rowTitle": "AI Models & SDKs",
+    "category": "Frontier AI Research",
     "brandColor": "#10A37F",
-    "shortDescription": "Frontier reasoning models, multimodal vision, and structured tool calling ⚡",
-    "positioning": "GPT-4o Reasoning API, Structured Outputs & ChatGPT Integrations",
+    "shortDescription": "Frontier reasoning models, multimodal vision, and structured tool calling",
+    "positioning": "GPT-4o & o-Series Advanced Reasoning Orchestration",
     "relatedProjects": [
-      "chronos",
-      "aurora",
-      "lcml"
-    ],
-    "icon": "/assets/icons/openai.svg"
-  },
-  {
-    "id": "anthropic",
-    "name": "Anthropic Claude",
-    "slug": "anthropic",
-    "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Frontier Reasoning",
-    "brandColor": "#D97706",
-    "shortDescription": "Constitutional reasoning, long-context comprehension & Model Context Protocol 🧠",
-    "positioning": "Claude 3.5 Sonnet Tool Calling & Prompt Engineering",
-    "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
-    "id": "gemini",
+    "id": "anthropic",
+    "name": "Anthropic",
+    "slug": "anthropic",
+    "row": 5,
+    "rowTitle": "AI Models & SDKs",
+    "category": "Constitutional AI & Claude",
+    "brandColor": "#D97706",
+    "shortDescription": "Constitutional reasoning, long-context comprehension, and MCP integration",
+    "positioning": "Claude 3.5 Sonnet & Extended Context Engineering",
+    "relatedProjects": [
+      "aurora"
+    ]
+  },
+  {
+    "id": "googlegemini",
     "name": "Google Gemini",
     "slug": "googlegemini",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Multimodal AI",
-    "brandColor": "#4E75F8",
-    "shortDescription": "Native multimodal reasoning across video, audio, code, and long-context windows 🪐",
-    "positioning": "Gemini 1.5 Pro Long-Context Analysis & Function Calling",
+    "rowTitle": "AI Models & SDKs",
+    "category": "Native Multimodal Intelligence",
+    "brandColor": "#4285F4",
+    "shortDescription": "Native multimodal reasoning across video, audio, code, and long contexts",
+    "positioning": "Gemini 1.5 Pro & 2M Token Multimodal Context Processing",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -781,100 +774,97 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "DeepSeek",
     "slug": "deepseek",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Open Weights Reasoning",
-    "brandColor": "#1E40AF",
-    "shortDescription": "High-efficiency mixture-of-experts architecture and math reasoning models 🐋",
-    "positioning": "DeepSeek R1 / V3 Reasoning Architecture & Low-Cost Serving",
+    "rowTitle": "AI Models & SDKs",
+    "category": "MoE Frontier Architecture",
+    "brandColor": "#4D6BFE",
+    "shortDescription": "High-efficiency mixture-of-experts architecture and math reasoning models",
+    "positioning": "DeepSeek-R1 & V3 Open Reasoning Infrastructure",
     "relatedProjects": [
-      "chronos"
-    ]
-  },
-  {
-    "id": "qwen",
-    "name": "通义千问",
-    "slug": "qwen",
-    "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Multilingual LLM",
-    "brandColor": "#6366F1",
-    "shortDescription": "Enterprise-grade multilingual reasoning, coding, and vision foundation models 🌏",
-    "positioning": "Qwen 2.5 Coding & Vision Model Fine-Tuning Pipelines",
-    "relatedProjects": [
-      "chronos"
-    ]
-  },
-  {
-    "id": "vercelai",
-    "name": "Vercel AI SDK",
-    "slug": "vercel",
-    "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "AI Frontend SDK",
-    "brandColor": "#FFFFFF",
-    "shortDescription": "Unified TypeScript library for streaming LLM text, objects, and generative UI ⚡",
-    "positioning": "AI Streaming Protocols, Generative UI & Edge Runtime Adapters",
-    "relatedProjects": [
-      "chronos",
       "aurora"
     ]
   },
   {
-    "id": "functioncalling",
-    "name": "Function Calling",
-    "slug": "functioncalling",
+    "id": "qwen",
+    "name": "Qwen",
+    "slug": "qwen",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Tool Integration",
-    "brandColor": "#10B981",
-    "shortDescription": "Deterministic JSON parameter extraction invoking external tools and APIs ⚙️",
-    "positioning": "Tool Definition Schemas, Multi-Turn Loop Handling & Execution",
+    "rowTitle": "AI Models & SDKs",
+    "category": "Multilingual Foundation Models",
+    "brandColor": "#615CED",
+    "shortDescription": "Enterprise-grade multilingual reasoning, coding, and vision foundation models",
+    "positioning": "Qwen 2.5 Multi-Task Foundation Model Ecosystem",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
-    "id": "structuredoutput",
-    "name": "Structured Output",
-    "slug": "structuredoutput",
+    "id": "vercel",
+    "name": "Vercel AI SDK",
+    "slug": "vercel",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Schema Enforcement",
-    "brandColor": "#8B5CF6",
-    "shortDescription": "100% JSON Schema adherence guaranteed by constrained decoding engines 📋",
-    "positioning": "Zod / Pydantic Schema Enforcement & Type-Safe Extraction",
+    "rowTitle": "AI Models & SDKs",
+    "category": "Unified AI UI Framework",
+    "brandColor": "#000000",
+    "shortDescription": "Unified TypeScript library for streaming LLM text, objects, and generative UI",
+    "positioning": "Unified Streaming Text, Object Generation & Generative UI",
     "relatedProjects": [
-      "chronos",
-      "lcml"
+      "aurora"
     ]
   },
   {
-    "id": "promptengineering",
-    "name": "Prompt Engineering",
-    "slug": "promptengineering",
+    "id": "ollama",
+    "name": "Ollama",
+    "slug": "ollama",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "Context Optimization",
-    "brandColor": "#F59E0B",
-    "shortDescription": "Chain-of-thought, few-shot prompting, and metaprompt architecture 📝",
-    "positioning": "System Prompts, Few-Shot In-Context Learning & Guardrails",
+    "rowTitle": "AI Models & SDKs",
+    "category": "Local Model Execution",
+    "brandColor": "#FFFFFF",
+    "shortDescription": "Local LLM execution with optimized quantization and unified REST inference APIs",
+    "positioning": "Local Quantized Model Serving & Offline Inference",
     "relatedProjects": [
-      "chronos",
-      "marymount"
+      "aurora"
     ]
   },
   {
-    "id": "langsmith",
-    "name": "LangSmith",
-    "slug": "langchain",
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "slug": "huggingface",
     "row": 5,
-    "rowTitle": "AI 模型与调用工程",
-    "category": "LLM Observability",
-    "brandColor": "#1C3C3C",
-    "shortDescription": "Trace latency, monitor tokens, debug chains, and evaluate prompt runs 🔍",
-    "positioning": "LLM Trace Debugging, Evaluation Datasets & Latency Profiling",
+    "rowTitle": "AI Models & SDKs",
+    "category": "Open Source AI Hub",
+    "brandColor": "#FFD21E",
+    "shortDescription": "The collaborative hub for open weights, transformers, and model hosting",
+    "positioning": "Open Model Registry, Transformers & Inference Endpoints",
     "relatedProjects": [
-      "chronos"
+      "aurora"
+    ]
+  },
+  {
+    "id": "groq",
+    "name": "Groq",
+    "slug": "groq",
+    "row": 5,
+    "rowTitle": "AI Models & SDKs",
+    "category": "LPU Inference Acceleration",
+    "brandColor": "#F55036",
+    "shortDescription": "Deterministic LPUs delivering ultra-low-latency real-time token generation",
+    "positioning": "Linear Processor Unit (LPU) Ultra-Fast Token Inference",
+    "relatedProjects": [
+      "aurora"
+    ]
+  },
+  {
+    "id": "togetherai",
+    "name": "Together AI",
+    "slug": "togetherai",
+    "row": 5,
+    "rowTitle": "AI Models & SDKs",
+    "category": "Cloud Model Inference",
+    "brandColor": "#0F6FFF",
+    "shortDescription": "High-throughput cloud inference engine serving leading open-source models",
+    "positioning": "Decentralized High-Throughput Open Model Cloud Serving",
+    "relatedProjects": [
+      "aurora"
     ]
   },
   {
@@ -882,28 +872,27 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "LangChain",
     "slug": "langchain",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Agent Orchestration",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Composable Agent Chaining",
     "brandColor": "#1C3C3C",
-    "shortDescription": "Composing multi-step reasoning chains with contextual tools and memory ⛓️",
-    "positioning": "Context Memory Stores & Retrieval-Augmented Tool Routing",
+    "shortDescription": "Composing multi-step reasoning chains with contextual tools and memory",
+    "positioning": "Composable Prompt Pipelines & Tool Execution Engine",
     "relatedProjects": [
-      "chronos",
-      "marymount"
+      "aurora"
     ]
   },
   {
     "id": "langgraph",
     "name": "LangGraph",
-    "slug": "langchain",
+    "slug": "langgraph",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Stateful Multi-Agent",
-    "brandColor": "#1C3C3C",
-    "shortDescription": "Cyclic state machines and human-in-the-loop multi-agent coordination 🔄",
-    "positioning": "Stateful Graph Workflows, Checkpointing & Multi-Agent Loops",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Cyclic State Orchestration",
+    "brandColor": "#FF6B4A",
+    "shortDescription": "Cyclic state machines and human-in-the-loop multi-agent coordination",
+    "positioning": "Cyclic Graph State Machines & Multi-Agent Checkpointing",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -911,14 +900,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "LlamaIndex",
     "slug": "llamaindex",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Data Framework",
-    "brandColor": "#14B8A6",
-    "shortDescription": "Context augmentation, structured indexing, and data connectors for LLMs 🦙",
-    "positioning": "Document Chunking, Vector Store Connectors & Query Pipelines",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Context Augmentation Data",
+    "brandColor": "#8C52FF",
+    "shortDescription": "Context augmentation, structured indexing, and data connectors for LLMs",
+    "positioning": "Data Connectors, Ingestion Workflows & Context Indexing",
     "relatedProjects": [
-      "chronos",
-      "lcml"
+      "aurora"
     ]
   },
   {
@@ -926,13 +914,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "CrewAI",
     "slug": "crewai",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Role-Playing Agents",
-    "brandColor": "#FF5722",
-    "shortDescription": "Collaborative role-playing autonomous agents executing sequential and parallel tasks 👥",
-    "positioning": "Role Assignment, Task Delegation & Multi-Agent Crews",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Role-Playing Multi-Agents",
+    "brandColor": "#FF4500",
+    "shortDescription": "Collaborative role-playing autonomous agents executing sequential workflows",
+    "positioning": "Role-Playing Autonomous Crews & Hierarchical Task Execution",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -940,13 +928,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "AutoGen",
     "slug": "autogen",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Conversational Agents",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Multi-Agent Conversation",
     "brandColor": "#0078D4",
-    "shortDescription": "Multi-agent conversation framework orchestrating complex problem solving 🤖",
-    "positioning": "Conversable Agents, Code Execution Sandbox & Group Chats",
+    "shortDescription": "Event-driven conversational agent framework enabling complex task solving",
+    "positioning": "Conversational Agent Architecture & Multi-Party Orchestration",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -954,13 +942,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Dify",
     "slug": "dify",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "LLMOps Platform",
-    "brandColor": "#2563EB",
-    "shortDescription": "Visual orchestration of AI applications, RAG pipelines, and agent workflows 🎛️",
-    "positioning": "Visual Prompt Workflows, Knowledge Bases & Agent Publishing",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "LLM App Workflow Engine",
+    "brandColor": "#155EEF",
+    "shortDescription": "Visual orchestration pipeline combining prompt engineering, RAG, and agent ops",
+    "positioning": "Visual Agentic Workflow Design & Production LLMOps",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -968,27 +956,27 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Coze",
     "slug": "coze",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Agent Builder",
-    "brandColor": "#8B5CF6",
-    "shortDescription": "All-in-one AI chatbot and bot development platform with plugin ecosystems 🧩",
-    "positioning": "Plugin Integrations, Workflow Canvas & Multi-Channel Deployment",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Next-Gen Bot Architecture",
+    "brandColor": "#304FFE",
+    "shortDescription": "All-in-one AI chatbot development platform with rich plugin integrations",
+    "positioning": "All-in-One Bot Logic & Multi-Modal Plugin Ecosystem",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
     "id": "semantickernel",
     "name": "Semantic Kernel",
-    "slug": "microsoft",
+    "slug": "semantickernel",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Enterprise AI SDK",
-    "brandColor": "#00A4EF",
-    "shortDescription": "Enterprise orchestration integrating AI plugins, memories, and native code 🏢",
-    "positioning": "Native Code Plugins, Planners & Enterprise AI Integration",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Enterprise Agent SDK",
+    "brandColor": "#008AD7",
+    "shortDescription": "Lightweight enterprise SDK integrating AI large language models with native code",
+    "positioning": "Enterprise Semantic Function Orchestration & Native Code Plugins",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -996,42 +984,41 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "MCP",
     "slug": "mcp",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Protocol Standard",
-    "brandColor": "#D97706",
-    "shortDescription": "Model Context Protocol: open standard connecting LLMs to external data and tools 🌐",
-    "positioning": "MCP Client & Server Architecture, Tool Resources & Prompts",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "Model Context Protocol",
+    "brandColor": "#10B981",
+    "shortDescription": "Open standard protocol connecting LLMs seamlessly with external context & tools",
+    "positioning": "Anthropic Model Context Protocol Server & Client Implementation",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
-    "id": "mem0",
-    "name": "Agent Memory (Mem0)",
-    "slug": "mem0",
+    "id": "haystack",
+    "name": "Haystack",
+    "slug": "haystack",
     "row": 6,
-    "rowTitle": "AI Agent 与工作流编排",
-    "category": "Long-Term Memory",
-    "brandColor": "#A855F7",
-    "shortDescription": "Persistent user preferences, adaptive graph memory, and cross-session recall 🧠",
-    "positioning": "Graph Memory, Episodic Storage & Adaptive User Profiles",
+    "rowTitle": "AI Agent Frameworks",
+    "category": "End-to-End LLM Pipelines",
+    "brandColor": "#0EAF9C",
+    "shortDescription": "Modular Python framework for building custom semantic search and agent pipelines",
+    "positioning": "Modular Component Pipelines & Semantic Document Processing",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
     "id": "pgvector",
     "name": "pgvector",
-    "slug": "postgresql",
+    "slug": "pgvector",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Vector Database",
-    "brandColor": "#4169E1",
-    "shortDescription": "Open-source vector similarity search for PostgreSQL with HNSW indexing 🐘",
-    "positioning": "HNSW Indexes, Cosine Similarity & Relational Vector Hybrid Queries",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Postgres Vector Extension",
+    "brandColor": "#336791",
+    "shortDescription": "Exact & approximate nearest neighbor search directly inside PostgreSQL",
+    "positioning": "PostgreSQL HNSW & IVFFlat High-Dimensional Indexing",
     "relatedProjects": [
-      "chronos",
-      "lcml"
+      "aurora"
     ]
   },
   {
@@ -1039,13 +1026,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Chroma",
     "slug": "chroma",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Embedding DB",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "AI Native Embeddings Database",
     "brandColor": "#FF6B6B",
-    "shortDescription": "AI-native open-source embedding database for rapid local vector prototyping 🌈",
-    "positioning": "Local Embeddings Storage, Metadata Filtering & Collection Queries",
+    "shortDescription": "Open-source embeddings database built for developer simplicity and rapid RAG",
+    "positioning": "Embedded & Distributed Vector Storage for Rapid Prototyping",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -1053,13 +1040,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Milvus",
     "slug": "milvus",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Cloud Vector DB",
-    "brandColor": "#00A3E0",
-    "shortDescription": "Billion-scale distributed vector database engineered for enterprise retrieval 🏢",
-    "positioning": "Distributed Vector Shards, IVF-PQ Indexing & High-QPS Search",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Massive Scale Vector Storage",
+    "brandColor": "#00A1EA",
+    "shortDescription": "Cloud-native vector database architected for billion-scale similarity search",
+    "positioning": "Billion-Scale Distributed Vector Architecture & Sharding",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -1067,13 +1054,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Weaviate",
     "slug": "weaviate",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Hybrid Vector Engine",
-    "brandColor": "#00D2B4",
-    "shortDescription": "Hybrid sparse-dense search combining BM25 keyword matching with embeddings 🔀",
-    "positioning": "Hybrid Keyword/Vector Search & Modular Vectorizer Modules",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Hybrid Vector & BM25 Search",
+    "brandColor": "#00D084",
+    "shortDescription": "Open-source vector database supporting hybrid vector and keyword BM25 search",
+    "positioning": "Hybrid Dense Vector & BM25 Sparse Search Engine",
     "relatedProjects": [
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -1081,13 +1068,27 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Qdrant",
     "slug": "qdrant",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Rust Vector Search",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Rust Vector Engine",
     "brandColor": "#DC2626",
-    "shortDescription": "High-performance vector search engine written in Rust with payload filtering 🦀",
-    "positioning": "Payload-Based Filtering, Rust Speed & Quantized Embeddings",
+    "shortDescription": "Vector similarity search engine with extended payload filtering written in Rust",
+    "positioning": "Rust Memory-Safe Vector Indexing & Complex Payload Filtering",
     "relatedProjects": [
-      "chronos"
+      "aurora"
+    ]
+  },
+  {
+    "id": "pinecone",
+    "name": "Pinecone",
+    "slug": "pinecone",
+    "row": 7,
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Managed Serverless Vector DB",
+    "brandColor": "#27272A",
+    "shortDescription": "Fully managed serverless vector database engineered for fast index freshness",
+    "positioning": "Managed Serverless Vector DB with Instant Index Freshness",
+    "relatedProjects": [
+      "aurora"
     ]
   },
   {
@@ -1095,13 +1096,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "LlamaParse",
     "slug": "llamaparse",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Document Parsing",
-    "brandColor": "#14B8A6",
-    "shortDescription": "GenAI-first parsing service for complex tables, charts, and unstructured PDFs 📑",
-    "positioning": "Table Extraction, Markdown Conversion & Layout-Aware Parsing",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Document Extraction for RAG",
+    "brandColor": "#6366F1",
+    "shortDescription": "GenAI-native document parser transforming complex PDFs into clean structured markdown",
+    "positioning": "GenAI Multimodal PDF Parsing & Tabular Extraction",
     "relatedProjects": [
-      "lcml"
+      "aurora"
     ]
   },
   {
@@ -1109,59 +1110,41 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Unstructured",
     "slug": "unstructured",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "ETL Pipeline",
-    "brandColor": "#F97316",
-    "shortDescription": "Preprocessing unstructured text documents into clean downstream RAG chunks 🧹",
-    "positioning": "Document Ingestion Pipelines, Partitioning & Metadata Extraction",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "ETL Pipeline for LLMs",
+    "brandColor": "#4F46E5",
+    "shortDescription": "Modular data preparation platform ingesting unstructured documents into vector pipelines",
+    "positioning": "Document Chunking, Cleaning & Embedding ETL Ingestion",
     "relatedProjects": [
-      "lcml"
+      "aurora"
     ]
   },
   {
-    "id": "reranker",
-    "name": "Reranker",
-    "slug": "reranker",
+    "id": "cohere",
+    "name": "Cohere",
+    "slug": "cohere",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Relevance Scoring",
-    "brandColor": "#8B5CF6",
-    "shortDescription": "Cross-encoder scoring models re-ordering top-k candidate chunks for precision 🎯",
-    "positioning": "Cross-Encoder Scoring, Cohere Rerank & Precision Tuning",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Enterprise Rerank & Embeddings",
+    "brandColor": "#39594D",
+    "shortDescription": "Leading multilingual embeddings and state-of-the-art semantic reranking models",
+    "positioning": "Enterprise Multilingual Embeddings & Semantic Rerank-v3",
     "relatedProjects": [
-      "chronos",
-      "lcml"
+      "aurora"
     ]
   },
   {
-    "id": "embeddingmodels",
-    "name": "Embedding Models",
-    "slug": "embeddingmodels",
+    "id": "voyageai",
+    "name": "Voyage AI",
+    "slug": "voyageai",
     "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Dense Vectors",
-    "brandColor": "#EC4899",
-    "shortDescription": "Dense semantic representations mapping text into high-dimensional geometric space 🌌",
-    "positioning": "Dense Embeddings, MTEB Benchmarks & Dimensionality Tuning",
+    "rowTitle": "RAG & Vector Databases",
+    "category": "Domain-Specialized Embeddings",
+    "brandColor": "#3B82F6",
+    "shortDescription": "State-of-the-art embedding and reranker models optimized for finance and code",
+    "positioning": "Domain-Customized Dense Embeddings & Context Retrieval",
     "relatedProjects": [
-      "chronos",
-      "lcml"
-    ],
-    "icon": "/assets/icons/rag.svg"
-  },
-  {
-    "id": "citations",
-    "name": "引用溯源",
-    "slug": "citations",
-    "row": 7,
-    "rowTitle": "RAG 知识库与检索工程",
-    "category": "Provenance & Hallucination",
-    "brandColor": "#06B6D4",
-    "shortDescription": "Source attribution and exact chunk verification preventing model hallucinations 📌",
-    "positioning": "Source Attribution, Span Highlighting & Hallucination Mitigation",
-    "relatedProjects": [
-      "lcml",
-      "chronos"
+      "aurora"
     ]
   },
   {
@@ -1169,14 +1152,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Docker",
     "slug": "docker",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Containerization",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Container Isolation",
     "brandColor": "#2496ED",
-    "shortDescription": "Deterministic container runtimes ensuring reproducibility from local to cloud 🐳",
-    "positioning": "Multi-Stage Builds, Container Security & Minimal Images",
+    "shortDescription": "Lightweight OS-level virtualization guaranteeing consistent runtime environments",
+    "positioning": "Multi-Stage Container Builds & Ephemeral Environments",
     "relatedProjects": [
       "marymount",
-      "lcml"
+      "kic"
     ]
   },
   {
@@ -1184,13 +1167,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Kubernetes",
     "slug": "kubernetes",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Orchestration",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Container Orchestration",
     "brandColor": "#326CE5",
-    "shortDescription": "Declarative cluster orchestration, self-healing pods, and service discovery ☸️",
-    "positioning": "K8s Deployments, Horizontal Pod Autoscaling & Ingress",
+    "shortDescription": "Automated container deployment, horizontal scaling, and declarative management",
+    "positioning": "Declarative Cluster Orchestration & Ingress Controllers",
     "relatedProjects": [
-      "marymount"
+      "kic"
     ]
   },
   {
@@ -1198,15 +1181,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "GitHub Actions",
     "slug": "githubactions",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
+    "rowTitle": "DevOps, Testing & Observability",
     "category": "CI/CD Automation",
     "brandColor": "#2088FF",
-    "shortDescription": "Automated test matrices, build pipelines, and production deployments 🤖",
-    "positioning": "CI/CD Workflows, Matrix Testing & Security Scanning",
+    "shortDescription": "Continuous integration and continuous deployment pipelines triggered by git events",
+    "positioning": "Declarative CI/CD Workflows, Security Audits & Matrix Builds",
     "relatedProjects": [
-      "chronos",
-      "aurora",
-      "marymount"
+      "marymount",
+      "chronos"
     ]
   },
   {
@@ -1214,13 +1196,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Prometheus",
     "slug": "prometheus",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Metrics Monitoring",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Time-Series Monitoring",
     "brandColor": "#E6522C",
-    "shortDescription": "Time-series metrics collection, PromQL querying, and real-time alerts 📈",
-    "positioning": "PromQL Queries, Scrape Targets & Service Level Objectives",
+    "shortDescription": "Dimensional data model with PromQL for real-time systems monitoring and alerting",
+    "positioning": "Pull-Based Time-Series Telemetry & Alertmanager Rules",
     "relatedProjects": [
-      "marymount"
+      "kic"
     ]
   },
   {
@@ -1228,13 +1210,13 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Grafana",
     "slug": "grafana",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Telemetry Dashboards",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Observability Dashboards",
     "brandColor": "#F46800",
-    "shortDescription": "Visual observability dashboards tracking system performance and telemetry 📊",
-    "positioning": "Observability Dashboards & Telemetry Visualization",
+    "shortDescription": "Interactive real-time visualization dashboards for telemetry metrics and logs",
+    "positioning": "Unified Observability Dashboards & Real-Time Telemetry Panels",
     "relatedProjects": [
-      "marymount"
+      "kic"
     ]
   },
   {
@@ -1242,28 +1224,14 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Sentry",
     "slug": "sentry",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Error Tracking",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Error Tracking & APM",
     "brandColor": "#362D59",
-    "shortDescription": "Real-time stack trace capture, performance tracing, and release health 🚨",
-    "positioning": "Error Boundary Reporting, Performance Spans & Release Monitoring",
+    "shortDescription": "Real-time error monitoring, stack trace diagnostics, and performance profiling",
+    "positioning": "Real-Time Error Tracking, Distributed Tracing & Breadcrumbs",
     "relatedProjects": [
       "marymount",
       "chronos"
-    ]
-  },
-  {
-    "id": "pytest",
-    "name": "Pytest",
-    "slug": "pytest",
-    "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Python Testing",
-    "brandColor": "#0A9EDC",
-    "shortDescription": "Fixtures, parameterized test runs, and mock assertions for Python codebases 🧪",
-    "positioning": "Automated Unit Tests, Mocking & Regression Suites",
-    "relatedProjects": [
-      "lcml"
     ]
   },
   {
@@ -1271,28 +1239,41 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "Playwright",
     "slug": "playwright",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
+    "rowTitle": "DevOps, Testing & Observability",
     "category": "End-to-End Testing",
     "brandColor": "#2EAD33",
-    "shortDescription": "Fast, reliable cross-browser automation and visual regression testing 🎭",
-    "positioning": "E2E User Journeys, Snapshot Assertions & Headless CI Runs",
+    "shortDescription": "Reliable cross-browser end-to-end automation with auto-waiting and trace recording",
+    "positioning": "Cross-Browser Headless E2E Automation & Snapshot Regression",
     "relatedProjects": [
-      "chronos"
+      "marymount"
+    ]
+  },
+  {
+    "id": "pytest",
+    "name": "Pytest",
+    "slug": "pytest",
+    "row": 8,
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Python Test Framework",
+    "brandColor": "#0A9EDC",
+    "shortDescription": "Scalable Python testing framework with fixture dependency injection and parametrization",
+    "positioning": "Python Fixture Architecture & Parameterized Testing",
+    "relatedProjects": [
+      "aurora"
     ]
   },
   {
     "id": "celery",
-    "name": "Celery / BullMQ",
+    "name": "Celery",
     "slug": "celery",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Task Queue",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Distributed Task Queue",
     "brandColor": "#37814A",
-    "shortDescription": "Distributed asynchronous job execution, scheduled cron, and retry backoff 📬",
-    "positioning": "Asynchronous Job Workers, Dead-Letter Queues & Scheduled Tasks",
+    "shortDescription": "Asynchronous distributed task execution and scheduling with broker backends",
+    "positioning": "Asynchronous Distributed Job Queues & Worker Scheduling",
     "relatedProjects": [
-      "marymount",
-      "lcml"
+      "kic"
     ]
   },
   {
@@ -1300,23 +1281,24 @@ export const SKILLS_DATA: SkillItem[] = [
     "name": "OpenTelemetry",
     "slug": "opentelemetry",
     "row": 8,
-    "rowTitle": "工程化部署、测试与稳定性",
-    "category": "Distributed Tracing",
-    "brandColor": "#425CC7",
-    "shortDescription": "Vendor-neutral telemetry standard for distributed traces, metrics, and logs 📡",
-    "positioning": "OTel Instrumentation, Context Propagation & Distributed Tracing",
+    "rowTitle": "DevOps, Testing & Observability",
+    "category": "Unified Telemetry Standard",
+    "brandColor": "#000000",
+    "shortDescription": "Vendor-neutral telemetry standard for collecting distributed traces, metrics, and logs",
+    "positioning": "Distributed Context Propagation & Vendor-Agnostic OTLP Collectors",
     "relatedProjects": [
-      "marymount"
+      "aurora"
     ]
   }
 ];
 
-// Dynamically group skills by their designated row definition
-export const SKILLS_BY_ROW: Record<number, SkillItem[]> = SKILL_ROWS.reduce<Record<number, SkillItem[]>>(
-  (acc, rowDef) => {
-    acc[rowDef.row] = SKILLS_DATA.filter((s) => s.row === rowDef.row);
-    return acc;
-  },
-  {}
-);
-
+export const SKILLS_BY_ROW: Record<number, SkillItem[]> = {
+  1: SKILLS_DATA.filter((s) => s.row === 1),
+  2: SKILLS_DATA.filter((s) => s.row === 2),
+  3: SKILLS_DATA.filter((s) => s.row === 3),
+  4: SKILLS_DATA.filter((s) => s.row === 4),
+  5: SKILLS_DATA.filter((s) => s.row === 5),
+  6: SKILLS_DATA.filter((s) => s.row === 6),
+  7: SKILLS_DATA.filter((s) => s.row === 7),
+  8: SKILLS_DATA.filter((s) => s.row === 8),
+};

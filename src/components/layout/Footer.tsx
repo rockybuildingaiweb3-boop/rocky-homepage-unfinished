@@ -6,9 +6,6 @@ import {
   RxTwitterLogo,
   RxLinkedinLogo,
   RxEnvelopeClosed,
-  RxReader,
-  RxBackpack,
-  RxLayers,
 } from 'react-icons/rx';
 import { FaYoutube, FaSpotify, FaTelegramPlane } from 'react-icons/fa';
 import { onScrolledIntoView } from '../../utils';
@@ -19,7 +16,7 @@ interface FooterProps {
   onNavigateRoute?: (path: string) => void;
 }
 
-// Structured link matrix with direct same-site Studio routes and external socials
+// Structured link matrix with global community and social platforms
 export const FOOTER_DATA = [
   {
     title: 'Community',
@@ -68,34 +65,6 @@ export const FOOTER_DATA = [
         name: 'Telegram',
         icon: FaTelegramPlane,
         link: 'https://t.me',
-      },
-    ],
-  },
-  {
-    title: 'Studio Index',
-    data: [
-      {
-        name: 'Projects (06)',
-        icon: RxLayers,
-        link: '/studio/projects',
-        isInternal: true,
-      },
-      {
-        name: 'Essays & Blog',
-        icon: RxReader,
-        link: '/studio/blog',
-        isInternal: true,
-      },
-      {
-        name: 'Career Dossier',
-        icon: RxBackpack,
-        link: '/studio/career',
-        isInternal: true,
-      },
-      {
-        name: 'Direct Contact',
-        icon: RxEnvelopeClosed,
-        link: 'mailto:rockybuilding.aiweb3@gmail.com',
       },
     ],
   },
@@ -165,13 +134,6 @@ export const Footer: React.FC<FooterProps> = ({ siteData, onNavigateRoute }) => 
 
     return cleanup;
   }, []);
-
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string, isInternal?: boolean) => {
-    if (isInternal && onNavigateRoute) {
-      e.preventDefault();
-      onNavigateRoute(link);
-    }
-  };
 
   return (
     <footer
@@ -259,20 +221,19 @@ export const Footer: React.FC<FooterProps> = ({ siteData, onNavigateRoute }) => 
           </div>
 
           {/* Zone 2: Center Navigation Matrix - 5 Cols */}
-          <div className="lg:col-span-5 grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-6">
+          <div className="lg:col-span-5 grid grid-cols-2 gap-8 sm:gap-10">
             {FOOTER_DATA.map((column) => (
               <div key={column.title} className="flex flex-col space-y-3">
                 <h3 className="font-mono uppercase text-[10px] sm:text-[11px] font-semibold tracking-[0.24em] text-white/40 select-none">
                   {column.title}
                 </h3>
                 <ul className="list-none p-0 m-0 space-y-2.5">
-                  {column.data.map(({ icon: Icon, name, link, isInternal }) => (
+                  {column.data.map(({ icon: Icon, name, link }) => (
                     <li key={name}>
                       <a
                         href={link}
-                        onClick={(e) => handleLinkClick(e, link, isInternal)}
-                        target={link.startsWith('http') ? '_blank' : undefined}
-                        rel={link.startsWith('http') ? 'noreferrer noopener' : undefined}
+                        target="_blank"
+                        rel="noreferrer noopener"
                         data-cursor="pointer"
                         className="inline-flex items-center text-white/60 hover:text-white transition-all duration-200 text-xs sm:text-[13px] group py-0.5"
                       >

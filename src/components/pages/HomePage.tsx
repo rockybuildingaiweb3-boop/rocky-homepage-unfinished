@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { WorkItem, SiteData } from '../../types';
 import { Navbar, Footer } from '../layout';
 import { HomeSection, WorkSection, SkillsSection } from '../sections';
-import { useScrollSpy } from '../../hooks/useScrollSpy';
+import { useScrollSpy } from '../../features/scroll';
 import { useRouter } from '../../router/RouterContext';
 
 interface HomePageProps {
@@ -32,8 +32,8 @@ export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
   const handleNavigate = useCallback(
     (targetId: string) => {
       // Direct studio route gateway
-      if (targetId === 'studio' || targetId === '/studio' || targetId === '/studio/projects') {
-        navigate('/studio/projects');
+      if (targetId === 'studio' || targetId === '/studio') {
+        navigate('/studio');
         return;
       }
       if (targetId.startsWith('/')) {

@@ -62,6 +62,10 @@ import {
   siNeo4j,
   siSqlite,
   siWeb3dotjs,
+  siBabylondotjs,
+  siOllama,
+  siHuggingface,
+  siHaystack,
 } from 'simple-icons';
 
 export interface SimpleIconData {
@@ -157,6 +161,11 @@ const VERIFIED_SIMPLE_ICONS: Record<string, SimpleIconData> = {
   sqlite: siSqlite,
   web3dotjs: siWeb3dotjs,
   web3: siWeb3dotjs,
+  babylondotjs: siBabylondotjs,
+  babylonjs: siBabylondotjs,
+  ollama: siOllama,
+  huggingface: siHuggingface,
+  haystack: siHaystack,
 };
 
 /**
@@ -164,7 +173,6 @@ const VERIFIED_SIMPLE_ICONS: Record<string, SimpleIconData> = {
  */
 const LOCAL_SVG_ASSETS: Record<string, string> = {
   openai: '/assets/icons/openai.svg',
-  chatgpt: '/assets/icons/openai.svg',
   rag: '/assets/icons/rag.svg',
   embeddingmodels: '/assets/icons/rag.svg',
   agentic: '/assets/icons/agentic.svg',

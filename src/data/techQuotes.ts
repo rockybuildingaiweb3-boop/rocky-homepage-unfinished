@@ -22,12 +22,12 @@ export const TECH_QUOTES: Record<string, string> = {
   "blender": "Subdivision surface modeling, UV unwrapping, and glTF optimization 📐",
   "spline": "Web-native interactive 3D assets, event triggers, and physics simulations 💫",
   "draco": "High-ratio geometry compression reducing 3D web asset payloads 📦",
-  "uvbaking": "Ambient occlusion, normal map baking, and texture atlas optimization 🎨",
   "canvasapi": "Immediate mode 2D pixel rendering, particle physics, and image filters 🖌️",
+  "babylondotjs": "Full-featured real-time 3D engine with PBR shaders and browser physics 🪐",
   "nodedotjs": "Asynchronous event loop runtime powering scalable backend services 🟢",
   "express": "Minimalist HTTP routing engine and middleware pipeline 🚂",
   "fastapi": "High-throughput async Python APIs serving real-time model inference ⚡",
-  "postgresql": "ACID transactions, relational integrity, and pgvector embeddings 🐘",
+  "postgresql": "ACID transactions, relational integrity, and advanced indexing 🐘",
   "supabase": "Postgres-native backend with instant realtime and Row Level Security ⚡",
   "prisma": "Declarative schema modeling and type-safe database query generation 💎",
   "drizzle": "SQL-like syntax, edge serverless compatibility, and zero runtime overhead ⚡",
@@ -46,52 +46,61 @@ export const TECH_QUOTES: Record<string, string> = {
   "siwe": "Sign-In with Ethereum enabling decentralized cryptographic authentication 🪪",
   "openai": "Frontier reasoning models, multimodal vision, and structured tool calling ⚡",
   "anthropic": "Constitutional reasoning, long-context comprehension & Model Context Protocol 🧠",
-  "gemini": "Native multimodal reasoning across video, audio, code, and long-context windows 🪐",
+  "googlegemini": "Native multimodal reasoning across video, audio, code, and long-context windows 🪐",
   "deepseek": "High-efficiency mixture-of-experts architecture and math reasoning models 🐋",
   "qwen": "Enterprise-grade multilingual reasoning, coding, and vision foundation models 🌏",
-  "vercelai": "Unified TypeScript library for streaming LLM text, objects, and generative UI ⚡",
-  "functioncalling": "Deterministic JSON parameter extraction invoking external tools and APIs ⚙️",
-  "structuredoutput": "100% JSON Schema adherence guaranteed by constrained decoding engines 📋",
-  "promptengineering": "Chain-of-thought, few-shot prompting, and metaprompt architecture 📝",
-  "langsmith": "Trace latency, monitor tokens, debug chains, and evaluate prompt runs 🔍",
+  "vercel": "Unified TypeScript library for streaming LLM text, objects, and generative UI ⚡",
+  "ollama": "Local model execution and optimized offline quantization pipelines 🦙",
+  "huggingface": "The open collaborative hub for open weights, transformers, and model hosting 🤗",
+  "groq": "Ultra-low-latency LPU inference acceleration delivering real-time streaming tokens ⚡",
+  "togetherai": "High-throughput cloud inference engine serving leading open-source models ☁️",
   "langchain": "Composing multi-step reasoning chains with contextual tools and memory ⛓️",
   "langgraph": "Cyclic state machines and human-in-the-loop multi-agent coordination 🔄",
   "llamaindex": "Context augmentation, structured indexing, and data connectors for LLMs 🦙",
   "crewai": "Collaborative role-playing autonomous agents executing sequential and parallel tasks 👥",
-  "autogen": "Multi-agent conversation framework orchestrating complex problem solving 🤖",
-  "dify": "Visual orchestration of AI applications, RAG pipelines, and agent workflows 🎛️",
-  "coze": "All-in-one AI chatbot and bot development platform with plugin ecosystems 🧩",
-  "semantickernel": "Enterprise orchestration integrating AI plugins, memories, and native code 🏢",
-  "mcp": "Model Context Protocol: open standard connecting LLMs to external data and tools 🌐",
-  "mem0": "Persistent user preferences, adaptive graph memory, and cross-session recall 🧠",
-  "pgvector": "Open-source vector similarity search for PostgreSQL with HNSW indexing 🐘",
-  "chroma": "AI-native open-source embedding database for rapid local vector prototyping 🌈",
-  "milvus": "Billion-scale distributed vector database engineered for enterprise retrieval 🏢",
-  "weaviate": "Hybrid sparse-dense search combining BM25 keyword matching with embeddings 🔀",
-  "qdrant": "High-performance vector search engine written in Rust with payload filtering 🦀",
-  "llamaparse": "GenAI-first parsing service for complex tables, charts, and unstructured PDFs 📑",
-  "unstructured": "Preprocessing unstructured text documents into clean downstream RAG chunks 🧹",
-  "reranker": "Cross-encoder scoring models re-ordering top-k candidate chunks for precision 🎯",
-  "embeddingmodels": "Dense semantic representations mapping text into high-dimensional geometric space 🌌",
-  "citations": "Source attribution and exact chunk verification preventing model hallucinations 📌",
-  "docker": "Deterministic container runtimes ensuring reproducibility from local to cloud 🐳",
-  "kubernetes": "Declarative cluster orchestration, self-healing pods, and service discovery ☸️",
-  "githubactions": "Automated test matrices, build pipelines, and production deployments 🤖",
-  "prometheus": "Time-series metrics collection, PromQL querying, and real-time alerts 📈",
-  "grafana": "Visual observability dashboards tracking system performance and telemetry 📊",
-  "sentry": "Real-time stack trace capture, performance tracing, and release health 🚨",
-  "pytest": "Fixtures, parameterized test runs, and mock assertions for Python codebases 🧪",
-  "playwright": "Fast, reliable cross-browser automation and visual regression testing 🎭",
-  "celery": "Distributed asynchronous job execution, scheduled cron, and retry backoff 📬",
-  "opentelemetry": "Vendor-neutral telemetry standard for distributed traces, metrics, and logs 📡"
+  "autogen": "Event-driven conversational agent framework enabling complex task solving 🤖",
+  "dify": "Visual orchestration pipeline combining prompt engineering, RAG, and agent ops 🧩",
+  "coze": "All-in-one AI bot building platform with rich plugin integrations 🤖",
+  "semantickernel": "Lightweight enterprise SDK integrating LLMs with native code functions ⚙️",
+  "mcp": "Open standard protocol connecting LLMs with external systems and data stores 🔌",
+  "haystack": "Modular end-to-end Python framework for custom semantic search and agent pipelines 🌾",
+  "pgvector": "Exact and approximate nearest neighbor vector search directly inside PostgreSQL 🐘",
+  "chroma": "Open-source developer-first embeddings database for rapid semantic retrieval 🎨",
+  "milvus": "Cloud-native vector database architected for billion-scale similarity search 📊",
+  "weaviate": "Open-source vector database supporting hybrid vector and keyword BM25 search 🔍",
+  "qdrant": "Rust-powered vector similarity search engine with extended payload filtering 🎯",
+  "pinecone": "Fully managed serverless vector database engineered for instant index freshness 🌲",
+  "llamaparse": "GenAI-native document parser transforming complex PDFs into clean structured markdown 📄",
+  "unstructured": "Modular data preparation ETL platform ingesting complex documents into vector pipelines 📑",
+  "cohere": "Enterprise multilingual embeddings and state-of-the-art semantic reranking models 🧠",
+  "voyageai": "Domain-specialized embeddings and rerankers optimized for high-precision retrieval 🚀",
+  "docker": "Lightweight OS-level virtualization guaranteeing consistent runtime environments 🐳",
+  "kubernetes": "Automated container deployment, horizontal scaling, and declarative management ☸️",
+  "githubactions": "Continuous integration and continuous deployment pipelines triggered by git events 🐙",
+  "prometheus": "Dimensional data model with PromQL for real-time systems monitoring and alerting 🔥",
+  "grafana": "Interactive real-time visualization dashboards for telemetry metrics and logs 📈",
+  "sentry": "Real-time error monitoring, stack trace diagnostics, and performance profiling 🚨",
+  "playwright": "Reliable cross-browser end-to-end automation with auto-waiting and trace recording 🎭",
+  "pytest": "Scalable Python testing framework with fixture dependency injection and parametrization 🐍",
+  "celery": "Asynchronous distributed task execution and scheduling with broker backends 🥦",
+  "opentelemetry": "Vendor-neutral telemetry standard for collecting distributed traces, metrics, and logs 🔭"
 };
 
-export function getTechQuote(skillId: string, fallback?: string): string {
-  const normId = skillId.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return (
-    TECH_QUOTES[normId] ||
-    TECH_QUOTES[skillId] ||
-    fallback ||
-    'High-performance production technical capability ⚡'
-  );
+export function getTechQuote(skillId: string, fallbackDescription?: string): string {
+  const cleanId = (skillId || '').toLowerCase().trim();
+  if (TECH_QUOTES[cleanId]) {
+    return TECH_QUOTES[cleanId];
+  }
+  // Secondary fallback lookup
+  const aliases: Record<string, string> = {
+    gemini: 'googlegemini',
+    claude: 'anthropic',
+    vercelai: 'vercel',
+    babylonjs: 'babylondotjs',
+  };
+  const aliasTarget = aliases[cleanId];
+  if (aliasTarget && TECH_QUOTES[aliasTarget]) {
+    return TECH_QUOTES[aliasTarget];
+  }
+  return fallbackDescription || 'High-performance creative engineering instrument.';
 }

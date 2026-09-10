@@ -3,7 +3,7 @@
  * 
  * Centralized, route-persistent HTML5 Audio controller:
  * - Exactly ONE HTMLAudioElement instance across the entire application lifecycle
- * - Survives route switches (/, /studio/projects, /studio/blog, /studio/career) without restarts
+ * - Survives route switches without restarts
  * - Manages autoplay policies and user interaction unlocking
  * - Session-persistent mute preferences
  */

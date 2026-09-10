@@ -1,22 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getGPUTier } from 'detect-gpu';
-import { isWebGLAvailable } from '../../../utils';
-import { ImageRenderer } from '../../../effects/work-slider/renderer';
-import { StudioProjectsProps } from '../types';
-import { useStudioSliderPhysics } from '../hooks/useStudioSliderPhysics';
-import { StudioProgressBar } from '../components/StudioProgressBar';
-import { StudioCard } from '../components/StudioCard';
-import { StudioProjectDetails } from '../components/StudioProjectDetails';
+import { isWebGLAvailable } from '../../utils';
+import { ImageRenderer } from '../../effects/work-slider/renderer';
+import { WorkItem } from '../../types';
+import { useStudioSliderPhysics } from '../studio/hooks/useStudioSliderPhysics';
+import { StudioProgressBar } from '../studio/components/StudioProgressBar';
+import { StudioCard } from '../studio/components/StudioCard';
+import { StudioProjectDetails } from '../studio/components/StudioProjectDetails';
+
+export interface WorkSliderProps {
+  workData: WorkItem[];
+  onActiveChange?: (hasActiveProject: boolean) => void;
+}
 
 /**
- * StudioProjects
- * Modular Studio orchestration layer:
+ * WorkSlider
+ * Homepage spatial horizontal project slider:
  * - Decouples slider physics (useStudioSliderPhysics) from presentation (StudioCard, StudioProjectDetails, StudioProgressBar)
  * - Retains WebGL Three.js image distortion effect via ImageRenderer
  * - Strict 8px drag threshold vs click activation
  * - Full keyboard navigation (Enter/Space to view, Escape to dismiss)
  */
-export const StudioProjects: React.FC<StudioProjectsProps> = ({ workData, onActiveChange }) => {
+export const WorkSlider: React.FC<WorkSliderProps> = ({ workData, onActiveChange }) => {
   const [currentActive, setCurrentActive] = useState<number>(-1);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,7 +51,7 @@ export const StudioProjects: React.FC<StudioProjectsProps> = ({ workData, onActi
     itemRefs,
   });
 
-  // Notify parent of active state changes (e.g. hides studio section header)
+  // Notify parent of active state changes (e.g. hides section header)
   useEffect(() => {
     if (onActiveChange) {
       onActiveChange(currentActive >= 0);
@@ -107,8 +112,8 @@ export const StudioProjects: React.FC<StudioProjectsProps> = ({ workData, onActi
       clearTimeout(timer);
       if (rendererRef.current) {
         rendererRef.current.destroy();
-        rendererRef.current = null;
       }
+      rendererRef.current = null;
     };
   }, [workData, getSpeed]);
 
@@ -183,3 +188,5 @@ export const StudioProjects: React.FC<StudioProjectsProps> = ({ workData, onActi
     </div>
   );
 };
+
+export default WorkSlider;

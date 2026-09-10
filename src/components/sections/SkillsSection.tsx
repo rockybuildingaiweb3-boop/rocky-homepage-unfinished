@@ -11,7 +11,7 @@ import { SkillsMarquee } from '../skills/SkillsMarquee';
  * 1. Signature cosmic purple planet rotating in full ambient view (/videos/skills-bg.webm)
  * 2. Elegant minimalist header:
  *    - "instruments" clean editorial title
- * 3. 5-row constellation of frameless, floating official brand logos (50 items total, 10 per row)
+ * 3. 8-row constellation of frameless, floating official brand logos (80 items total, 10 per row)
  * 4. Micro-telemetry floating HUD for active/hovered skill
  * 5. Subtle dual-track kinetic marquee at the base, 100% linked in real-time with the constellation!
  */

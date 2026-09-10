@@ -118,7 +118,7 @@ export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({
   return (
     <div className="w-full flex flex-col gap-3 sm:gap-5 my-6 sm:my-10 select-none relative z-10">
       {/* 
-        TRACK 1: Rows 1 & 2 Skills Stream (Flowing Forward / Left)
+        TRACK 1: Rows 1 to 4 Skills Stream (Flowing Forward / Left)
         Completely transparent background so star particles flow right through.
       */}
       <div className="marquee-band group">
@@ -129,7 +129,7 @@ export const SkillsMarquee: React.FC<SkillsMarqueeProps> = ({
       </div>
 
       {/* 
-        TRACK 2: Rows 3, 4 & 5 Skills Stream (Flowing Reverse / Right)
+        TRACK 2: Rows 5 to 8 Skills Stream (Flowing Reverse / Right)
         Completely transparent background so star particles flow right through.
       */}
       <div className="marquee-band group">

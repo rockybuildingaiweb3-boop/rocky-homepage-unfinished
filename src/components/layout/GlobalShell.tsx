@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Loader } from './Loader';
-import { CursorDot, ParticleBackground } from '../ui';
+import { ParticleBackground } from '../ui';
+import { CursorDot } from '../../features/cursor';
 
 interface GlobalShellProps {
   progress: number;
