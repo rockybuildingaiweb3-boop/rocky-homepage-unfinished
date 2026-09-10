@@ -218,7 +218,13 @@ const StarBackground2D: React.FC = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="w-full h-full block" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="w-full h-full block pointer-events-none"
+      style={{ pointerEvents: 'none' }}
+    />
+  );
 };
 
 interface WebGLErrorBoundaryProps {
@@ -267,10 +273,15 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
   }, []);
 
   return (
-    <div className={className} style={{ pointerEvents: 'none' }}>
+    <div
+      className="particle-background fixed inset-0 w-full h-full z-0 pointer-events-none select-none overflow-hidden"
+      style={{ pointerEvents: 'none' }}
+      aria-hidden="true"
+    >
       {canUseWebGL ? (
         <WebGLErrorBoundary fallback={<StarBackground2D />}>
           <Canvas
+            style={{ pointerEvents: 'none' }}
             camera={{ position: [0, 0, 1] }}
             gl={{
               powerPreference: 'high-performance',
