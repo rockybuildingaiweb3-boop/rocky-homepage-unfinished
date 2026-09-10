@@ -8,13 +8,11 @@ import { usePreloadAssets } from './hooks/usePreloadAssets';
 function PortfolioApp() {
   const isMobile = useIsMobile();
   const { currentRoute } = useRouter();
-  const { loadingDone, progress, siteData, workData } = usePreloadAssets();
+  const { loadingDone, progress, siteData } = usePreloadAssets();
 
   return (
     <GlobalShell progress={progress} loadingDone={loadingDone} isMobile={isMobile}>
-      {currentRoute.family === 'exhibition' ? (
-        <HomePage workData={workData} siteData={siteData} />
-      ) : null}
+      {currentRoute.family === 'exhibition' ? <HomePage siteData={siteData} /> : null}
     </GlobalShell>
   );
 }
