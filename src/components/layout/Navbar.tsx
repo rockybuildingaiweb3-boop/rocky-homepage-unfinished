@@ -3,7 +3,6 @@ import { useBackgroundMusic } from '../../features/audio';
 
 interface NavbarProps {
   onNavigate?: (targetId: string) => void;
-  activeSection?: string;
 }
 
 const NAV_ITEMS = [
@@ -12,7 +11,7 @@ const NAV_ITEMS = [
   { label: 'contact', target: 'contact' },
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   return (
@@ -38,11 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
               key={item.target}
               type="button"
               onClick={() => onNavigate?.(item.target)}
-              className={`font-mono text-[10px] uppercase tracking-[0.22em] transition-opacity sm:text-xs ${
-                activeSection === item.target || (item.target === 'home' && !activeSection)
-                  ? 'text-white opacity-100'
-                  : 'text-white/55 hover:text-white opacity-100'
-              }`}
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60 transition-colors hover:text-white sm:text-xs"
             >
               {item.label}
             </button>
@@ -52,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
             href="https://github.com/rockybuildingaiweb3-boop/rocky-homepage-unfinished"
             target="_blank"
             rel="noreferrer"
-            className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55 transition-colors hover:text-white sm:text-xs"
+            className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60 transition-colors hover:text-white sm:text-xs"
           >
             github
           </a>
@@ -60,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
           <button
             type="button"
             onClick={toggleMute}
-            className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55 transition-colors hover:text-white sm:text-xs"
+            className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60 transition-colors hover:text-white sm:text-xs"
             aria-label={isMuted ? 'Turn audio on' : 'Turn audio off'}
           >
             audio {isMuted ? 'off' : 'on'}
