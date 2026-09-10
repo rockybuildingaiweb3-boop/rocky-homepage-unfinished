@@ -1,73 +1,41 @@
-import { useEffect, useState } from 'react';
-import { SiteData } from '../types';
-import { loadSiteData } from '../data/site/loader';
-import { loadImage, devMsg } from '../utils';
+import { useState, useEffect } from 'react';
+import { loadImage } from '../utils';
 
 export interface PreloadAssetsResult {
-  loading: boolean;
   loadingDone: boolean;
   progress: number;
-  siteData: SiteData | null;
 }
 
-const CRITICAL_ASSETS = [
-  '/assets/imgs/home-back.jpg',
-  '/assets/imgs/logo-rb-cyber.svg',
-  '/assets/imgs/signature.svg',
-];
-
 export function usePreloadAssets(): PreloadAssetsResult {
-  const [loading, setLoading] = useState(true);
   const [loadingDone, setLoadingDone] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [siteData, setSiteData] = useState<SiteData | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    const load = async () => {
-      try {
-        const data = await loadSiteData();
-        if (!mounted) return;
-        setSiteData(data);
-        setProgress(20);
+    const assets = [
+      '/assets/imgs/home-back.jpg',
+      '/assets/imgs/logo-rb-cyber.svg',
+      '/assets/imgs/signature.svg',
+    ];
 
-        let loaded = 0;
-        await Promise.all(
-          CRITICAL_ASSETS.map(async (src) => {
-            await loadImage(src);
-            if (mounted) {
-              loaded += 1;
-              setProgress(20 + Math.round((loaded / CRITICAL_ASSETS.length) * 80));
-            }
-          })
-        );
+    Promise.all(
+      assets.map(async (src) => {
+        await loadImage(src);
+        if (mounted) {
+          setProgress((current) => Math.min(100, current + 100 / assets.length));
+        }
+      })
+    ).finally(() => {
+      if (!mounted) return;
+      setProgress(100);
+      setLoadingDone(true);
+    });
 
-        if (!mounted) return;
-        setProgress(100);
-        setTimeout(() => {
-          if (!mounted) return;
-          setLoadingDone(true);
-          setTimeout(() => {
-            if (!mounted) return;
-            setLoading(false);
-            devMsg();
-          }, 500);
-        }, 150);
-      } catch (error) {
-        console.error('Failed to load site data:', error);
-        if (!mounted) return;
-        setProgress(100);
-        setLoadingDone(true);
-        setLoading(false);
-      }
-    };
-
-    load();
     return () => {
       mounted = false;
     };
   }, []);
 
-  return { loading, loadingDone, progress, siteData };
+  return { loadingDone, progress };
 }
