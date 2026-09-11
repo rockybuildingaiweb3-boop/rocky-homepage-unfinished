@@ -5,7 +5,7 @@ import { StudioProjects } from './modules/StudioProjects';
 import { StudioBlog } from './modules/StudioBlog';
 import { StudioCareer } from './modules/StudioCareer';
 import { Footer } from '../layout/Footer';
-import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
+import { useBackgroundMusic } from '../../features/audio';
 
 interface StudioShellProps {
   workData: WorkItem[];
@@ -22,18 +22,14 @@ export const StudioShell: React.FC<StudioShellProps> = ({ workData, siteData }) 
   const { currentPath, studioModule, navigate } = useRouter();
   const { isPlaying, isMuted, toggleMute } = useBackgroundMusic();
 
-  // Ensure window scrolls up when switching Studio modules
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [studioModule]);
+  }, [studioModule, currentPath]);
 
   return (
     <div className="w-full min-h-screen relative z-10 flex flex-col bg-[#030014] text-white select-none">
-      {/* ─── STUDIO GLOBAL HEADER ─── */}
       <header className="sticky top-0 left-0 right-0 z-40 w-full border-b border-white/[0.08] bg-black/60 backdrop-blur-xl px-6 sm:px-10 lg:px-12 py-4">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
-          
-          {/* Left: Return Gateway to Cinematic Homepage */}
           <button
             type="button"
             onClick={() => navigate('/')}
@@ -45,7 +41,6 @@ export const StudioShell: React.FC<StudioShellProps> = ({ workData, siteData }) 
             <span className="sm:hidden">exhibition</span>
           </button>
 
-          {/* Center: Museum Index Tabs */}
           <nav aria-label="Studio Navigation" className="flex items-center gap-1.5 sm:gap-2">
             {STUDIO_NAV_ITEMS.map((item) => {
               const isActive = studioModule === item.id;
@@ -76,7 +71,6 @@ export const StudioShell: React.FC<StudioShellProps> = ({ workData, siteData }) 
             })}
           </nav>
 
-          {/* Right: Background Audio Toggle */}
           <div className="flex items-center gap-2">
             <button
               onClick={toggleMute}
@@ -111,28 +105,19 @@ export const StudioShell: React.FC<StudioShellProps> = ({ workData, siteData }) 
               <span className="hidden md:inline">{isMuted ? 'Muted' : 'Sound'}</span>
             </button>
           </div>
-
         </div>
       </header>
 
-      {/* ─── ACTIVE MODULE CONTENT ─── */}
       <main className="flex-1 w-full relative">
         {studioModule === 'projects' && (
           <div className="pt-8 sm:pt-12">
             <StudioProjects workData={workData} />
           </div>
         )}
-
-        {studioModule === 'blog' && (
-          <StudioBlog />
-        )}
-
-        {studioModule === 'career' && (
-          <StudioCareer />
-        )}
+        {studioModule === 'blog' && <StudioBlog />}
+        {studioModule === 'career' && <StudioCareer />}
       </main>
 
-      {/* ─── FOOTER ─── */}
       <Footer siteData={siteData} onNavigateRoute={navigate} />
     </div>
   );
