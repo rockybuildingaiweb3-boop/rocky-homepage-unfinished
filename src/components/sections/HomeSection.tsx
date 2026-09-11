@@ -19,9 +19,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
   const [imageLoaded, setImageLoaded] = useState<boolean>(true);
   const [nebulaReady, setNebulaReady] = useState<boolean>(false);
 
-  // Trigger entrance animation once background image is ready or fallback timer fires
   useEffect(() => {
-    // Check for user's reduced-motion preferences
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -55,7 +53,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       return;
     }
 
-    // Set initial hidden coordinates
     const words = [word1Ref.current, word2Ref.current];
     words.forEach((el) => {
       if (!el) return;
@@ -93,9 +90,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         'opacity 0.9s ease 0.85s, transform 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) 0.85s';
     }
 
-    // Only start entrance stagger after artwork image is loaded or after brief safety delay
     const timeouts: (ReturnType<typeof setTimeout>)[] = [];
-
     const schedule = (fn: () => void, delay: number) => {
       timeouts.push(setTimeout(fn, delay));
     };
@@ -165,25 +160,24 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     };
   }, [imageLoaded]);
 
-  // Multi-tier parallax offsets for deep dimensional separation
   const bgParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.BACKGROUND;
   const nebulaParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.NEBULA;
   const textParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.TEXT;
 
-  // Day-to-Night Transition Progress (0.0 = bright watercolor garden, 1.0 = deep cosmic night in Studio)
   const windowH = typeof window !== 'undefined' ? window.innerHeight : 900;
   const dayToNightProgress = Math.min(1, Math.max(0, scrollY / (windowH * 0.85)));
 
   const handleScrollCueClick = () => {
     if (onNavigate) {
-      onNavigate('work');
-    } else {
-      const workEl = document.getElementById('work');
-      if (workEl) {
-        const offset10vh = window.innerHeight * 0.1;
-        const targetY = Math.max(0, workEl.offsetTop - offset10vh);
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-      }
+      onNavigate('studio');
+      return;
+    }
+
+    const studioEl = document.getElementById('studio');
+    if (studioEl) {
+      const offset10vh = window.innerHeight * 0.1;
+      const targetY = Math.max(0, studioEl.offsetTop - offset10vh);
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
     }
   };
 
@@ -197,10 +191,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       }}
       aria-label="Hero section — Rocky Babcock"
     >
-      {/* ─────────────────────────────────────────────────────────────
-          LAYER 1: FULL-SCREEN BOTANICAL WATERCOLOR ARTWORK (home-back.jpg)
-          With dynamic day-to-night saturation decrease & dimming on scroll
-         ───────────────────────────────────────────────────────────── */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-[1] overflow-hidden"
         style={{
@@ -225,22 +215,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         />
       </div>
 
-      {/* ─────────────────────────────────────────────────────────────
-          LAYER 1.5 & LAYER 2: CELESTIAL ACCRETION DISK NEBULA
-          Rises from below as night ascends into the studio
-         ───────────────────────────────────────────────────────────── */}
       <NebulaBackground
         nebulaReady={nebulaReady}
         nebulaParallaxY={nebulaParallaxY - dayToNightProgress * 60}
       />
 
-      {/* ─────────────────────────────────────────────────────────────
-          LAYER 3: FOREGROUND TYPOGRAPHIC LOCKUP (MUSAB HASSAN EDITORIAL)
-          - Positioned in lower-middle sky, right above the vivid flowers
-          - Zero background blocks or dark translucent sheets (100% clean watercolor)
-          - Delicate, refined silver-purple outer glow on typography
-          - Balanced signature in upper left, perfectly clear of any fog
-         ───────────────────────────────────────────────────────────── */}
       <div
         className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-10 sm:pt-14 pb-8 sm:pb-12 will-change-transform bg-transparent"
         style={{
@@ -248,9 +227,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
           opacity: Math.max(0, 1 - dayToNightProgress * 1.5),
         }}
       >
-        {/* Core title and signature cluster */}
         <div className="relative flex flex-col items-center pointer-events-auto bg-transparent">
-          {/* Handcrafted luminous signature placed with commanding presence above 'rocky' */}
           <div className="absolute -top-[46px] sm:-top-[58px] md:-top-[68px] lg:-top-[78px] left-[4%] sm:-left-[160px] md:-left-[220px] lg:-left-[280px] pointer-events-none z-20">
             <img
               ref={signatureRef}
@@ -261,7 +238,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             />
           </div>
 
-          {/* Editorial Display Title Block — completely transparent, delicate silver-purple illumination */}
           <div className="relative px-2 py-1 bg-transparent">
             <h1
               className="hero-title-illuminated flex flex-col items-center m-0 p-0 font-normal select-none bg-transparent"
@@ -269,7 +245,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
                 fontFamily: 'var(--title-font)',
               }}
             >
-              {/* First Word: rocky */}
               <div className="overflow-hidden inline-flex pb-1">
                 <span
                   ref={word1Ref}
@@ -285,7 +260,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
                 </span>
               </div>
 
-              {/* Second Word: babcock */}
               <div className="overflow-hidden inline-flex pb-1">
                 <span
                   ref={word2Ref}
@@ -303,7 +277,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             </h1>
           </div>
 
-          {/* Minimalist Occupation Tagline */}
           <div className="overflow-hidden mt-4 sm:mt-5 md:mt-6">
             <p
               ref={occRef}
@@ -317,7 +290,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             </p>
           </div>
 
-          {/* Personal Attitude / Philosophy Statement: Authentic & Poetic (Zero AI clichés) */}
           <div ref={mottoRef} className="overflow-hidden mt-3 sm:mt-4 max-w-xl text-center will-change-transform px-4">
             <p className="m-0 motto-illuminated text-xs sm:text-sm md:text-[15px] font-normal tracking-[0.18em] text-white/95 leading-relaxed">
               写有呼吸的代码，造看得见光的界面。
@@ -327,17 +299,15 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             </p>
           </div>
 
-          {/* Action Suite: Editorial Actions (Enter the Studio + Available for 2026) */}
           <div
             ref={scrollCtaRef}
             className="overflow-hidden mt-6 sm:mt-8 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-5 will-change-transform"
           >
-            {/* Primary Action Button: Enter the Studio */}
             <button
               type="button"
               onClick={() => onNavigate?.('studio')}
               className="group relative inline-flex items-center gap-3 px-6 py-2.5 rounded-full font-mono text-xs sm:text-[13px] tracking-[0.22em] uppercase text-white/95 hover:text-white bg-black/40 hover:bg-white/[0.08] border border-white/25 hover:border-white/70 shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(216,180,254,0.35)] backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white clickable"
-              aria-label="Enter the Studio projects"
+              aria-label="Enter the Studio"
             >
               <span className="text-purple-300 font-light text-sm select-none">&bull;</span>
               <span>enter the studio</span>
@@ -346,7 +316,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
               </span>
             </button>
 
-            {/* Secondary Status Action: Available for 2026 */}
             <button
               type="button"
               onClick={() => onNavigate?.('contact')}
@@ -361,23 +330,20 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
             </button>
           </div>
 
-          {/* Minimalist Floating Scroll Prompt */}
           <div className="mt-4 opacity-50 hover:opacity-90 transition-opacity">
             <button
               type="button"
               onClick={handleScrollCueClick}
               className="group flex items-center gap-2 font-mono text-[10px] tracking-[0.3em] uppercase text-white/60 hover:text-white bg-transparent border-none cursor-pointer p-1 clickable"
-              aria-label="Scroll down to explore"
+              aria-label="Scroll down to explore Studio"
             >
               <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">&darr;</span>
               <span>scroll to explore</span>
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* Hero Bottom Organic Vignette */}
       <div
         className="absolute bottom-0 left-0 right-0 h-28 sm:h-36 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/15 to-[#030014]/40"
         aria-hidden="true"
@@ -385,4 +351,3 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     </section>
   );
 };
-
