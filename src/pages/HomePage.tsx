@@ -1,38 +1,45 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Navbar, Footer } from '../components/layout';
-import { HomeSection, SkillsSection } from '../components/sections';
+import { HomeSection, WorkSection, SkillsSection } from '../components/sections';
 import { useRouter } from '../router/RouterContext';
-import { SiteData } from '../types';
+import { useScrollSpy } from '../features/scroll';
+import type { SiteData, WorkItem } from '../types';
 
 interface HomePageProps {
-  siteData?: SiteData | null;
+  workData: WorkItem[];
+  siteData: SiteData | null;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
+export const HomePage: React.FC<HomePageProps> = ({ workData, siteData }) => {
   const { navigate } = useRouter();
+  const { activeSection } = useScrollSpy({
+    sectionIds: ['home', 'work', 'skills', 'contact'],
+  });
 
-  const handleNavigate = (target: string) => {
+  const handleNavigate = useCallback((target: string) => {
     if (target === 'studio') {
       navigate('/studio');
       return;
     }
-    if (target === 'contact') {
-      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+
+    if (target === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    if (target === 'skills') {
-      document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' });
-      return;
+
+    const element = document.getElementById(target);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [navigate]);
 
   return (
     <main className="relative z-10 w-full overflow-x-hidden">
-      <Navbar onNavigate={handleNavigate} />
+      <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
       <HomeSection onNavigate={handleNavigate} />
+      <WorkSection workData={workData} />
       <SkillsSection />
-      <Footer siteData={siteData} onNavigateRoute={navigate} />
+      <Footer siteData={siteData} />
     </main>
   );
 };
