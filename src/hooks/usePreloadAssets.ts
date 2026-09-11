@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SiteData, WorkItem } from '../types';
+import { SiteData } from '../types';
 import { loadSiteData } from '../data/site/loader';
 import { loadImage, devMsg } from '../utils';
 
@@ -8,7 +8,6 @@ export interface PreloadAssetsResult {
   loadingDone: boolean;
   progress: number;
   siteData: SiteData | null;
-  workData: WorkItem[];
 }
 
 /**
@@ -86,11 +85,5 @@ export function usePreloadAssets(): PreloadAssetsResult {
     };
   }, []);
 
-  return {
-    loading,
-    loadingDone,
-    progress,
-    siteData,
-    workData: [],
-  };
+  return { loading, loadingDone, progress, siteData };
 }
