@@ -2,15 +2,14 @@ import React, { useCallback } from 'react';
 import { Navbar, Footer } from '../components/layout';
 import { HomeSection, SkillsSection } from '../components/sections';
 import { useScrollSpy } from '../features/scroll';
-import type { SiteData, WorkItem } from '../types';
+import type { SiteData } from '../types';
 
 interface HomePageProps {
-  workData: WorkItem[];
   siteData: SiteData | null;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
-  const { activeSection } = useScrollSpy({
+  const { scrollY, activeSection } = useScrollSpy({
     sectionIds: ['home', 'studio', 'skills', 'contact'],
   });
 
@@ -29,7 +28,7 @@ export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
   return (
     <main className="relative z-10 w-full overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
-      <HomeSection onNavigate={handleNavigate} />
+      <HomeSection scrollY={scrollY} onNavigate={handleNavigate} />
       <SkillsSection />
       <Footer siteData={siteData} />
     </main>
