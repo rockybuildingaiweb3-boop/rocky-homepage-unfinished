@@ -6,11 +6,11 @@ import { usePreloadAssets } from './hooks/usePreloadAssets';
 
 function PortfolioApp() {
   const isMobile = useIsMobile();
-  const { loadingDone, progress, siteData, workData } = usePreloadAssets();
+  const { loadingDone, progress, siteData } = usePreloadAssets();
 
   return (
     <GlobalShell progress={progress} loadingDone={loadingDone} isMobile={isMobile}>
-      <HomePage workData={workData} siteData={siteData} />
+      <HomePage siteData={siteData} />
     </GlobalShell>
   );
 }
