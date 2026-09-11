@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SiteData, WorkItem } from '../types';
 import { loadSiteData } from '../data/site/loader';
-import { loadImage, devMsg, fetchJsonData } from '../utils';
+import { loadImage, devMsg } from '../utils';
 
 export interface PreloadAssetsResult {
   loading: boolean;
@@ -12,37 +12,31 @@ export interface PreloadAssetsResult {
 }
 
 /**
- * Hook to manage portfolio data fetching, asset preloading, and smooth loader dismiss transitions
+ * Preload only assets required by the current homepage shell.
+ * Work-specific data and cover assets are intentionally no longer loaded here.
  */
 export function usePreloadAssets(): PreloadAssetsResult {
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingDone, setLoadingDone] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(10);
   const [siteData, setSiteData] = useState<SiteData | null>(null);
-  const [workData, setWorkData] = useState<WorkItem[]>([]);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadPortfolio() {
       try {
-        const [wData, sData] = await Promise.all([
-          fetchJsonData<WorkItem[]>('/data/work-data.json'),
-          loadSiteData(),
-        ]);
-
+        const sData = await loadSiteData();
         if (!isMounted) return;
-        setWorkData(wData || []);
+
         setSiteData(sData);
         setProgress(30);
 
-        // Preload key images essential for initial presentation
         const criticalImages = [
           '/assets/imgs/loader-flower.jpg',
           '/assets/imgs/home-back.jpg',
           '/assets/imgs/logo-rb-cyber.svg',
           '/assets/imgs/signature.svg',
-          ...wData.map((item) => `/assets/imgs/work-back/${item.id}/cover.jpg`),
         ];
 
         let loadedCount = 0;
@@ -53,12 +47,12 @@ export function usePreloadAssets(): PreloadAssetsResult {
             try {
               await loadImage(src);
             } catch {
-              // Ignore single image failure to avoid blocking app
+              // A single decorative asset should not block the page ceremony.
             }
+
             if (isMounted) {
-              loadedCount++;
-              const calculated = 30 + Math.round((loadedCount / total) * 70);
-              setProgress(calculated);
+              loadedCount += 1;
+              setProgress(30 + Math.round((loadedCount / total) * 70));
             }
           })
         );
@@ -66,8 +60,6 @@ export function usePreloadAssets(): PreloadAssetsResult {
         if (!isMounted) return;
         setProgress(100);
 
-        // Finish loader transition:
-        // Wait 250ms -> setLoadingDone(true) triggers right: 0; width: 0 wipe -> overlay fade
         setTimeout(() => {
           if (!isMounted) return;
           setLoadingDone(true);
@@ -94,5 +86,11 @@ export function usePreloadAssets(): PreloadAssetsResult {
     };
   }, []);
 
-  return { loading, loadingDone, progress, siteData, workData };
+  return {
+    loading,
+    loadingDone,
+    progress,
+    siteData,
+    workData: [],
+  };
 }
