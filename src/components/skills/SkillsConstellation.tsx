@@ -1,6 +1,11 @@
-import React, { useMemo, memo } from 'react';
-import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
+import React, { useState, useEffect, memo } from 'react';
+import { SKILLS_DATA } from '../../data/skills';
 import { SkillNode } from './SkillNode';
+import {
+  DESKTOP_CONSTELLATION,
+  MOBILE_CONSTELLATION,
+  ConstellationLayout,
+} from '../../features/skills/constellationLayout';
 
 interface SkillsConstellationProps {
   activeSkillId: string | null;
@@ -8,124 +13,84 @@ interface SkillsConstellationProps {
   onLeaveSkill: () => void;
 }
 
-// 8 Celestial Sector angles around the central planet
-const SECTOR_CENTER_ANGLES: Record<string, number> = {
-  frontend: -90, // North
-  graphics: -45, // North-East
-  backend: 0,    // East
-  data: 45,      // South-East
-  web3: 90,      // South
-  models: 135,   // South-West
-  agents: 180,   // West
-  rag: 225,      // North-West
-};
-
-// 11-slot orbital layout distribution within each 45° sector
-// 3 concentric orbital rings: Arc 1 (inner, r=28%), Arc 2 (mid, r=38%), Arc 3 (outer, r=47%)
-const SECTOR_SLOTS = [
-  // Arc 1 (3 items):
-  { arc: 1, deltaAngle: -11 },
-  { arc: 1, deltaAngle: 0 },
-  { arc: 1, deltaAngle: 11 },
-  // Arc 2 (4 items):
-  { arc: 2, deltaAngle: -16 },
-  { arc: 2, deltaAngle: -5 },
-  { arc: 2, deltaAngle: 5 },
-  { arc: 2, deltaAngle: 16 },
-  // Arc 3 (4 items):
-  { arc: 3, deltaAngle: -19 },
-  { arc: 3, deltaAngle: -6 },
-  { arc: 3, deltaAngle: 6 },
-  { arc: 3, deltaAngle: 19 },
-];
-
-const ARC_RADII: Record<number, { rx: number; ry: number }> = {
-  1: { rx: 28, ry: 25 },
-  2: { rx: 38, ry: 35 },
-  3: { rx: 47, ry: 43 },
-};
-
+/**
+ * SkillsConstellation (Skills V2)
+ *
+ * Deterministic, layered spatial field framing the central purple planet.
+ * Features 88 skill nodes across 4 cosmic depth zones:
+ * - Zone A: Inner Orbit (14 foundational technologies framing the planetary atmosphere)
+ * - Zone B: Mid Field (43 technologies forming the main ecosystem)
+ * - Zone C: Outer Field (23 technologies extending outward for scale and depth)
+ * - Zone D: Peripheral Stars (8 boundary instruments)
+ *
+ * Characteristics:
+ * - 100% deterministic (zero Math.random(), stable seeded calculation)
+ * - Non-uniform cosmic field with organic clustering and deliberate negative space
+ * - Guaranteed planet exclusion clearance and node collision avoidance
+ * - Secondary restrained editorial category annotations (non-interactive)
+ * - Pure single-skill hover synchronization with Knowledge Canopy
+ * - True constellation layout maintained on both desktop and mobile
+ */
 export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
   activeSkillId,
   onHoverSkill,
   onLeaveSkill,
 }) => {
-  // Deterministic positions for the 88 skills framing the central planet (Desktop/Tablet)
-  const skillPositions = useMemo(() => {
-    const map = new Map<string, { x: number; y: number }>();
+  // Deterministic breakpoint selection (Desktop horizontal ellipse vs Mobile vertical ellipse)
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
 
-    SKILLS_DATA.forEach((skill, idx) => {
-      const baseAngle = SECTOR_CENTER_ANGLES[skill.categoryId];
-      const slotIndex = idx % 11;
-      const slot = SECTOR_SLOTS[slotIndex];
-
-      const angleDeg = baseAngle + slot.deltaAngle;
-      const angleRad = (angleDeg * Math.PI) / 180;
-      const { rx, ry } = ARC_RADII[slot.arc];
-
-      // Elliptical coordinate centered at (50%, 50%)
-      const x = 50 + rx * Math.cos(angleRad);
-      const y = 50 + ry * Math.sin(angleRad);
-
-      map.set(skill.id, {
-        x: parseFloat(x.toFixed(2)),
-        y: parseFloat(y.toFixed(2)),
-      });
-    });
-
-    return map;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    setIsMobile(mql.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
   }, []);
 
-  // Category label anchor positions (just beyond outer arc)
-  const categoryLabels = useMemo(() => {
-    return SKILL_CATEGORIES.map((category) => {
-      const angleDeg = SECTOR_CENTER_ANGLES[category.id];
-      const angleRad = (angleDeg * Math.PI) / 180;
-      const rx = 49.5;
-      const ry = 46.5;
-
-      const x = 50 + rx * Math.cos(angleRad);
-      const y = 50 + ry * Math.sin(angleRad);
-
-      return {
-        ...category,
-        x: parseFloat(x.toFixed(2)),
-        y: parseFloat(y.toFixed(2)),
-      };
-    });
-  }, []);
+  const activeLayout: ConstellationLayout = isMobile
+    ? MOBILE_CONSTELLATION
+    : DESKTOP_CONSTELLATION;
 
   return (
-    <div className="relative w-full max-w-[1380px] mx-auto px-2 sm:px-4 flex flex-col items-center">
-      {/* ─── DESKTOP / TABLET: SPATIAL ORBITAL CONSTELLATION (>= 768px) ─── */}
-      <div className="hidden md:block relative w-full h-[760px] lg:h-[840px] xl:h-[900px] select-none">
-        {/* Category Celestial Sector Typographic Badges */}
-        {categoryLabels.map((cat) => {
-          return (
-            <div
-              key={cat.id}
-              style={{ left: `${cat.x}%`, top: `${cat.y}%` }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 transition-all duration-300"
-            >
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all duration-300 backdrop-blur-xs border-white/[0.06] bg-black/20 text-white/40">
-                <span className="font-mono text-[9px] tracking-widest uppercase">
-                  [{cat.number} // {cat.title.split('&')[0].trim()}]
-                </span>
-              </div>
+    <div className="relative w-full max-w-[1380px] mx-auto px-2 sm:px-4 flex flex-col items-center select-none">
+      {/* ─── UNIFIED SPATIAL CONSTELLATION STAGE ─── */}
+      <div className="relative w-full h-[960px] sm:h-[900px] md:h-[840px] lg:h-[860px] xl:h-[880px] overflow-visible">
+        {/* ─── 1. SECONDARY EDITORIAL CATEGORY ANNOTATIONS (Non-interactive) ─── */}
+        {activeLayout.categoryLabels.map((cat) => (
+          <div
+            key={cat.id}
+            style={{ left: `${cat.x}%`, top: `${cat.y}%` }}
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 select-none transition-opacity duration-300"
+          >
+            <div className="flex items-center gap-1.5 opacity-40 hover:opacity-60 transition-opacity">
+              <span className="font-mono text-[9px] sm:text-[10px] tracking-[0.22em] text-white/50 uppercase whitespace-nowrap">
+                [{cat.number}] {cat.shortLabel}
+              </span>
             </div>
-          );
-        })}
+          </div>
+        ))}
 
-        {/* 88 Deterministic Skill Nodes */}
+        {/* ─── 2. 88 DETERMINISTIC SPATIAL SKILL NODES ─── */}
         {SKILLS_DATA.map((skill) => {
-          const pos = skillPositions.get(skill.id) || { x: 50, y: 50 };
+          const pos = activeLayout.nodePositions.get(skill.id) || {
+            x: 50,
+            y: 50,
+            zone: 'B',
+            categoryId: skill.categoryId,
+          };
           const isActive = activeSkillId === skill.id;
 
           return (
             <div
               key={skill.id}
               style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
+              className="absolute -translate-x-1/2 -translate-y-1/2 scale-80 sm:scale-90 md:scale-100 transition-transform origin-center"
             >
               <SkillNode
                 skill={skill}
@@ -133,50 +98,6 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
                 onHover={onHoverSkill}
                 onLeave={onLeaveSkill}
               />
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ─── MOBILE: ADAPTED COSMIC SECTOR FLOW (< 768px) ─── */}
-      <div className="md:hidden w-full flex flex-col gap-6 py-4 px-2">
-        {SKILL_CATEGORIES.map((cat) => {
-          const categorySkills = SKILLS_DATA.filter((s) => s.categoryId === cat.id);
-
-          return (
-            <div
-              key={cat.id}
-              className="flex flex-col rounded-2xl border p-3.5 transition-all duration-300 backdrop-blur-md border-white/[0.08] bg-black/25"
-            >
-              {/* Category Header */}
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] tracking-widest text-purple-300/80">
-                    [{cat.number}]
-                  </span>
-                  <span className="font-mono text-xs uppercase tracking-wider text-white/90">
-                    {cat.title}
-                  </span>
-                </div>
-                <span className="font-mono text-[9px] text-white/35">11 instruments</span>
-              </div>
-
-              {/* 11 Skills Flow */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {categorySkills.map((skill) => {
-                  const isActive = activeSkillId === skill.id;
-
-                  return (
-                    <SkillNode
-                      key={skill.id}
-                      skill={skill}
-                      isActive={isActive}
-                      onHover={onHoverSkill}
-                      onLeave={onLeaveSkill}
-                    />
-                  );
-                })}
-              </div>
             </div>
           );
         })}
