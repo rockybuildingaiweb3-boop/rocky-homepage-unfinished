@@ -25,14 +25,16 @@ export const KnowledgeCanopy: React.FC<KnowledgeCanopyProps> = memo(({
     return (
       <div
         key={`${keyPrefix}-${skill.id}`}
-        role="button"
         tabIndex={0}
         aria-label={`${skill.name} insight`}
         onMouseEnter={() => onHoverSkill(skill.id)}
         onMouseLeave={onLeaveSkill}
         onFocus={() => onHoverSkill(skill.id)}
         onBlur={onLeaveSkill}
-        className={`group relative flex shrink-0 items-start gap-3.5 rounded-xl border px-4 py-3 max-w-[380px] sm:max-w-[420px] transition-all duration-300 text-left select-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 ${
+        onTouchStart={() => onHoverSkill(skill.id)}
+        onTouchEnd={onLeaveSkill}
+        onTouchCancel={onLeaveSkill}
+        className={`group relative flex shrink-0 items-start gap-3.5 rounded-xl border px-4 py-3 max-w-[380px] sm:max-w-[420px] transition-all duration-300 text-left select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 ${
           isActive
             ? 'border-purple-400/60 bg-white/[0.09] shadow-lg shadow-purple-950/40 z-20 scale-[1.02]'
             : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05] z-10'

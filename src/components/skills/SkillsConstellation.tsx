@@ -1,5 +1,5 @@
 import React, { useMemo, memo } from 'react';
-import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem } from '../../data/skills';
+import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
 import { SkillNode } from './SkillNode';
 
 interface SkillsConstellationProps {
@@ -50,12 +50,6 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
   onHoverSkill,
   onLeaveSkill,
 }) => {
-  // Determine active category for related grouping
-  const activeCategory = useMemo(() => {
-    if (!activeSkillId) return null;
-    return SKILLS_DATA.find((s) => s.id === activeSkillId)?.categoryId || null;
-  }, [activeSkillId]);
-
   // Deterministic positions for the 88 skills framing the central planet (Desktop/Tablet)
   const skillPositions = useMemo(() => {
     const map = new Map<string, { x: number; y: number }>();
@@ -107,20 +101,13 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
       <div className="hidden md:block relative w-full h-[760px] lg:h-[840px] xl:h-[900px] select-none">
         {/* Category Celestial Sector Typographic Badges */}
         {categoryLabels.map((cat) => {
-          const isCatActive = activeCategory === cat.id;
           return (
             <div
               key={cat.id}
               style={{ left: `${cat.x}%`, top: `${cat.y}%` }}
               className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 transition-all duration-300"
             >
-              <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all duration-300 backdrop-blur-xs ${
-                  isCatActive
-                    ? 'border-purple-400/40 bg-purple-950/40 text-white shadow-sm'
-                    : 'border-white/[0.06] bg-black/20 text-white/40'
-                }`}
-              >
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all duration-300 backdrop-blur-xs border-white/[0.06] bg-black/20 text-white/40">
                 <span className="font-mono text-[9px] tracking-widest uppercase">
                   [{cat.number} // {cat.title.split('&')[0].trim()}]
                 </span>
@@ -133,7 +120,6 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
         {SKILLS_DATA.map((skill) => {
           const pos = skillPositions.get(skill.id) || { x: 50, y: 50 };
           const isActive = activeSkillId === skill.id;
-          const isRelated = !isActive && activeCategory === skill.categoryId;
 
           return (
             <div
@@ -144,7 +130,6 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
               <SkillNode
                 skill={skill}
                 isActive={isActive}
-                isRelated={isRelated}
                 onHover={onHoverSkill}
                 onLeave={onLeaveSkill}
               />
@@ -157,16 +142,11 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
       <div className="md:hidden w-full flex flex-col gap-6 py-4 px-2">
         {SKILL_CATEGORIES.map((cat) => {
           const categorySkills = SKILLS_DATA.filter((s) => s.categoryId === cat.id);
-          const isCatActive = activeCategory === cat.id;
 
           return (
             <div
               key={cat.id}
-              className={`flex flex-col rounded-2xl border p-3.5 transition-all duration-300 backdrop-blur-md ${
-                isCatActive
-                  ? 'border-purple-400/40 bg-purple-950/20'
-                  : 'border-white/[0.08] bg-black/25'
-              }`}
+              className="flex flex-col rounded-2xl border p-3.5 transition-all duration-300 backdrop-blur-md border-white/[0.08] bg-black/25"
             >
               {/* Category Header */}
               <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/[0.06]">
@@ -185,14 +165,12 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {categorySkills.map((skill) => {
                   const isActive = activeSkillId === skill.id;
-                  const isRelated = !isActive && activeCategory === skill.categoryId;
 
                   return (
                     <SkillNode
                       key={skill.id}
                       skill={skill}
                       isActive={isActive}
-                      isRelated={isRelated}
                       onHover={onHoverSkill}
                       onLeave={onLeaveSkill}
                     />

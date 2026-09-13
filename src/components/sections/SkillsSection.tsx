@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { SKILLS_DATA, SkillItem } from '../../data/skills';
+import { SKILLS_DATA } from '../../data/skills';
 import { SkillsAtmosphere } from '../skills/SkillsAtmosphere';
 import { SkillsConstellation } from '../skills/SkillsConstellation';
 import { KnowledgeCanopy } from '../skills/KnowledgeCanopy';

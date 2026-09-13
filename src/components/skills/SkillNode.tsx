@@ -5,7 +5,6 @@ import { TechLogo } from './TechLogo';
 interface SkillNodeProps {
   skill: SkillItem;
   isActive: boolean;
-  isRelated: boolean;
   onHover: (id: string) => void;
   onLeave: () => void;
   style?: React.CSSProperties;
@@ -15,7 +14,6 @@ interface SkillNodeProps {
 export const SkillNode: React.FC<SkillNodeProps> = memo(({
   skill,
   isActive,
-  isRelated,
   onHover,
   onLeave,
   style,
@@ -30,12 +28,12 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
       onFocus={() => onHover(skill.id)}
       onBlur={onLeave}
       onTouchStart={() => onHover(skill.id)}
+      onTouchEnd={onLeave}
+      onTouchCancel={onLeave}
       style={style}
       className={`group relative flex items-center justify-center rounded-xl p-2 transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 select-none ${
         isActive
           ? 'scale-125 z-30 opacity-100'
-          : isRelated
-          ? 'scale-105 z-20 opacity-95'
           : 'scale-100 z-10 opacity-70 hover:opacity-100 hover:scale-115'
       } ${className}`}
     >
@@ -54,8 +52,6 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
         className={`relative flex items-center justify-center rounded-xl transition-colors duration-300 p-1.5 backdrop-blur-[2px] ${
           isActive
             ? 'bg-white/[0.12] border border-white/40 shadow-lg'
-            : isRelated
-            ? 'bg-white/[0.05] border border-white/15'
             : 'bg-white/[0.02] border border-white/8 group-hover:bg-white/[0.08] group-hover:border-white/20'
         }`}
       >

@@ -1,4 +1,4 @@
-import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem, SkillCategory } from '../../data/skills';
+import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem } from '../../data/skills';
 import { resolveSkillIcon } from '../../components/skills/iconResolver';
 
 export interface ValidationReport {
