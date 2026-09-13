@@ -20,10 +20,16 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
   const imageRefs = useRef<(HTMLImageElement | null)[]>([]);
 
   const [currentActive, setCurrentActive] = useState<number>(-1);
+  const currentActiveRef = useRef<number>(-1);
+  currentActiveRef.current = currentActive;
+
   const [isHolding, setIsHolding] = useState<boolean>(false);
   const isDraggingRef = useRef<boolean>(false);
 
-  // Slider animation state
+  const [isRevealed, setIsRevealed] = useState<boolean>(false);
+  const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
+
+  // Slider motion & animation state
   const sliderState = useRef({
     initialMouseX: 0,
     currentMouseX: 0,
@@ -37,28 +43,57 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
     rafId: 0,
   });
 
+  // Coordinated kinetic intro state (reference workListIntro)
+  const introState = useRef({
+    hasStarted: false,
+    isIntroPlaying: false,
+    startTime: 0,
+    duration: 1600,
+    initialOffset: 0,
+    isComplete: false,
+  });
+
   const rendererRef = useRef<StudioRenderer | null>(null);
-  const hasPlayedIntroRef = useRef<boolean>(false);
 
   // Helper for linear interpolation
   const lerp = (start: number, end: number, factor: number) =>
     start * (1 - factor) + end * factor;
 
-  // IntersectionObserver to trigger smooth intro momentum glide on entering viewport
+  // IntersectionObserver to trigger whole list entrance & card release
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReduced) {
+      setIsReducedMotion(true);
+      setIsRevealed(true);
+      introState.current.hasStarted = true;
+      introState.current.isComplete = true;
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasPlayedIntroRef.current) {
-          hasPlayedIntroRef.current = true;
-          // Smooth intro kinetic pulse matching reference workListIntro
-          sliderState.current.currentPosition = 90;
+        if (entry.isIntersecting && !introState.current.hasStarted) {
+          introState.current.hasStarted = true;
+          introState.current.isIntroPlaying = true;
+          introState.current.startTime = performance.now();
+
+          // Arrival from outside viewport (reference: translateX(100%))
+          const initialOffset = Math.min(window.innerWidth * 0.95, 1150);
+          introState.current.initialOffset = initialOffset;
+          sliderState.current.currentPosition = initialOffset;
           sliderState.current.targetPosition = 0;
+
+          // Trigger staggered card release & masked text reveals
+          setIsRevealed(true);
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     );
 
     observer.observe(el);
@@ -90,7 +125,14 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
   // Mouse and touch interaction handlers
   const handleDragStart = useCallback(
     (clientX: number) => {
-      if (currentActive >= 0 || !listRef.current) return;
+      if (currentActiveRef.current >= 0 || !listRef.current) return;
+
+      // User interaction immediately claims authority over any in-flight intro
+      if (introState.current.isIntroPlaying) {
+        introState.current.isIntroPlaying = false;
+        introState.current.isComplete = true;
+      }
+
       sliderState.current.isInteracting = true;
       sliderState.current.initialMouseX = clientX;
       sliderState.current.currentMouseX = clientX;
@@ -107,12 +149,12 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
       setIsHolding(true);
       isDraggingRef.current = false;
     },
-    [currentActive]
+    []
   );
 
   const handleDragMove = useCallback(
     (clientX: number) => {
-      if (!sliderState.current.isInteracting || currentActive >= 0) return;
+      if (!sliderState.current.isInteracting || currentActiveRef.current >= 0) return;
       sliderState.current.currentMouseX = clientX;
 
       const diff = (clientX - sliderState.current.initialMouseX) * -1;
@@ -126,7 +168,7 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
         sliderState.current.offsetSpeed * (diff / clientWidth);
       sliderState.current.targetPosition = Math.round(target * 100) / 100;
     },
-    [currentActive]
+    []
   );
 
   const handleDragEnd = useCallback(() => {
@@ -140,69 +182,102 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
   // Trackpad / wheel listener inside Studio section
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      if (currentActive >= 0 || !listRef.current) return;
+      if (currentActiveRef.current >= 0 || !listRef.current) return;
 
-      // When cursor is over the Studio slider, allow horizontal scrolling gestures
+      if (introState.current.isIntroPlaying) {
+        introState.current.isIntroPlaying = false;
+        introState.current.isComplete = true;
+      }
+
       const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
       if (Math.abs(delta) > 2) {
         sliderState.current.targetPosition -= delta * 1.5;
       }
     },
-    [currentActive]
+    []
   );
 
-  // Initialize WebGL and Animation Loop
+  // Initialize WebGL and Animation Loop (Independent of active card state)
   useEffect(() => {
     let isCancelled = false;
 
     const initEffects = async () => {
       try {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
         const gpuTier = await getGPUTier();
         if (isCancelled || !containerRef.current) return;
 
-        // Collect valid image elements
+        // Strict high-fidelity threshold: GPU tier >= 2, non-mobile, stable FPS >= 30
+        const fps = gpuTier.fps ?? 60;
+        const isCapableDesktop = gpuTier.tier >= 2 && !gpuTier.isMobile && fps >= 30;
+
         const validImages = imageRefs.current.filter(Boolean) as HTMLImageElement[];
-        if (validImages.length > 0 && gpuTier.tier >= 1 && !gpuTier.isMobile) {
+        if (validImages.length > 0 && isCapableDesktop) {
           rendererRef.current = new StudioRenderer(containerRef.current, validImages);
         }
       } catch {
-        // Fallback gracefully to high-performance CSS and image layer
+        // Fallback gracefully to high-performance styled CSS layer
       }
     };
 
     initEffects();
 
-    // Main animation loop (runs at 60fps)
+    // Unified 60fps animation loop
     const animate = () => {
       const state = sliderState.current;
       const listEl = listRef.current;
+      const intro = introState.current;
 
-      if (listEl) {
-        if (currentActive < 0) {
+      // Handle kinetic intro glide (outQuint with deceleration speed)
+      if (intro.isIntroPlaying && !intro.isComplete) {
+        const now = performance.now();
+        const elapsed = now - intro.startTime;
+        const progress = Math.min(1, elapsed / intro.duration);
+        // outQuint: 1 - (1 - progress)^5
+        const quintOut = 1 - Math.pow(1 - progress, 5);
+        const remaining = 1 - quintOut;
+
+        state.currentPosition = intro.initialOffset * remaining;
+        state.targetPosition = 0;
+
+        // Kinetic velocity feeds shader deformation & RGB split (reference: speed = t * 2500)
+        state.speed = -remaining * 2500;
+
+        if (progress >= 1) {
+          intro.isIntroPlaying = false;
+          intro.isComplete = true;
+          state.currentPosition = 0;
+          state.targetPosition = 0;
+          state.speed = 0;
+        }
+      } else if (listEl) {
+        // Standard interactive scroller logic
+        if (currentActiveRef.current < 0) {
           const clientW = document.body.clientWidth || window.innerWidth;
           let endPoint = listEl.scrollWidth - clientW;
           if (endPoint < 0) endPoint = listEl.scrollWidth;
 
-          // Clamping bounds
           if (state.targetPosition > 0) state.targetPosition = 0;
           if (state.targetPosition <= -endPoint) state.targetPosition = -endPoint;
         }
 
-        // Lerp position
         state.currentPosition = lerp(
           state.currentPosition,
           state.targetPosition,
           state.lerpSpeed
         );
 
-        // Calculate velocity speed for shaders
         state.speed = Math.round((state.currentPosition - state.targetPosition) * 100) / 100;
+      }
 
+      if (listEl) {
         const roundedX = Math.round(state.currentPosition * 100) / 100;
         listEl.style.transform = `translate3d(${roundedX}px, 0px, 0px)`;
       }
 
-      // Render Three.js WebGL shader distortion
+      // Three.js distortion mesh updates with real-time speed & layout dimensions
       if (rendererRef.current) {
         rendererRef.current.render(state.speed);
       }
@@ -220,17 +295,26 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
         rendererRef.current = null;
       }
     };
-  }, [currentActive]);
+  }, []); // Run once for the lifecycle of StudioSection
 
   return (
     <section
       id="studio"
       ref={sectionRef}
-      className="relative w-full min-h-[80vh] sm:min-h-[86vh] mt-8 sm:mt-14 mb-4 sm:mb-8 flex flex-col justify-center overflow-hidden select-none"
+      className="relative w-full min-h-[78vh] sm:min-h-[84vh] mt-6 sm:mt-10 mb-6 sm:mb-10 flex flex-col justify-center overflow-hidden select-none"
       aria-label="Studio Showcase"
     >
       {/* Section Header: Minimalist Editorial Marker */}
-      <div className="w-full px-6 sm:px-12 md:px-16 mb-4 sm:mb-8 flex flex-row items-center justify-between pointer-events-none">
+      <div
+        className="w-full px-6 sm:px-12 md:px-16 mb-4 sm:mb-8 flex flex-row items-center justify-between pointer-events-none transition-all duration-700"
+        style={{
+          opacity: isRevealed || isReducedMotion ? 1 : 0,
+          transform:
+            isRevealed || isReducedMotion
+              ? 'translate3d(0, 0, 0)'
+              : 'translate3d(0, -12px, 0)',
+        }}
+      >
         <div className="flex items-center gap-4">
           <span className="font-mono text-xs sm:text-sm tracking-[0.25em] text-cyan-400 font-semibold uppercase">
             // STUDIO
@@ -291,6 +375,8 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
               isAmbient={currentActive !== -1 && currentActive !== index}
               isDragging={isHolding}
               isDetailsOpen={currentActive !== -1}
+              isRevealed={isRevealed}
+              isReducedMotion={isReducedMotion}
               onToggleActive={toggleActiveItem}
             />
           ))}
@@ -306,7 +392,7 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
         )}
       </div>
 
-      {/* Subtle Drag Prompt Hint (Disappears during interaction) */}
+      {/* Subtle Drag Prompt Hint */}
       <div
         className={`w-full text-center mt-3 sm:mt-5 transition-opacity duration-500 pointer-events-none ${
           currentActive >= 0 ? 'opacity-0' : 'opacity-40'
@@ -315,20 +401,6 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
         <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-white/60">
           &larr; Drag or Scroll Horizontally to Explore &rarr;
         </span>
-      </div>
-
-      {/* Atmospheric Bridge: Gentle cosmic purple aura blending into Skills section */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none -z-10 overflow-hidden"
-        aria-hidden="true"
-      >
-        <div
-          className="w-full h-full"
-          style={{
-            background:
-              'radial-gradient(ellipse 60% 80% at 50% 100%, rgba(112, 66, 248, 0.14) 0%, rgba(79, 70, 229, 0.05) 45%, transparent 85%)',
-          }}
-        />
       </div>
     </section>
   );

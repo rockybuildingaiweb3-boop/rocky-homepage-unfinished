@@ -122,8 +122,12 @@ export class StudioImageMesh {
     this.uniforms.uImgSize.value.set(imgRect.width || this.sizes.x, imgRect.height || this.sizes.y);
     this.uniforms.uMeshSize.value.set(this.sizes.x, this.sizes.y);
 
-    // Warping and distortion effect driven by scroll velocity
-    this.uniforms.uOffset.value.set(speed * -0.0003, Math.abs(speed * 0.00005));
+    // Warping and distortion effect driven by velocity (calibrated to reference)
+    const factorX = -0.00012;
+    const factorY = 0.00003;
+    const clampedOffsetX = Math.max(-0.25, Math.min(0.25, speed * factorX));
+    const clampedOffsetY = Math.max(0, Math.min(0.08, Math.abs(speed * factorY)));
+    this.uniforms.uOffset.value.set(clampedOffsetX, clampedOffsetY);
     this.uniforms.uTime.value = this.clock.getElapsedTime() * 0.8;
   }
 

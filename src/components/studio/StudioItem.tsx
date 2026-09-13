@@ -8,6 +8,8 @@ interface StudioItemProps {
   isAmbient: boolean;
   isDragging: boolean;
   isDetailsOpen: boolean;
+  isRevealed?: boolean;
+  isReducedMotion?: boolean;
   onToggleActive: (index: number) => void;
   imageRef: (el: HTMLImageElement | null) => void;
 }
@@ -21,17 +23,27 @@ export const StudioItem = forwardRef<HTMLLIElement, StudioItemProps>(
       isAmbient,
       isDragging,
       isDetailsOpen,
+      isRevealed = false,
+      isReducedMotion = false,
       onToggleActive,
       imageRef,
     },
     ref
   ) => {
     const formattedIndex = index < 9 ? `0${index + 1}` : `${index + 1}`;
+    const showText = isRevealed || isReducedMotion;
 
     return (
       <li
         ref={ref}
-        className="list-none flex-shrink-0 h-full flex items-center justify-center relative select-none"
+        className="list-none flex-shrink-0 h-full flex items-center justify-center relative select-none will-change-[margin-right]"
+        style={{
+          marginRight:
+            !showText && !isReducedMotion ? 'clamp(140px, 24vw, 320px)' : '0px',
+          transition: !isReducedMotion
+            ? `margin-right 1400ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30}ms`
+            : 'none',
+        }}
       >
         <div
           onClick={() => {
@@ -58,49 +70,83 @@ export const StudioItem = forwardRef<HTMLLIElement, StudioItemProps>(
               src={project.image}
               alt={`${project.title} cover`}
               draggable="false"
-              className="absolute top-1/2 left-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-500 opacity-60"
+              className="absolute top-1/2 left-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-500 opacity-65 group-hover:opacity-90"
             />
             {/* Subtle dark vignette overlay for depth */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
           </div>
 
-          {/* Top Right: Item Index */}
+          {/* Top Right: Masked Item Index */}
           <div
-            className={`absolute top-[4vh] right-0 z-[2] text-right pointer-events-none transition-opacity duration-300 ${
+            className={`absolute top-[4vh] right-0 z-[2] text-right pointer-events-none overflow-hidden transition-opacity duration-300 ${
               isDetailsOpen || isDragging ? 'opacity-0' : 'opacity-100'
             }`}
           >
-            <span className="font-mono text-xs sm:text-sm tracking-[0.2em] text-white/70 block">
+            <span
+              className="font-mono text-xs sm:text-sm tracking-[0.2em] text-white/70 block will-change-transform"
+              style={{
+                transform: showText
+                  ? 'translate3d(0, 0%, 0)'
+                  : 'translate3d(0, 115%, 0)',
+                opacity: showText ? 1 : 0,
+                transition: !isReducedMotion
+                  ? `transform 900ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30 + 100}ms, opacity 900ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30 + 100}ms`
+                  : 'none',
+              }}
+            >
               {formattedIndex}
             </span>
           </div>
 
-          {/* Bottom Right: Title & View Button */}
+          {/* Bottom Right: Masked Title & View Button */}
           <div
-            className={`absolute bottom-[6vh] sm:bottom-[8vh] right-0 z-[2] text-right flex flex-col justify-end items-end pointer-events-none transition-opacity duration-300 ${
+            className={`absolute bottom-[6vh] sm:bottom-[8vh] right-0 z-[2] text-right flex flex-col justify-end items-end transition-opacity duration-300 ${
               isDetailsOpen || isDragging ? 'opacity-0' : 'opacity-100'
             }`}
           >
-            <h2
-              className="text-[6.5vw] sm:text-[4vw] md:text-[2.6vw] font-normal leading-[1.05] text-white lowercase tracking-wide max-w-[280px] sm:max-w-[320px] transition-transform duration-500 group-hover:-translate-x-1"
-              style={{ fontFamily: 'var(--title-font)' }}
-            >
-              {project.title}
-            </h2>
-
-            <div className="mt-3 pointer-events-auto">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleActive(index);
+            <div className="overflow-hidden pointer-events-none">
+              <h2
+                className="text-[6.5vw] sm:text-[4vw] md:text-[2.6vw] font-normal leading-[1.05] text-white lowercase tracking-wide max-w-[280px] sm:max-w-[320px] transition-transform duration-500 group-hover:-translate-x-1 will-change-transform"
+                style={{
+                  fontFamily: 'var(--title-font)',
+                  transform: showText
+                    ? 'translate3d(0, 0%, 0)'
+                    : 'translate3d(0, 115%, 0)',
+                  opacity: showText ? 1 : 0,
+                  transition: !isReducedMotion
+                    ? `transform 1100ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30 + 300}ms, opacity 1100ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30 + 300}ms`
+                    : 'none',
                 }}
-                className="relative group/btn inline-flex items-center text-[11px] sm:text-xs tracking-[0.22em] uppercase text-white/90 font-medium py-1 px-1 transition-colors hover:text-cyan-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
-                style={{ fontFamily: 'var(--body-font)' }}
               >
-                <span>View</span>
-                <span className="absolute bottom-0 left-1 right-1 h-[1px] bg-white/40 group-hover/btn:bg-cyan-400 transition-colors" />
-              </button>
+                {project.title}
+              </h2>
+            </div>
+
+            <div className="mt-3 pointer-events-auto overflow-hidden">
+              <div
+                style={{
+                  transform: showText
+                    ? 'translate3d(0, 0%, 0)'
+                    : 'translate3d(0, 120%, 0)',
+                  opacity: showText ? 1 : 0,
+                  transition: !isReducedMotion
+                    ? `transform 1100ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30 + 450}ms, opacity 1100ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 30 + 450}ms`
+                    : 'none',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleActive(index);
+                  }}
+                  className="relative group/btn inline-flex items-center text-[11px] sm:text-xs tracking-[0.22em] uppercase text-white/90 font-medium py-1 px-1 transition-colors hover:text-cyan-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
+                  style={{ fontFamily: 'var(--body-font)' }}
+                >
+                  <span>View</span>
+                  <span className="absolute bottom-0 left-1 right-1 h-[1px] bg-white/40 group-hover/btn:bg-cyan-400 transition-colors" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
