@@ -24,7 +24,7 @@ export const SkillsSection: React.FC = () => {
   return (
     <section
       id="skills"
-      className="relative flex flex-col items-center justify-center w-full mt-[35vh] sm:mt-[40vh] pt-4 sm:pt-8 pb-16 sm:pb-24 text-white z-10 bg-transparent overflow-hidden"
+      className="relative flex flex-col items-center justify-center w-full mt-4 sm:mt-8 pt-4 sm:pt-6 pb-16 sm:pb-24 text-white z-10 bg-transparent overflow-hidden"
       aria-label="Skills & Technologies"
     >
       {/* ─── 1. SIGNATURE PURPLE COSMIC PLANET BACKGROUND ─── */}

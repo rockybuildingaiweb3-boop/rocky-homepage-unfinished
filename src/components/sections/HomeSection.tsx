@@ -223,8 +223,10 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       <div
         className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-10 sm:pt-14 pb-8 sm:pb-12 will-change-transform bg-transparent"
         style={{
-          transform: `translate3d(0, ${textParallaxY}px, 0)`,
-          opacity: Math.max(0, 1 - dayToNightProgress * 1.5),
+          transform: `translate3d(0, ${textParallaxY}px, 0) scale(${Math.max(0.94, 1 - dayToNightProgress * 0.08)})`,
+          opacity: Math.max(0, 1 - dayToNightProgress * 1.35),
+          filter: `blur(${dayToNightProgress * 5}px)`,
+          willChange: 'transform, opacity, filter',
         }}
       >
         <div className="relative flex flex-col items-center pointer-events-auto bg-transparent">
@@ -345,7 +347,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
       </div>
 
       <div
-        className="absolute bottom-0 left-0 right-0 h-28 sm:h-36 pointer-events-none z-[4] bg-gradient-to-b from-transparent via-[#030014]/15 to-[#030014]/40"
+        className="absolute bottom-0 left-0 right-0 h-36 sm:h-48 pointer-events-none z-[4] transition-opacity duration-300"
+        style={{
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(3, 0, 20, 0.4) 50%, rgba(3, 0, 20, 0.95) 100%)',
+          opacity: Math.max(0.4, dayToNightProgress),
+        }}
         aria-hidden="true"
       />
     </section>

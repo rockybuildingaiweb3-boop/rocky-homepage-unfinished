@@ -38,10 +38,32 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
   });
 
   const rendererRef = useRef<StudioRenderer | null>(null);
+  const hasPlayedIntroRef = useRef<boolean>(false);
 
   // Helper for linear interpolation
   const lerp = (start: number, end: number, factor: number) =>
     start * (1 - factor) + end * factor;
+
+  // IntersectionObserver to trigger smooth intro momentum glide on entering viewport
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasPlayedIntroRef.current) {
+          hasPlayedIntroRef.current = true;
+          // Smooth intro kinetic pulse matching reference workListIntro
+          sliderState.current.currentPosition = 90;
+          sliderState.current.targetPosition = 0;
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Center active item smoothly
   const scrollToActiveItem = useCallback((idx: number) => {
@@ -204,7 +226,7 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
     <section
       id="studio"
       ref={sectionRef}
-      className="relative w-full min-h-[90vh] sm:min-h-[100vh] my-[10vh] sm:my-[18vh] flex flex-col justify-center overflow-hidden select-none"
+      className="relative w-full min-h-[80vh] sm:min-h-[86vh] mt-8 sm:mt-14 mb-4 sm:mb-8 flex flex-col justify-center overflow-hidden select-none"
       aria-label="Studio Showcase"
     >
       {/* Section Header: Minimalist Editorial Marker */}
@@ -286,13 +308,27 @@ export const StudioSection: React.FC<StudioSectionProps> = ({
 
       {/* Subtle Drag Prompt Hint (Disappears during interaction) */}
       <div
-        className={`w-full text-center mt-4 sm:mt-6 transition-opacity duration-500 pointer-events-none ${
+        className={`w-full text-center mt-3 sm:mt-5 transition-opacity duration-500 pointer-events-none ${
           currentActive >= 0 ? 'opacity-0' : 'opacity-40'
         }`}
       >
         <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-white/60">
           &larr; Drag or Scroll Horizontally to Explore &rarr;
         </span>
+      </div>
+
+      {/* Atmospheric Bridge: Gentle cosmic purple aura blending into Skills section */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none -z-10 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div
+          className="w-full h-full"
+          style={{
+            background:
+              'radial-gradient(ellipse 60% 80% at 50% 100%, rgba(112, 66, 248, 0.14) 0%, rgba(79, 70, 229, 0.05) 45%, transparent 85%)',
+          }}
+        />
       </div>
     </section>
   );
