@@ -40,7 +40,8 @@ export function useScrollSpy({
 
         const windowH = window.innerHeight;
 
-        for (const id of sectionIds) {
+        for (let i = sectionIds.length - 1; i >= 0; i--) {
+          const id = sectionIds[i];
           const el = document.getElementById(id);
           if (el) {
             const top = el.offsetTop - windowH * offsetRatio;

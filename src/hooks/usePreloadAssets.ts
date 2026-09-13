@@ -36,6 +36,11 @@ export function usePreloadAssets(): PreloadAssetsResult {
           '/assets/imgs/home-back.jpg',
           '/assets/imgs/logo-rb-cyber.svg',
           '/assets/imgs/signature.svg',
+          '/assets/imgs/studio/project-1.jpg',
+          '/assets/imgs/studio/project-2.jpg',
+          '/assets/imgs/studio/project-3.jpg',
+          '/assets/imgs/studio/project-4.jpg',
+          '/assets/imgs/studio/project-5.jpg',
         ];
 
         let loadedCount = 0;

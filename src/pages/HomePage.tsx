@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Navbar, Footer } from '../components/layout';
-import { HomeSection, SkillsSection } from '../components/sections';
+import { HomeSection, StudioSection, SkillsSection } from '../components/sections';
 import { useScrollSpy } from '../features/scroll';
 import type { SiteData } from '../types';
 
@@ -29,6 +29,7 @@ export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
     <main className="relative z-10 w-full overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
       <HomeSection scrollY={scrollY} onNavigate={handleNavigate} />
+      <StudioSection />
       <SkillsSection />
       <Footer siteData={siteData} />
     </main>
