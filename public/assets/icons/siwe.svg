@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Sign-In with Ethereum EIP-4361 standard mark -->
+  <polygon points="12 2 4.5 14 12 9.5 19.5 14 12 2" fill="#4B68AE"/>
+  <polygon points="12 10.8 4.5 14.8 12 22 19.5 14.8 12 10.8" fill="#849DDB"/>
+  <rect x="10" y="10" width="4" height="4" rx="1" fill="#FFF"/>
+</svg>

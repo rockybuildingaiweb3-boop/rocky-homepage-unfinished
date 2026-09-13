@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- GLSL Shader Crystal & Vector Matrix -->
+  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" fill="none" stroke="#5586A4"/>
+  <line x1="12" y1="2" x2="12" y2="22" stroke="#5586A4" stroke-opacity="0.6"/>
+  <polyline points="22 8.5 12 12 2 8.5" stroke="#5586A4"/>
+  <polyline points="22 15.5 12 12 2 15.5" stroke="#5586A4" stroke-opacity="0.6"/>
+  <circle cx="12" cy="12" r="2.2" fill="#5586A4"/>
+</svg>

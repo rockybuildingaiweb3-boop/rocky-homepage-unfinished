@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- ERC-4337 Account Abstraction Shield -->
+  <path d="M12 2L4 5.5v6.5c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V5.5L12 2z" fill="#627EEA" fill-opacity="0.2" stroke="#627EEA" stroke-width="1.8"/>
+  <polygon points="12 6 8.5 12 12 10.5 15.5 12" fill="#627EEA"/>
+  <polygon points="12 11.5 8.5 13 12 18 15.5 13" fill="#8C9EFF"/>
+</svg>

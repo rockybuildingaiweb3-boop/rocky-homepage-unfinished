@@ -20,6 +20,10 @@ button { font: inherit; }
 .marquee-track-forward { animation: skills-marquee-forward 50s linear infinite; }
 .marquee-track-reverse { animation: skills-marquee-reverse 55s linear infinite; }
 .marquee-band:hover .marquee-track { animation-play-state: paused; }
+.mask-edges {
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
 
 @keyframes skills-marquee-forward { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
 @keyframes skills-marquee-reverse { from { transform: translate3d(-50%,0,0); } to { transform: translate3d(0,0,0); } }
