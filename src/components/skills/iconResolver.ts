@@ -12,12 +12,15 @@ import type { SimpleIcon } from 'simple-icons';
 
 export type IconType = 'brand' | 'generic' | 'missing';
 
+export type IconSource =
+  | { kind: 'simple-icon'; icon: SimpleIcon }
+  | { kind: 'local-svg'; url: string; title: string }
+  | { kind: 'missing' };
+
 export interface IconDefinition {
   id: string;
-  type: 'brand' | 'generic';
-  source:
-    | { kind: 'simple-icon'; icon: SimpleIcon }
-    | { kind: 'local-svg'; url: string; title: string };
+  type: IconType;
+  source: IconSource;
   title: string;
 }
 
@@ -46,39 +49,6 @@ export type ResolvedIcon =
       kind: 'missing';
       title: string;
     };
-
-/**
- * 27 Verified local SVG asset paths that exist in public/assets/icons/
- */
-export const VERIFIED_LOCAL_ASSETS: readonly string[] = [
-  '/assets/icons/glsl.svg',
-  '/assets/icons/r3f.svg',
-  '/assets/icons/spline.svg',
-  '/assets/icons/draco.svg',
-  '/assets/icons/canvasapi.svg',
-  '/assets/icons/viem.svg',
-  '/assets/icons/foundry.svg',
-  '/assets/icons/privy.svg',
-  '/assets/icons/erc4337.svg',
-  '/assets/icons/thegraph.svg',
-  '/assets/icons/siwe.svg',
-  '/assets/icons/hardhat.svg',
-  '/assets/icons/openai.svg',
-  '/assets/icons/groq.svg',
-  '/assets/icons/togetherai.svg',
-  '/assets/icons/cohere.svg',
-  '/assets/icons/llamaindex.svg',
-  '/assets/icons/autogen.svg',
-  '/assets/icons/semantickernel.svg',
-  '/assets/icons/mcp.svg',
-  '/assets/icons/langsmith.svg',
-  '/assets/icons/pgvector.svg',
-  '/assets/icons/chroma.svg',
-  '/assets/icons/weaviate.svg',
-  '/assets/icons/pinecone.svg',
-  '/assets/icons/llamaparse.svg',
-  '/assets/icons/unstructured.svg',
-] as const;
 
 /**
  * Canonical Icon Registry for all 88 technologies.
@@ -664,7 +634,7 @@ export function resolveSkillIcon(skillId: string, name?: string): ResolvedIcon {
   const displayName = name || normalizedId;
   const def = ICON_REGISTRY[normalizedId];
 
-  if (!def) {
+  if (!def || def.type === 'missing' || def.source.kind === 'missing') {
     return {
       id: normalizedId,
       name: displayName,
@@ -685,13 +655,23 @@ export function resolveSkillIcon(skillId: string, name?: string): ResolvedIcon {
     };
   }
 
+  if (def.source.kind === 'simple-icon') {
+    return {
+      id: def.id,
+      name: displayName,
+      iconType: def.type,
+      kind: 'svg-path',
+      path: def.source.icon.path,
+      hex: def.source.icon.hex,
+      title: def.source.icon.title || def.title || displayName,
+    };
+  }
+
   return {
-    id: def.id,
+    id: normalizedId,
     name: displayName,
-    iconType: def.type,
-    kind: 'svg-path',
-    path: def.source.icon.path,
-    hex: def.source.icon.hex,
-    title: def.source.icon.title || def.title || displayName,
+    iconType: 'missing',
+    kind: 'missing',
+    title: displayName,
   };
 }

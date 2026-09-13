@@ -31,11 +31,12 @@ export function useScrollSpy({
       if (rafId !== null) return;
       rafId = requestAnimationFrame(() => {
         rafId = null;
-        const scrollPos =
-          window.scrollY ||
-          document.documentElement.scrollTop ||
+        const rawPos =
+          (typeof window !== 'undefined' ? window.scrollY : 0) ||
+          (typeof document !== 'undefined' ? document.documentElement.scrollTop : 0) ||
           scrollContainerRef?.current?.scrollTop ||
           0;
+        const scrollPos = typeof rawPos === 'number' && Number.isFinite(rawPos) ? Math.max(0, rawPos) : 0;
         setScrollY(scrollPos);
 
         const windowH = window.innerHeight;

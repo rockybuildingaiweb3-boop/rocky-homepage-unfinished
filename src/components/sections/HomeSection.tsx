@@ -3,11 +3,11 @@ import { NebulaBackground } from './NebulaBackground';
 import { VISUAL_CONSTANTS } from '../../constants/visual';
 
 interface HomeSectionProps {
-  scrollY: number;
+  scrollY?: number;
   onNavigate?: (targetId: string) => void;
 }
 
-export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate }) => {
+export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigate }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const word1Ref = useRef<HTMLSpanElement>(null);
   const word2Ref = useRef<HTMLSpanElement>(null);
@@ -160,12 +160,25 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
     };
   }, [imageLoaded]);
 
-  const bgParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.BACKGROUND;
-  const nebulaParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.NEBULA;
-  const textParallaxY = scrollY * VISUAL_CONSTANTS.PARALLAX.TEXT;
+  const safeScrollY = typeof scrollY === 'number' && Number.isFinite(scrollY) ? Math.max(0, scrollY) : 0;
+  const bgParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.BACKGROUND;
+  const nebulaParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.NEBULA;
+  const textParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.TEXT;
 
-  const windowH = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const dayToNightProgress = Math.min(1, Math.max(0, scrollY / (windowH * 0.85)));
+  const windowH =
+    typeof window !== 'undefined' && Number.isFinite(window.innerHeight) && window.innerHeight > 0
+      ? window.innerHeight
+      : 900;
+  const divisor = windowH * 0.85;
+  const rawProgress = divisor > 0 ? safeScrollY / divisor : 0;
+  const dayToNightProgress = Number.isFinite(rawProgress) ? Math.min(1, Math.max(0, rawProgress)) : 0;
+
+  const heroOpacity = Number.isFinite(dayToNightProgress)
+    ? Math.max(0, 1 - dayToNightProgress * 1.35)
+    : 1;
+  const bottomGradientOpacity = Number.isFinite(dayToNightProgress)
+    ? Math.max(0.4, dayToNightProgress)
+    : 0.4;
 
   const handleScrollCueClick = () => {
     if (onNavigate) {
@@ -224,7 +237,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-10 sm:pt-14 pb-8 sm:pb-12 will-change-transform bg-transparent"
         style={{
           transform: `translate3d(0, ${textParallaxY}px, 0) scale(${Math.max(0.94, 1 - dayToNightProgress * 0.08)})`,
-          opacity: Math.max(0, 1 - dayToNightProgress * 1.35),
+          opacity: heroOpacity,
           filter: `blur(${dayToNightProgress * 5}px)`,
           willChange: 'transform, opacity, filter',
         }}
@@ -350,7 +363,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY, onNavigate })
         className="absolute bottom-0 left-0 right-0 h-36 sm:h-48 pointer-events-none z-[4] transition-opacity duration-300"
         style={{
           background: 'linear-gradient(to bottom, transparent 0%, rgba(3, 0, 20, 0.4) 50%, rgba(3, 0, 20, 0.95) 100%)',
-          opacity: Math.max(0.4, dayToNightProgress),
+          opacity: bottomGradientOpacity,
         }}
         aria-hidden="true"
       />
