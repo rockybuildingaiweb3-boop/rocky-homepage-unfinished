@@ -1,1 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none"><text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="5.2" font-weight="600" letter-spacing="0.03em" fill="#F1F5F9">PRIVY</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 48" width="24" height="24" fill="#F1F5F9">
+  <path d="M 18.658 37.189 C 28.96 37.189 37.316 28.862 37.316 18.594 C 37.316 8.326 28.96 0 18.658 0 C 8.355 -0.001 0 8.326 0 18.594 C 0 28.861 8.355 37.188 18.658 37.188 Z M 18.658 48 C 25.699 48 31.408 46.803 31.408 45.333 C 31.408 43.865 25.703 42.667 18.658 42.667 C 11.612 42.667 5.907 43.865 5.907 45.333 C 5.907 46.803 11.612 48 18.658 48 Z" />
+</svg>

@@ -1,9 +1,9 @@
 import {
   siTypescript, siJavascript, siReact, siNextdotjs, siSvelte, siTailwindcss, siFramer, siGreensock, siHtml5, siVite, siRive,
-  siThreedotjs, siWebgl, siWebgpu, siBlender, siBabylondotjs, siUnity,
+  siThreedotjs, siWebgl, siOpengl, siWebgpu, siBlender, siBabylondotjs, siUnity,
   siNodedotjs, siExpress, siFastapi, siFlask, siSpringboot, siPrisma, siDrizzle, siTrpc, siGraphql, siPydantic, siNginx,
   siPostgresql, siMysql, siSupabase, siRedis, siRabbitmq, siCelery, siApachekafka, siDocker, siKubernetes, siLinux, siGit,
-  siSolidity, siWagmi, siEthers, siIpfs,
+  siSolidity, siWagmi, siEthers, siEthereum, siIpfs,
   siAnthropic, siGooglegemini, siDeepseek, siQwen, siVercel, siOllama, siHuggingface,
   siLangchain, siLanggraph, siCrewai, siDify, siCoze, siHaystack,
   siMilvus, siQdrant, siPrometheus, siGrafana, siSentry
@@ -143,9 +143,9 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
   },
   glsl: {
     id: 'glsl',
-    type: 'generic', // Shader pipeline language standard
+    type: 'generic', // Shader pipeline language standard (OpenGL)
     title: 'GLSL',
-    source: { kind: 'local-svg', url: '/assets/icons/glsl.svg', title: 'GLSL' },
+    source: { kind: 'simple-icon', icon: siOpengl },
   },
   webgpu: {
     id: 'webgpu',
@@ -167,7 +167,7 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
   },
   spline: {
     id: 'spline',
-    type: 'generic', // 3D parametric spline loop mark
+    type: 'brand', // Official Spline 3D design software mark
     title: 'Spline',
     source: { kind: 'local-svg', url: '/assets/icons/spline.svg', title: 'Spline' },
   },
@@ -181,7 +181,7 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
     id: 'canvasapi',
     type: 'generic', // HTML5 Canvas 2D bitmap standard
     title: 'Canvas API',
-    source: { kind: 'local-svg', url: '/assets/icons/canvasapi.svg', title: 'Canvas API' },
+    source: { kind: 'simple-icon', icon: siHtml5 },
   },
   babylondotjs: {
     id: 'babylondotjs',
@@ -379,7 +379,7 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
     id: 'erc4337',
     type: 'generic', // Ethereum standard for account abstraction
     title: 'ERC-4337',
-    source: { kind: 'local-svg', url: '/assets/icons/erc4337.svg', title: 'ERC-4337' },
+    source: { kind: 'simple-icon', icon: siEthereum },
   },
   thegraph: {
     id: 'thegraph',
@@ -553,7 +553,7 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
     id: 'pgvector',
     type: 'generic', // PostgreSQL vector extension technical symbol
     title: 'pgvector',
-    source: { kind: 'local-svg', url: '/assets/icons/pgvector.svg', title: 'pgvector' },
+    source: { kind: 'simple-icon', icon: siPostgresql },
   },
   chroma: {
     id: 'chroma',
