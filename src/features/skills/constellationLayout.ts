@@ -1,26 +1,22 @@
 /**
- * Constellation Spatial Field Engine (Skills V2 — Spatial Field Architecture)
+ * Constellation Spatial Field Engine (Skills V2 — Cross-Category Weaving)
  *
  * Authored, deterministic 2D spatial field framing the central celestial planet.
- * Replaces all obsolete radial/orbital geometry (no angle attractors, no orbital rings,
- * no concentric zones).
+ * Fully decouples skill category from spatial placement:
+ * 1. 88 Authored Spatial Anchors:
+ *    - Independent Cartesian coordinates across the 2D stage percentage space.
+ *    - High radial variance, non-uniform angular density, and natural asymmetry.
+ *    - No spatial region, zone, or quadrant is assigned to any category.
  *
- * Core Architecture:
- * 1. 2D Spatial Field:
- *    - Authored Cartesian base anchors across 2D stage percentage space.
- *    - Cross-category ecosystem weaving where multiple disciplines share spatial regions
- *      and categories naturally span across neighboring areas.
- *    - High variance in distance from the central planet (min ~20%, max ~62%).
- *    - Asymmetric quadrant and angular distribution with intentional negative space corridors.
+ * 2. Deterministic Cross-Category Interleaving:
+ *    - Skills from different disciplines are deterministically interleaved onto the spatial field.
+ *    - Zero Math.random(). 100% reproducible across renders and platforms.
+ *    - Local neighborhoods naturally contain diverse combinations
+ *      (e.g., React + OpenAI + Three.js + PostgreSQL + Solidity).
  *
- * 2. 100% Deterministic:
- *    - Zero Math.random().
- *    - Stable seeded FNV-1a PRNG for reproducible micro-variations.
- *    - Unchanged across re-renders, refreshes, and navigation.
- *
- * 3. Local Deterministic Collision & Planet Clearance:
- *    - Local (dx, dy) repulsion so relaxation does NOT push nodes into concentric circles.
- *    - Central planet exclusion boundary protection.
+ * 3. Physics-Based Deterministic Clearance:
+ *    - Local (dx, dy) repulsion ensures 0 node collisions.
+ *    - Celestial planet exclusion boundary protection.
  *    - Viewport boundary containment.
  */
 
@@ -69,8 +65,20 @@ export interface GeometryDiagnostics {
   };
 }
 
+export interface CategoryDiversityDiagnostics {
+  kNeighbors: number;
+  avgSameCategoryNeighbors: number;
+  sameCategoryPercentage: number;
+  avgDistinctCategoriesInNeighborhood: number;
+  quadrantDistribution: Record<
+    string,
+    { upperLeft: number; upperRight: number; lowerLeft: number; lowerRight: number }
+  >;
+  maxQuadrantConcentration: number;
+}
+
 /**
- * Editorial Category Labels (Restrained annotations in 2D space)
+ * Editorial Category Labels (Restrained contextual annotations)
  */
 export const CATEGORY_SHORT_LABELS: Record<string, string> = {
   frontend: 'CORE FRONTEND',
@@ -84,217 +92,70 @@ export const CATEGORY_SHORT_LABELS: Record<string, string> = {
 };
 
 /**
- * Authored 2D Spatial Anchors for Desktop Viewports (x: 4..96, y: 5..95)
- * Interwoven cross-disciplinary placement with varied local density and deliberate negative space.
+ * 88 Authored 2D Spatial Anchors for Desktop Viewports (x: 4..96, y: 5..95)
+ * Pure Cartesian coordinates defining the organic constellation composition.
+ * Completely independent of skill categories.
  */
-const DESKTOP_AUTHORED_SEEDS: Record<string, { x: number; y: number }> = {
-  // North Crest & Upper-Center (Frontend + 3D + AI Gateway)
-  nextdotjs:    { x: 44, y: 15 },
-  tailwindcss:  { x: 52, y: 13 },
-  threedotjs:   { x: 60, y: 17 },
-  r3f:          { x: 48, y: 22 },
-  vercel:       { x: 38, y: 19 },
-  vite:         { x: 34, y: 12 },
-
-  // North-West Field (Interactive UI, Motion, Canvas)
-  typescript:   { x: 32, y: 26 },
-  react:        { x: 26, y: 23 },
-  javascript:   { x: 22, y: 16 },
-  svelte:       { x: 17, y: 22 },
-  framer:       { x: 27, y: 32 },
-  canvasapi:    { x: 35, y: 33 },
-  greensock:    { x: 13, y: 28 },
-  rive:         { x: 8,  y: 19 },
-  html5:        { x: 16, y: 35 },
-
-  // North-East Reach (3D Shaders, GPU, Spatial Tech)
-  webgl:        { x: 65, y: 21 },
-  glsl:         { x: 72, y: 18 },
-  webgpu:       { x: 70, y: 12 },
-  blender:      { x: 80, y: 16 },
-  spline:       { x: 78, y: 24 },
-  draco:        { x: 84, y: 26 },
-  babylondotjs: { x: 89, y: 19 },
-  unity:        { x: 93, y: 27 },
-  ethers:       { x: 82, y: 33 },
-
-  // West Flank (Frontier AI Models & Reasoning Engines)
-  openai:       { x: 24, y: 43 },
-  anthropic:    { x: 18, y: 44 },
-  googlegemini: { x: 26, y: 51 },
-  deepseek:     { x: 12, y: 42 },
-  qwen:         { x: 9,  y: 49 },
-  ollama:       { x: 16, y: 37 },
-  togetherai:   { x: 6,  y: 40 },
-  cohere:       { x: 5,  y: 56 },
-  huggingface:  { x: 14, y: 55 },
-
-  // South-West Reef (AI Agents, Orchestration & Synthesizers)
-  langchain:    { x: 29, y: 61 },
-  mcp:          { x: 24, y: 64 },
-  langgraph:    { x: 19, y: 62 },
-  llamaindex:   { x: 32, y: 69 },
-  crewai:       { x: 26, y: 72 },
-  autogen:      { x: 16, y: 69 },
-  dify:         { x: 21, y: 78 },
-  coze:         { x: 12, y: 65 },
-  semantickernel:{ x: 14, y: 76 },
-  langsmith:    { x: 27, y: 83 },
-  haystack:     { x: 8,  y: 73 },
-  groq:         { x: 20, y: 55 },
-
-  // South Floor & Nadir (Vector Infrastructure & Distributed Data)
-  pgvector:     { x: 37, y: 68 },
-  postgresql:   { x: 44, y: 72 },
-  weaviate:     { x: 49, y: 68 },
-  qdrant:       { x: 54, y: 73 },
-  chroma:       { x: 39, y: 76 },
-  milvus:       { x: 33, y: 77 },
-  redis:        { x: 59, y: 74 },
-  mysql:        { x: 47, y: 81 },
-  docker:       { x: 41, y: 83 },
-  linux:        { x: 45, y: 89 },
-  git:          { x: 36, y: 86 },
-  kubernetes:   { x: 53, y: 89 },
-  pinecone:     { x: 31, y: 90 },
-  llamaparse:   { x: 23, y: 86 },
-  unstructured: { x: 16, y: 84 },
-  prometheus:   { x: 10, y: 86 },
-  grafana:      { x: 6,  y: 83 },
-  sentry:       { x: 5,  y: 93 },
-
-  // Mid-East & South-East Reef (Web3 Protocols & Decentralized Systems)
-  solidity:     { x: 74, y: 38 },
-  viem:         { x: 83, y: 38 },
-  wagmi:        { x: 89, y: 39 },
-  foundry:      { x: 86, y: 33 },
-  privy:        { x: 76, y: 46 },
-  erc4337:      { x: 83, y: 45 },
-  thegraph:     { x: 91, y: 46 },
-  siwe:         { x: 72, y: 54 },
-  hardhat:      { x: 89, y: 52 },
-  ipfs:         { x: 94, y: 58 },
-
-  // South-East Flank & Canyon (Backend APIs, Engines & Event Queues)
-  nodedotjs:    { x: 72, y: 45 },
-  express:      { x: 79, y: 51 },
-  fastapi:      { x: 68, y: 58 },
-  prisma:       { x: 77, y: 61 },
-  drizzle:      { x: 64, y: 66 },
-  trpc:         { x: 86, y: 59 },
-  graphql:      { x: 74, y: 67 },
-  flask:        { x: 82, y: 67 },
-  springboot:   { x: 71, y: 75 },
-  pydantic:     { x: 79, y: 74 },
-  nginx:        { x: 90, y: 68 },
-  supabase:     { x: 66, y: 82 },
-  rabbitmq:     { x: 61, y: 85 },
-  kafka:        { x: 77, y: 82 },
-  celery:       { x: 86, y: 82 },
-};
+const AUTHORED_DESKTOP_SPATIAL_ANCHORS: { x: number; y: number }[] = [
+  // Upper Crest & High Flanks
+  { x: 44, y: 15 }, { x: 52, y: 13 }, { x: 60, y: 17 }, { x: 48, y: 22 }, { x: 38, y: 19 }, { x: 34, y: 12 },
+  // North-West Field & Upper Outer Halo
+  { x: 32, y: 26 }, { x: 26, y: 23 }, { x: 22, y: 16 }, { x: 17, y: 22 }, { x: 27, y: 32 }, { x: 35, y: 33 },
+  { x: 13, y: 28 }, { x: 8,  y: 19 }, { x: 16, y: 35 },
+  // North-East Reach & Outer Corridor
+  { x: 65, y: 21 }, { x: 72, y: 18 }, { x: 70, y: 12 }, { x: 80, y: 16 }, { x: 78, y: 24 }, { x: 84, y: 26 },
+  { x: 89, y: 19 }, { x: 93, y: 27 }, { x: 82, y: 33 },
+  // Mid-West Flank
+  { x: 24, y: 43 }, { x: 18, y: 44 }, { x: 26, y: 51 }, { x: 12, y: 42 }, { x: 9,  y: 49 }, { x: 16, y: 37 },
+  { x: 6,  y: 40 }, { x: 5,  y: 56 }, { x: 14, y: 55 },
+  // South-West Reef & Arch
+  { x: 29, y: 61 }, { x: 24, y: 64 }, { x: 19, y: 62 }, { x: 32, y: 69 }, { x: 26, y: 72 }, { x: 16, y: 69 },
+  { x: 21, y: 78 }, { x: 12, y: 65 }, { x: 14, y: 76 }, { x: 27, y: 83 }, { x: 8,  y: 73 }, { x: 20, y: 55 },
+  // South Floor, Floor Nadir & Deep Foundation
+  { x: 37, y: 68 }, { x: 44, y: 72 }, { x: 49, y: 68 }, { x: 54, y: 73 }, { x: 39, y: 76 }, { x: 33, y: 77 },
+  { x: 59, y: 74 }, { x: 47, y: 81 }, { x: 41, y: 83 }, { x: 45, y: 89 }, { x: 36, y: 86 }, { x: 53, y: 89 },
+  { x: 31, y: 90 }, { x: 23, y: 86 }, { x: 16, y: 84 }, { x: 10, y: 86 }, { x: 6,  y: 83 }, { x: 5,  y: 93 },
+  // Mid-East Flank & Outer Cluster
+  { x: 74, y: 38 }, { x: 83, y: 38 }, { x: 89, y: 39 }, { x: 86, y: 33 }, { x: 76, y: 46 }, { x: 83, y: 45 },
+  { x: 91, y: 46 }, { x: 72, y: 54 }, { x: 89, y: 52 }, { x: 94, y: 58 },
+  // South-East Flank & Canyon Reach
+  { x: 72, y: 45 }, { x: 79, y: 51 }, { x: 68, y: 58 }, { x: 77, y: 61 }, { x: 64, y: 66 }, { x: 86, y: 59 },
+  { x: 74, y: 67 }, { x: 82, y: 67 }, { x: 71, y: 75 }, { x: 79, y: 74 }, { x: 90, y: 68 }, { x: 66, y: 82 },
+  { x: 61, y: 85 }, { x: 77, y: 82 }, { x: 86, y: 82 },
+];
 
 /**
- * Authored 2D Spatial Anchors for Mobile Viewports (Tall aspect ratio, y: 5..97)
+ * 88 Authored 2D Spatial Anchors for Mobile Viewports (Vertical stage, y: 5..97)
+ * Pure Cartesian coordinates tailored to vertical mobile screens.
  */
-const MOBILE_AUTHORED_SEEDS: Record<string, { x: number; y: number }> = {
+const AUTHORED_MOBILE_SPATIAL_ANCHORS: { x: number; y: number }[] = [
   // Top Sector (y: 5..33)
-  nextdotjs:    { x: 50, y: 7 },
-  tailwindcss:  { x: 38, y: 8 },
-  threedotjs:   { x: 62, y: 8 },
-  vite:         { x: 25, y: 8 },
-  webgpu:       { x: 75, y: 8 },
-  r3f:          { x: 50, y: 14 },
-  vercel:       { x: 36, y: 14 },
-  webgl:        { x: 64, y: 14 },
-  typescript:   { x: 22, y: 14 },
-  glsl:         { x: 78, y: 14 },
-  react:        { x: 10, y: 11 },
-  blender:      { x: 90, y: 11 },
-  javascript:   { x: 18, y: 20 },
-  spline:       { x: 82, y: 20 },
-  svelte:       { x: 30, y: 20 },
-  draco:        { x: 70, y: 20 },
-  framer:       { x: 42, y: 20 },
-  canvasapi:    { x: 58, y: 20 },
-  greensock:    { x: 8,  y: 19 },
-  babylondotjs: { x: 92, y: 19 },
-  rive:         { x: 12, y: 27 },
-  unity:        { x: 88, y: 27 },
-  html5:        { x: 24, y: 28 },
-  ethers:       { x: 76, y: 28 },
+  { x: 50, y: 7 }, { x: 38, y: 8 }, { x: 62, y: 8 }, { x: 25, y: 8 }, { x: 75, y: 8 },
+  { x: 50, y: 14 }, { x: 36, y: 14 }, { x: 64, y: 14 }, { x: 22, y: 14 }, { x: 78, y: 14 },
+  { x: 10, y: 11 }, { x: 90, y: 11 }, { x: 18, y: 20 }, { x: 82, y: 20 }, { x: 30, y: 20 },
+  { x: 70, y: 20 }, { x: 42, y: 20 }, { x: 58, y: 20 }, { x: 8,  y: 19 }, { x: 92, y: 19 },
+  { x: 12, y: 27 }, { x: 88, y: 27 }, { x: 24, y: 28 }, { x: 76, y: 28 },
 
-  // Flanking Left & Right of the Planet (y: 33..67)
-  openai:       { x: 20, y: 35 },
-  anthropic:    { x: 9,  y: 36 },
-  ollama:       { x: 14, y: 43 },
-  googlegemini: { x: 24, y: 43 },
-  deepseek:     { x: 9,  y: 50 },
-  qwen:         { x: 21, y: 51 },
-  togetherai:   { x: 8,  y: 58 },
-  huggingface:  { x: 20, y: 58 },
-  cohere:       { x: 7,  y: 65 },
-  groq:         { x: 19, y: 65 },
-
-  solidity:     { x: 80, y: 35 },
-  viem:         { x: 91, y: 36 },
-  foundry:      { x: 76, y: 43 },
-  wagmi:        { x: 88, y: 43 },
-  privy:        { x: 79, y: 50 },
-  erc4337:      { x: 91, y: 50 },
-  thegraph:     { x: 78, y: 58 },
-  siwe:         { x: 90, y: 58 },
-  hardhat:      { x: 78, y: 65 },
-  ipfs:         { x: 90, y: 65 },
+  // Flanking Left & Right of Planet (y: 33..67)
+  { x: 20, y: 35 }, { x: 9,  y: 36 }, { x: 14, y: 43 }, { x: 24, y: 43 }, { x: 9,  y: 50 },
+  { x: 21, y: 51 }, { x: 8,  y: 58 }, { x: 20, y: 58 }, { x: 7,  y: 65 }, { x: 19, y: 65 },
+  { x: 80, y: 35 }, { x: 91, y: 36 }, { x: 76, y: 43 }, { x: 88, y: 43 }, { x: 79, y: 50 },
+  { x: 91, y: 50 }, { x: 78, y: 58 }, { x: 90, y: 58 }, { x: 78, y: 65 }, { x: 90, y: 65 },
 
   // Bottom Sector (y: 68..97)
-  langchain:    { x: 36, y: 70 },
-  mcp:          { x: 50, y: 69 },
-  nodedotjs:    { x: 64, y: 70 },
-  langgraph:    { x: 24, y: 72 },
-  fastapi:      { x: 76, y: 72 },
-  express:      { x: 88, y: 72 },
-  llamaindex:   { x: 12, y: 72 },
-  crewai:       { x: 32, y: 76 },
-  pgvector:     { x: 44, y: 75 },
-  weaviate:     { x: 56, y: 75 },
-  prisma:       { x: 68, y: 76 },
-  autogen:      { x: 20, y: 78 },
-  drizzle:      { x: 80, y: 78 },
-  trpc:         { x: 90, y: 78 },
-  coze:         { x: 9,  y: 78 },
-  dify:         { x: 28, y: 82 },
-  postgresql:   { x: 40, y: 81 },
-  qdrant:       { x: 60, y: 81 },
-  graphql:      { x: 72, y: 82 },
-  semantickernel:{ x: 16, y: 84 },
-  flask:        { x: 84, y: 84 },
-  langsmith:    { x: 26, y: 88 },
-  chroma:       { x: 36, y: 87 },
-  redis:        { x: 50, y: 86 },
-  springboot:   { x: 64, y: 87 },
-  pydantic:     { x: 74, y: 88 },
-  haystack:     { x: 9,  y: 87 },
-  nginx:        { x: 91, y: 87 },
-  milvus:       { x: 32, y: 92 },
-  mysql:        { x: 44, y: 91 },
-  supabase:     { x: 56, y: 91 },
-  docker:       { x: 68, y: 92 },
-  pinecone:     { x: 20, y: 93 },
-  rabbitmq:     { x: 80, y: 93 },
-  llamaparse:   { x: 10, y: 93 },
-  celery:       { x: 90, y: 93 },
-  unstructured: { x: 36, y: 96 },
-  linux:        { x: 46, y: 96 },
-  git:          { x: 54, y: 96 },
-  kubernetes:   { x: 64, y: 96 },
-  prometheus:   { x: 16, y: 96 },
-  kafka:        { x: 84, y: 96 },
-  grafana:      { x: 6,  y: 96 },
-  sentry:       { x: 94, y: 96 },
-};
+  { x: 36, y: 70 }, { x: 50, y: 69 }, { x: 64, y: 70 }, { x: 24, y: 72 }, { x: 76, y: 72 },
+  { x: 88, y: 72 }, { x: 12, y: 72 }, { x: 32, y: 76 }, { x: 44, y: 75 }, { x: 56, y: 75 },
+  { x: 68, y: 76 }, { x: 20, y: 78 }, { x: 80, y: 78 }, { x: 90, y: 78 }, { x: 9,  y: 78 },
+  { x: 28, y: 82 }, { x: 40, y: 81 }, { x: 60, y: 81 }, { x: 72, y: 82 }, { x: 16, y: 84 },
+  { x: 84, y: 84 }, { x: 26, y: 88 }, { x: 36, y: 87 }, { x: 50, y: 86 }, { x: 64, y: 87 },
+  { x: 74, y: 88 }, { x: 9,  y: 87 }, { x: 91, y: 87 }, { x: 32, y: 92 }, { x: 44, y: 91 },
+  { x: 56, y: 91 }, { x: 68, y: 92 }, { x: 20, y: 93 }, { x: 80, y: 93 }, { x: 10, y: 93 },
+  { x: 90, y: 93 }, { x: 36, y: 96 }, { x: 46, y: 96 }, { x: 54, y: 96 }, { x: 64, y: 96 },
+  { x: 16, y: 96 }, { x: 84, y: 96 }, { x: 6,  y: 96 }, { x: 94, y: 96 },
+];
 
 /**
- * Editorial Category Label Anchors (Non-circular, non-symmetrical 2D placement)
+ * Editorial Category Labels Positioning (Non-circular, non-cluster framing)
  */
 const DESKTOP_EDITORIAL_LABELS: Record<string, { x: number; y: number }> = {
   frontend: { x: 34.0, y: 7.0 },
@@ -319,27 +180,50 @@ const MOBILE_EDITORIAL_LABELS: Record<string, { x: number; y: number }> = {
 };
 
 /**
- * Deterministic string hash function (FNV-1a 32-bit).
+ * Deterministically interleave skills from all 8 categories.
+ * Produces an ordered array of 88 skills where adjacent entries
+ * belong to different technological disciplines.
+ * Zero Math.random().
  */
-export function hashString(str: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+export function getInterleavedSkills(): typeof SKILLS_DATA {
+  const byCategory = new Map<string, typeof SKILLS_DATA>();
+  for (const cat of SKILL_CATEGORIES) {
+    byCategory.set(cat.id, SKILLS_DATA.filter((s) => s.categoryId === cat.id));
   }
-  return h >>> 0;
+
+  // Cross-cutting sequence of disciplines
+  const categoryCycle = [
+    'frontend',
+    'models',
+    'graphics',
+    'data',
+    'web3',
+    'agents',
+    'backend',
+    'rag',
+  ];
+
+  const interleaved: typeof SKILLS_DATA = [];
+
+  // 11 items per category across 8 categories = 88 items
+  for (let cycle = 0; cycle < 11; cycle++) {
+    // Subtle offset per cycle prevents repetition of exact adjacent pairs
+    const shift = (cycle * 3) % categoryCycle.length;
+    for (let i = 0; i < categoryCycle.length; i++) {
+      const catId = categoryCycle[(i + shift) % categoryCycle.length];
+      const list = byCategory.get(catId);
+      if (list && list[cycle]) {
+        interleaved.push(list[cycle]);
+      }
+    }
+  }
+
+  return interleaved;
 }
 
 /**
- * Deterministic pseudo-random float in [0, 1) based on a numeric seed.
- */
-export function seededFloat(seed: number, salt: number): number {
-  const x = Math.sin(seed * 0.0001 + salt * 137.58) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-/**
- * Compute the complete deterministic 2D spatial constellation layout.
+ * Compute the complete deterministic 2D spatial constellation layout
+ * with cross-category weaving.
  */
 export function computeConstellationLayout(isMobile: boolean = false): ConstellationLayout {
   const nodeNormW = isMobile ? 8.4 : 4.4;
@@ -347,79 +231,80 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
   const planetRx = isMobile ? 18.0 : 19.5;
   const planetRy = isMobile ? 15.0 : 20.5;
 
-  const seeds = isMobile ? MOBILE_AUTHORED_SEEDS : DESKTOP_AUTHORED_SEEDS;
+  const anchors = isMobile ? AUTHORED_MOBILE_SPATIAL_ANCHORS : AUTHORED_DESKTOP_SPATIAL_ANCHORS;
 
-  // Initialize nodes from authored 2D coordinates with subtle deterministic micro-jitter
-  const rawNodes = SKILLS_DATA.map((skill) => {
-    const seed = hashString(skill.id);
-    const base = seeds[skill.id] || { x: 50, y: 50 };
+  // Clone anchors for deterministic relaxation
+  const rawAnchors = anchors.map((a, idx) => ({ idx, x: a.x, y: a.y }));
 
-    // Weak deterministic micro-displacement (±0.4% in x, ±0.3% in y)
-    const jitterX = (seededFloat(seed, 1) - 0.5) * 0.8;
-    const jitterY = (seededFloat(seed, 2) - 0.5) * 0.6;
-
-    return {
-      id: skill.id,
-      categoryId: skill.categoryId,
-      x: base.x + jitterX,
-      y: base.y + jitterY,
-    };
-  });
-
-  // Local physics-based relaxation loop (repelling along 2D dx, dy vectors)
+  // Local physics-based relaxation loop
   const ITERATIONS = isMobile ? 55 : 45;
   for (let iter = 0; iter < ITERATIONS; iter++) {
     // 1. Planet exclusion boundary protection
-    for (const node of rawNodes) {
-      const dx = node.x - 50;
-      const dy = node.y - 50;
+    for (const a of rawAnchors) {
+      const dx = a.x - 50;
+      const dy = a.y - 50;
       const distPlanet = Math.sqrt((dx / planetRx) ** 2 + (dy / planetRy) ** 2);
       if (distPlanet < 1.02) {
         const scale = 1.04 / Math.max(distPlanet, 0.001);
-        node.x = 50 + dx * scale;
-        node.y = 50 + dy * scale;
+        a.x = 50 + dx * scale;
+        a.y = 50 + dy * scale;
       }
     }
 
     // 2. Node-to-node collision relaxation along local offset vectors
-    for (let i = 0; i < rawNodes.length; i++) {
-      for (let j = i + 1; j < rawNodes.length; j++) {
-        const n1 = rawNodes[i];
-        const n2 = rawNodes[j];
-        const dx = n2.x - n1.x;
-        const dy = n2.y - n1.y;
+    for (let i = 0; i < rawAnchors.length; i++) {
+      for (let j = i + 1; j < rawAnchors.length; j++) {
+        const a1 = rawAnchors[i];
+        const a2 = rawAnchors[j];
+        const dx = a2.x - a1.x;
+        const dy = a2.y - a1.y;
         const normDist = Math.sqrt((dx / nodeNormW) ** 2 + (dy / nodeNormH) ** 2);
         if (normDist < 1.05 && normDist > 0.0001) {
           const overlap = 1.05 - normDist;
           const pushX = (dx / normDist) * overlap * 0.45 * nodeNormW;
           const pushY = (dy / normDist) * overlap * 0.45 * nodeNormH;
-          n1.x -= pushX * 0.5;
-          n1.y -= pushY * 0.5;
-          n2.x += pushX * 0.5;
-          n2.y += pushY * 0.5;
+          a1.x -= pushX * 0.5;
+          a1.y -= pushY * 0.5;
+          a2.x += pushX * 0.5;
+          a2.y += pushY * 0.5;
         }
       }
     }
 
     // 3. Viewport bounds protection
-    for (const node of rawNodes) {
-      node.x = Math.max(isMobile ? 4.5 : 3.8, Math.min(isMobile ? 95.5 : 96.2, node.x));
-      node.y = Math.max(isMobile ? 4.0 : 4.5, Math.min(isMobile ? 97.0 : 95.5, node.y));
+    for (const a of rawAnchors) {
+      a.x = Math.max(isMobile ? 4.5 : 3.8, Math.min(isMobile ? 95.5 : 96.2, a.x));
+      a.y = Math.max(isMobile ? 4.0 : 4.5, Math.min(isMobile ? 97.0 : 95.5, a.y));
     }
   }
 
-  // Finalize node positions map and list
+  // Sort relaxed anchors along continuous spatial sweep around center (50, 50)
+  const sortedAnchors = [...rawAnchors].sort((a, b) => {
+    let angleA = Math.atan2(a.y - 50, a.x - 50) * (180 / Math.PI);
+    if (angleA < 0) angleA += 360;
+    let angleB = Math.atan2(b.y - 50, b.x - 50) * (180 / Math.PI);
+    if (angleB < 0) angleB += 360;
+    return angleA - angleB;
+  });
+
+  // Interleave skills cross-categorically
+  const interleavedSkills = getInterleavedSkills();
+
+  // Assign interleaved skills 1:1 to spatially continuous anchors
   const nodePositions = new Map<string, ConstellationNodePosition>();
   const nodeList: ConstellationNodePosition[] = [];
 
-  for (const node of rawNodes) {
+  for (let i = 0; i < interleavedSkills.length; i++) {
+    const skill = interleavedSkills[i];
+    const anchor = sortedAnchors[i];
+
     const formatted: ConstellationNodePosition = {
-      id: node.id,
-      x: parseFloat(node.x.toFixed(2)),
-      y: parseFloat(node.y.toFixed(2)),
-      categoryId: node.categoryId,
+      id: skill.id,
+      x: parseFloat(anchor.x.toFixed(2)),
+      y: parseFloat(anchor.y.toFixed(2)),
+      categoryId: skill.categoryId,
     };
-    nodePositions.set(node.id, formatted);
+    nodePositions.set(skill.id, formatted);
     nodeList.push(formatted);
   }
 
@@ -465,19 +350,16 @@ export function computeGeometryDiagnostics(layout: ConstellationLayout): Geometr
     const r = Math.sqrt(dx * dx + dy * dy);
     radii.push(r);
 
-    // Angle in [0, 360)
     let angle = Math.atan2(dy, dx) * (180 / Math.PI);
     if (angle < 0) angle += 360;
     const bin = Math.min(Math.floor(angle / 45), 7);
     angularBins[bin]++;
 
-    // Quadrant relative to center (50, 50)
     if (dx < 0 && dy < 0) quadrants.upperLeft++;
     else if (dx >= 0 && dy < 0) quadrants.upperRight++;
     else if (dx < 0 && dy >= 0) quadrants.lowerLeft++;
     else quadrants.lowerRight++;
 
-    // Nearest-neighbor euclidean distance
     let minD = Infinity;
     for (let j = 0; j < nodes.length; j++) {
       if (i === j) continue;
@@ -514,6 +396,79 @@ export function computeGeometryDiagnostics(layout: ConstellationLayout): Geometr
   };
 }
 
-// Precomputed static singletons for instant zero-cost rendering
+/**
+ * Compute Category Adjacency Diversity Diagnostics (Prompt 03-C)
+ * Inspects nearest spatial neighbors and measures cross-category weaving.
+ */
+export function computeCategoryDiversityDiagnostics(
+  layout: ConstellationLayout,
+  k: number = 4
+): CategoryDiversityDiagnostics {
+  const nodes = layout.nodeList;
+  let totalSameCatNeighbors = 0;
+  let totalEvaluated = 0;
+  const distinctCategoriesInNeighborhood: number[] = [];
+
+  for (let i = 0; i < nodes.length; i++) {
+    const n1 = nodes[i];
+    const dists = nodes
+      .map((n2, j) => ({
+        idx: j,
+        node: n2,
+        dist: i === j ? Infinity : Math.sqrt((n2.x - n1.x) ** 2 + (n2.y - n1.y) ** 2),
+      }))
+      .sort((a, b) => a.dist - b.dist);
+
+    const neighbors = dists.slice(0, k).map((d) => d.node);
+    const sameCat = neighbors.filter((n) => n.categoryId === n1.categoryId).length;
+    totalSameCatNeighbors += sameCat;
+    totalEvaluated += k;
+
+    const uniqueCats = new Set([n1.categoryId, ...neighbors.map((n) => n.categoryId)]);
+    distinctCategoriesInNeighborhood.push(uniqueCats.size);
+  }
+
+  // Quadrant distribution per category
+  const quadrantDistribution: Record<
+    string,
+    { upperLeft: number; upperRight: number; lowerLeft: number; lowerRight: number }
+  > = {};
+
+  let maxQuadrantConcentration = 0;
+
+  for (const cat of SKILL_CATEGORIES) {
+    const catNodes = nodes.filter((n) => n.categoryId === cat.id);
+    const q = { upperLeft: 0, upperRight: 0, lowerLeft: 0, lowerRight: 0 };
+    catNodes.forEach((n) => {
+      if (n.x < 50 && n.y < 50) q.upperLeft++;
+      else if (n.x >= 50 && n.y < 50) q.upperRight++;
+      else if (n.x < 50 && n.y >= 50) q.lowerLeft++;
+      else q.lowerRight++;
+    });
+    quadrantDistribution[cat.id] = q;
+
+    const highestInQuad = Math.max(q.upperLeft, q.upperRight, q.lowerLeft, q.lowerRight);
+    if (highestInQuad > maxQuadrantConcentration) {
+      maxQuadrantConcentration = highestInQuad;
+    }
+  }
+
+  const avgSame = totalSameCatNeighbors / nodes.length;
+  const samePct = (totalSameCatNeighbors / totalEvaluated) * 100;
+  const avgDistinct =
+    distinctCategoriesInNeighborhood.reduce((a, b) => a + b, 0) /
+    distinctCategoriesInNeighborhood.length;
+
+  return {
+    kNeighbors: k,
+    avgSameCategoryNeighbors: parseFloat(avgSame.toFixed(2)),
+    sameCategoryPercentage: parseFloat(samePct.toFixed(1)),
+    avgDistinctCategoriesInNeighborhood: parseFloat(avgDistinct.toFixed(2)),
+    quadrantDistribution,
+    maxQuadrantConcentration,
+  };
+}
+
+// Precomputed static singletons for instantaneous rendering
 export const DESKTOP_CONSTELLATION = computeConstellationLayout(false);
 export const MOBILE_CONSTELLATION = computeConstellationLayout(true);

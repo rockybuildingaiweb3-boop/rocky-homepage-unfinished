@@ -5,6 +5,7 @@ import {
   DESKTOP_CONSTELLATION,
   MOBILE_CONSTELLATION,
   computeGeometryDiagnostics,
+  computeCategoryDiversityDiagnostics,
 } from '../src/features/skills/constellationLayout';
 import { SKILLS_DATA } from '../src/data/skills';
 
@@ -113,6 +114,31 @@ for (let i = 0; i < mobileNodes.length; i++) {
 const desktopDiag = computeGeometryDiagnostics(DESKTOP_CONSTELLATION);
 const mobileDiag = computeGeometryDiagnostics(MOBILE_CONSTELLATION);
 
+// 6. Category Adjacency Diversity Diagnostics (Prompt 03-C)
+const desktopDiversity = computeCategoryDiversityDiagnostics(DESKTOP_CONSTELLATION, 4);
+const mobileDiversity = computeCategoryDiversityDiagnostics(MOBILE_CONSTELLATION, 4);
+
+if (desktopDiversity.sameCategoryPercentage > 10.0) {
+  spatialErrors.push(
+    `Desktop same-category neighbor percentage too high: ${desktopDiversity.sameCategoryPercentage}% (expected < 10%).`
+  );
+}
+if (mobileDiversity.sameCategoryPercentage > 10.0) {
+  spatialErrors.push(
+    `Mobile same-category neighbor percentage too high: ${mobileDiversity.sameCategoryPercentage}% (expected < 10%).`
+  );
+}
+if (desktopDiversity.maxQuadrantConcentration > 5) {
+  spatialErrors.push(
+    `Desktop category quadrant concentration too high: max ${desktopDiversity.maxQuadrantConcentration} nodes in one quadrant (expected <= 5).`
+  );
+}
+if (mobileDiversity.maxQuadrantConcentration > 5) {
+  spatialErrors.push(
+    `Mobile category quadrant concentration too high: max ${mobileDiversity.maxQuadrantConcentration} nodes in one quadrant (expected <= 5).`
+  );
+}
+
 console.log(`Desktop Nodes:          ${desktopNodes.length} / 88`);
 console.log(`Mobile Nodes:           ${mobileNodes.length} / 88`);
 console.log(`Desktop Collisions:     ${desktopCollisions}`);
@@ -127,11 +153,23 @@ console.log(`Angular distribution:   ${JSON.stringify(desktopDiag.angularBins)} 
 console.log(`Quadrant distribution:  UL=${desktopDiag.quadrants.upperLeft} | UR=${desktopDiag.quadrants.upperRight} | LL=${desktopDiag.quadrants.lowerLeft} | LR=${desktopDiag.quadrants.lowerRight}`);
 console.log(`Nearest-neighbor dist:  min=${desktopDiag.nearestNeighborDistance.min}% | mean=${desktopDiag.nearestNeighborDistance.mean}% | stdDev=${desktopDiag.nearestNeighborDistance.stdDev}%`);
 
+console.log('\n--- DESKTOP CATEGORY ADJACENCY DIVERSITY (k=4) ---');
+console.log(`Avg same-category neighbors: ${desktopDiversity.avgSameCategoryNeighbors} / 4`);
+console.log(`Same-category neighbor rate: ${desktopDiversity.sameCategoryPercentage}% (Baseline random: 12.5%, Clustered: >60%)`);
+console.log(`Avg distinct categories/hood: ${desktopDiversity.avgDistinctCategoriesInNeighborhood} / 5`);
+console.log(`Max single-quadrant share:  ${desktopDiversity.maxQuadrantConcentration} / 11 items per category (no quadrant monopoly)`);
+
 console.log('\n--- MOBILE GEOMETRY DIAGNOSTICS ---');
 console.log(`Radial distance:        min=${mobileDiag.radialDistance.min}% | max=${mobileDiag.radialDistance.max}% | mean=${mobileDiag.radialDistance.mean}% | stdDev=${mobileDiag.radialDistance.stdDev}%`);
 console.log(`Angular distribution:   ${JSON.stringify(mobileDiag.angularBins)} (8 bins: [0-45°, 45-90°, 90-135°, 135-180°, 180-225°, 225-270°, 270-315°, 315-360°])`);
 console.log(`Quadrant distribution:  UL=${mobileDiag.quadrants.upperLeft} | UR=${mobileDiag.quadrants.upperRight} | LL=${mobileDiag.quadrants.lowerLeft} | LR=${mobileDiag.quadrants.lowerRight}`);
 console.log(`Nearest-neighbor dist:  min=${mobileDiag.nearestNeighborDistance.min}% | mean=${mobileDiag.nearestNeighborDistance.mean}% | stdDev=${mobileDiag.nearestNeighborDistance.stdDev}%`);
+
+console.log('\n--- MOBILE CATEGORY ADJACENCY DIVERSITY (k=4) ---');
+console.log(`Avg same-category neighbors: ${mobileDiversity.avgSameCategoryNeighbors} / 4`);
+console.log(`Same-category neighbor rate: ${mobileDiversity.sameCategoryPercentage}% (Baseline random: 12.5%, Clustered: >60%)`);
+console.log(`Avg distinct categories/hood: ${mobileDiversity.avgDistinctCategoriesInNeighborhood} / 5`);
+console.log(`Max single-quadrant share:  ${mobileDiversity.maxQuadrantConcentration} / 11 items per category (no quadrant monopoly)`);
 console.log('==================================================');
 
 if (spatialErrors.length > 0) {
