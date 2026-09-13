@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <!-- LangSmith telemetry ray mark -->
-  <circle cx="12" cy="12" r="9" stroke="#1C3C3C" stroke-width="2" fill="#00A389" fill-opacity="0.2"/>
-  <circle cx="12" cy="12" r="3.5" fill="#00A389"/>
-  <path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="#00A389" stroke-width="1.6"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none"><text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="5.4" font-weight="600" letter-spacing="0.03em" fill="#F1F5F9">SMITH</text></svg>

@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <!-- ERC-4337 Account Abstraction Shield -->
-  <path d="M12 2L4 5.5v6.5c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V5.5L12 2z" fill="#627EEA" fill-opacity="0.2" stroke="#627EEA" stroke-width="1.8"/>
-  <polygon points="12 6 8.5 12 12 10.5 15.5 12" fill="#627EEA"/>
-  <polygon points="12 11.5 8.5 13 12 18 15.5 13" fill="#8C9EFF"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none"><text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="6.8" font-weight="600" letter-spacing="0.04em" fill="#F1F5F9">4337</text></svg>
