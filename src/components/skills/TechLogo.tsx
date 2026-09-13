@@ -19,6 +19,19 @@ export const TechLogo: React.FC<TechLogoProps> = ({
   const resolved = resolveSkillIcon(id, name);
   const displayName = name || resolved.title || id;
 
+  if (resolved.kind === 'missing') {
+    return (
+      <div
+        className={`flex items-center justify-center rounded border border-dashed border-white/20 text-white/40 font-mono text-[10px] select-none ${className}`}
+        style={size ? { width: size, height: size } : undefined}
+        title={`${displayName} (missing icon)`}
+        aria-label={`${displayName} (missing icon)`}
+      >
+        ?
+      </div>
+    );
+  }
+
   if (resolved.kind === 'local-svg') {
     return (
       <img
