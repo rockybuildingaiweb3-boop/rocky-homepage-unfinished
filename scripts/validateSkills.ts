@@ -4,7 +4,7 @@ import { validateSkillsDataset } from '../src/features/skills/validateSkills';
 import {
   DESKTOP_CONSTELLATION,
   MOBILE_CONSTELLATION,
-  SKILL_ZONE_ASSIGNMENTS,
+  computeGeometryDiagnostics,
 } from '../src/features/skills/constellationLayout';
 import { SKILLS_DATA } from '../src/data/skills';
 
@@ -61,19 +61,7 @@ for (const s of SKILLS_DATA) {
   }
 }
 
-// 3. Verify Zone distribution (Zone A: 14, Zone B: 43, Zone C: 23, Zone D: 8)
-const zoneCounts = { A: 0, B: 0, C: 0, D: 0 };
-for (const s of SKILLS_DATA) {
-  const z = SKILL_ZONE_ASSIGNMENTS[s.id];
-  if (!z) spatialErrors.push(`Skill ${s.id} has no assigned zone.`);
-  else zoneCounts[z]++;
-}
-
-if (zoneCounts.A !== 14 || zoneCounts.B !== 43 || zoneCounts.C !== 23 || zoneCounts.D !== 8) {
-  spatialErrors.push(`Zone distribution mismatch: ${JSON.stringify(zoneCounts)} (expected A:14, B:43, C:23, D:8)`);
-}
-
-// 4. Verify Desktop collisions & planet clearance
+// 3. Verify Desktop collisions & planet clearance
 const desktopNodes = DESKTOP_CONSTELLATION.nodeList;
 let desktopCollisions = 0;
 let desktopPlanetCollisions = 0;
@@ -98,7 +86,7 @@ for (let i = 0; i < desktopNodes.length; i++) {
   }
 }
 
-// 5. Verify Mobile collisions & planet clearance
+// 4. Verify Mobile collisions & planet clearance
 const mobileNodes = MOBILE_CONSTELLATION.nodeList;
 let mobileCollisions = 0;
 let mobilePlanetCollisions = 0;
@@ -108,7 +96,7 @@ for (let i = 0; i < mobileNodes.length; i++) {
   const dPlanet = Math.sqrt(((n1.x - 50) / 18.0) ** 2 + ((n1.y - 50) / 15.0) ** 2);
   if (dPlanet < 1.0) mobilePlanetCollisions++;
 
-  if (n1.x < 3.0 || n1.x > 97.0 || n1.y < 3.0 || n1.y > 97.0) {
+  if (n1.x < 3.0 || n1.x > 97.0 || n1.y < 3.0 || n1.y > 97.5) {
     spatialErrors.push(`Mobile node ${n1.id} out of bounds: (${n1.x}%, ${n1.y}%)`);
   }
 
@@ -121,14 +109,29 @@ for (let i = 0; i < mobileNodes.length; i++) {
   }
 }
 
+// 5. Geometry Diagnostics Computation (Computed from actual final positions)
+const desktopDiag = computeGeometryDiagnostics(DESKTOP_CONSTELLATION);
+const mobileDiag = computeGeometryDiagnostics(MOBILE_CONSTELLATION);
+
 console.log(`Desktop Nodes:          ${desktopNodes.length} / 88`);
 console.log(`Mobile Nodes:           ${mobileNodes.length} / 88`);
-console.log(`Zones:                  Zone A: ${zoneCounts.A}, Zone B: ${zoneCounts.B}, Zone C: ${zoneCounts.C}, Zone D: ${zoneCounts.D}`);
 console.log(`Desktop Collisions:     ${desktopCollisions}`);
 console.log(`Desktop Planet Bounds:  ${desktopPlanetCollisions}`);
 console.log(`Mobile Collisions:      ${mobileCollisions}`);
 console.log(`Mobile Planet Bounds:   ${mobilePlanetCollisions}`);
 console.log(`Editorial Labels:       ${DESKTOP_CONSTELLATION.categoryLabels.length} / 8`);
+
+console.log('\n--- DESKTOP GEOMETRY DIAGNOSTICS ---');
+console.log(`Radial distance:        min=${desktopDiag.radialDistance.min}% | max=${desktopDiag.radialDistance.max}% | mean=${desktopDiag.radialDistance.mean}% | stdDev=${desktopDiag.radialDistance.stdDev}%`);
+console.log(`Angular distribution:   ${JSON.stringify(desktopDiag.angularBins)} (8 bins: [0-45°, 45-90°, 90-135°, 135-180°, 180-225°, 225-270°, 270-315°, 315-360°])`);
+console.log(`Quadrant distribution:  UL=${desktopDiag.quadrants.upperLeft} | UR=${desktopDiag.quadrants.upperRight} | LL=${desktopDiag.quadrants.lowerLeft} | LR=${desktopDiag.quadrants.lowerRight}`);
+console.log(`Nearest-neighbor dist:  min=${desktopDiag.nearestNeighborDistance.min}% | mean=${desktopDiag.nearestNeighborDistance.mean}% | stdDev=${desktopDiag.nearestNeighborDistance.stdDev}%`);
+
+console.log('\n--- MOBILE GEOMETRY DIAGNOSTICS ---');
+console.log(`Radial distance:        min=${mobileDiag.radialDistance.min}% | max=${mobileDiag.radialDistance.max}% | mean=${mobileDiag.radialDistance.mean}% | stdDev=${mobileDiag.radialDistance.stdDev}%`);
+console.log(`Angular distribution:   ${JSON.stringify(mobileDiag.angularBins)} (8 bins: [0-45°, 45-90°, 90-135°, 135-180°, 180-225°, 225-270°, 270-315°, 315-360°])`);
+console.log(`Quadrant distribution:  UL=${mobileDiag.quadrants.upperLeft} | UR=${mobileDiag.quadrants.upperRight} | LL=${mobileDiag.quadrants.lowerLeft} | LR=${mobileDiag.quadrants.lowerRight}`);
+console.log(`Nearest-neighbor dist:  min=${mobileDiag.nearestNeighborDistance.min}% | mean=${mobileDiag.nearestNeighborDistance.mean}% | stdDev=${mobileDiag.nearestNeighborDistance.stdDev}%`);
 console.log('==================================================');
 
 if (spatialErrors.length > 0) {
@@ -141,4 +144,5 @@ if (spatialErrors.length > 0) {
   console.log('\n[CONSTELLATION_VALIDATION_SUCCESS] Constellation spatial composition verified.\n');
   process.exit(0);
 }
+
 

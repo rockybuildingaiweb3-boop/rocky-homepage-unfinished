@@ -16,16 +16,13 @@ interface SkillsConstellationProps {
 /**
  * SkillsConstellation (Skills V2)
  *
- * Deterministic, layered spatial field framing the central purple planet.
- * Features 88 skill nodes across 4 cosmic depth zones:
- * - Zone A: Inner Orbit (14 foundational technologies framing the planetary atmosphere)
- * - Zone B: Mid Field (43 technologies forming the main ecosystem)
- * - Zone C: Outer Field (23 technologies extending outward for scale and depth)
- * - Zone D: Peripheral Stars (8 boundary instruments)
+ * Authored, deterministic 2D spatial field framing the central purple planet.
+ * Replaces all radial/orbital geometry with an organic technical ecosystem.
  *
  * Characteristics:
  * - 100% deterministic (zero Math.random(), stable seeded calculation)
- * - Non-uniform cosmic field with organic clustering and deliberate negative space
+ * - 2D Cartesian spatial field with high radial distance variance and natural asymmetry
+ * - Cross-disciplinary ecosystem weaving with intentional negative space corridors
  * - Guaranteed planet exclusion clearance and node collision avoidance
  * - Secondary restrained editorial category annotations (non-interactive)
  * - Pure single-skill hover synchronization with Knowledge Canopy
@@ -36,7 +33,7 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
   onHoverSkill,
   onLeaveSkill,
 }) => {
-  // Deterministic breakpoint selection (Desktop horizontal ellipse vs Mobile vertical ellipse)
+  // Deterministic breakpoint selection (Desktop vs Mobile spatial field)
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 768;
@@ -81,7 +78,6 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
           const pos = activeLayout.nodePositions.get(skill.id) || {
             x: 50,
             y: 50,
-            zone: 'B',
             categoryId: skill.categoryId,
           };
           const isActive = activeSkillId === skill.id;
