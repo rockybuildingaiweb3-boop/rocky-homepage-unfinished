@@ -48,7 +48,10 @@ export const SkillsSection: React.FC = () => {
       aria-label="Technical Constellation & Instruments"
     >
       {/* ─── 1. CELESTIAL PLANET ATMOSPHERE (HERO PROTAGONIST) ─── */}
-      <SkillsAtmosphere activeBrandColor={activeBrandColor} />
+      <SkillsAtmosphere
+        activeBrandColor={activeBrandColor}
+        isHovered={Boolean(activeSkillId)}
+      />
 
       {/* ─── 2. EDITORIAL MINIMALIST HEADER ─── */}
       <div className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center relative z-10 mb-6 sm:mb-8">

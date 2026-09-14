@@ -1,11 +1,14 @@
-import React, { useState, useEffect, memo } from 'react';
-import { SKILLS_DATA } from '../../data/skills';
+import React, { useState, useEffect, useMemo, memo } from 'react';
+import { SKILLS_DATA, SkillItem } from '../../data/skills';
 import { SkillNode } from './SkillNode';
+import { ConstellationEnergyLines } from './ConstellationEnergyLines';
+import { SkillHUD } from './SkillHUD';
 import {
   DESKTOP_CONSTELLATION,
   MOBILE_CONSTELLATION,
   ConstellationLayout,
 } from '../../features/skills/constellationLayout';
+import { getRelatedSkillIds } from '../../features/skills/skillRelationships';
 
 interface SkillsConstellationProps {
   activeSkillId: string | null;
@@ -14,19 +17,20 @@ interface SkillsConstellationProps {
 }
 
 /**
- * SkillsConstellation (Skills V2)
+ * SkillsConstellation
  *
  * Authored, deterministic 2D spatial field framing the central purple planet.
- * Replaces all radial/orbital geometry with an organic technical ecosystem.
- *
- * Characteristics:
- * - 100% deterministic (zero Math.random(), stable seeded calculation)
- * - 2D Cartesian spatial field with high radial distance variance and natural asymmetry
- * - Cross-disciplinary ecosystem weaving with intentional negative space corridors
- * - Guaranteed planet exclusion clearance and node collision avoidance
- * - Secondary restrained editorial category annotations (non-interactive)
- * - Pure single-skill hover synchronization with Knowledge Canopy
- * - True constellation layout maintained on both desktop and mobile
+ * 
+ * Interaction Layer:
+ * - Three Skill Tiers (Tier 1 Core, Tier 2 Tools, Tier 3 Supporting Ecosystem)
+ * - Transparent-by-default containers (removes icon-grid feeling, manifests on interaction)
+ * - Hover-driven knowledge illumination:
+ *   - Active node: 1.15 scale, purple/white glow, sharper icon
+ *   - Related nodes: secondary illumination & subtle resonance
+ *   - Subtle connection energy: soft glow conduits & particle trails
+ * - Futuristic System Interface HUD:
+ *   - Displays editorial knowledge quote, category, and resonating nodes
+ * - Clean state architecture: Pure hover, zero click state.
  */
 export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
   activeSkillId,
@@ -54,6 +58,18 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
     ? MOBILE_CONSTELLATION
     : DESKTOP_CONSTELLATION;
 
+  // Active skill object
+  const hoveredSkill: SkillItem | null = useMemo(() => {
+    if (!activeSkillId) return null;
+    return SKILLS_DATA.find((s) => s.id === activeSkillId) ?? null;
+  }, [activeSkillId]);
+
+  // Derived related skill IDs
+  const relatedSkillIds: string[] = useMemo(() => {
+    if (!activeSkillId) return [];
+    return getRelatedSkillIds(activeSkillId);
+  }, [activeSkillId]);
+
   return (
     <div className="relative w-full max-w-[1380px] mx-auto px-2 sm:px-4 flex flex-col items-center select-none">
       {/* ─── UNIFIED SPATIAL CONSTELLATION STAGE ─── */}
@@ -73,24 +89,36 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
           </div>
         ))}
 
-        {/* ─── 2. 88 DETERMINISTIC SPATIAL SKILL NODES ─── */}
+        {/* ─── 2. SUBTLE CONNECTION ENERGY & GLOW TRAILS (Active on hover) ─── */}
+        <ConstellationEnergyLines
+          hoveredSkillId={activeSkillId}
+          relatedSkillIds={relatedSkillIds}
+          nodePositions={activeLayout.nodePositions}
+          brandColor={hoveredSkill?.brandColor || '#A855F7'}
+        />
+
+        {/* ─── 3. 88 DETERMINISTIC SPATIAL SKILL NODES ─── */}
         {SKILLS_DATA.map((skill) => {
           const pos = activeLayout.nodePositions.get(skill.id) || {
             x: 50,
             y: 50,
             categoryId: skill.categoryId,
           };
-          const isActive = activeSkillId === skill.id;
+          const isHovered = activeSkillId === skill.id;
+          const isRelated = relatedSkillIds.includes(skill.id);
+          const isDimmed = Boolean(activeSkillId && !isHovered && !isRelated);
 
           return (
             <div
               key={skill.id}
               style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 scale-80 sm:scale-90 md:scale-100 transition-transform origin-center"
+              className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform origin-center"
             >
               <SkillNode
                 skill={skill}
-                isActive={isActive}
+                isHovered={isHovered}
+                isRelated={isRelated}
+                isDimmed={isDimmed}
                 onHover={onHoverSkill}
                 onLeave={onLeaveSkill}
               />
@@ -98,8 +126,17 @@ export const SkillsConstellation: React.FC<SkillsConstellationProps> = memo(({
           );
         })}
       </div>
+
+      {/* ─── 4. FUTURISTIC SYSTEM INTERFACE / EDITORIAL TELEMETRY HUD ─── */}
+      <SkillHUD
+        hoveredSkill={hoveredSkill}
+        allSkills={SKILLS_DATA}
+        onHoverSkill={onHoverSkill}
+        onLeaveSkill={onLeaveSkill}
+      />
     </div>
   );
 });
 
 SkillsConstellation.displayName = 'SkillsConstellation';
+export default SkillsConstellation;

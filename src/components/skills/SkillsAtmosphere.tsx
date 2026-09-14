@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, memo } from 'react';
 
 interface SkillsAtmosphereProps {
   activeBrandColor?: string;
+  isHovered?: boolean;
 }
 
 /**
@@ -11,12 +12,16 @@ interface SkillsAtmosphereProps {
  * The rotating purple planet (/videos/skills-bg.webm) is the visual protagonist,
  * perfectly centered and framed by the orbital constellation.
  * 
- * Performance & Lifecycle:
- * - Scoped IntersectionObserver pauses video AND detaches mouse parallax when off-screen.
- * - Gentle ambient modulation with active brand color (no disruptive explosions or jumps).
+ * Kinetic Interaction:
+ * When a skill is hovered:
+ * - Planetary Core reacts with subtle gravitational pulse & light surge
+ * - Energetic shockwave rings emanate outward from the core to the constellation
+ * - Brand resonance field surges organically
+ * - Scoped IntersectionObserver detaches operations when off-screen
  */
 export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
   activeBrandColor = '#7042F8',
+  isHovered = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -91,19 +96,52 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
 
       {/* ─── LAYER 2: DYNAMIC BRAND RESONANCE CORE ─── */}
       <div
-        className="absolute w-[70vw] max-w-[850px] h-[500px] pointer-events-none transition-all duration-700 ease-out"
+        className={`absolute rounded-full pointer-events-none transition-all duration-700 ease-out ${
+          isHovered
+            ? 'w-[85vw] max-w-[950px] h-[580px] opacity-100'
+            : 'w-[70vw] max-w-[850px] h-[500px] opacity-75'
+        }`}
         style={{
-          background: `radial-gradient(circle at 50% 50%, ${activeBrandColor}25 0%, ${activeBrandColor}06 45%, transparent 70%)`,
-          filter: 'blur(60px)',
+          background: `radial-gradient(circle at 50% 50%, ${activeBrandColor}30 0%, ${activeBrandColor}08 45%, transparent 70%)`,
+          filter: 'blur(65px)',
           transform: `translate(${mouseOffset.x * 0.25}px, ${mouseOffset.y * 0.25}px)`,
         }}
       />
 
-      {/* ─── LAYER 3: FULL-BLEED ROTATING PURPLE PLANET (The Hero Protagonist) ─── */}
+      {/* ─── LAYER 3: PLANETARY ENERGY SHOCKWAVE (Emanates when skill is hovered) ─── */}
+      {isHovered && (
+        <>
+          <div
+            className="absolute rounded-full pointer-events-none animate-ping duration-1000 border"
+            style={{
+              width: '380px',
+              height: '380px',
+              borderColor: `${activeBrandColor}40`,
+              boxShadow: `0 0 30px ${activeBrandColor}35`,
+            }}
+          />
+          <div
+            className="absolute rounded-full pointer-events-none border border-purple-400/30 transition-all duration-700"
+            style={{
+              width: '520px',
+              height: '420px',
+              transform: `scale(1.05)`,
+              boxShadow: `0 0 45px rgba(168, 85, 247, 0.25)`,
+            }}
+          />
+        </>
+      )}
+
+      {/* ─── LAYER 4: FULL-BLEED ROTATING PURPLE PLANET (The Hero Protagonist) ─── */}
       <div
-        className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-transform duration-300 ease-out"
+        className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-all duration-500 ease-out"
         style={{
-          transform: `translate(${mouseOffset.x * 0.4}px, ${mouseOffset.y * 0.4}px)`,
+          transform: `translate(${mouseOffset.x * 0.4}px, ${mouseOffset.y * 0.4}px) ${
+            isHovered ? 'scale(1.035)' : 'scale(1.0)'
+          }`,
+          filter: isHovered
+            ? 'brightness(1.18) contrast(1.08) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4))'
+            : 'brightness(1.0) contrast(1.0)',
           maskImage:
             'radial-gradient(ellipse 85% 70% at 50% 50%, black 45%, rgba(0,0,0,0.6) 75%, transparent 100%)',
           WebkitMaskImage:
@@ -112,7 +150,7 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
       >
         <video
           ref={videoRef}
-          className="w-full h-full object-cover min-w-[950px] opacity-75 sm:opacity-85 pointer-events-none select-none mix-blend-screen"
+          className="w-full h-full object-cover min-w-[950px] opacity-75 sm:opacity-85 pointer-events-none select-none mix-blend-screen transition-opacity duration-300"
           preload="auto"
           playsInline
           loop
@@ -122,21 +160,25 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
         />
       </div>
 
-      {/* ─── LAYER 4: ORBITAL HALO RINGS (Cosmic visual framing) ─── */}
+      {/* ─── LAYER 5: ORBITAL HALO RINGS (Cosmic visual framing) ─── */}
       <div
-        className="absolute w-[680px] h-[540px] md:w-[860px] md:h-[660px] lg:w-[1050px] lg:h-[760px] rounded-[50%] border border-purple-500/10 pointer-events-none transition-transform duration-500 ease-out"
+        className={`absolute w-[680px] h-[540px] md:w-[860px] md:h-[660px] lg:w-[1050px] lg:h-[760px] rounded-[50%] border pointer-events-none transition-all duration-500 ease-out ${
+          isHovered ? 'border-purple-400/25 scale-[1.01]' : 'border-purple-500/10'
+        }`}
         style={{
           transform: `translate(${mouseOffset.x * 0.1}px, ${mouseOffset.y * 0.1}px)`,
         }}
       />
       <div
-        className="absolute w-[460px] h-[370px] md:w-[600px] md:h-[460px] lg:w-[720px] lg:h-[520px] rounded-[50%] border border-purple-400/[0.07] pointer-events-none transition-transform duration-500 ease-out"
+        className={`absolute w-[460px] h-[370px] md:w-[600px] md:h-[460px] lg:w-[720px] lg:h-[520px] rounded-[50%] border pointer-events-none transition-all duration-500 ease-out ${
+          isHovered ? 'border-purple-300/20' : 'border-purple-400/[0.07]'
+        }`}
         style={{
           transform: `translate(${mouseOffset.x * 0.18}px, ${mouseOffset.y * 0.18}px)`,
         }}
       />
 
-      {/* ─── LAYER 5: SEAMLESS ATMOSPHERIC DEPTH VIGNETTE ─── */}
+      {/* ─── LAYER 6: SEAMLESS ATMOSPHERIC DEPTH VIGNETTE ─── */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -149,3 +191,4 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
 });
 
 SkillsAtmosphere.displayName = 'SkillsAtmosphere';
+export default SkillsAtmosphere;
