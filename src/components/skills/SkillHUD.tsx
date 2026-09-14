@@ -97,15 +97,19 @@ export const SkillHUD: React.FC<SkillHUDProps> = memo(({
                   <span className="text-white/80">{hoveredSkill.categoryId}</span>
                   <span className="text-white/20">/</span>
                   <span
-                    className={`px-1.5 py-0.2 rounded text-[9px] font-semibold border ${
-                      skillTier === 1
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wider uppercase border ${
+                      skillTier === 'core'
                         ? 'text-amber-300 border-amber-400/30 bg-amber-400/10'
-                        : skillTier === 2
+                        : skillTier === 'professional'
                         ? 'text-cyan-300 border-cyan-400/30 bg-cyan-400/10'
-                        : 'text-purple-300 border-purple-400/30 bg-purple-400/10'
+                        : 'text-purple-300/80 border-purple-400/20 bg-purple-400/5'
                     }`}
                   >
-                    TIER {skillTier}: {skillTier === 1 ? 'CORE IDENTITY' : skillTier === 2 ? 'PRODUCTION' : 'ECOSYSTEM'}
+                    {skillTier === 'core'
+                      ? 'TIER 1: CORE'
+                      : skillTier === 'professional'
+                      ? 'TIER 2: PROFESSIONAL'
+                      : 'TIER 3: ECOSYSTEM'}
                   </span>
                 </div>
 

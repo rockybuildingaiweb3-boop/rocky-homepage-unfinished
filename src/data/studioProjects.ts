@@ -2,32 +2,32 @@ import type { StudioProject } from '../types';
 
 export const STUDIO_PROJECTS: StudioProject[] = [
   {
-    id: 'chronos-ai',
-    title: 'Chronos Engine',
-    category: 'Creative AI & WebGL',
+    id: 'rocky-blog',
+    title: 'Rocky Blog',
+    category: 'Personal Knowledge System',
     year: '2025',
     details: {
-      summary: 'Autonomous Visual Engine',
+      summary: 'AI & Technology Journal',
       description:
-        'A real-time generative visual simulation platform combining custom GLSL compute shaders with low-latency LLM agent interactions for immersive architectural storytelling.',
+        'A personal technical journal documenting my exploration of artificial intelligence, Web3, software development, and emerging technologies. Built as a long-term knowledge system for sharing research, experiments, technical insights, and ideas about the future of digital creation.',
     },
-    roles: ['Lead Creative Technologist', 'WebGL / GLSL Architecture', 'Full-Stack Developer'],
+    roles: ['Creator', 'Technical Writer', 'Full-Stack Developer'],
     image: '/assets/imgs/studio/project-1.jpg',
     links: [
       {
         type: 'web',
-        text: 'Live Experience',
-        link: 'https://github.com/rockybuildingaiweb3-boop',
+        text: 'Website',
+        link: 'https://rocky-blog-for-homepage.vercel.app/zh-CN',
       },
       {
-        type: 'case-study',
-        text: 'System Blueprint',
-        link: 'https://github.com/rockybuildingaiweb3-boop',
+        type: 'github',
+        text: 'GitHub',
+        link: 'https://github.com/rockybuildingaiweb3-boop/RockyBlogForHomepage',
       },
     ],
     metadata: {
-      client: 'Studio R&D',
-      stack: 'Three.js, GLSL, WebGPU, TypeScript',
+      client: 'Rocky Personal Project',
+      stack: 'Astro, React, TypeScript, MDX, Tailwind CSS',
     },
   },
   {

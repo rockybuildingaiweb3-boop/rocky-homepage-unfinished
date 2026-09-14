@@ -35,25 +35,25 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
 }) => {
   const tier: SkillTier = getSkillTier(skill.id);
 
-  // Dimension scaling across the 3 visual tiers
+  // Dimension scaling across the 3 visual tiers (Major Stars vs Supporting Stars)
   const sizeClasses =
-    tier === 1
-      ? 'w-11 h-11 sm:w-12 sm:h-12'
-      : tier === 2
+    tier === 'core'
+      ? 'w-12 h-12 sm:w-13 sm:h-13'
+      : tier === 'professional'
       ? 'w-9 h-9 sm:w-10 sm:h-10'
-      : 'w-7.5 h-7.5 sm:w-8 sm:h-8';
+      : 'w-7 h-7 sm:w-7.5 sm:h-7.5';
 
   const logoClasses =
-    tier === 1
-      ? 'w-6 h-6 sm:w-6.5 sm:h-6.5'
-      : tier === 2
-      ? 'w-5 h-5 sm:w-5.5 sm:h-5.5'
-      : 'w-3.5 h-3.5 sm:w-4 sm:h-4';
+    tier === 'core'
+      ? 'w-6.5 h-6.5 sm:w-7 sm:h-7'
+      : tier === 'professional'
+      ? 'w-4.5 h-4.5 sm:w-5 sm:h-5'
+      : 'w-3.5 h-3.5 sm:w-3.5 sm:h-3.5';
 
   return (
     <button
       type="button"
-      aria-label={`${skill.name} (Tier ${tier} - ${skill.categoryId})`}
+      aria-label={`${skill.name} (${tier} - ${skill.categoryId})`}
       onMouseEnter={() => onHover(skill.id)}
       onMouseLeave={onLeave}
       onFocus={() => onHover(skill.id)}
@@ -68,33 +68,35 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
           : isRelated
           ? 'scale-105 z-30 opacity-100'
           : isDimmed
-          ? 'scale-95 z-10 opacity-25 hover:opacity-90 hover:scale-105'
-          : tier === 1
-          ? 'scale-100 z-20 opacity-95 hover:opacity-100 hover:scale-110'
-          : tier === 2
-          ? 'scale-100 z-15 opacity-85 hover:opacity-100 hover:scale-105'
-          : 'scale-95 z-10 opacity-70 hover:opacity-100 hover:scale-105'
+          ? 'scale-95 z-10 opacity-20 hover:opacity-90 hover:scale-105'
+          : tier === 'core'
+          ? 'scale-100 z-25 opacity-100 hover:opacity-100 hover:scale-110'
+          : tier === 'professional'
+          ? 'scale-100 z-15 opacity-80 hover:opacity-100 hover:scale-105'
+          : 'scale-95 z-10 opacity-50 hover:opacity-90 hover:scale-105'
       } ${className}`}
     >
-      {/* ─── LAYER 1: AMBIENT LOCAL LIGHT FIELD ─── */}
+      {/* ─── LAYER 1: AMBIENT LOCAL LIGHT FIELD (Major stars have persistent glow) ─── */}
       <div
         className={`absolute -inset-3 rounded-full pointer-events-none -z-20 transition-all duration-400 ${
           isHovered
             ? 'opacity-100 scale-125'
             : isRelated
             ? 'opacity-70 scale-110'
-            : tier === 1
-            ? 'opacity-25 scale-100 group-hover:opacity-60'
-            : tier === 2
+            : tier === 'core'
+            ? 'opacity-40 scale-105 group-hover:opacity-80'
+            : tier === 'professional'
             ? 'opacity-10 scale-95 group-hover:opacity-40'
-            : 'opacity-0 scale-90 group-hover:opacity-25'
+            : 'opacity-0 scale-90 group-hover:opacity-20'
         }`}
         style={{
           background: isHovered
             ? `radial-gradient(circle, #A855F770 0%, ${skill.brandColor}40 40%, transparent 70%)`
             : isRelated
             ? `radial-gradient(circle, #C084FC50 0%, ${skill.brandColor}30 45%, transparent 70%)`
-            : `radial-gradient(circle, ${skill.brandColor}35 0%, transparent 65%)`,
+            : tier === 'core'
+            ? `radial-gradient(circle, ${skill.brandColor}45 0%, ${skill.brandColor}15 45%, transparent 70%)`
+            : `radial-gradient(circle, ${skill.brandColor}30 0%, transparent 65%)`,
         }}
         aria-hidden="true"
       />
@@ -106,19 +108,25 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
             ? 'border-white/60 opacity-100 animate-pulse scale-105'
             : isRelated
             ? 'border-purple-400/40 opacity-80 scale-100'
+            : tier === 'core'
+            ? 'border-white/10 opacity-40 group-hover:border-white/30 group-hover:opacity-75'
             : 'border-transparent opacity-0 group-hover:border-white/20 group-hover:opacity-60'
         }`}
         aria-hidden="true"
       />
 
-      {/* ─── LAYER 3: DYNAMIC CONTAINER (Transparent by default, manifests on interaction) ─── */}
+      {/* ─── LAYER 3: DYNAMIC CONTAINER (Core has subtle ambient grounding; Eco is quiet) ─── */}
       <div
         className={`relative flex items-center justify-center rounded-full ${sizeClasses} transition-all duration-300 ${
           isHovered
             ? 'bg-[#1C153B]/90 border border-white/70 shadow-[0_0_24px_rgba(168,85,247,0.55),0_0_10px_rgba(255,255,255,0.7)] backdrop-blur-md'
             : isRelated
             ? 'bg-[#140F2A]/60 border border-purple-400/45 shadow-[0_0_16px_rgba(168,85,247,0.3)] backdrop-blur-xs'
-            : 'bg-transparent border border-white/[0.05] group-hover:border-white/30 group-hover:bg-[#181133]/40'
+            : tier === 'core'
+            ? 'bg-[#181133]/40 border border-white/20 shadow-[0_0_10px_rgba(168,85,247,0.2)] group-hover:border-white/40 group-hover:bg-[#1a133b]/60'
+            : tier === 'professional'
+            ? 'bg-transparent border border-white/[0.06] group-hover:border-white/30 group-hover:bg-[#181133]/40'
+            : 'bg-transparent border border-white/[0.02] group-hover:border-white/20 group-hover:bg-[#181133]/30'
         }`}
       >
         <TechLogo

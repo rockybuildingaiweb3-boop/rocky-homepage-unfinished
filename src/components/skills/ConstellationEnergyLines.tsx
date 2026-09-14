@@ -44,7 +44,11 @@ export const ConstellationEnergyLines: React.FC<ConstellationEnergyLinesProps> =
     });
 
     // 2. Secondary Energy Filaments: Active Node -> Related Sister Nodes
+    const seenRids = new Set<string>();
     for (const rid of relatedSkillIds) {
+      if (seenRids.has(rid) || rid === hoveredSkillId) continue;
+      seenRids.add(rid);
+
       const target = nodePositions.get(rid);
       if (!target) continue;
 
