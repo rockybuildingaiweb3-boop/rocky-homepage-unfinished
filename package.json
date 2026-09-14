@@ -10,7 +10,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test": "tsx scripts/validateSkills.ts",
-    "validate:skills": "tsx scripts/validateSkills.ts"
+    "validate:skills": "tsx scripts/validateSkills.ts",
+    "validate:icons": "tsx scripts/validateIcons.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

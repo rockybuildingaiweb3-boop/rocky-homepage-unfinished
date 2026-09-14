@@ -34,36 +34,46 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
       className={`group relative flex items-center justify-center select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400/60 ${
         isActive
           ? 'scale-118 z-30 opacity-100'
-          : 'scale-100 z-10 opacity-75 hover:opacity-100 hover:scale-110'
+          : 'scale-100 z-10 opacity-95 hover:opacity-100 hover:scale-110'
       } transition-all duration-300 ease-out ${className}`}
     >
-      {/* Restrained Cosmic Ambient Glow */}
+      {/* Surrounding Ambient Particle Ring on Active / Hover */}
       <div
-        className={`absolute -inset-2 rounded-full pointer-events-none -z-10 transition-opacity duration-300 ${
+        className={`absolute -inset-2.5 rounded-full pointer-events-none -z-20 transition-all duration-300 ${
           isActive
-            ? 'opacity-85 blur-md'
-            : 'opacity-20 group-hover:opacity-50 blur-sm'
+            ? 'opacity-100 scale-105'
+            : 'opacity-0 scale-95 group-hover:opacity-70 group-hover:scale-100'
         }`}
         style={{
-          background: isActive
-            ? `radial-gradient(circle, ${skill.brandColor}38 0%, ${skill.brandColor}10 45%, transparent 72%)`
-            : `radial-gradient(circle, ${skill.brandColor}22 0%, transparent 68%)`,
+          background: `radial-gradient(circle, ${skill.brandColor}40 0%, ${skill.brandColor}15 45%, transparent 70%)`,
         }}
         aria-hidden="true"
       />
 
-      {/* Atmospheric Translucent Substrate */}
+      {/* Surrounding Resonance Micro-Ring */}
       <div
-        className={`relative flex items-center justify-center rounded-full w-9 h-9 sm:w-10 sm:h-10 transition-all duration-300 backdrop-blur-[2px] ${
+        className={`absolute -inset-1 rounded-full pointer-events-none -z-10 transition-all duration-300 border ${
           isActive
-            ? 'bg-[#120F24]/85 border border-white/30 shadow-[0_4px_18px_rgba(0,0,0,0.7)]'
-            : 'bg-[#0A0815]/65 border border-white/[0.08] group-hover:border-white/20 group-hover:bg-[#0E0B1C]/75 shadow-[0_2px_10px_rgba(0,0,0,0.5)]'
+            ? 'border-white/35 opacity-100 animate-pulse'
+            : 'border-white/0 opacity-0 group-hover:border-white/25 group-hover:opacity-80'
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* Cosmic Substrate Core (Enhanced contrast & legibility) */}
+      <div
+        className={`relative flex items-center justify-center rounded-full w-9 h-9 sm:w-10 sm:h-10 transition-all duration-300 backdrop-blur-sm ${
+          isActive
+            ? 'bg-[#1D1739] border border-white/50 shadow-[0_0_22px_rgba(255,255,255,0.18),0_4px_18px_rgba(0,0,0,0.85)]'
+            : 'bg-[#120E24]/92 border border-white/[0.18] group-hover:border-white/40 group-hover:bg-[#1A1435] shadow-[0_2px_12px_rgba(0,0,0,0.65)]'
         }`}
       >
         <TechLogo
           id={skill.id}
           name={skill.name}
-          className="w-5 h-5 sm:w-5.5 sm:h-5.5 transition-transform duration-300 pointer-events-none"
+          className={`w-5 h-5 sm:w-5.5 sm:h-5.5 transition-all duration-300 pointer-events-none ${
+            isActive ? 'brightness-125' : 'group-hover:brightness-115'
+          }`}
         />
       </div>
 

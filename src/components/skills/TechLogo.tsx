@@ -12,7 +12,7 @@ export interface TechLogoProps {
 
 /**
  * Normalizes brand hex values so that dark/black brand logos
- * (e.g., wagmi, Next.js, Ollama) remain crisp and legible
+ * (e.g., wagmi, Next.js, Ollama, Vercel) remain crisp and legible
  * on dark atmospheric substrates.
  */
 function getNormalizedFill(hex: string, overrideColor?: string): string {
@@ -20,12 +20,19 @@ function getNormalizedFill(hex: string, overrideColor?: string): string {
     return overrideColor.startsWith('#') ? overrideColor : `#${overrideColor}`;
   }
   const cleanHex = hex.replace('#', '').toLowerCase();
-  if (['000000', '000', '111111', '1a1b1f', '18181b', '09090b', '141414'].includes(cleanHex)) {
+  if (['000000', '000', '111111', '1a1b1f', '18181b', '09090b', '141414', '171717'].includes(cleanHex)) {
     return '#F1F5F9';
   }
   return `#${cleanHex}`;
 }
 
+/**
+ * Standardized Technology Logo Rendering Pipeline:
+ * 1. Metadata-driven scale normalization (equalizing perceived visual mass)
+ * 2. Contrast & brightness adjustment for cosmic dark-substrate legibility
+ * 3. Strict aspect ratio preservation (xMidYMid meet & object-contain)
+ * 4. Deterministic multi-source resolution
+ */
 export const TechLogo: React.FC<TechLogoProps> = ({
   id,
   name,
@@ -49,14 +56,27 @@ export const TechLogo: React.FC<TechLogoProps> = ({
     );
   }
 
+  // Normalization transform & filter values derived strictly from registry metadata
+  const scale = resolved.scale ?? 1.0;
+  const brightness = resolved.brightness ?? 1.0;
+
+  const containerStyle: React.CSSProperties = {
+    ...(size ? { width: size, height: size } : {}),
+    transform: scale !== 1.0 ? `scale(${scale})` : undefined,
+    filter: brightness !== 1.0 ? `brightness(${brightness})` : undefined,
+    transformOrigin: 'center center',
+  };
+
   // Priority 1: Tech Stack Icons
   if (resolved.kind === 'tech-stack-icon') {
     return (
       <span
-        className={`inline-flex items-center justify-center shrink-0 pointer-events-none select-none max-w-full max-h-full ${className}`}
-        style={size ? { width: size, height: size } : undefined}
+        className={`inline-flex items-center justify-center shrink-0 pointer-events-none select-none ${className}`}
+        style={containerStyle}
         title={displayName}
         aria-label={displayName}
+        data-visual-mode={resolved.visualMode}
+        data-skill-type={resolved.type}
       >
         <StackIcon
           name={resolved.key}
@@ -70,14 +90,22 @@ export const TechLogo: React.FC<TechLogoProps> = ({
   // Priority 2 & 4: SVGL and Verified Local SVG assets
   if (resolved.kind === 'svgl-svg' || resolved.kind === 'local-svg') {
     return (
-      <img
-        src={resolved.url}
-        alt={displayName}
-        className={`object-contain pointer-events-none select-none shrink-0 max-w-full max-h-full ${className}`}
-        style={size ? { width: size, height: size } : undefined}
-        loading="lazy"
-        draggable={false}
-      />
+      <span
+        className={`inline-flex items-center justify-center shrink-0 pointer-events-none select-none ${className}`}
+        style={containerStyle}
+        title={displayName}
+        aria-label={displayName}
+        data-visual-mode={resolved.visualMode}
+        data-skill-type={resolved.type}
+      >
+        <img
+          src={resolved.url}
+          alt={displayName}
+          className="w-full h-full object-contain pointer-events-none select-none"
+          loading="lazy"
+          draggable={false}
+        />
+      </span>
     );
   }
 
@@ -85,19 +113,29 @@ export const TechLogo: React.FC<TechLogoProps> = ({
   const fill = getNormalizedFill(resolved.hex, color);
 
   return (
-    <svg
-      role="img"
-      viewBox="0 0 24 24"
-      fill={fill}
-      xmlns="http://www.w3.org/2000/svg"
-      className={`object-contain pointer-events-none select-none shrink-0 max-w-full max-h-full ${className}`}
-      style={size ? { width: size, height: size } : undefined}
+    <span
+      className={`inline-flex items-center justify-center shrink-0 pointer-events-none select-none ${className}`}
+      style={containerStyle}
+      title={displayName}
       aria-label={displayName}
+      data-visual-mode={resolved.visualMode}
+      data-skill-type={resolved.type}
     >
-      <title>{displayName}</title>
-      <path d={resolved.path} />
-    </svg>
+      <svg
+        role="img"
+        viewBox="0 0 24 24"
+        preserveAspectRatio="xMidYMid meet"
+        fill={fill}
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full object-contain pointer-events-none select-none"
+        aria-label={displayName}
+      >
+        <title>{displayName}</title>
+        <path d={resolved.path} />
+      </svg>
+    </span>
   );
 };
 
 export default TechLogo;
+
