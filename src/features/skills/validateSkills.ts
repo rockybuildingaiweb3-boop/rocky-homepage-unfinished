@@ -3,6 +3,10 @@ import {
   ICON_REGISTRY,
   getIconDefinition,
   resolveSkillIcon,
+  IconSourceType,
+  IconClassification,
+  VerificationStatus,
+  SkillRegistryEntry,
 } from '../../components/skills/iconResolver';
 
 export const CANONICAL_SKILL_NAMES: readonly string[] = [
@@ -112,26 +116,28 @@ export const CANONICAL_SKILL_NAMES: readonly string[] = [
 ] as const;
 
 /**
- * Technologies that must explicitly be classified as generic symbols
- * rather than official commercial/company brand logos.
+ * Technologies that are standards, protocols, or generic ecosystem representations
+ * and must NEVER be misclassified as official corporate brand logos.
  */
-export const REQUIRED_GENERIC_SKILL_IDS: readonly string[] = [
-  'webgl',
-  'glsl',
-  'webgpu',
-  'r3f',
+export const NON_BRAND_SKILL_IDS: readonly string[] = [
   'canvasapi',
+  'glsl',
+  'r3f',
   'erc4337',
   'siwe',
-  'mcp',
   'pgvector',
-  'llamaparse',
+  'webgl',
+  'webgpu',
+  'mcp',
+  'html5',
+  'graphql',
+  'ipfs',
 ] as const;
 
 // Vite eager glob indexes all SVG files present under /public/assets/icons at compile time.
 const VITE_LOCAL_SVGS: Record<string, unknown> =
   typeof import.meta !== 'undefined' && typeof (import.meta as any).glob === 'function'
-    ? (import.meta as any).glob('/public/assets/icons/*.svg', { eager: true })
+    ? (import.meta as any).glob('/public/assets/icons/**/*.svg', { eager: true })
     : {};
 
 export type AssetExistsChecker = (url: string) => boolean;
@@ -165,14 +171,25 @@ export function checkAssetExists(url: string, customChecker?: AssetExistsChecker
   }
 
   // 2. Vite browser environment check
-  const filename = url.split('/').pop();
-  if (filename && Object.keys(VITE_LOCAL_SVGS).length > 0) {
-    const viteKey = `/public/assets/icons/${filename}`;
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  const viteKey = `/public${cleanUrl}`;
+  if (Object.keys(VITE_LOCAL_SVGS).length > 0) {
     return Object.prototype.hasOwnProperty.call(VITE_LOCAL_SVGS, viteKey);
   }
 
   // If running in development without globs populated, check pattern
   return url.startsWith('/assets/icons/') && url.endsWith('.svg');
+}
+
+export interface SkillValidationEntry {
+  id: string;
+  name: string;
+  resolvedSource: IconSourceType;
+  resolvedIconKey: string;
+  fallbackLevel: 1 | 2 | 3 | 4 | 5;
+  classification: IconClassification;
+  verificationStatus: VerificationStatus;
+  missingStatus: 'present' | 'missing';
 }
 
 export interface ValidationReport {
@@ -186,6 +203,8 @@ export interface ValidationReport {
   allCategoriesHaveTargetCount: boolean;
   countsPerCategory: Record<string, number>;
   mappedRegistryCount: number;
+  sourceCounts: Record<IconSourceType, number>;
+  classificationCounts: Record<IconClassification, number>;
   brandIcons: number;
   genericIcons: number;
   missingIcons: number;
@@ -195,18 +214,20 @@ export interface ValidationReport {
   duplicateIds: number;
   duplicateNames: number;
   missingIconList: Array<{ id: string; name: string }>;
+  skillsReport: SkillValidationEntry[];
   formattedReport: string;
 }
 
 /**
- * Formats validation output to strictly match the canonical report schema.
+ * Formats validation output to strictly match the canonical report schema,
+ * displaying both the high-level dataset metrics and the full 88-skill resolution registry.
  */
 export function formatValidationReport(report: ValidationReport): string {
   const perCategoryStatus = report.allCategoriesHaveTargetCount
     ? `${report.perCategoryTarget} / ${report.perCategoryTarget}`
     : 'mismatched';
 
-  let output = [
+  const lines: string[] = [
     'Skills:',
     `${report.totalSkills} / ${report.expectedSkills}`,
     '',
@@ -218,6 +239,20 @@ export function formatValidationReport(report: ValidationReport): string {
     '',
     'Icon registry:',
     `${report.mappedRegistryCount} / ${report.expectedSkills} mapped`,
+    '',
+    'Sources Breakdown:',
+    `  - Source 1 (Tech Stack Icons): ${report.sourceCounts['tech-stack-icons']}`,
+    `  - Source 2 (SVGL):             ${report.sourceCounts['svgl']}`,
+    `  - Source 3 (Simple Icons):     ${report.sourceCounts['simple-icons']}`,
+    `  - Source 4 (Verified Local):   ${report.sourceCounts['verified-local']}`,
+    `  - Source 5 (Missing):          ${report.sourceCounts['missing']}`,
+    '',
+    'Classification Breakdown:',
+    `  - Official Brand:         ${report.classificationCounts['official-brand']}`,
+    `  - Technology / Framework: ${report.classificationCounts['technology-framework']}`,
+    `  - Protocol / Standard:    ${report.classificationCounts['protocol-standard']}`,
+    `  - Generic Ecosystem:      ${report.classificationCounts['generic-ecosystem']}`,
+    `  - Missing:                ${report.classificationCounts['missing']}`,
     '',
     'Brand icons:',
     `${report.brandIcons}`,
@@ -242,20 +277,41 @@ export function formatValidationReport(report: ValidationReport): string {
     '',
     'Duplicate names:',
     `${report.duplicateNames}`,
-  ].join('\n');
+    '',
+    '------------------------------------------------------------------------------------------------------',
+    '88 SKILLS RESOLUTION REPORT (Deterministic Multi-Source Registry)',
+    '------------------------------------------------------------------------------------------------------',
+    '#   | Skill Name             | Source           | Icon Key             | Level   | Status  | Classification',
+    '----+------------------------+------------------+----------------------+---------+---------+----------------------',
+  ];
+
+  report.skillsReport.forEach((entry, idx) => {
+    const num = String(idx + 1).padStart(2, ' ');
+    const name = entry.name.padEnd(22, ' ');
+    const source = entry.resolvedSource.padEnd(16, ' ');
+    const key = entry.resolvedIconKey.padEnd(20, ' ');
+    const level = `Level ${entry.fallbackLevel}`.padEnd(7, ' ');
+    const status = entry.missingStatus.padEnd(7, ' ');
+    const classification = `${entry.classification} (${entry.verificationStatus})`;
+    lines.push(`${num} | ${name} | ${source} | ${key} | ${level} | ${status} | ${classification}`);
+  });
+
+  lines.push('------------------------------------------------------------------------------------------------------');
 
   if (report.missingIconList.length > 0) {
-    output += '\n\nMissing Icons List:\n' +
-      report.missingIconList.map((m) => `  - ${m.name} (${m.id})`).join('\n');
+    lines.push(
+      '\nMissing Icons List:\n' +
+        report.missingIconList.map((m) => `  - ${m.name} (${m.id})`).join('\n')
+    );
   }
 
-  return output;
+  return lines.join('\n');
 }
 
 /**
- * Validates the canonical 88-skill dataset and icon system.
+ * Validates the canonical 88-skill dataset and multi-source icon system.
  * Enforces strict dataset integrity, exact ID coverage, canonical names,
- * single Kafka/GraphQL entries, physical disk asset verification, and explicit typing.
+ * deterministic source priority, physical disk asset verification, and explicit typing.
  */
 export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): ValidationReport {
   const errors: string[] = [];
@@ -265,6 +321,22 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
   const expectedCategories = 8;
   const perCategoryTarget = 11;
   const countsPerCategory: Record<string, number> = {};
+
+  const sourceCounts: Record<IconSourceType, number> = {
+    'tech-stack-icons': 0,
+    svgl: 0,
+    'simple-icons': 0,
+    'verified-local': 0,
+    missing: 0,
+  };
+
+  const classificationCounts: Record<IconClassification, number> = {
+    'official-brand': 0,
+    'technology-framework': 0,
+    'protocol-standard': 0,
+    'generic-ecosystem': 0,
+    missing: 0,
+  };
 
   let brandIcons = 0;
   let genericIcons = 0;
@@ -276,6 +348,7 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
   let duplicateNames = 0;
 
   const missingIconList: Array<{ id: string; name: string }> = [];
+  const skillsReport: SkillValidationEntry[] = [];
 
   // 1. Total Skills Count
   if (totalSkills !== expectedSkills) {
@@ -323,7 +396,6 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
   }
 
   const registryKeys = Object.keys(ICON_REGISTRY);
-  const registryKeySet = new Set(registryKeys);
 
   // Check for unexpected registry entries
   for (const regKey of registryKeys) {
@@ -340,7 +412,7 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
   let mappedRegistryCount = 0;
 
   // Validate each skill in SKILLS_DATA
-  SKILLS_DATA.forEach((skill: SkillItem, index: number) => {
+  SKILLS_DATA.forEach((skill: SkillItem) => {
     // Canonical name presence
     if (!canonicalSet.has(skill.name)) {
       errors.push(`Unexpected skill name not in canonical list: "${skill.name}" (id: ${skill.id}).`);
@@ -372,42 +444,93 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
     }
 
     // Icon registry mapping check
-    const iconDef = getIconDefinition(skill.id);
-    if (!iconDef) {
+    const regEntry: SkillRegistryEntry | undefined = getIconDefinition(skill.id);
+    if (!regEntry) {
       errors.push(`Skill with ID "${skill.id}" ("${skill.name}") has no registry entry in ICON_REGISTRY.`);
       invalidMappings++;
       return;
     }
 
     mappedRegistryCount++;
+    const { icon } = regEntry;
 
-    // Explicit icon classification
-    if (iconDef.type === 'brand') {
-      brandIcons++;
-    } else if (iconDef.type === 'generic') {
-      genericIcons++;
-    } else if (iconDef.type === 'missing') {
-      missingIcons++;
-      missingIconList.push({ id: skill.id, name: skill.name });
+    // Track source counts
+    if (sourceCounts[icon.source] !== undefined) {
+      sourceCounts[icon.source]++;
     } else {
-      errors.push(`Invalid icon type "${(iconDef as unknown as { type: string }).type}" for skill "${skill.name}".`);
+      errors.push(`Unknown icon source "${icon.source}" for skill "${skill.name}".`);
       invalidMappings++;
     }
 
-    // Icon Source Integrity
-    if (iconDef.source.kind === 'simple-icon') {
-      const { icon } = iconDef.source;
-      if (!icon || typeof icon.path !== 'string' || icon.path.length < 10) {
+    // Track classification counts
+    if (classificationCounts[icon.classification] !== undefined) {
+      classificationCounts[icon.classification]++;
+    } else {
+      errors.push(`Unknown icon classification "${icon.classification}" for skill "${skill.name}".`);
+      invalidMappings++;
+    }
+
+    // Explicit icon classification counts for legacy report compatibility
+    if (icon.classification === 'official-brand') {
+      brandIcons++;
+    } else if (
+      icon.classification === 'technology-framework' ||
+      icon.classification === 'protocol-standard' ||
+      icon.classification === 'generic-ecosystem'
+    ) {
+      genericIcons++;
+    } else if (icon.classification === 'missing') {
+      missingIcons++;
+      missingIconList.push({ id: skill.id, name: skill.name });
+    }
+
+    // Verify source priority and asset integrity
+    if (icon.source === 'tech-stack-icons') {
+      if (icon.fallbackLevel !== 1) {
+        errors.push(`Skill "${skill.name}" source is tech-stack-icons but fallbackLevel is ${icon.fallbackLevel} (expected 1).`);
+        invalidMappings++;
+      }
+      if (!icon.key || typeof icon.key !== 'string' || icon.key.length === 0) {
+        errors.push(`Empty tech-stack-icons key for skill "${skill.name}".`);
+        invalidMappings++;
+      }
+    } else if (icon.source === 'svgl') {
+      if (icon.fallbackLevel !== 2) {
+        errors.push(`Skill "${skill.name}" source is svgl but fallbackLevel is ${icon.fallbackLevel} (expected 2).`);
+        invalidMappings++;
+      }
+      const url = icon.url || `/assets/icons/svgl/${icon.key}.svg`;
+      if (!url.startsWith('/assets/icons/svgl/') || !url.endsWith('.svg')) {
+        errors.push(`Invalid SVGL URL format for skill "${skill.name}": "${url}".`);
+        invalidMappings++;
+      } else {
+        const fileExists = checkAssetExists(url, customAssetChecker);
+        if (!fileExists) {
+          errors.push(`SVGL asset physically missing on disk for skill "${skill.name}": "${url}".`);
+          missingLocalAssets++;
+        }
+      }
+    } else if (icon.source === 'simple-icons') {
+      if (icon.fallbackLevel !== 3) {
+        errors.push(`Skill "${skill.name}" source is simple-icons but fallbackLevel is ${icon.fallbackLevel} (expected 3).`);
+        invalidMappings++;
+      }
+      const si = icon.simpleIcon;
+      if (!si || typeof si.path !== 'string' || si.path.length < 10) {
         errors.push(`Invalid SimpleIcon vector path for skill "${skill.name}" (${skill.id}).`);
         invalidMappings++;
       }
-      if (!icon || typeof icon.hex !== 'string' || icon.hex.length < 3) {
+      if (!si || typeof si.hex !== 'string' || si.hex.length < 3) {
         errors.push(`Invalid SimpleIcon hex code for skill "${skill.name}" (${skill.id}).`);
         invalidMappings++;
       }
-    } else if (iconDef.source.kind === 'local-svg') {
-      const { url } = iconDef.source;
-      if (!url || !url.startsWith('/assets/icons/') || !url.endsWith('.svg')) {
+    } else if (icon.source === 'verified-local') {
+      if (icon.fallbackLevel !== 4) {
+        errors.push(`Skill "${skill.name}" source is verified-local but fallbackLevel is ${icon.fallbackLevel} (expected 4).`);
+        invalidMappings++;
+      }
+      const url = icon.url || `/assets/icons/${icon.key}.svg`;
+      if (!url.startsWith('/assets/icons/') || !url.endsWith('.svg')) {
         errors.push(`Invalid local SVG URL format for skill "${skill.name}": "${url}".`);
         invalidMappings++;
       } else {
@@ -417,19 +540,20 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
           missingLocalAssets++;
         }
       }
-    } else if (iconDef.source.kind === 'missing') {
-      if (iconDef.type !== 'missing') {
-        errors.push(`Skill "${skill.name}" has kind "missing" but type "${iconDef.type}". Must match.`);
+    } else if (icon.source === 'missing') {
+      if (icon.fallbackLevel !== 5) {
+        errors.push(`Skill "${skill.name}" source is missing but fallbackLevel is ${icon.fallbackLevel} (expected 5).`);
         invalidMappings++;
       }
-    } else {
-      errors.push(`Unknown icon source kind for skill "${skill.name}" (${skill.id}).`);
-      invalidMappings++;
+      if (icon.classification !== 'missing' || icon.status !== 'missing') {
+        errors.push(`Skill "${skill.name}" has source "missing" but classification "${icon.classification}".`);
+        invalidMappings++;
+      }
     }
 
     // Resolved icon output verification (no silent fallback permitted)
     const resolved = resolveSkillIcon(skill.id, skill.name);
-    if (iconDef.type === 'missing') {
+    if (icon.source === 'missing') {
       if (resolved.kind !== 'missing') {
         errors.push(`Skill "${skill.name}" is classified as missing, but resolved to non-missing state.`);
         invalidMappings++;
@@ -439,14 +563,30 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
         errors.push(`Skill "${skill.name}" (${skill.id}) unexpectedly resolved to missing state.`);
         invalidMappings++;
       }
+      if (resolved.source !== icon.source) {
+        errors.push(`Skill "${skill.name}" source mismatch: registry=${icon.source}, resolved=${resolved.source}.`);
+        invalidMappings++;
+      }
     }
+
+    // Add entry to per-skill report
+    skillsReport.push({
+      id: skill.id,
+      name: skill.name,
+      resolvedSource: resolved.source,
+      resolvedIconKey: resolved.key,
+      fallbackLevel: resolved.fallbackLevel,
+      classification: resolved.classification,
+      verificationStatus: resolved.status,
+      missingStatus: resolved.kind === 'missing' ? 'missing' : 'present',
+    });
   });
 
-  // Check required generic technologies classification
-  for (const genericSkillId of REQUIRED_GENERIC_SKILL_IDS) {
-    const def = getIconDefinition(genericSkillId);
-    if (def && def.type !== 'generic') {
-      errors.push(`Technology "${genericSkillId}" must be classified as "generic", not "${def.type}".`);
+  // Verify that standards and generic representations are not misclassified as official brand logos
+  for (const nonBrandSkillId of NON_BRAND_SKILL_IDS) {
+    const def = getIconDefinition(nonBrandSkillId);
+    if (def && def.icon.classification === 'official-brand') {
+      errors.push(`Technology "${nonBrandSkillId}" is a standard/generic symbol and must NOT be classified as "official-brand".`);
       invalidMappings++;
     }
   }
@@ -496,6 +636,8 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
     allCategoriesHaveTargetCount,
     countsPerCategory,
     mappedRegistryCount,
+    sourceCounts,
+    classificationCounts,
     brandIcons,
     genericIcons,
     missingIcons,
@@ -505,6 +647,7 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
     duplicateIds,
     duplicateNames,
     missingIconList,
+    skillsReport,
     formattedReport: '',
   };
 

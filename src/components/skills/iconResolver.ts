@@ -1,676 +1,1458 @@
+/**
+ * AUTHORITATIVE MULTI-SOURCE TECHNOLOGY ICON REGISTRY
+ * Deterministic multi-source icon resolution for all 88 skills.
+ * 
+ * Source Priority:
+ * 1. Tech Stack Icons (tech-stack-icons package)
+ * 2. SVGL (locally cached verified vector assets)
+ * 3. Simple Icons (simple-icons package)
+ * 4. Verified Existing Local SVG (curated brand and standards assets)
+ * 5. Missing State
+ * 
+ * Classifications:
+ * - official-brand: Official company / product brand mark
+ * - technology-framework: Open-source project / library / runtime mark
+ * - protocol-standard: Official web / blockchain / network standard specification mark
+ * - generic-ecosystem: Explicit ecosystem / parent standard representation
+ * - missing: No trustworthy logo exists
+ */
+
 import {
-  siTypescript, siJavascript, siReact, siNextdotjs, siSvelte, siTailwindcss, siFramer, siGreensock, siHtml5, siVite, siRive,
-  siThreedotjs, siWebgl, siOpengl, siWebgpu, siBlender, siBabylondotjs, siUnity,
-  siNodedotjs, siExpress, siFastapi, siFlask, siSpringboot, siPrisma, siDrizzle, siTrpc, siGraphql, siPydantic, siNginx,
-  siPostgresql, siMysql, siSupabase, siRedis, siRabbitmq, siCelery, siApachekafka, siDocker, siKubernetes, siLinux, siGit,
-  siSolidity, siWagmi, siEthers, siEthereum, siIpfs,
-  siAnthropic, siGooglegemini, siDeepseek, siQwen, siVercel, siOllama, siHuggingface,
-  siLangchain, siLanggraph, siCrewai, siDify, siCoze, siHaystack,
-  siMilvus, siQdrant, siPrometheus, siGrafana, siSentry
+  siRive,
+  siBabylondotjs,
+  siPydantic,
+  siCelery,
+  siWagmi,
+  siEthers,
+  siIpfs,
+  siDify,
+  siCoze,
+  siHaystack,
+  siMilvus,
 } from 'simple-icons';
 import type { SimpleIcon } from 'simple-icons';
 
-export type IconType = 'brand' | 'generic' | 'missing';
+export type IconSourceType =
+  | 'tech-stack-icons'
+  | 'svgl'
+  | 'simple-icons'
+  | 'verified-local'
+  | 'missing';
 
-export type IconSource =
-  | { kind: 'simple-icon'; icon: SimpleIcon }
-  | { kind: 'local-svg'; url: string; title: string }
-  | { kind: 'missing' };
+export type IconClassification =
+  | 'official-brand'
+  | 'technology-framework'
+  | 'protocol-standard'
+  | 'generic-ecosystem'
+  | 'missing';
 
-export interface IconDefinition {
-  id: string;
-  type: IconType;
-  source: IconSource;
-  title: string;
+export type VerificationStatus =
+  | 'verified'
+  | 'generic-representation'
+  | 'missing';
+
+export interface SkillIconMetadata {
+  source: IconSourceType;
+  key: string;
+  fallbackLevel: 1 | 2 | 3 | 4 | 5;
+  classification: IconClassification;
+  status: VerificationStatus;
+  sourceAssetId: string;
+  brandColor?: string;
+  notes?: string;
+  url?: string;
+  simpleIcon?: SimpleIcon;
 }
 
-export type ResolvedIcon =
+export interface SkillRegistryEntry {
+  id: string;
+  name: string;
+  icon: SkillIconMetadata;
+}
+
+// Backward compatibility types
+export type IconDefinition = SkillRegistryEntry;
+export type IconType = 'brand' | 'generic' | 'missing';
+
+export type ResolvedSkillIcon =
   | {
       id: string;
       name: string;
-      iconType: 'brand' | 'generic';
-      kind: 'svg-path';
+      source: 'tech-stack-icons';
+      fallbackLevel: 1;
+      key: string;
+      classification: IconClassification;
+      status: VerificationStatus;
+      kind: 'tech-stack-icon';
+      title: string;
+      brandColor?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      source: 'svgl';
+      fallbackLevel: 2;
+      key: string;
+      url: string;
+      classification: IconClassification;
+      status: VerificationStatus;
+      kind: 'svgl-svg';
+      title: string;
+      brandColor?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      source: 'simple-icons';
+      fallbackLevel: 3;
+      key: string;
       path: string;
       hex: string;
+      classification: IconClassification;
+      status: VerificationStatus;
+      kind: 'svg-path';
       title: string;
+      brandColor?: string;
     }
   | {
       id: string;
       name: string;
-      iconType: 'brand' | 'generic';
-      kind: 'local-svg';
+      source: 'verified-local';
+      fallbackLevel: 4;
+      key: string;
       url: string;
+      classification: IconClassification;
+      status: VerificationStatus;
+      kind: 'local-svg';
       title: string;
+      brandColor?: string;
     }
   | {
       id: string;
       name: string;
-      iconType: 'missing';
+      source: 'missing';
+      fallbackLevel: 5;
+      key: string;
+      classification: 'missing';
+      status: 'missing';
       kind: 'missing';
       title: string;
     };
 
-/**
- * Canonical Icon Registry for all 88 technologies.
- * Explicitly maps skill ID to either a verified Brand icon or a Generic technical symbol.
- * No arbitrary string matching or guessed file paths.
- */
-export const ICON_REGISTRY: Record<string, IconDefinition> = {
-  // ==========================================
-  // ROW 1 — CORE FRONTEND & INTERACTION (11)
-  // ==========================================
-  typescript: {
+export const ICON_REGISTRY: Record<string, SkillRegistryEntry> = {
+  'typescript': {
     id: 'typescript',
-    type: 'brand',
-    title: 'TypeScript',
-    source: { kind: 'simple-icon', icon: siTypescript },
+    name: 'TypeScript',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'typescript',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:typescript',
+      brandColor: '#3178C6',
+    },
   },
-  javascript: {
+  'javascript': {
     id: 'javascript',
-    type: 'brand',
-    title: 'JavaScript',
-    source: { kind: 'simple-icon', icon: siJavascript },
+    name: 'JavaScript',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'js',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:js',
+      brandColor: '#F7DF1E',
+    },
   },
-  react: {
+  'react': {
     id: 'react',
-    type: 'brand',
-    title: 'React',
-    source: { kind: 'simple-icon', icon: siReact },
+    name: 'React',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'react',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:react',
+      brandColor: '#61DAFB',
+    },
   },
-  nextdotjs: {
+  'nextdotjs': {
     id: 'nextdotjs',
-    type: 'brand',
-    title: 'Next.js',
-    source: { kind: 'simple-icon', icon: siNextdotjs },
+    name: 'Next.js',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'nextjs',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:nextjs',
+      brandColor: '#FFFFFF',
+    },
   },
-  svelte: {
+  'svelte': {
     id: 'svelte',
-    type: 'brand',
-    title: 'Svelte',
-    source: { kind: 'simple-icon', icon: siSvelte },
+    name: 'Svelte',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'sveltejs',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:sveltejs',
+      brandColor: '#FF3E00',
+    },
   },
-  tailwindcss: {
+  'tailwindcss': {
     id: 'tailwindcss',
-    type: 'brand',
-    title: 'Tailwind CSS',
-    source: { kind: 'simple-icon', icon: siTailwindcss },
+    name: 'Tailwind CSS',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'tailwindcss',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:tailwindcss',
+      brandColor: '#06B6D4',
+    },
   },
-  framer: {
+  'framer': {
     id: 'framer',
-    type: 'brand',
-    title: 'Framer Motion',
-    source: { kind: 'simple-icon', icon: siFramer },
+    name: 'Framer Motion',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'framer',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:framer',
+      brandColor: '#0055FF',
+    },
   },
-  greensock: {
+  'greensock': {
     id: 'greensock',
-    type: 'brand',
-    title: 'GSAP',
-    source: { kind: 'simple-icon', icon: siGreensock },
+    name: 'GSAP',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'gsap',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:gsap',
+      brandColor: '#0AE448',
+    },
   },
-  html5: {
+  'html5': {
     id: 'html5',
-    type: 'brand',
-    title: 'HTML5',
-    source: { kind: 'simple-icon', icon: siHtml5 },
+    name: 'HTML5',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'html5',
+      fallbackLevel: 1,
+      classification: 'protocol-standard',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:html5',
+      brandColor: '#E34F26',
+    },
   },
-  vite: {
+  'vite': {
     id: 'vite',
-    type: 'brand',
-    title: 'Vite',
-    source: { kind: 'simple-icon', icon: siVite },
+    name: 'Vite',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'vitejs',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:vitejs',
+      brandColor: '#646CFF',
+    },
   },
-  rive: {
+  'rive': {
     id: 'rive',
-    type: 'brand',
-    title: 'Rive',
-    source: { kind: 'simple-icon', icon: siRive },
+    name: 'Rive',
+    icon: {
+      source: 'simple-icons',
+      key: 'siRive',
+      fallbackLevel: 3,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siRive',
+      simpleIcon: siRive,
+      brandColor: '#1D1D1D',
+    },
   },
-
-  // ==========================================
-  // ROW 2 — 3D & GRAPHICS (11)
-  // ==========================================
-  threedotjs: {
+  'threedotjs': {
     id: 'threedotjs',
-    type: 'brand',
-    title: 'Three.js',
-    source: { kind: 'simple-icon', icon: siThreedotjs },
+    name: 'Three.js',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'threejs',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:threejs',
+      brandColor: '#FFFFFF',
+    },
   },
-  webgl: {
+  'webgl': {
     id: 'webgl',
-    type: 'generic', // Khronos web 3D standard
-    title: 'WebGL',
-    source: { kind: 'simple-icon', icon: siWebgl },
+    name: 'WebGL',
+    icon: {
+      source: 'svgl',
+      key: 'webgl',
+      fallbackLevel: 2,
+      classification: 'protocol-standard',
+      status: 'verified',
+      sourceAssetId: 'svgl:webgl',
+      url: '/assets/icons/svgl/webgl.svg',
+      brandColor: '#990000',
+    },
   },
-  glsl: {
+  'glsl': {
     id: 'glsl',
-    type: 'generic', // Shader pipeline language standard (OpenGL)
-    title: 'GLSL',
-    source: { kind: 'simple-icon', icon: siOpengl },
+    name: 'GLSL',
+    icon: {
+      source: 'verified-local',
+      key: 'glsl',
+      fallbackLevel: 4,
+      classification: 'generic-ecosystem',
+      status: 'generic-representation',
+      sourceAssetId: '/assets/icons/glsl.svg',
+      url: '/assets/icons/glsl.svg',
+      brandColor: '#5586A4',
+      notes: 'Khronos OpenGL Shading Language standard representation',
+    },
   },
-  webgpu: {
+  'webgpu': {
     id: 'webgpu',
-    type: 'generic', // W3C WebGPU hardware acceleration standard
-    title: 'WebGPU',
-    source: { kind: 'simple-icon', icon: siWebgpu },
+    name: 'WebGPU',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'webgpu',
+      fallbackLevel: 1,
+      classification: 'protocol-standard',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:webgpu',
+      brandColor: '#005A9C',
+    },
   },
-  r3f: {
+  'r3f': {
     id: 'r3f',
-    type: 'generic', // pmndrs declarative 3D canvas technical symbol
-    title: 'React Three Fiber',
-    source: { kind: 'local-svg', url: '/assets/icons/r3f.svg', title: 'React Three Fiber' },
+    name: 'React Three Fiber',
+    icon: {
+      source: 'verified-local',
+      key: 'r3f',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'generic-representation',
+      sourceAssetId: '/assets/icons/r3f.svg',
+      url: '/assets/icons/r3f.svg',
+      brandColor: '#53C1DE',
+      notes: 'Poimandres React Three Fiber community mark',
+    },
   },
-  blender: {
+  'blender': {
     id: 'blender',
-    type: 'brand',
-    title: 'Blender',
-    source: { kind: 'simple-icon', icon: siBlender },
+    name: 'Blender',
+    icon: {
+      source: 'svgl',
+      key: 'blender',
+      fallbackLevel: 2,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'svgl:blender',
+      url: '/assets/icons/svgl/blender.svg',
+      brandColor: '#EA7600',
+    },
   },
-  spline: {
+  'spline': {
     id: 'spline',
-    type: 'brand', // Official Spline 3D design software mark
-    title: 'Spline',
-    source: { kind: 'local-svg', url: '/assets/icons/spline.svg', title: 'Spline' },
+    name: 'Spline',
+    icon: {
+      source: 'verified-local',
+      key: 'spline',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/spline.svg',
+      url: '/assets/icons/spline.svg',
+      brandColor: '#FF5C97',
+      notes: 'Spline 3D design platform official mark',
+    },
   },
-  draco: {
+  'draco': {
     id: 'draco',
-    type: 'brand', // Official Google/Khronos Draco 3D compression mark
-    title: 'Draco',
-    source: { kind: 'local-svg', url: '/assets/icons/draco.svg', title: 'Draco' },
+    name: 'Draco',
+    icon: {
+      source: 'verified-local',
+      key: 'draco',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/draco.svg',
+      url: '/assets/icons/draco.svg',
+      brandColor: '#FF6D00',
+      notes: 'Google Draco 3D mesh compression library mark',
+    },
   },
-  canvasapi: {
+  'canvasapi': {
     id: 'canvasapi',
-    type: 'generic', // HTML5 Canvas 2D bitmap standard
-    title: 'Canvas API',
-    source: { kind: 'simple-icon', icon: siHtml5 },
+    name: 'Canvas API',
+    icon: {
+      source: 'verified-local',
+      key: 'canvasapi',
+      fallbackLevel: 4,
+      classification: 'protocol-standard',
+      status: 'generic-representation',
+      sourceAssetId: '/assets/icons/canvasapi.svg',
+      url: '/assets/icons/canvasapi.svg',
+      brandColor: '#E34F26',
+      notes: 'W3C/WHATWG HTML5 2D Canvas specification mark',
+    },
   },
-  babylondotjs: {
+  'babylondotjs': {
     id: 'babylondotjs',
-    type: 'brand',
-    title: 'Babylon.js',
-    source: { kind: 'simple-icon', icon: siBabylondotjs },
+    name: 'Babylon.js',
+    icon: {
+      source: 'simple-icons',
+      key: 'siBabylondotjs',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siBabylondotjs',
+      simpleIcon: siBabylondotjs,
+      brandColor: '#BB464B',
+    },
   },
-  unity: {
+  'unity': {
     id: 'unity',
-    type: 'brand',
-    title: 'Unity',
-    source: { kind: 'simple-icon', icon: siUnity },
+    name: 'Unity',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'unity',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:unity',
+      brandColor: '#FFFFFF',
+    },
   },
-
-  // ==========================================
-  // ROW 3 — BACKEND & API FRAMEWORKS (11)
-  // ==========================================
-  nodedotjs: {
+  'nodedotjs': {
     id: 'nodedotjs',
-    type: 'brand',
-    title: 'Node.js',
-    source: { kind: 'simple-icon', icon: siNodedotjs },
+    name: 'Node.js',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'nodejs',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:nodejs',
+      brandColor: '#5FA04E',
+    },
   },
-  express: {
+  'express': {
     id: 'express',
-    type: 'brand',
-    title: 'Express',
-    source: { kind: 'simple-icon', icon: siExpress },
+    name: 'Express',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'expressjs',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:expressjs',
+      brandColor: '#FFFFFF',
+    },
   },
-  fastapi: {
+  'fastapi': {
     id: 'fastapi',
-    type: 'brand',
-    title: 'FastAPI',
-    source: { kind: 'simple-icon', icon: siFastapi },
+    name: 'FastAPI',
+    icon: {
+      source: 'svgl',
+      key: 'fastapi',
+      fallbackLevel: 2,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'svgl:fastapi',
+      url: '/assets/icons/svgl/fastapi.svg',
+      brandColor: '#009688',
+    },
   },
-  flask: {
+  'flask': {
     id: 'flask',
-    type: 'brand',
-    title: 'Flask',
-    source: { kind: 'simple-icon', icon: siFlask },
+    name: 'Flask',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'flask',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:flask',
+      brandColor: '#FFFFFF',
+    },
   },
-  springboot: {
+  'springboot': {
     id: 'springboot',
-    type: 'brand',
-    title: 'Spring Boot',
-    source: { kind: 'simple-icon', icon: siSpringboot },
+    name: 'Spring Boot',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'spring',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:spring',
+      brandColor: '#6DB33F',
+    },
   },
-  prisma: {
+  'prisma': {
     id: 'prisma',
-    type: 'brand',
-    title: 'Prisma',
-    source: { kind: 'simple-icon', icon: siPrisma },
+    name: 'Prisma',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'prisma',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:prisma',
+      brandColor: '#2D3748',
+    },
   },
-  drizzle: {
+  'drizzle': {
     id: 'drizzle',
-    type: 'brand',
-    title: 'Drizzle',
-    source: { kind: 'simple-icon', icon: siDrizzle },
+    name: 'Drizzle',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'drizzle',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:drizzle',
+      brandColor: '#C5F74F',
+    },
   },
-  trpc: {
+  'trpc': {
     id: 'trpc',
-    type: 'brand',
-    title: 'tRPC',
-    source: { kind: 'simple-icon', icon: siTrpc },
+    name: 'tRPC',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'tRPC',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:tRPC',
+      brandColor: '#2596BE',
+    },
   },
-  graphql: {
+  'graphql': {
     id: 'graphql',
-    type: 'brand',
-    title: 'GraphQL',
-    source: { kind: 'simple-icon', icon: siGraphql },
+    name: 'GraphQL',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'graphql',
+      fallbackLevel: 1,
+      classification: 'protocol-standard',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:graphql',
+      brandColor: '#E10098',
+    },
   },
-  pydantic: {
+  'pydantic': {
     id: 'pydantic',
-    type: 'brand',
-    title: 'Pydantic',
-    source: { kind: 'simple-icon', icon: siPydantic },
+    name: 'Pydantic',
+    icon: {
+      source: 'simple-icons',
+      key: 'siPydantic',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siPydantic',
+      simpleIcon: siPydantic,
+      brandColor: '#E92063',
+    },
   },
-  nginx: {
+  'nginx': {
     id: 'nginx',
-    type: 'brand',
-    title: 'Nginx',
-    source: { kind: 'simple-icon', icon: siNginx },
+    name: 'Nginx',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'nginx',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:nginx',
+      brandColor: '#009639',
+    },
   },
-
-  // ==========================================
-  // ROW 4 — DATA, STORAGE & QUEUES (11)
-  // ==========================================
-  postgresql: {
+  'postgresql': {
     id: 'postgresql',
-    type: 'brand',
-    title: 'PostgreSQL',
-    source: { kind: 'simple-icon', icon: siPostgresql },
+    name: 'PostgreSQL',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'postgresql',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:postgresql',
+      brandColor: '#4169E1',
+    },
   },
-  mysql: {
+  'mysql': {
     id: 'mysql',
-    type: 'brand',
-    title: 'MySQL',
-    source: { kind: 'simple-icon', icon: siMysql },
+    name: 'MySQL',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'mysql',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:mysql',
+      brandColor: '#4479A1',
+    },
   },
-  supabase: {
+  'supabase': {
     id: 'supabase',
-    type: 'brand',
-    title: 'Supabase',
-    source: { kind: 'simple-icon', icon: siSupabase },
+    name: 'Supabase',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'supabase',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:supabase',
+      brandColor: '#3ECF8E',
+    },
   },
-  redis: {
+  'redis': {
     id: 'redis',
-    type: 'brand',
-    title: 'Redis',
-    source: { kind: 'simple-icon', icon: siRedis },
+    name: 'Redis',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'redis',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:redis',
+      brandColor: '#DC382D',
+    },
   },
-  rabbitmq: {
+  'rabbitmq': {
     id: 'rabbitmq',
-    type: 'brand',
-    title: 'RabbitMQ',
-    source: { kind: 'simple-icon', icon: siRabbitmq },
+    name: 'RabbitMQ',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'rabbitmq',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:rabbitmq',
+      brandColor: '#FF6600',
+    },
   },
-  celery: {
+  'celery': {
     id: 'celery',
-    type: 'brand',
-    title: 'Celery',
-    source: { kind: 'simple-icon', icon: siCelery },
+    name: 'Celery',
+    icon: {
+      source: 'simple-icons',
+      key: 'siCelery',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siCelery',
+      simpleIcon: siCelery,
+      brandColor: '#37814A',
+    },
   },
-  kafka: {
+  'kafka': {
     id: 'kafka',
-    type: 'brand',
-    title: 'Kafka',
-    source: { kind: 'simple-icon', icon: siApachekafka },
+    name: 'Kafka',
+    icon: {
+      source: 'svgl',
+      key: 'kafka',
+      fallbackLevel: 2,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'svgl:kafka',
+      url: '/assets/icons/svgl/kafka_dark.svg',
+      brandColor: '#231F20',
+    },
   },
-  docker: {
+  'docker': {
     id: 'docker',
-    type: 'brand',
-    title: 'Docker',
-    source: { kind: 'simple-icon', icon: siDocker },
+    name: 'Docker',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'docker',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:docker',
+      brandColor: '#2496ED',
+    },
   },
-  kubernetes: {
+  'kubernetes': {
     id: 'kubernetes',
-    type: 'brand',
-    title: 'Kubernetes',
-    source: { kind: 'simple-icon', icon: siKubernetes },
+    name: 'Kubernetes',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'kubernetes',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:kubernetes',
+      brandColor: '#326CE5',
+    },
   },
-  linux: {
+  'linux': {
     id: 'linux',
-    type: 'brand',
-    title: 'Linux',
-    source: { kind: 'simple-icon', icon: siLinux },
+    name: 'Linux',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'linux',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:linux',
+      brandColor: '#FCC624',
+    },
   },
-  git: {
+  'git': {
     id: 'git',
-    type: 'brand',
-    title: 'Git',
-    source: { kind: 'simple-icon', icon: siGit },
+    name: 'Git',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'git',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:git',
+      brandColor: '#F05032',
+    },
   },
-
-  // ==========================================
-  // ROW 5 — WEB3 & DECENTRALIZED (11)
-  // ==========================================
-  solidity: {
+  'solidity': {
     id: 'solidity',
-    type: 'brand',
-    title: 'Solidity',
-    source: { kind: 'simple-icon', icon: siSolidity },
+    name: 'Solidity',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'solidity',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:solidity',
+      brandColor: '#363636',
+    },
   },
-  viem: {
+  'viem': {
     id: 'viem',
-    type: 'brand', // Official viem vector mark
-    title: 'viem',
-    source: { kind: 'local-svg', url: '/assets/icons/viem.svg', title: 'viem' },
+    name: 'viem',
+    icon: {
+      source: 'verified-local',
+      key: 'viem',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/viem.svg',
+      url: '/assets/icons/viem.svg',
+      brandColor: '#6B7280',
+      notes: 'viem TypeScript interface for Ethereum official mark',
+    },
   },
-  wagmi: {
+  'wagmi': {
     id: 'wagmi',
-    type: 'brand',
-    title: 'wagmi',
-    source: { kind: 'simple-icon', icon: siWagmi },
+    name: 'wagmi',
+    icon: {
+      source: 'simple-icons',
+      key: 'siWagmi',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siWagmi',
+      simpleIcon: siWagmi,
+      brandColor: '#000000',
+    },
   },
-  ethers: {
+  'ethers': {
     id: 'ethers',
-    type: 'brand',
-    title: 'Ethers.js',
-    source: { kind: 'simple-icon', icon: siEthers },
+    name: 'Ethers.js',
+    icon: {
+      source: 'simple-icons',
+      key: 'siEthers',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siEthers',
+      simpleIcon: siEthers,
+      brandColor: '#2535A0',
+    },
   },
-  foundry: {
+  'foundry': {
     id: 'foundry',
-    type: 'generic', // Paradigm Foundry anvil technical symbol
-    title: 'Foundry',
-    source: { kind: 'local-svg', url: '/assets/icons/foundry.svg', title: 'Foundry' },
+    name: 'Foundry',
+    icon: {
+      source: 'verified-local',
+      key: 'foundry',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/foundry.svg',
+      url: '/assets/icons/foundry.svg',
+      brandColor: '#F5A623',
+      notes: 'Paradigm Foundry smart contract development toolchain mark',
+    },
   },
-  privy: {
+  'privy': {
     id: 'privy',
-    type: 'generic', // Embedded auth cube symbol
-    title: 'Privy',
-    source: { kind: 'local-svg', url: '/assets/icons/privy.svg', title: 'Privy' },
+    name: 'Privy',
+    icon: {
+      source: 'verified-local',
+      key: 'privy',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/privy.svg',
+      url: '/assets/icons/privy.svg',
+      brandColor: '#F1F5F9',
+      notes: 'Privy embedded web3 auth official mark',
+    },
   },
-  erc4337: {
+  'erc4337': {
     id: 'erc4337',
-    type: 'generic', // Ethereum standard for account abstraction
-    title: 'ERC-4337',
-    source: { kind: 'simple-icon', icon: siEthereum },
+    name: 'ERC-4337',
+    icon: {
+      source: 'verified-local',
+      key: 'erc4337',
+      fallbackLevel: 4,
+      classification: 'protocol-standard',
+      status: 'generic-representation',
+      sourceAssetId: '/assets/icons/erc4337.svg',
+      url: '/assets/icons/erc4337.svg',
+      brandColor: '#627EEA',
+      notes: 'Ethereum standard EIP-4337 Account Abstraction ecosystem representation',
+    },
   },
-  thegraph: {
+  'thegraph': {
     id: 'thegraph',
-    type: 'brand', // Official The Graph network concentric mark
-    title: 'The Graph',
-    source: { kind: 'local-svg', url: '/assets/icons/thegraph.svg', title: 'The Graph' },
+    name: 'The Graph',
+    icon: {
+      source: 'verified-local',
+      key: 'thegraph',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/thegraph.svg',
+      url: '/assets/icons/thegraph.svg',
+      brandColor: '#6F4CFF',
+      notes: 'The Graph protocol official mark',
+    },
   },
-  ipfs: {
+  'ipfs': {
     id: 'ipfs',
-    type: 'brand',
-    title: 'IPFS',
-    source: { kind: 'simple-icon', icon: siIpfs },
+    name: 'IPFS',
+    icon: {
+      source: 'simple-icons',
+      key: 'siIpfs',
+      fallbackLevel: 3,
+      classification: 'protocol-standard',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siIpfs',
+      simpleIcon: siIpfs,
+      brandColor: '#65C2CB',
+    },
   },
-  siwe: {
+  'siwe': {
     id: 'siwe',
-    type: 'generic', // EIP-4361 Sign-In with Ethereum protocol standard
-    title: 'SIWE',
-    source: { kind: 'local-svg', url: '/assets/icons/siwe.svg', title: 'SIWE' },
+    name: 'SIWE',
+    icon: {
+      source: 'verified-local',
+      key: 'siwe',
+      fallbackLevel: 4,
+      classification: 'protocol-standard',
+      status: 'generic-representation',
+      sourceAssetId: '/assets/icons/siwe.svg',
+      url: '/assets/icons/siwe.svg',
+      brandColor: '#4A5568',
+      notes: 'Sign-In with Ethereum EIP-4361 standard mark',
+    },
   },
-  hardhat: {
+  'hardhat': {
     id: 'hardhat',
-    type: 'generic', // Hardhat construction helmet technical symbol
-    title: 'Hardhat',
-    source: { kind: 'local-svg', url: '/assets/icons/hardhat.svg', title: 'Hardhat' },
+    name: 'Hardhat',
+    icon: {
+      source: 'verified-local',
+      key: 'hardhat',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/hardhat.svg',
+      url: '/assets/icons/hardhat.svg',
+      brandColor: '#FFF133',
+      notes: 'Nomic Foundation Hardhat Ethereum dev environment mark',
+    },
   },
-
-  // ==========================================
-  // ROW 6 — AI MODELS & SDKS (11)
-  // ==========================================
-  openai: {
+  'openai': {
     id: 'openai',
-    type: 'brand', // Official OpenAI vector logo
-    title: 'OpenAI',
-    source: { kind: 'local-svg', url: '/assets/icons/openai.svg', title: 'OpenAI' },
+    name: 'OpenAI',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'openai',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:openai',
+      brandColor: '#FFFFFF',
+    },
   },
-  anthropic: {
+  'anthropic': {
     id: 'anthropic',
-    type: 'brand',
-    title: 'Anthropic',
-    source: { kind: 'simple-icon', icon: siAnthropic },
+    name: 'Anthropic',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'anthropic',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:anthropic',
+      brandColor: '#D97706',
+    },
   },
-  googlegemini: {
+  'googlegemini': {
     id: 'googlegemini',
-    type: 'brand',
-    title: 'Google Gemini',
-    source: { kind: 'simple-icon', icon: siGooglegemini },
+    name: 'Google Gemini',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'gemini',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:gemini',
+      brandColor: '#8E75FF',
+    },
   },
-  deepseek: {
+  'deepseek': {
     id: 'deepseek',
-    type: 'brand',
-    title: 'DeepSeek',
-    source: { kind: 'simple-icon', icon: siDeepseek },
+    name: 'DeepSeek',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'deepseek',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:deepseek',
+      brandColor: '#4D6BFE',
+    },
   },
-  qwen: {
+  'qwen': {
     id: 'qwen',
-    type: 'brand',
-    title: 'Qwen',
-    source: { kind: 'simple-icon', icon: siQwen },
+    name: 'Qwen',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'qwen',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:qwen',
+      brandColor: '#615CED',
+    },
   },
-  vercel: {
+  'vercel': {
     id: 'vercel',
-    type: 'brand',
-    title: 'Vercel AI SDK',
-    source: { kind: 'simple-icon', icon: siVercel },
+    name: 'Vercel AI SDK',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'vercel',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:vercel',
+      brandColor: '#FFFFFF',
+    },
   },
-  ollama: {
+  'ollama': {
     id: 'ollama',
-    type: 'brand',
-    title: 'Ollama',
-    source: { kind: 'simple-icon', icon: siOllama },
+    name: 'Ollama',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'ollama',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:ollama',
+      brandColor: '#FFFFFF',
+    },
   },
-  huggingface: {
+  'huggingface': {
     id: 'huggingface',
-    type: 'brand',
-    title: 'Hugging Face',
-    source: { kind: 'simple-icon', icon: siHuggingface },
+    name: 'Hugging Face',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'huggingface',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:huggingface',
+      brandColor: '#FFD21E',
+    },
   },
-  groq: {
+  'groq': {
     id: 'groq',
-    type: 'brand', // Official Groq LPU vector mark
-    title: 'Groq',
-    source: { kind: 'local-svg', url: '/assets/icons/groq.svg', title: 'Groq' },
+    name: 'Groq',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'groq',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:groq',
+      brandColor: '#F55036',
+    },
   },
-  togetherai: {
+  'togetherai': {
     id: 'togetherai',
-    type: 'brand', // Official Together AI vector mark
-    title: 'Together AI',
-    source: { kind: 'local-svg', url: '/assets/icons/togetherai.svg', title: 'Together AI' },
+    name: 'Together AI',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'together',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:together',
+      brandColor: '#0F6FFF',
+    },
   },
-  cohere: {
+  'cohere': {
     id: 'cohere',
-    type: 'brand', // Official Cohere coral squircle vector
-    title: 'Cohere',
-    source: { kind: 'local-svg', url: '/assets/icons/cohere.svg', title: 'Cohere' },
+    name: 'Cohere',
+    icon: {
+      source: 'svgl',
+      key: 'cohere',
+      fallbackLevel: 2,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'svgl:cohere',
+      url: '/assets/icons/svgl/cohere.svg',
+      brandColor: '#39594D',
+    },
   },
-
-  // ==========================================
-  // ROW 7 — AI AGENT & ORCHESTRATION (11)
-  // ==========================================
-  langchain: {
+  'langchain': {
     id: 'langchain',
-    type: 'brand',
-    title: 'LangChain',
-    source: { kind: 'simple-icon', icon: siLangchain },
+    name: 'LangChain',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'langchain',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:langchain',
+      brandColor: '#1C3C3C',
+    },
   },
-  langgraph: {
+  'langgraph': {
     id: 'langgraph',
-    type: 'brand',
-    title: 'LangGraph',
-    source: { kind: 'simple-icon', icon: siLanggraph },
+    name: 'LangGraph',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'langgraph',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:langgraph',
+      brandColor: '#2C3437',
+    },
   },
-  llamaindex: {
+  'llamaindex': {
     id: 'llamaindex',
-    type: 'brand', // Official LlamaIndex square vector
-    title: 'LlamaIndex',
-    source: { kind: 'local-svg', url: '/assets/icons/llamaindex.svg', title: 'LlamaIndex' },
+    name: 'LlamaIndex',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'llamaindex',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:llamaindex',
+      brandColor: '#6B46C1',
+    },
   },
-  crewai: {
+  'crewai': {
     id: 'crewai',
-    type: 'brand',
-    title: 'CrewAI',
-    source: { kind: 'simple-icon', icon: siCrewai },
+    name: 'CrewAI',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'crewai',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:crewai',
+      brandColor: '#FF4F00',
+    },
   },
-  autogen: {
+  'autogen': {
     id: 'autogen',
-    type: 'brand', // Official Microsoft AutoGen vector
-    title: 'AutoGen',
-    source: { kind: 'local-svg', url: '/assets/icons/autogen.svg', title: 'AutoGen' },
+    name: 'AutoGen',
+    icon: {
+      source: 'verified-local',
+      key: 'autogen',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/autogen.svg',
+      url: '/assets/icons/autogen.svg',
+      brandColor: '#0078D4',
+      notes: 'Microsoft AutoGen multi-agent framework mark',
+    },
   },
-  dify: {
+  'dify': {
     id: 'dify',
-    type: 'brand',
-    title: 'Dify',
-    source: { kind: 'simple-icon', icon: siDify },
+    name: 'Dify',
+    icon: {
+      source: 'simple-icons',
+      key: 'siDify',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siDify',
+      simpleIcon: siDify,
+      brandColor: '#0033FF',
+    },
   },
-  coze: {
+  'coze': {
     id: 'coze',
-    type: 'brand',
-    title: 'Coze',
-    source: { kind: 'simple-icon', icon: siCoze },
+    name: 'Coze',
+    icon: {
+      source: 'simple-icons',
+      key: 'siCoze',
+      fallbackLevel: 3,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siCoze',
+      simpleIcon: siCoze,
+      brandColor: '#4D53E8',
+    },
   },
-  semantickernel: {
+  'semantickernel': {
     id: 'semantickernel',
-    type: 'generic', // Semantic Kernel neural loop technical symbol
-    title: 'Semantic Kernel',
-    source: { kind: 'local-svg', url: '/assets/icons/semantickernel.svg', title: 'Semantic Kernel' },
+    name: 'Semantic Kernel',
+    icon: {
+      source: 'verified-local',
+      key: 'semantickernel',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/semantickernel.svg',
+      url: '/assets/icons/semantickernel.svg',
+      brandColor: '#107C41',
+      notes: 'Microsoft Semantic Kernel framework mark',
+    },
   },
-  mcp: {
+  'mcp': {
     id: 'mcp',
-    type: 'generic', // Model Context Protocol open standard trident symbol
-    title: 'MCP',
-    source: { kind: 'local-svg', url: '/assets/icons/mcp.svg', title: 'MCP' },
+    name: 'MCP',
+    icon: {
+      source: 'verified-local',
+      key: 'mcp',
+      fallbackLevel: 4,
+      classification: 'protocol-standard',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/mcp.svg',
+      url: '/assets/icons/mcp.svg',
+      brandColor: '#D97706',
+      notes: 'Model Context Protocol standard mark',
+    },
   },
-  haystack: {
+  'haystack': {
     id: 'haystack',
-    type: 'brand',
-    title: 'Haystack',
-    source: { kind: 'simple-icon', icon: siHaystack },
+    name: 'Haystack',
+    icon: {
+      source: 'simple-icons',
+      key: 'siHaystack',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siHaystack',
+      simpleIcon: siHaystack,
+      brandColor: '#0EAF9C',
+    },
   },
-  langsmith: {
+  'langsmith': {
     id: 'langsmith',
-    type: 'generic', // LangSmith telemetry ray technical symbol
-    title: 'LangSmith',
-    source: { kind: 'local-svg', url: '/assets/icons/langsmith.svg', title: 'LangSmith' },
+    name: 'LangSmith',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'langsmith',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:langsmith',
+      brandColor: '#00A67E',
+    },
   },
-
-  // ==========================================
-  // ROW 8 — RAG, VECTOR & OBSERVABILITY (11)
-  // ==========================================
-  pgvector: {
+  'pgvector': {
     id: 'pgvector',
-    type: 'generic', // PostgreSQL vector extension technical symbol
-    title: 'pgvector',
-    source: { kind: 'simple-icon', icon: siPostgresql },
+    name: 'pgvector',
+    icon: {
+      source: 'verified-local',
+      key: 'pgvector',
+      fallbackLevel: 4,
+      classification: 'technology-framework',
+      status: 'generic-representation',
+      sourceAssetId: '/assets/icons/pgvector.svg',
+      url: '/assets/icons/pgvector.svg',
+      brandColor: '#336791',
+      notes: 'PostgreSQL pgvector extension representation',
+    },
   },
-  chroma: {
+  'chroma': {
     id: 'chroma',
-    type: 'brand', // Official Chroma DB vector mark
-    title: 'Chroma',
-    source: { kind: 'local-svg', url: '/assets/icons/chroma.svg', title: 'Chroma' },
+    name: 'Chroma',
+    icon: {
+      source: 'verified-local',
+      key: 'chroma',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/chroma.svg',
+      url: '/assets/icons/chroma.svg',
+      brandColor: '#FF6B6B',
+      notes: 'Chroma vector database official mark',
+    },
   },
-  milvus: {
+  'milvus': {
     id: 'milvus',
-    type: 'brand',
-    title: 'Milvus',
-    source: { kind: 'simple-icon', icon: siMilvus },
+    name: 'Milvus',
+    icon: {
+      source: 'simple-icons',
+      key: 'siMilvus',
+      fallbackLevel: 3,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'simple-icons:siMilvus',
+      simpleIcon: siMilvus,
+      brandColor: '#00A1EA',
+    },
   },
-  weaviate: {
+  'weaviate': {
     id: 'weaviate',
-    type: 'brand', // Official Weaviate 3D geometric vector
-    title: 'Weaviate',
-    source: { kind: 'local-svg', url: '/assets/icons/weaviate.svg', title: 'Weaviate' },
+    name: 'Weaviate',
+    icon: {
+      source: 'verified-local',
+      key: 'weaviate',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/weaviate.svg',
+      url: '/assets/icons/weaviate.svg',
+      brandColor: '#00E676',
+      notes: 'Weaviate vector database official mark',
+    },
   },
-  qdrant: {
+  'qdrant': {
     id: 'qdrant',
-    type: 'brand',
-    title: 'Qdrant',
-    source: { kind: 'simple-icon', icon: siQdrant },
+    name: 'Qdrant',
+    icon: {
+      source: 'svgl',
+      key: 'qdrant',
+      fallbackLevel: 2,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'svgl:qdrant',
+      url: '/assets/icons/svgl/qdrant_dark.svg',
+      brandColor: '#DC2626',
+    },
   },
-  pinecone: {
+  'pinecone': {
     id: 'pinecone',
-    type: 'brand', // Official Pinecone geometric vector
-    title: 'Pinecone',
-    source: { kind: 'local-svg', url: '/assets/icons/pinecone.svg', title: 'Pinecone' },
+    name: 'Pinecone',
+    icon: {
+      source: 'verified-local',
+      key: 'pinecone',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/pinecone.svg',
+      url: '/assets/icons/pinecone.svg',
+      brandColor: '#000000',
+      notes: 'Pinecone vector database official mark',
+    },
   },
-  llamaparse: {
+  'llamaparse': {
     id: 'llamaparse',
-    type: 'generic', // Document parsing extraction technical symbol
-    title: 'LlamaParse',
-    source: { kind: 'local-svg', url: '/assets/icons/llamaparse.svg', title: 'LlamaParse' },
+    name: 'LlamaParse',
+    icon: {
+      source: 'verified-local',
+      key: 'llamaparse',
+      fallbackLevel: 4,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: '/assets/icons/llamaparse.svg',
+      url: '/assets/icons/llamaparse.svg',
+      brandColor: '#805AD5',
+      notes: 'LlamaIndex LlamaParse official mark',
+    },
   },
-  unstructured: {
+  'unstructured': {
     id: 'unstructured',
-    type: 'brand', // Official Unstructured.io vector mark
-    title: 'Unstructured',
-    source: { kind: 'local-svg', url: '/assets/icons/unstructured.svg', title: 'Unstructured' },
+    name: 'Unstructured',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'unstructured',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:unstructured',
+      brandColor: '#0ADDF8',
+    },
   },
-  prometheus: {
+  'prometheus': {
     id: 'prometheus',
-    type: 'brand',
-    title: 'Prometheus',
-    source: { kind: 'simple-icon', icon: siPrometheus },
+    name: 'Prometheus',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'prometheus',
+      fallbackLevel: 1,
+      classification: 'technology-framework',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:prometheus',
+      brandColor: '#E6522C',
+    },
   },
-  grafana: {
+  'grafana': {
     id: 'grafana',
-    type: 'brand',
-    title: 'Grafana',
-    source: { kind: 'simple-icon', icon: siGrafana },
+    name: 'Grafana',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'grafana',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:grafana',
+      brandColor: '#F46800',
+    },
   },
-  sentry: {
+  'sentry': {
     id: 'sentry',
-    type: 'brand',
-    title: 'Sentry',
-    source: { kind: 'simple-icon', icon: siSentry },
+    name: 'Sentry',
+    icon: {
+      source: 'tech-stack-icons',
+      key: 'sentry',
+      fallbackLevel: 1,
+      classification: 'official-brand',
+      status: 'verified',
+      sourceAssetId: 'tech-stack-icons:sentry',
+      brandColor: '#362D59',
+    },
   },
 };
 
 /**
- * Direct registry lookup helper.
+ * Retrieves the canonical icon definition for a skill.
  */
-export function getIconDefinition(skillId: string): IconDefinition | undefined {
-  const normalizedId = skillId.toLowerCase().trim();
-  return ICON_REGISTRY[normalizedId];
+export function getIconDefinition(skillId: string): SkillRegistryEntry | undefined {
+  return ICON_REGISTRY[skillId.toLowerCase().trim()];
 }
 
 /**
- * Resolves any skill icon deterministically with strict typing.
- * Never guesses random filenames. Returns 'missing' explicitly if unmapped.
+ * Authoritative Skill Icon Resolver.
+ * Follows exact deterministic hierarchy:
+ * 1. Tech Stack Icons
+ * 2. SVGL (locally cached)
+ * 3. Simple Icons
+ * 4. Verified Existing Local SVG
+ * 5. Missing State
  */
-export function resolveSkillIcon(skillId: string, name?: string): ResolvedIcon {
+export function resolveSkillIcon(skillId: string, name?: string): ResolvedSkillIcon {
   const normalizedId = skillId.toLowerCase().trim();
-  const displayName = name || normalizedId;
   const def = ICON_REGISTRY[normalizedId];
+  const displayName = name || (def ? def.name : skillId);
 
-  if (!def || def.type === 'missing' || def.source.kind === 'missing') {
+  if (!def || def.icon.source === 'missing') {
     return {
       id: normalizedId,
       name: displayName,
-      iconType: 'missing',
+      source: 'missing',
+      fallbackLevel: 5,
+      key: normalizedId,
+      classification: 'missing',
+      status: 'missing',
       kind: 'missing',
       title: displayName,
     };
   }
 
-  if (def.source.kind === 'local-svg') {
+  const { icon } = def;
+
+  if (icon.source === 'tech-stack-icons') {
     return {
       id: def.id,
       name: displayName,
-      iconType: def.type,
-      kind: 'local-svg',
-      url: def.source.url,
-      title: def.source.title || def.title || displayName,
+      source: 'tech-stack-icons',
+      fallbackLevel: 1,
+      key: icon.key,
+      classification: icon.classification,
+      status: icon.status,
+      kind: 'tech-stack-icon',
+      title: displayName,
+      brandColor: icon.brandColor,
     };
   }
 
-  if (def.source.kind === 'simple-icon') {
+  if (icon.source === 'svgl') {
     return {
       id: def.id,
       name: displayName,
-      iconType: def.type,
+      source: 'svgl',
+      fallbackLevel: 2,
+      key: icon.key,
+      url: icon.url || `/assets/icons/svgl/${icon.key}.svg`,
+      classification: icon.classification,
+      status: icon.status,
+      kind: 'svgl-svg',
+      title: displayName,
+      brandColor: icon.brandColor,
+    };
+  }
+
+  if (icon.source === 'simple-icons') {
+    const si = icon.simpleIcon;
+    return {
+      id: def.id,
+      name: displayName,
+      source: 'simple-icons',
+      fallbackLevel: 3,
+      key: icon.key,
+      path: si?.path || '',
+      hex: si?.hex || 'FFFFFF',
+      classification: icon.classification,
+      status: icon.status,
       kind: 'svg-path',
-      path: def.source.icon.path,
-      hex: def.source.icon.hex,
-      title: def.source.icon.title || def.title || displayName,
+      title: si?.title || displayName,
+      brandColor: icon.brandColor || (si?.hex ? `#${si.hex}` : undefined),
+    };
+  }
+
+  if (icon.source === 'verified-local') {
+    return {
+      id: def.id,
+      name: displayName,
+      source: 'verified-local',
+      fallbackLevel: 4,
+      key: icon.key,
+      url: icon.url || `/assets/icons/${icon.key}.svg`,
+      classification: icon.classification,
+      status: icon.status,
+      kind: 'local-svg',
+      title: displayName,
+      brandColor: icon.brandColor,
     };
   }
 
   return {
     id: normalizedId,
     name: displayName,
-    iconType: 'missing',
+    source: 'missing',
+    fallbackLevel: 5,
+    key: normalizedId,
+    classification: 'missing',
+    status: 'missing',
     kind: 'missing',
     title: displayName,
   };

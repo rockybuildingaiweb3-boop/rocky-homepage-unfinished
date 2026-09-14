@@ -1,4 +1,5 @@
 import React from 'react';
+import StackIcon from 'tech-stack-icons';
 import { resolveSkillIcon } from './iconResolver';
 
 export interface TechLogoProps {
@@ -11,8 +12,8 @@ export interface TechLogoProps {
 
 /**
  * Normalizes brand hex values so that dark/black brand logos
- * (e.g., Next.js, Three.js, Vercel, wagmi, Ollama) remain crisp
- * and legible on dark atmospheric substrates.
+ * (e.g., wagmi, Next.js, Ollama) remain crisp and legible
+ * on dark atmospheric substrates.
  */
 function getNormalizedFill(hex: string, overrideColor?: string): string {
   if (overrideColor) {
@@ -48,7 +49,26 @@ export const TechLogo: React.FC<TechLogoProps> = ({
     );
   }
 
-  if (resolved.kind === 'local-svg') {
+  // Priority 1: Tech Stack Icons
+  if (resolved.kind === 'tech-stack-icon') {
+    return (
+      <span
+        className={`inline-flex items-center justify-center shrink-0 pointer-events-none select-none max-w-full max-h-full ${className}`}
+        style={size ? { width: size, height: size } : undefined}
+        title={displayName}
+        aria-label={displayName}
+      >
+        <StackIcon
+          name={resolved.key}
+          variant="dark"
+          className="w-full h-full object-contain flex items-center justify-center pointer-events-none"
+        />
+      </span>
+    );
+  }
+
+  // Priority 2 & 4: SVGL and Verified Local SVG assets
+  if (resolved.kind === 'svgl-svg' || resolved.kind === 'local-svg') {
     return (
       <img
         src={resolved.url}
@@ -61,6 +81,7 @@ export const TechLogo: React.FC<TechLogoProps> = ({
     );
   }
 
+  // Priority 3: Simple Icons SVG path
   const fill = getNormalizedFill(resolved.hex, color);
 
   return (
