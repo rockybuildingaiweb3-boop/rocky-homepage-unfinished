@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { LoaderPhase } from '../ceremony/types';
 import { CeremonySignature } from '../ceremony/CeremonySignature';
 import { CeremonyFlower } from '../ceremony/CeremonyFlower';
@@ -12,20 +12,36 @@ export interface LoaderProps {
   onFinish?: () => void;
 }
 
+const PHASE_ORDER: Record<LoaderPhase, number> = {
+  INITIALIZING: 0,
+  ATMOSPHERE: 1,
+  SIGNING: 2,
+  FLOWER_EMERGE: 3,
+  IDENTITY_SETTLE: 4,
+  READY: 5,
+  EXITING: 6,
+  COMPLETE: 7,
+};
+
 /**
  * Opening Ceremony Master Coordinator
  *
  * Deterministic Timeline & Monotonic Progress Contract:
- * 01 INITIALIZING:   0ms   – 500ms   (0%   – 15%)
- * 02 ATMOSPHERE:     500ms – 1200ms  (15%  – 25%)
- * 03 SIGNATURE:      1200ms – 3300ms (25%  – 65%)
- * 04 BOTANICAL BLOOM:3300ms – 4200ms (65%  – 82%)
- * 05 IDENTITY:       4200ms – 4900ms (82%  – 95%)
- * 06 READY:          4900ms – 5400ms (95%  – 100%)
- * EXITING:           5400ms – 6250ms (100% locked)
- * COMPLETE:          > 6250ms        (100% locked, unmount)
+ * 01 INITIALIZING:    0ms   – 450ms   (0%   – 12%)  Atmospheric inception
+ * 02 ATMOSPHERE:      450ms – 1100ms  (12%  – 24%)  Subtle cosmic violet depth
+ * 03 SIGNATURE:       1100ms – 3400ms (24%  – 68%)  Sequential authentic handwriting
+ * 04 BOTANICAL BLOOM: 3400ms – 4400ms (68%  – 84%)  Velvet rose emergence from deep shadow
+ * 05 IDENTITY:        4400ms – 5200ms (84%  – 96%)  Typographic identity settles
+ * 06 READY:           5200ms – 5700ms (96%  – 100%) Harmonic lockup, deliberate hold
+ * EXITING:            5700ms – 6500ms (100% locked, aperture expands to reveal Hero)
+ * COMPLETE:           > 6500ms        (100% locked, unmount)
  *
- * Guaranteed Monotonic: P(t + 1) >= P(t) under all conditions.
+ * Architectural Guarantees:
+ * 1. ONE-SHOT LIFECYCLE: Never restarts on parent re-renders or prop updates.
+ * 2. STRICT MONOTONICITY: Phase transitions only move forward (0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7).
+ * 3. STRICT MONOTONIC PROGRESS: P(t + 1) >= P(t) under all circumstances.
+ * 4. ISOLATED VIEWPORT WORLD: Full z-[99999] coverage, suppresses page scroll and underlying elements.
+ * 5. SEAMLESS HERO HANDOFF: Deliberate 400ms settle before smooth aperture exit transition.
  */
 export const Loader: React.FC<LoaderProps> = ({
   progress,
@@ -39,17 +55,28 @@ export const Loader: React.FC<LoaderProps> = ({
   const [displayProgress, setDisplayProgress] = useState<number>(0);
   const [isExiting, setIsExiting] = useState<boolean>(false);
 
-  const startTimeRef = useRef<number>(0);
-  const reqAnimRef = useRef<number | null>(null);
-  const heroAwakenedRef = useRef<boolean>(false);
-  const networkDoneRef = useRef<boolean>(loadingDone);
+  // Stable references that NEVER trigger re-renders or reset the ceremony
+  const onAwakenHeroRef = useRef(onAwakenHero);
+  const onFinishRef = useRef(onFinish);
+  const loadingDoneRef = useRef(loadingDone);
+  const externalProgressRef = useRef(progress);
+
+  // Monotonic state tracking
+  const currentPhaseIndexRef = useRef<number>(0);
   const maxDisplayProgressRef = useRef<number>(0);
+  const hasStartedRef = useRef<boolean>(false);
+  const heroAwakenedRef = useRef<boolean>(false);
+  const reqAnimRef = useRef<number | null>(null);
 
+  // Keep callback refs synchronized without affecting the animation loop
   useEffect(() => {
-    networkDoneRef.current = loadingDone;
-  }, [loadingDone]);
+    onAwakenHeroRef.current = onAwakenHero;
+    onFinishRef.current = onFinish;
+    loadingDoneRef.current = loadingDone;
+    externalProgressRef.current = progress;
+  }, [onAwakenHero, onFinish, loadingDone, progress]);
 
-  // Lock body scroll while ceremony is running to prevent visual jumping
+  // Lock body scroll while ceremony is active
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -58,70 +85,111 @@ export const Loader: React.FC<LoaderProps> = ({
     };
   }, []);
 
-  const triggerAwakenHero = useCallback(() => {
+  // Safe helper to advance phase strictly forward
+  const advancePhase = (nextPhase: LoaderPhase) => {
+    const nextIdx = PHASE_ORDER[nextPhase];
+    if (nextIdx > currentPhaseIndexRef.current) {
+      currentPhaseIndexRef.current = nextIdx;
+      setPhase(nextPhase);
+    }
+  };
+
+  const triggerAwakenHero = () => {
     if (!heroAwakenedRef.current) {
       heroAwakenedRef.current = true;
-      if (onAwakenHero) onAwakenHero();
+      if (onAwakenHeroRef.current) {
+        onAwakenHeroRef.current();
+      }
     }
-  }, [onAwakenHero]);
+  };
 
-  // Master Ceremony RAF loop
+  // Master One-Shot Ceremony RAF Loop
   useEffect(() => {
-    startTimeRef.current = performance.now();
+    // Ensure the ceremony loop is initialized strictly once
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
 
-    const T_INIT = 500;
-    const T_ATMO = 1200;
-    const T_SIGN = 3300;
-    const T_FLOWER = 4200;
-    const T_IDENTITY = 4900;
-    const T_READY = 5400;
-    const T_EXIT = 6250;
+    // Check prefers-reduced-motion
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      // Instant visual lockup without stroke animation physics
+      advancePhase('READY');
+      setStrokeProgress(1);
+      setFlowerProgress(1);
+      setDisplayProgress(100);
+      maxDisplayProgressRef.current = 100;
+
+      const timer = setTimeout(() => {
+        advancePhase('EXITING');
+        setIsExiting(true);
+        triggerAwakenHero();
+
+        setTimeout(() => {
+          advancePhase('COMPLETE');
+          if (onFinishRef.current) onFinishRef.current();
+        }, 800);
+      }, 1200);
+
+      return () => clearTimeout(timer);
+    }
+
+    const startTime = performance.now();
+
+    const T_INIT = 450;
+    const T_ATMO = 1100;
+    const T_SIGN = 3400;
+    const T_FLOWER = 4400;
+    const T_IDENTITY = 5200;
+    const T_READY = 5700;
+    const T_EXIT = 6500;
 
     const animateCeremony = (now: number) => {
-      const elapsed = now - startTimeRef.current;
+      const elapsed = now - startTime;
       let targetVisualPercent = 0;
 
       if (elapsed < T_INIT) {
-        setPhase('INITIALIZING');
+        advancePhase('INITIALIZING');
         setStrokeProgress(0);
         setFlowerProgress(0);
         const t = elapsed / T_INIT;
-        targetVisualPercent = t * 15; // 0% -> 15%
+        targetVisualPercent = t * 12; // 0% -> 12%
       } else if (elapsed < T_ATMO) {
-        setPhase('ATMOSPHERE');
+        advancePhase('ATMOSPHERE');
         setStrokeProgress(0);
         setFlowerProgress(0);
         const t = (elapsed - T_INIT) / (T_ATMO - T_INIT);
-        targetVisualPercent = 15 + t * 10; // 15% -> 25%
+        targetVisualPercent = 12 + t * 12; // 12% -> 24%
       } else if (elapsed < T_SIGN) {
-        setPhase('SIGNING');
+        advancePhase('SIGNING');
         const signT = (elapsed - T_ATMO) / (T_SIGN - T_ATMO); // 0 -> 1
         setStrokeProgress(signT);
         setFlowerProgress(0);
-        targetVisualPercent = 25 + signT * 40; // 25% -> 65%
+        targetVisualPercent = 24 + signT * 44; // 24% -> 68%
       } else if (elapsed < T_FLOWER) {
-        setPhase('FLOWER_EMERGE');
+        advancePhase('FLOWER_EMERGE');
         setStrokeProgress(1);
         const flowerT = (elapsed - T_SIGN) / (T_FLOWER - T_SIGN); // 0 -> 1
         setFlowerProgress(flowerT);
-        targetVisualPercent = 65 + flowerT * 17; // 65% -> 82%
+        targetVisualPercent = 68 + flowerT * 16; // 68% -> 84%
       } else if (elapsed < T_IDENTITY) {
-        setPhase('IDENTITY_SETTLE');
+        advancePhase('IDENTITY_SETTLE');
         setStrokeProgress(1);
         setFlowerProgress(1);
         const identityT = (elapsed - T_FLOWER) / (T_IDENTITY - T_FLOWER); // 0 -> 1
-        targetVisualPercent = 82 + identityT * 13; // 82% -> 95%
+        targetVisualPercent = 84 + identityT * 12; // 84% -> 96%
       } else if (elapsed < T_READY) {
-        setPhase('READY');
+        advancePhase('READY');
         setStrokeProgress(1);
         setFlowerProgress(1);
         const readyT = (elapsed - T_IDENTITY) / (T_READY - T_IDENTITY);
-        targetVisualPercent = 95 + readyT * 5; // 95% -> 100%
+        targetVisualPercent = 96 + readyT * 4; // 96% -> 100%
 
-        // Real asset readiness gate with 6.5s graceful fallback
-        const isRealAssetReady = networkDoneRef.current || elapsed >= 6500;
-        if (!isRealAssetReady && targetVisualPercent >= 99) {
-          // Hold gracefully at 99% until real assets report ready
+        // Asset readiness gate: hold gently at 99% if network assets are still in flight
+        const isNetworkReady = loadingDoneRef.current || elapsed >= 7000;
+        if (!isNetworkReady && targetVisualPercent >= 99) {
           targetVisualPercent = 99;
           const nextVal = Math.max(maxDisplayProgressRef.current, 99);
           if (nextVal > maxDisplayProgressRef.current) {
@@ -132,25 +200,25 @@ export const Loader: React.FC<LoaderProps> = ({
           return;
         }
       } else if (elapsed < T_EXIT) {
-        // EXITING phase: aperture expands into Hero world
-        setPhase('EXITING');
+        // EXITING phase: aperture expands gracefully to reveal Hero
+        advancePhase('EXITING');
         setIsExiting(true);
         triggerAwakenHero();
         setStrokeProgress(1);
         setFlowerProgress(1);
         targetVisualPercent = 100;
       } else {
-        // COMPLETE: handoff control and unmount
-        setPhase('COMPLETE');
+        // COMPLETE: seamless handoff and unmount
+        advancePhase('COMPLETE');
         triggerAwakenHero();
-        if (onFinish) onFinish();
+        if (onFinishRef.current) onFinishRef.current();
         return;
       }
 
-      // Mathematical Monotonicity Invariant: P(t+1) >= P(t)
-      const nextProgress = Math.max(maxDisplayProgressRef.current, Math.round(targetVisualPercent));
-      if (nextProgress > maxDisplayProgressRef.current) {
-        maxDisplayProgressRef.current = Math.min(100, nextProgress);
+      // Mathematical Monotonicity Guarantee: P(t+1) >= P(t) under all conditions
+      const computedProgress = Math.round(targetVisualPercent);
+      if (computedProgress > maxDisplayProgressRef.current) {
+        maxDisplayProgressRef.current = Math.min(100, computedProgress);
         setDisplayProgress(maxDisplayProgressRef.current);
       }
 
@@ -162,7 +230,7 @@ export const Loader: React.FC<LoaderProps> = ({
     return () => {
       if (reqAnimRef.current) cancelAnimationFrame(reqAnimRef.current);
     };
-  }, [triggerAwakenHero, onFinish]);
+  }, []); // Strictly empty dependency array: one-shot lifetime
 
   return (
     <div
@@ -194,21 +262,21 @@ export const Loader: React.FC<LoaderProps> = ({
         }}
         aria-hidden="true"
       >
-        {/* Central Ethereal Starlight Aura */}
+        {/* Central Ethereal Starlight Atmosphere (subtle cosmic mist) */}
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[70vw] max-w-[700px] aspect-square rounded-full mix-blend-screen will-change-transform transition-all duration-1000 ease-out"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[70vw] max-w-[650px] aspect-square rounded-full mix-blend-screen will-change-transform transition-all duration-1000 ease-out"
           style={{
             background:
-              'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.32) 0%, rgba(129, 140, 248, 0.18) 38%, rgba(243, 232, 255, 0.06) 65%, transparent 80%)',
-            filter: 'blur(36px)',
-            opacity: phase === 'INITIALIZING' ? 0 : isExiting ? 0.95 : 0.75,
+              'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.14) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%)',
+            filter: 'blur(48px)',
+            opacity: phase === 'INITIALIZING' ? 0 : isExiting ? 0.75 : 0.55,
             transform: isExiting
-              ? 'translate(-50%, -50%) scale(1.25)'
+              ? 'translate(-50%, -50%) scale(1.20)'
               : 'translate(-50%, -50%) scale(1)',
           }}
         />
 
-        {/* Botanical Studio Velvet Form (transparent PNG/WebP, zero black box) */}
+        {/* Botanical Velvet Flower Form (restrained medium luminance, zero black box) */}
         <CeremonyFlower phase={phase} phaseProgress={flowerProgress} />
       </div>
 
@@ -219,7 +287,7 @@ export const Loader: React.FC<LoaderProps> = ({
         className="relative z-10 w-full max-w-4xl px-4 sm:px-6 flex flex-col items-center justify-center will-change-transform"
         style={{
           transform: isExiting ? 'scale(1.04) translate3d(0, -8px, 0)' : 'scale(1) translate3d(0, 0, 0)',
-          filter: isExiting ? 'blur(4px)' : 'none',
+          filter: isExiting ? 'blur(3px)' : 'none',
           transition: 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.85s ease',
         }}
       >
@@ -240,3 +308,4 @@ export const Loader: React.FC<LoaderProps> = ({
 };
 
 export default Loader;
+

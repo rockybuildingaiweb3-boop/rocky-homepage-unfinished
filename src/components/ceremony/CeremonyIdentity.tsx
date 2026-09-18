@@ -23,11 +23,11 @@ export const CeremonyIdentity: React.FC<CeremonyIdentityProps> = ({ phase }) => 
       }}
     >
       <h1
-        className="text-center m-0 p-0 font-normal lowercase tracking-[-0.03em] text-white text-3xl sm:text-4xl md:text-5xl select-none"
+        className="text-center m-0 p-0 font-normal lowercase tracking-[-0.015em] text-white text-3xl sm:text-4xl md:text-5xl select-none"
         style={{
           fontFamily: 'var(--title-font)',
           textShadow:
-            '0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(168, 85, 247, 0.65), 0 4px 18px rgba(0, 0, 0, 0.95)',
+            '0 2px 14px rgba(0, 0, 0, 0.9), 0 0 24px rgba(216, 180, 254, 0.35)',
         }}
       >
         rocky babcock

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { GlobalShell } from './components/layout';
 import { HomePage } from './pages/HomePage';
 import { useIsMobile } from './hooks/useIsMobile';
@@ -9,12 +9,16 @@ function PortfolioApp() {
   const { loadingDone, progress, siteData } = usePreloadAssets();
   const [heroAwake, setHeroAwake] = useState(false);
 
+  const handleAwakenHero = useCallback(() => {
+    setHeroAwake(true);
+  }, []);
+
   return (
     <GlobalShell
       progress={progress}
       loadingDone={loadingDone}
       isMobile={isMobile}
-      onAwakenHero={() => setHeroAwake(true)}
+      onAwakenHero={handleAwakenHero}
     >
       <HomePage siteData={siteData} isHeroAwake={heroAwake} />
     </GlobalShell>
@@ -24,3 +28,4 @@ function PortfolioApp() {
 export default function App() {
   return <PortfolioApp />;
 }
+

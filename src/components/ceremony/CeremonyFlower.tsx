@@ -6,12 +6,22 @@ interface CeremonyFlowerProps {
   phaseProgress?: number; // 0 to 1 within the current phase
 }
 
+/**
+ * CeremonyFlower
+ *
+ * Restrained botanical velvet rose emerging from darkness:
+ * - Restrained medium luminance hierarchy (Signature > Rose > Atmosphere > Progress)
+ * - Rich internal petal detail and deep burgundy velvety folds preserved
+ * - No fluorescent neon red, no white/screen washouts over petals
+ * - Smooth anti-aliased edge falloff with color decontamination, zero rectangular border
+ * - Sits in harmonious, balanced spatial depth behind the calligraphic signature
+ */
 export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProgress = 0 }) => {
   // Determine emergence metrics based on ceremony phase
   let opacity = 0;
   let scale = 0.88;
   let rotation = -2.0;
-  let blurAmount = 6;
+  let blurAmount = 8;
   let glowIntensity = 0.1;
 
   switch (phase) {
@@ -19,62 +29,63 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProg
       opacity = 0;
       scale = 0.86;
       rotation = -2.5;
-      blurAmount = 8;
+      blurAmount = 10;
       glowIntensity = 0;
       break;
 
     case 'ATMOSPHERE':
       // Subtle organic presence stirring in the deep void
-      opacity = 0.25;
-      scale = 0.90;
-      rotation = -1.8;
-      blurAmount = 4;
-      glowIntensity = 0.3;
+      opacity = 0.16;
+      scale = 0.89;
+      rotation = -2.0;
+      blurAmount = 6;
+      glowIntensity = 0.18;
       break;
 
     case 'SIGNING':
-      // Gentle velvety silhouette blooming softly behind the calligraphy
-      opacity = 0.50;
-      scale = 0.94;
-      rotation = -1.0;
+      // Gentle velvety silhouette blooming softly in atmospheric depth behind the calligraphy
+      opacity = 0.38;
+      scale = 0.93;
+      rotation = -1.2;
       blurAmount = 2.5;
-      glowIntensity = 0.5;
+      glowIntensity = 0.35;
       break;
 
     case 'FLOWER_EMERGE': {
-      // Organic bloom emergence with subtle breathing overshoot and settling
+      // Organic bloom emergence with subtle breathing overshoot and settling into velvety dimension
       const t = Math.max(0, Math.min(1, phaseProgress));
       const easedT = 1 - Math.pow(1 - t, 2.8);
-      const overshoot = Math.sin(t * Math.PI) * 0.025;
-      scale = 0.94 + easedT * 0.06 + overshoot; // 0.94 -> 1.025 -> 1.00
-      opacity = 0.50 + easedT * 0.44; // 0.50 -> 0.94
-      rotation = -1.0 + easedT * 1.0; // -1.0 -> 0.0 deg
+      const overshoot = Math.sin(t * Math.PI) * 0.02;
+      scale = 0.93 + easedT * 0.07 + overshoot; // 0.93 -> 1.02 -> 1.00
+      opacity = 0.38 + easedT * 0.27; // 0.38 -> 0.65 (restrained medium luminance)
+      rotation = -1.2 + easedT * 1.2; // -1.2 -> 0.0 deg
       blurAmount = Math.max(0, 2.5 - easedT * 2.5);
-      glowIntensity = 0.5 + easedT * 0.45;
+      glowIntensity = 0.35 + easedT * 0.30; // 0.35 -> 0.65
       break;
     }
 
     case 'IDENTITY_SETTLE':
     case 'READY':
-      opacity = 0.94;
+      // Settled, mysterious, dimensional botanical object (Signature remains primary focus)
+      opacity = 0.65;
       scale = 1.0;
       rotation = 0;
       blurAmount = 0;
-      glowIntensity = 0.88;
+      glowIntensity = 0.65;
       break;
 
     case 'EXITING':
       // Atmospheric aperture expansion: flower dissolves as camera moves into Hero garden
-      opacity = 0;
-      scale = 1.18;
-      rotation = 0.8;
-      blurAmount = 8;
-      glowIntensity = 1.0;
+      opacity = 0.50;
+      scale = 1.10;
+      rotation = 0.5;
+      blurAmount = 3;
+      glowIntensity = 0.40;
       break;
 
     case 'COMPLETE':
       opacity = 0;
-      scale = 1.25;
+      scale = 1.20;
       break;
   }
 
@@ -83,25 +94,25 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProg
       className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0"
       aria-hidden="true"
     >
-      {/* 1. Luminous Ambient Backlight Corona (soft violet-magenta starlight glow behind petals) */}
+      {/* 1. Restrained Ambient Atmosphere (deep violet-slate cosmic mist behind flower) */}
       <div
-        className="absolute w-[85vw] sm:w-[68vw] max-w-[640px] aspect-square rounded-full pointer-events-none mix-blend-screen will-change-transform transition-all duration-1000 ease-out"
+        className="absolute w-[80vw] sm:w-[62vw] max-w-[560px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-1000 ease-out"
         style={{
           background:
-            'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.42) 0%, rgba(129, 140, 248, 0.22) 36%, rgba(192, 132, 252, 0.10) 62%, transparent 80%)',
-          filter: 'blur(40px)',
+            'radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.16) 0%, rgba(99, 102, 241, 0.08) 38%, transparent 70%)',
+          filter: 'blur(52px)',
           opacity: glowIntensity,
-          transform: `scale(${scale * 1.06})`,
+          transform: `scale(${scale * 1.04})`,
         }}
       />
 
-      {/* 2. Photographic Velvet Flower with 100% Alpha Transparency (no black box / rectangle) */}
+      {/* 2. Photographic Velvet Flower with Alpha Transparency (no black box, no edge contours) */}
       <div
-        className="relative w-[85vw] sm:w-[70vw] md:w-[60vw] max-w-[580px] aspect-square flex items-center justify-center will-change-transform"
+        className="relative w-[75vw] sm:w-[60vw] md:w-[50vw] max-w-[480px] aspect-square flex items-center justify-center will-change-transform"
         style={{
           opacity,
           transform: `scale(${scale}) rotate(${rotation}deg)`,
-          filter: blurAmount > 0 ? `blur(${blurAmount}px)` : 'none',
+          filter: blurAmount > 0 ? `blur(${blurAmount}px)` : 'drop-shadow(0 12px 36px rgba(0, 0, 0, 0.7))',
           transition:
             phase === 'FLOWER_EMERGE'
               ? 'none'
@@ -117,16 +128,6 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProg
             className="w-full h-full object-contain select-none pointer-events-none"
           />
         </picture>
-
-        {/* Delicate inner starlight sheen breathing with the petals */}
-        <div
-          className="absolute inset-0 pointer-events-none mix-blend-screen"
-          style={{
-            background:
-              'radial-gradient(circle at 52% 48%, rgba(255, 255, 255, 0.24) 0%, rgba(216, 180, 254, 0.14) 32%, transparent 68%)',
-            opacity: glowIntensity * 0.75,
-          }}
-        />
       </div>
     </div>
   );

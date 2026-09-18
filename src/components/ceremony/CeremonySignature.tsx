@@ -198,15 +198,15 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
         </defs>
 
         {/* ── 1. SUBTLE ATMOSPHERIC AURA (Restrained, delicate background depth) ── */}
-        <g filter="url(#sig-atmospheric-aura)" opacity="0.65">
+        <g filter="url(#sig-atmospheric-aura)" opacity="0.45">
           {windows.map((stroke, idx) => {
             const { offset, opacity } = strokeOffsets[idx] || { offset: stroke.length, opacity: 0 };
             return (
               <path
                 key={`aura-${stroke.id}`}
                 d={stroke.pathD}
-                stroke="rgba(168, 85, 247, 0.55)"
-                strokeWidth={5.5}
+                stroke="rgba(168, 85, 247, 0.45)"
+                strokeWidth={3.8}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeDasharray={stroke.length}
@@ -220,15 +220,15 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           })}
         </g>
 
-        {/* ── 2. SOFT LUMINOUS BODY (Soft white-lilac body of liquid ink) ── */}
-        <g filter="url(#sig-luminous-body)" stroke="rgba(238, 230, 255, 0.9)" strokeLinecap="round" strokeLinejoin="round">
+        {/* ── 2. SOFT LUMINOUS BODY (Liquid calligraphic ink body) ── */}
+        <g filter="url(#sig-luminous-body)" stroke="rgba(242, 235, 255, 0.92)" strokeLinecap="round" strokeLinejoin="round">
           {windows.map((stroke, idx) => {
             const { offset, opacity } = strokeOffsets[idx] || { offset: stroke.length, opacity: 0 };
             return (
               <path
                 key={`body-${stroke.id}`}
                 d={stroke.pathD}
-                strokeWidth={3.4}
+                strokeWidth={2.4}
                 strokeDasharray={stroke.length}
                 strokeDashoffset={offset}
                 opacity={opacity}
@@ -251,7 +251,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
                   pathRefs.current[idx] = el;
                 }}
                 d={stroke.pathD}
-                strokeWidth={1.85}
+                strokeWidth={1.4}
                 strokeDasharray={stroke.length}
                 strokeDashoffset={offset}
                 opacity={opacity}
@@ -263,49 +263,24 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           })}
         </g>
 
-        {/* ── 4. REFINED PEN TIP (Point of contact + subtle local glow + no cartoon diamond) ── */}
+        {/* ── 4. REFINED PEN TIP (Ink bead / micro-nib point of contact, hides during pen lifts) ── */}
         {penPosition && !isComplete && (
           <g
             transform={`translate(${penPosition.x}, ${penPosition.y})`}
-            className="will-change-transform pointer-events-none transition-opacity duration-200"
-            style={{ opacity: isPenLifting ? 0.45 : 1 }}
+            className="will-change-transform pointer-events-none transition-opacity duration-150"
+            style={{ opacity: isPenLifting ? 0 : 1 }}
           >
             {/* Subtle local glow halo */}
             <circle
-              r={isPenLifting ? 3.5 : 5.5}
-              fill="rgba(192, 132, 252, 0.4)"
+              r={3.5}
+              fill="rgba(192, 132, 252, 0.45)"
               filter="url(#pen-tip-glow)"
             />
             {/* Tiny crisp point of contact */}
             <circle
-              r={isPenLifting ? 1.2 : 2.0}
+              r={1.5}
               fill="#ffffff"
             />
-          </g>
-        )}
-
-        {/* ── 5. RESTRAINED SPECULAR GLINTS (At most 2 structural, subtle accents) ── */}
-        {showGlints && (
-          <g className="transition-opacity duration-1000 ease-out opacity-85">
-            {/* Rare subtle glint on R crest */}
-            <g transform="translate(160, 68) scale(0.45)">
-              <path
-                fill="#ffffff"
-                filter="drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 10px rgba(168,85,247,0.7))"
-                d="M 0 -14 Q 0 0 14 0 Q 0 0 0 14 Q 0 0 -14 0 Q 0 0 0 -14 Z"
-                className="animate-pulse"
-              />
-            </g>
-            {/* Subtle glint at the very flourish tip */}
-            <g transform="translate(1095, 174) scale(0.4)">
-              <path
-                fill="#ffffff"
-                filter="drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 10px rgba(192,132,252,0.7))"
-                d="M 0 -14 Q 0 0 14 0 Q 0 0 0 14 Q 0 0 -14 0 Q 0 0 0 -14 Z"
-                className="animate-pulse"
-                style={{ animationDelay: '250ms' }}
-              />
-            </g>
           </g>
         )}
       </svg>
