@@ -66,14 +66,18 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
         isHovered
           ? 'scale-115 z-40 opacity-100'
           : isRelated
-          ? 'scale-105 z-30 opacity-100'
+          ? 'scale-105 z-30 opacity-90'
           : isDimmed
-          ? 'scale-95 z-10 opacity-20 hover:opacity-90 hover:scale-105'
+          ? tier === 'core'
+            ? 'scale-95 z-10 opacity-55 hover:opacity-95 hover:scale-105'
+            : tier === 'professional'
+            ? 'scale-95 z-10 opacity-48 hover:opacity-90 hover:scale-105'
+            : 'scale-95 z-10 opacity-40 hover:opacity-90 hover:scale-105'
           : tier === 'core'
           ? 'scale-100 z-25 opacity-100 hover:opacity-100 hover:scale-110'
           : tier === 'professional'
-          ? 'scale-100 z-15 opacity-80 hover:opacity-100 hover:scale-105'
-          : 'scale-95 z-10 opacity-50 hover:opacity-90 hover:scale-105'
+          ? 'scale-100 z-15 opacity-85 hover:opacity-100 hover:scale-105'
+          : 'scale-95 z-10 opacity-65 hover:opacity-90 hover:scale-105'
       } ${className}`}
     >
       {/* ─── LAYER 1: AMBIENT LOCAL LIGHT FIELD (Major stars have persistent glow) ─── */}
@@ -82,7 +86,7 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
           isHovered
             ? 'opacity-100 scale-125'
             : isRelated
-            ? 'opacity-70 scale-110'
+            ? 'opacity-50 scale-105'
             : tier === 'core'
             ? 'opacity-40 scale-105 group-hover:opacity-80'
             : tier === 'professional'
@@ -107,7 +111,7 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
           isHovered
             ? 'border-white/60 opacity-100 animate-pulse scale-105'
             : isRelated
-            ? 'border-purple-400/40 opacity-80 scale-100'
+            ? 'border-purple-400/30 opacity-60 scale-100'
             : tier === 'core'
             ? 'border-white/10 opacity-40 group-hover:border-white/30 group-hover:opacity-75'
             : 'border-transparent opacity-0 group-hover:border-white/20 group-hover:opacity-60'
@@ -121,7 +125,7 @@ export const SkillNode: React.FC<SkillNodeProps> = memo(({
           isHovered
             ? 'bg-[#1C153B]/90 border border-white/70 shadow-[0_0_24px_rgba(168,85,247,0.55),0_0_10px_rgba(255,255,255,0.7)] backdrop-blur-md'
             : isRelated
-            ? 'bg-[#140F2A]/60 border border-purple-400/45 shadow-[0_0_16px_rgba(168,85,247,0.3)] backdrop-blur-xs'
+            ? 'bg-[#140F2A]/50 border border-purple-400/35 shadow-[0_0_12px_rgba(168,85,247,0.25)] backdrop-blur-xs'
             : tier === 'core'
             ? 'bg-[#181133]/40 border border-white/20 shadow-[0_0_10px_rgba(168,85,247,0.2)] group-hover:border-white/40 group-hover:bg-[#1a133b]/60'
             : tier === 'professional'

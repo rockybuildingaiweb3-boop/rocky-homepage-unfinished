@@ -43,12 +43,18 @@ export const ConstellationEnergyLines: React.FC<ConstellationEnergyLinesProps> =
       isCoreBeam: true,
     });
 
-    // 2. Secondary Energy Filaments: Active Node -> Related Sister Nodes
+    // 2. Secondary Energy Filaments: Active Node -> Top 4 Related Sister Nodes
+    // Restricting to the strongest 3–5 (first 4 IDs) to prevent dense dependency-graph appearance
     const seenRids = new Set<string>();
+    const activeRids: string[] = [];
     for (const rid of relatedSkillIds) {
-      if (seenRids.has(rid) || rid === hoveredSkillId) continue;
+      if (rid === hoveredSkillId || seenRids.has(rid)) continue;
       seenRids.add(rid);
+      activeRids.push(rid);
+      if (activeRids.length >= 4) break;
+    }
 
+    for (const rid of activeRids) {
       const target = nodePositions.get(rid);
       if (!target) continue;
 
@@ -85,11 +91,11 @@ export const ConstellationEnergyLines: React.FC<ConstellationEnergyLinesProps> =
           <stop offset="100%" stopColor="transparent" stopOpacity="0" />
         </radialGradient>
 
-        {/* Linear Gradient for Core Beam */}
-        <linearGradient id="coreBeamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-          <stop offset="35%" stopColor={brandColor} stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#A855F7" stopOpacity="0.2" />
+        {/* Soft Gravitational Energy Trail Gradient for Planet Core Conduit */}
+        <linearGradient id="gravitationalBeamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#C084FC" stopOpacity="0.75" />
+          <stop offset="40%" stopColor={brandColor} stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#DDD6FE" stopOpacity="0.25" />
         </linearGradient>
 
         {/* Subtle Glow Filter */}
@@ -107,26 +113,24 @@ export const ConstellationEnergyLines: React.FC<ConstellationEnergyLinesProps> =
         if (p.isCoreBeam) {
           return (
             <g key={p.id}>
-              {/* Diffuse Outer Corona */}
+              {/* Diffuse Gravitational Corona */}
               <path
                 d={p.d}
                 fill="none"
                 stroke={brandColor}
-                strokeWidth="4.5"
-                opacity="0.35"
+                strokeWidth="3.2"
+                opacity="0.22"
                 vectorEffect="non-scaling-stroke"
                 filter="url(#softGlow)"
               />
-              {/* Luminous Inner Core Beam */}
+              {/* Soft Luminous Energy Trail */}
               <path
                 d={p.d}
                 fill="none"
-                stroke="url(#coreBeamGrad)"
-                strokeWidth="1.8"
-                strokeDasharray="4 3"
-                opacity="0.9"
+                stroke="url(#gravitationalBeamGrad)"
+                strokeWidth="1.2"
+                opacity="0.65"
                 vectorEffect="non-scaling-stroke"
-                className="animate-pulse"
               />
             </g>
           );
@@ -134,24 +138,23 @@ export const ConstellationEnergyLines: React.FC<ConstellationEnergyLinesProps> =
 
         return (
           <g key={p.id}>
-            {/* Soft Ambient Filament */}
+            {/* Soft Ambient Filament Glow */}
             <path
               d={p.d}
               fill="none"
               stroke={brandColor}
-              strokeWidth="2.8"
-              opacity="0.22"
+              strokeWidth="2.0"
+              opacity="0.15"
               vectorEffect="non-scaling-stroke"
               filter="url(#softGlow)"
             />
-            {/* Focused Kinetic Filament with Flowing Dashes */}
+            {/* Subtle Ethereal Resonance Filament */}
             <path
               d={p.d}
               fill="none"
-              stroke="#F1F5F9"
-              strokeWidth="1.1"
-              strokeDasharray="2 4"
-              opacity="0.75"
+              stroke={brandColor}
+              strokeWidth="0.75"
+              opacity="0.35"
               vectorEffect="non-scaling-stroke"
             />
           </g>
