@@ -6,9 +6,10 @@ import type { SiteData } from '../types';
 
 interface HomePageProps {
   siteData: SiteData | null;
+  isHeroAwake?: boolean;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
+export const HomePage: React.FC<HomePageProps> = ({ siteData, isHeroAwake = true }) => {
   const { scrollY, activeSection } = useScrollSpy({
     sectionIds: ['home', 'studio', 'skills', 'contact'],
   });
@@ -28,7 +29,7 @@ export const HomePage: React.FC<HomePageProps> = ({ siteData }) => {
   return (
     <main className="relative z-10 w-full overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
-      <HomeSection scrollY={scrollY} onNavigate={handleNavigate} />
+      <HomeSection scrollY={scrollY} onNavigate={handleNavigate} isAwake={isHeroAwake} />
       <StudioSection />
       <SkillsSection />
       <Footer siteData={siteData} />

@@ -7,6 +7,7 @@ interface GlobalShellProps {
   progress: number;
   loadingDone: boolean;
   isMobile: boolean;
+  onAwakenHero?: () => void;
   children: React.ReactNode;
 }
 
@@ -17,12 +18,13 @@ interface GlobalShellProps {
  * - Interactive custom cursor (tracks across all routes & pages)
  * - Atmospheric 35mm cinematic film grain texture layer
  * - Atmospheric 3D starfield & cosmic depth layer (ParticleBackground)
- * - Ceremonial opening loader (session-persistent, non-blocking)
+ * - Ceremonial opening loader (deliberate cinematic opening ceremony)
  */
 export const GlobalShell: React.FC<GlobalShellProps> = ({
   progress,
   loadingDone,
   isMobile,
+  onAwakenHero,
   children,
 }) => {
   const [ceremonyDone, setCeremonyDone] = useState<boolean>(false);
@@ -32,11 +34,12 @@ export const GlobalShell: React.FC<GlobalShellProps> = ({
       {/* Interactive custom cursor - global across all routes */}
       <CursorDot isMobile={isMobile} />
 
-      {/* Ceremonial Intro sequence - single session playback */}
+      {/* Ceremonial Opening Sequence */}
       {!ceremonyDone && (
         <Loader
           progress={progress}
           loadingDone={loadingDone}
+          onAwakenHero={onAwakenHero}
           onFinish={() => setCeremonyDone(true)}
         />
       )}

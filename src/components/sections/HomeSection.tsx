@@ -5,9 +5,14 @@ import { VISUAL_CONSTANTS } from '../../constants/visual';
 interface HomeSectionProps {
   scrollY?: number;
   onNavigate?: (targetId: string) => void;
+  isAwake?: boolean;
 }
 
-export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigate }) => {
+export const HomeSection: React.FC<HomeSectionProps> = ({
+  scrollY = 0,
+  onNavigate,
+  isAwake = true,
+}) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const word1Ref = useRef<HTMLSpanElement>(null);
   const word2Ref = useRef<HTMLSpanElement>(null);
@@ -90,6 +95,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
         'opacity 0.9s ease 0.85s, transform 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) 0.85s';
     }
 
+    // Wait until ceremony opens the world
+    if (!isAwake) {
+      return;
+    }
+
     const timeouts: (ReturnType<typeof setTimeout>)[] = [];
     const schedule = (fn: () => void, delay: number) => {
       timeouts.push(setTimeout(fn, delay));
@@ -104,7 +114,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
             word1Ref.current.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
             word1Ref.current.style.opacity = '1';
           }
-        }, 160);
+        }, 140);
       }
 
       if (word2Ref.current) {
@@ -113,7 +123,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
             word2Ref.current.style.transform = 'translate3d(0, 0%, 0) rotate(0deg)';
             word2Ref.current.style.opacity = '1';
           }
-        }, 300);
+        }, 280);
       }
 
       if (signatureRef.current) {
@@ -122,7 +132,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
             signatureRef.current.style.opacity = '1';
             signatureRef.current.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(-4deg)';
           }
-        }, 440);
+        }, 420);
       }
 
       if (occRef.current) {
@@ -131,7 +141,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
             occRef.current.style.opacity = '1';
             occRef.current.style.transform = 'translate3d(0, 0, 0)';
           }
-        }, 620);
+        }, 600);
       }
 
       if (mottoRef.current) {
@@ -140,7 +150,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
             mottoRef.current.style.opacity = '1';
             mottoRef.current.style.transform = 'translate3d(0, 0, 0)';
           }
-        }, 720);
+        }, 700);
       }
 
       if (scrollCtaRef.current) {
@@ -149,16 +159,16 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ scrollY = 0, onNavigat
             scrollCtaRef.current.style.opacity = '1';
             scrollCtaRef.current.style.transform = 'translate3d(0, 0, 0)';
           }
-        }, 840);
+        }, 820);
       }
     };
 
-    schedule(startAwakening, imageLoaded ? 120 : 600);
+    schedule(startAwakening, imageLoaded ? 80 : 300);
 
     return () => {
       timeouts.forEach((id) => clearTimeout(id));
     };
-  }, [imageLoaded]);
+  }, [imageLoaded, isAwake]);
 
   const safeScrollY = typeof scrollY === 'number' && Number.isFinite(scrollY) ? Math.max(0, scrollY) : 0;
   const bgParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.BACKGROUND;

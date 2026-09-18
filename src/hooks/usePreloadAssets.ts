@@ -61,6 +61,15 @@ export function usePreloadAssets(): PreloadAssetsResult {
           })
         );
 
+        // Verify document fonts readiness
+        if (typeof document !== 'undefined' && 'fonts' in document) {
+          try {
+            await (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready;
+          } catch {
+            // Non-blocking fallback
+          }
+        }
+
         if (!isMounted) return;
         setProgress(100);
 
