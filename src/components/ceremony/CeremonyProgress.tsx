@@ -9,11 +9,12 @@ interface CeremonyProgressProps {
 /**
  * CeremonyProgress
  *
- * Precision artistic instrumentation measuring the 6-Act ceremony:
+ * Precision artistic instrumentation measuring the narrative ceremony:
  * - Subordinate to the art (doesn't fight signature or rose for attention)
  * - Monospaced uppercase tracking inspired by high-end digital art installations
  * - Never truncates, never wraps
- * - Deterministic milestone status matching the 6 Acts exactly
+ * - Deterministic milestone status matching the narrative acts exactly:
+ *   VOID → AWAKENING → EMERGENCE → SIGNATURE → CONVERGENCE → CLIMAX → SILENCE → ARRIVAL
  */
 export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
   displayProgress,
@@ -21,18 +22,22 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
 }) => {
   const clamped = Math.max(0, Math.min(100, Math.round(displayProgress)));
 
-  // Deterministic 6-Act narrative milestones aligned with percentage thresholds
+  // Narrative milestones aligned with percentage thresholds
   let statusText = '01 // THE VOID';
-  if (clamped >= 15 && clamped < 30) {
+  if (clamped >= 12 && clamped < 28) {
     statusText = '02 // AWAKENING';
-  } else if (clamped >= 30 && clamped < 48) {
+  } else if (clamped >= 28 && clamped < 48) {
     statusText = '03 // EMERGENCE';
   } else if (clamped >= 48 && clamped < 76) {
     statusText = '04 // SIGNATURE';
-  } else if (clamped >= 76 && clamped < 96) {
-    statusText = '05 // CLIMAX';
-  } else if (clamped >= 96) {
-    statusText = '06 // ARRIVAL';
+  } else if (clamped >= 76 && clamped < 82) {
+    statusText = '05 // CONVERGENCE';
+  } else if (clamped >= 82 && clamped < 96) {
+    statusText = '06 // CLIMAX';
+  } else if (clamped >= 96 && clamped < 99) {
+    statusText = '07 // SILENCE';
+  } else if (clamped >= 99) {
+    statusText = '08 // ARRIVAL';
   }
 
   const isComplete = clamped >= 100 || phase === 'ARRIVAL' || phase === 'EXITING';
@@ -40,7 +45,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
 
   return (
     <div
-      className={`relative z-30 flex flex-col items-center mt-7 sm:mt-9 transition-all duration-700 ease-out select-none will-change-transform ${
+      className={`relative z-30 flex flex-col items-center mt-5 sm:mt-7 transition-all duration-700 ease-out select-none will-change-transform ${
         isHidden ? 'opacity-0 translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'
       }`}
       aria-label={`Ceremony progress: ${clamped}%`}
@@ -50,7 +55,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
       aria-valuemax={100}
     >
       {/* ── 1. CINEMATIC INSTRUMENTATION STATUS & TABULAR PERCENTAGE ── */}
-      <div className="flex items-center justify-between w-64 sm:w-72 md:w-80 mb-2 px-0.5">
+      <div className="flex items-center justify-between w-60 sm:w-68 md:w-72 mb-2 px-0.5">
         <span
           className="text-[10px] sm:text-[11px] font-mono tracking-[0.24em] uppercase whitespace-nowrap transition-colors duration-500 select-none font-medium"
           style={{
@@ -73,7 +78,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
       </div>
 
       {/* ── 2. REFINED MINIMALIST ARCHITECTURAL PROGRESS BAR ── */}
-      <div className="relative w-64 sm:w-72 md:w-80 h-[3px] rounded-full bg-white/[0.10] overflow-visible border border-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+      <div className="relative w-60 sm:w-68 md:w-72 h-[2.5px] rounded-full bg-white/[0.10] overflow-visible border border-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
         {/* Track Fill */}
         <div
           className="h-full rounded-full transition-[width] duration-150 ease-out relative will-change-transform"
@@ -90,7 +95,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
           {/* Subtle Leading-Edge Starlight Spark */}
           {clamped > 0 && clamped < 100 && (
             <div
-              className="absolute -right-1 -top-[2.5px] w-2 h-2 rounded-full bg-white shadow-[0_0_5px_#ffffff,0_0_10px_#c084fc] will-change-transform pointer-events-none"
+              className="absolute -right-1 -top-[2px] w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_4px_#ffffff,0_0_8px_#c084fc] will-change-transform pointer-events-none"
               aria-hidden="true"
             />
           )}

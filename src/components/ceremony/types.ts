@@ -3,8 +3,9 @@ export type LoaderPhase =
   | 'AWAKENING'
   | 'EMERGENCE'
   | 'SIGNING'
-  | 'SUSPENSE'
+  | 'CONVERGENCE'
   | 'CLIMAX'
+  | 'SILENCE'
   | 'ARRIVAL'
   | 'EXITING'
   | 'COMPLETE';
@@ -18,12 +19,13 @@ export interface StrokeMeasurement {
 }
 
 export interface CeremonyTimelineConfig {
-  voidDuration: number;       // ms (Act I)
-  awakeningDuration: number;  // ms (Act II)
-  emergenceDuration: number;  // ms (Act III)
-  signingDuration: number;    // ms (Act IV)
-  suspenseDuration: number;   // ms (Act V Silence)
-  climaxDuration: number;     // ms (Act V Climax)
-  arrivalDuration: number;    // ms (Act VI Lockup)
-  exitDuration: number;       // ms (Act VI Transition)
+  voidDuration: number;        // ms (Act I: Void)
+  awakeningDuration: number;   // ms (Act II: Awakening light)
+  emergenceDuration: number;   // ms (Act III: Rose emergence)
+  signingDuration: number;     // ms (Act IV: Signature)
+  convergenceDuration: number; // ms (Act V: Energy convergence)
+  climaxDuration: number;      // ms (Act V: Resonant climax)
+  silenceDuration: number;     // ms (Act V: Breathless silence)
+  arrivalDuration: number;     // ms (Act VI: Arrival lockup)
+  exitDuration: number;        // ms (Act VII: Hero transition)
 }

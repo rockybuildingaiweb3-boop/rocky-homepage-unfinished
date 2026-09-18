@@ -17,39 +17,44 @@ const PHASE_ORDER: Record<LoaderPhase, number> = {
   AWAKENING: 1,
   EMERGENCE: 2,
   SIGNING: 3,
-  SUSPENSE: 4,
+  CONVERGENCE: 4,
   CLIMAX: 5,
-  ARRIVAL: 6,
-  EXITING: 7,
-  COMPLETE: 8,
+  SILENCE: 6,
+  ARRIVAL: 7,
+  EXITING: 8,
+  COMPLETE: 9,
 };
 
-// Subtle, low-count cosmic dust motes (depth perception only, no glitter spam)
+// Subtle, low-count cosmic dust motes for authentic spatial depth
 const COSMIC_DUST_MOTES = [
-  { id: 'm1', left: '18%', top: '22%', size: 1.5, opacity: 0.25, driftX: 6, driftY: -10, dur: 18 },
-  { id: 'm2', left: '82%', top: '18%', size: 2.0, opacity: 0.30, driftX: -8, driftY: 12, dur: 22 },
-  { id: 'm3', left: '12%', top: '75%', size: 1.8, opacity: 0.22, driftX: 10, driftY: -8, dur: 16 },
-  { id: 'm4', left: '88%', top: '78%', size: 2.2, opacity: 0.35, driftX: -7, driftY: -12, dur: 20 },
-  { id: 'm5', left: '32%', top: '14%', size: 1.2, opacity: 0.18, driftX: -5, driftY: 8, dur: 24 },
-  { id: 'm6', left: '68%', top: '85%', size: 1.6, opacity: 0.28, driftX: 8, driftY: -6, dur: 19 },
-  { id: 'm7', left: '24%', top: '62%', size: 1.4, opacity: 0.20, driftX: -6, driftY: 9, dur: 21 },
-  { id: 'm8', left: '76%', top: '38%', size: 1.8, opacity: 0.26, driftX: 7, driftY: -11, dur: 17 },
-  { id: 'm9', left: '45%', top: '8%', size: 2.0, opacity: 0.32, driftX: 4, driftY: 10, dur: 25 },
-  { id: 'm10', left: '55%', top: '92%', size: 1.5, opacity: 0.24, driftX: -9, driftY: -7, dur: 18 },
-  { id: 'm11', left: '8%', top: '42%', size: 1.3, opacity: 0.16, driftX: 8, driftY: 8, dur: 23 },
-  { id: 'm12', left: '92%', top: '56%', size: 1.7, opacity: 0.28, driftX: -6, driftY: -9, dur: 20 },
+  { id: 'm1', left: '16%', top: '20%', size: 1.5, opacity: 0.22, dirX: -1, dirY: -1 },
+  { id: 'm2', left: '84%', top: '18%', size: 2.0, opacity: 0.26, dirX: 1, dirY: -1 },
+  { id: 'm3', left: '14%', top: '76%', size: 1.8, opacity: 0.20, dirX: -1, dirY: 1 },
+  { id: 'm4', left: '86%', top: '80%', size: 2.2, opacity: 0.30, dirX: 1, dirY: 1 },
+  { id: 'm5', left: '30%', top: '12%', size: 1.2, opacity: 0.16, dirX: -0.5, dirY: -1 },
+  { id: 'm6', left: '70%', top: '86%', size: 1.6, opacity: 0.24, dirX: 0.8, dirY: 1 },
+  { id: 'm7', left: '22%', top: '60%', size: 1.4, opacity: 0.18, dirX: -1, dirY: 0.5 },
+  { id: 'm8', left: '78%', top: '36%', size: 1.8, opacity: 0.22, dirX: 1, dirY: -0.5 },
+  { id: 'm9', left: '46%', top: '8%', size: 2.0, opacity: 0.28, dirX: 0, dirY: -1 },
+  { id: 'm10', left: '54%', top: '92%', size: 1.5, opacity: 0.20, dirX: 0, dirY: 1 },
+  { id: 'm11', left: '8%', top: '44%', size: 1.3, opacity: 0.14, dirX: -1, dirY: 0 },
+  { id: 'm12', left: '92%', top: '54%', size: 1.7, opacity: 0.24, dirX: 1, dirY: 0 },
 ];
 
 /**
  * Loader — Cinematic Opening Ceremony
  *
- * Implements a 6-Act dramatic narrative arc:
- * ACT I:   THE VOID (0% - 15%) — Subtle breathing cosmic depth.
- * ACT II:  SIGNAL & AWAKENING (15% - 30%) — Starlight disturbance waking the environment.
- * ACT III: BOTANICAL EMERGENCE (30% - 48%) — Rose discovered through authentic lighting story.
- * ACT IV:  CALLIGRAPHIC SIGNATURE (48% - 76%) — Musical handwriting as temporary hero.
- * ACT V:   SUSPENSE & CLIMAX (76% - 96%) — Silence before impact; resonant starlight chain reaction.
- * ACT VI:  ARRIVAL & TRANSITION (96% - 100%) — Harmonic lockup & radial aperture handoff into Hero.
+ * Authored according to strict creative direction:
+ * VOID → AWAKENING → ROSE EMERGENCE → SIGNATURE → CONVERGENCE → CLIMAX → SILENCE → ARRIVAL
+ *
+ * 1. SPACE (vast, deep obsidian void)
+ * 2. ROSE (precious botanical visual anchor at authentic native scale)
+ * 3. SIGNATURE (handwritten performance, causally ignited by light flowing from the rose)
+ * 4. IDENTITY TEXT (subordinate, reveals cleanly during climax)
+ * 5. SYSTEM TELEMETRY (precision instrumentation at the bottom)
+ *
+ * Monotonic progress guaranteed. Climax creates true spatial causality:
+ * SIGNATURE FINISHES → ENERGY CONVERGES → INNER ILLUMINATION IN ROSE → SPACE BREATHES → SILENCE → ARRIVAL.
  */
 export const Loader: React.FC<LoaderProps> = ({
   progress = 0,
@@ -60,6 +65,7 @@ export const Loader: React.FC<LoaderProps> = ({
   const [phase, setPhase] = useState<LoaderPhase>('VOID');
   const [phaseProgress, setPhaseProgress] = useState<number>(0);
   const [strokeProgress, setStrokeProgress] = useState<number>(0);
+  const [convergenceProgress, setConvergenceProgress] = useState<number>(0);
   const [climaxProgress, setClimaxProgress] = useState<number>(0);
   const [displayProgress, setDisplayProgress] = useState<number>(0);
   const [isExiting, setIsExiting] = useState<boolean>(false);
@@ -82,7 +88,7 @@ export const Loader: React.FC<LoaderProps> = ({
     loadingDoneRef.current = loadingDone;
   }, [onAwakenHero, onFinish, loadingDone]);
 
-  // Lock body scroll during the ceremony
+  // Lock body scroll during ceremony
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -100,158 +106,164 @@ export const Loader: React.FC<LoaderProps> = ({
     }
   };
 
-  const triggerAwakenHero = () => {
-    if (!heroAwakenedRef.current) {
-      heroAwakenedRef.current = true;
-      if (onAwakenHeroRef.current) {
-        onAwakenHeroRef.current();
-      }
-    }
-  };
-
-  // Master Ceremony RAF & Heartbeat Loop
+  // ─────────────────────────────────────────────────────────────────────────────
+  // MASTER CEREMONY TIMELINE & PROGRESS ENGINE
+  // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    let isCancelled = false;
-    let animId: number | null = null;
-    let heartbeatId: number | null = null;
-
-    // Check prefers-reduced-motion
+    // Respect user's motion preferences
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (prefersReducedMotion) {
       advancePhase('ARRIVAL');
-      setStrokeProgress(1);
-      setClimaxProgress(1);
       setDisplayProgress(100);
-      maxDisplayProgressRef.current = 100;
-
       const timer = setTimeout(() => {
-        advancePhase('EXITING');
-        setIsExiting(true);
-        triggerAwakenHero();
-
-        setTimeout(() => {
-          advancePhase('COMPLETE');
-          if (!finishedRef.current) {
-            finishedRef.current = true;
-            if (onFinishRef.current) onFinishRef.current();
-          }
-        }, 500);
-      }, 700);
-
+        if (!heroAwakenedRef.current) {
+          heroAwakenedRef.current = true;
+          if (onAwakenHeroRef.current) onAwakenHeroRef.current();
+        }
+        if (onFinishRef.current) onFinishRef.current();
+      }, 1200);
       return () => clearTimeout(timer);
     }
 
-    if (persistedStartTimeRef.current === null) {
-      persistedStartTimeRef.current = performance.now();
-    }
+    // Timeline Configuration (ms)
+    const T_VOID_END = 850;        // 0 to 850ms   (0% - 12%)
+    const T_AWAKEN_END = 2050;     // 850 to 2050ms (12% - 28%)
+    const T_EMERGE_END = 3400;     // 2050 to 3400ms (28% - 48%)
+    const T_SIGN_END = 5250;       // 3400 to 5250ms (48% - 76%)
+    const T_CONVERGE_END = 5700;   // 5250 to 5700ms (76% - 82%)
+    const T_CLIMAX_END = 6450;     // 5700 to 6450ms (82% - 96%)
+    const T_SILENCE_END = 6800;    // 6450 to 6800ms (96% - 99%)
+    const T_ARRIVAL_END = 7200;    // 6800 to 7200ms (100% locked)
+    const T_EXIT_END = 7950;       // 7200 to 7950ms (transition into Hero)
 
-    // ── 6-ACT CINEMATIC TIMELINE MILESTONES (ms) ──
-    // ACT I:   VOID:       0ms   – 900ms  (0%  -> 15%)
-    // ACT II:  AWAKENING:  900ms – 1900ms (15% -> 30%)
-    // ACT III: EMERGENCE:  1900ms– 3100ms (30% -> 48%)
-    // ACT IV:  SIGNATURE:  3100ms– 4900ms (48% -> 76%)
-    // ACT V-1: SUSPENSE:   4900ms– 5200ms (76% -> 80%) [Silence Before Impact]
-    // ACT V-2: CLIMAX:     5200ms– 6000ms (80% -> 96%) [Resonant Causal Chain]
-    // ACT VI:  ARRIVAL:    6000ms– 6500ms (96% -> 100%) [Harmonic Lockup]
-    // EXITING: 6500ms– 7300ms (100% locked, radial aperture opens)
-    // COMPLETE: > 7300ms      (Hero transition complete & unmount)
-    const T_VOID = 900;
-    const T_AWAKEN = 1900;
-    const T_EMERGE = 3100;
-    const T_SIGN = 4900;
-    const T_SUSPENSE = 5200;
-    const T_CLIMAX = 6000;
-    const T_ARRIVAL = 6500;
-    const T_EXIT = 7300;
-    const T_TIMEOUT = 7600;
+    let animationFrameId: number;
+    let fallbackIntervalId: NodeJS.Timeout;
 
-    const tick = (now: number) => {
-      if (isCancelled) return;
-      const startTime = persistedStartTimeRef.current ?? now;
-      const elapsed = now - startTime;
+    const startTimestamp = performance.now();
+    persistedStartTimeRef.current = startTimestamp;
 
-      let targetVisualPercent = 0;
+    const updateCeremony = (now: number) => {
+      if (finishedRef.current) return;
 
-      if (elapsed < T_VOID) {
+      const elapsed = Math.max(0, now - (persistedStartTimeRef.current || startTimestamp));
+
+      // ── Act I: THE VOID (0 - 850ms) ───────────────────────────────────
+      if (elapsed < T_VOID_END) {
         advancePhase('VOID');
-        setStrokeProgress(0);
-        setClimaxProgress(0);
-        const t = Math.max(0, elapsed / T_VOID);
-        setPhaseProgress(t);
-        // Start immediately at 1% so the user never sees a static 0%
-        targetVisualPercent = Math.max(1, t * 15);
-      } else if (elapsed < T_AWAKEN) {
+        const p = elapsed / T_VOID_END;
+        setPhaseProgress(p);
+        const targetPct = Math.round(1 + p * 11); // 1% -> 12%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act II: AWAKENING (850 - 2050ms) ──────────────────────────────
+      else if (elapsed < T_AWAKEN_END) {
         advancePhase('AWAKENING');
-        setStrokeProgress(0);
-        setClimaxProgress(0);
-        const t = (elapsed - T_VOID) / (T_AWAKEN - T_VOID);
-        setPhaseProgress(t);
-        targetVisualPercent = 15 + t * 15; // 15% -> 30%
-      } else if (elapsed < T_EMERGE) {
+        const p = (elapsed - T_VOID_END) / (T_AWAKEN_END - T_VOID_END);
+        setPhaseProgress(p);
+        const targetPct = Math.round(12 + p * 16); // 12% -> 28%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act III: ROSE EMERGENCE (2050 - 3400ms) ───────────────────────
+      else if (elapsed < T_EMERGE_END) {
         advancePhase('EMERGENCE');
-        setStrokeProgress(0);
-        setClimaxProgress(0);
-        const t = (elapsed - T_AWAKEN) / (T_EMERGE - T_AWAKEN);
-        setPhaseProgress(t);
-        targetVisualPercent = 30 + t * 18; // 30% -> 48%
-      } else if (elapsed < T_SIGN) {
+        const p = (elapsed - T_AWAKEN_END) / (T_EMERGE_END - T_AWAKEN_END);
+        setPhaseProgress(p);
+        const targetPct = Math.round(28 + p * 20); // 28% -> 48%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act IV: SIGNATURE PERFORMANCE (3400 - 5250ms) ─────────────────
+      else if (elapsed < T_SIGN_END) {
         advancePhase('SIGNING');
-        const signT = (elapsed - T_EMERGE) / (T_SIGN - T_EMERGE);
-        setStrokeProgress(signT);
-        setClimaxProgress(0);
-        setPhaseProgress(signT);
-        targetVisualPercent = 48 + signT * 28; // 48% -> 76%
-      } else if (elapsed < T_SUSPENSE) {
-        // Act V Part 1: Silence before impact
-        advancePhase('SUSPENSE');
-        setStrokeProgress(1);
-        setClimaxProgress(0);
-        const suspT = (elapsed - T_SIGN) / (T_SUSPENSE - T_SIGN);
-        setPhaseProgress(suspT);
-        targetVisualPercent = 76 + suspT * 4; // 76% -> 80%
-      } else if (elapsed < T_CLIMAX) {
-        // Act V Part 2: Controlled Climax
+        const p = (elapsed - T_EMERGE_END) / (T_SIGN_END - T_EMERGE_END);
+        setPhaseProgress(p);
+        setStrokeProgress(p);
+        const targetPct = Math.round(48 + p * 28); // 48% -> 76%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act V Part 1: CONVERGENCE (5250 - 5700ms) ─────────────────────
+      else if (elapsed < T_CONVERGE_END) {
+        advancePhase('CONVERGENCE');
+        const p = (elapsed - T_SIGN_END) / (T_CONVERGE_END - T_SIGN_END);
+        setPhaseProgress(p);
+        setStrokeProgress(1.0);
+        setConvergenceProgress(p);
+        const targetPct = Math.round(76 + p * 6); // 76% -> 82%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act V Part 2: CLIMAX (5700 - 6450ms) ──────────────────────────
+      else if (elapsed < T_CLIMAX_END) {
         advancePhase('CLIMAX');
-        setStrokeProgress(1);
-        const climT = (elapsed - T_SUSPENSE) / (T_CLIMAX - T_SUSPENSE);
-        setClimaxProgress(climT);
-        setPhaseProgress(climT);
-        targetVisualPercent = 80 + climT * 16; // 80% -> 96%
-      } else if (elapsed < T_ARRIVAL) {
-        // Act VI: Arrival & Harmonic lockup
+        const p = (elapsed - T_CONVERGE_END) / (T_CLIMAX_END - T_CONVERGE_END);
+        setPhaseProgress(p);
+        setStrokeProgress(1.0);
+        setConvergenceProgress(1.0);
+        setClimaxProgress(p);
+        const targetPct = Math.round(82 + p * 14); // 82% -> 96%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act V Part 3: SILENCE (6450 - 6800ms) ─────────────────────────
+      else if (elapsed < T_SILENCE_END) {
+        advancePhase('SILENCE');
+        const p = (elapsed - T_CLIMAX_END) / (T_SILENCE_END - T_CLIMAX_END);
+        setPhaseProgress(p);
+        setStrokeProgress(1.0);
+        setConvergenceProgress(1.0);
+        setClimaxProgress(1.0);
+        const targetPct = Math.round(96 + p * 3); // 96% -> 99%
+        const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
+        maxDisplayProgressRef.current = monotonicPct;
+        setDisplayProgress(monotonicPct);
+      }
+      // ── Act VI: ARRIVAL (6800 - 7200ms) ───────────────────────────────
+      else if (elapsed < T_ARRIVAL_END) {
         advancePhase('ARRIVAL');
-        setStrokeProgress(1);
-        setClimaxProgress(1);
-        const arrT = (elapsed - T_CLIMAX) / (T_ARRIVAL - T_CLIMAX);
-        setPhaseProgress(arrT);
-        targetVisualPercent = 96 + arrT * 4; // 96% -> 100%
+        setStrokeProgress(1.0);
+        setClimaxProgress(1.0);
+        setConvergenceProgress(1.0);
 
-        // Real asset readiness gate: hold gently at 99% if network assets are still in flight
-        const isNetworkReady = loadingDoneRef.current || elapsed >= T_TIMEOUT;
-        if (!isNetworkReady && targetVisualPercent >= 99) {
-          targetVisualPercent = 99;
-          const nextVal = Math.max(maxDisplayProgressRef.current, 99);
-          if (nextVal > maxDisplayProgressRef.current) {
-            maxDisplayProgressRef.current = nextVal;
-            setDisplayProgress(nextVal);
-          }
-          return;
-        }
-      } else if (elapsed < T_EXIT) {
-        // EXITING: aperture opens, Hero awakens
+        // Progress reaches 100% cleanly and locks
+        maxDisplayProgressRef.current = 100;
+        setDisplayProgress(100);
+      }
+      // ── Act VII: HERO TRANSITION (7200 - 7950ms) ──────────────────────
+      else if (elapsed < T_EXIT_END) {
         advancePhase('EXITING');
         setIsExiting(true);
-        triggerAwakenHero();
-        setStrokeProgress(1);
-        setClimaxProgress(1);
-        targetVisualPercent = 100;
-      } else {
-        // COMPLETE: seamless handoff and unmount
+        maxDisplayProgressRef.current = 100;
+        setDisplayProgress(100);
+
+        // Trigger Hero awakening at start of spatial expansion
+        if (!heroAwakenedRef.current) {
+          heroAwakenedRef.current = true;
+          if (onAwakenHeroRef.current) onAwakenHeroRef.current();
+        }
+      }
+      // ── Act VIII: COMPLETE (> 7950ms) ──────────────────────────────────
+      else {
         advancePhase('COMPLETE');
-        triggerAwakenHero();
+        maxDisplayProgressRef.current = 100;
+        setDisplayProgress(100);
+
+        if (!heroAwakenedRef.current) {
+          heroAwakenedRef.current = true;
+          if (onAwakenHeroRef.current) onAwakenHeroRef.current();
+        }
+
         if (!finishedRef.current) {
           finishedRef.current = true;
           if (onFinishRef.current) onFinishRef.current();
@@ -259,94 +271,55 @@ export const Loader: React.FC<LoaderProps> = ({
         return;
       }
 
-      // Mathematical Monotonicity Guarantee: P(t+1) >= P(t) under all conditions
-      const computedProgress = Math.round(targetVisualPercent);
-      if (computedProgress > maxDisplayProgressRef.current) {
-        maxDisplayProgressRef.current = Math.min(100, computedProgress);
-        setDisplayProgress(maxDisplayProgressRef.current);
-      }
+      animationFrameId = requestAnimationFrame(updateCeremony);
     };
 
-    const loop = (now: number) => {
-      if (isCancelled) return;
-      tick(now);
-      animId = requestAnimationFrame(loop);
-    };
+    animationFrameId = requestAnimationFrame(updateCeremony);
 
-    tick(performance.now());
-    animId = requestAnimationFrame(loop);
-
-    heartbeatId = window.setInterval(() => {
-      if (!isCancelled) {
-        tick(performance.now());
+    // Watchdog fallback heartbeat (30Hz) in case RAF is tab-throttled
+    fallbackIntervalId = setInterval(() => {
+      if (finishedRef.current) {
+        clearInterval(fallbackIntervalId);
+        return;
       }
-    }, 80);
+      const now = performance.now();
+      const elapsed = Math.max(0, now - (persistedStartTimeRef.current || startTimestamp));
+
+      // Force unblock if elapsed time exceeds 8.5s
+      if (elapsed >= 8500 && !finishedRef.current) {
+        finishedRef.current = true;
+        if (!heroAwakenedRef.current) {
+          heroAwakenedRef.current = true;
+          if (onAwakenHeroRef.current) onAwakenHeroRef.current();
+        }
+        if (onFinishRef.current) onFinishRef.current();
+        clearInterval(fallbackIntervalId);
+      }
+    }, 150);
 
     return () => {
-      isCancelled = true;
-      if (animId !== null) cancelAnimationFrame(animId);
-      if (heartbeatId !== null) clearInterval(heartbeatId);
+      cancelAnimationFrame(animationFrameId);
+      clearInterval(fallbackIntervalId);
     };
   }, []);
 
-  // Camera participation & spatial depth metrics
-  let cameraScale = 1.0;
-  let cameraBlur = 0;
-  let stageTranslateY = 0;
+  // Spatial response variables during climax (Space reacts in unison with the rose)
+  const climaxT = Math.max(0, Math.min(1, climaxProgress));
+  const spaceExpansion = 1.0 + Math.sin(climaxT * Math.PI) * 0.04;
+  const atmoBloomOpacity =
+    phase === 'CLIMAX' || phase === 'SILENCE' || phase === 'ARRIVAL'
+      ? 0.35 + Math.sin(climaxT * Math.PI) * 0.25
+      : phase === 'VOID'
+      ? 0.04
+      : 0.18;
 
-  switch (phase) {
-    case 'VOID':
-      cameraScale = 0.96;
-      break;
-    case 'AWAKENING':
-      cameraScale = 0.975;
-      break;
-    case 'EMERGENCE':
-      cameraScale = 0.975 + phaseProgress * 0.025; // 0.975 -> 1.00 (subtle camera approach)
-      break;
-    case 'SIGNING':
-    case 'SUSPENSE':
-      cameraScale = 1.0; // Stabilizes for handwriting precision
-      break;
-    case 'CLIMAX':
-      cameraScale = 1.0 + Math.sin(climaxProgress * Math.PI) * 0.02; // Micro-expansion at climax
-      break;
-    case 'ARRIVAL':
-      cameraScale = 1.0;
-      break;
-    case 'EXITING':
-      cameraScale = 1.06;
-      cameraBlur = 3;
-      stageTranslateY = -8;
-      break;
-    case 'COMPLETE':
-      cameraScale = 1.10;
-      break;
-  }
-
-  // Atmospheric background intensity response
-  const atmoOpacity =
-    phase === 'VOID'
-      ? 0.15
-      : phase === 'AWAKENING'
-      ? 0.35
-      : phase === 'EMERGENCE'
-      ? 0.50
-      : phase === 'SIGNING'
-      ? 0.28 // Subtly dims so signature dominates
-      : phase === 'SUSPENSE'
-      ? 0.32
-      : phase === 'CLIMAX'
-      ? 0.75 // Environmental starlight bloom
-      : phase === 'ARRIVAL'
-      ? 0.55
-      : 0.85;
+  // Dust mote displacement during climax (outward drift)
+  const dustDisplacement = Math.sin(climaxT * Math.PI) * 14;
 
   return (
     <div
-      className={`fixed inset-0 w-screen h-screen flex flex-col justify-center items-center z-[99999] bg-[#030014] select-none overflow-hidden will-change-transform ${
-        isExiting ? 'pointer-events-none' : 'pointer-events-auto'
-      }`}
+      id="cinematic-loader"
+      className="fixed inset-0 w-screen h-screen flex flex-col justify-center items-center z-[99999] bg-[#02000c] select-none overflow-hidden will-change-transform"
       style={{
         transition: 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
         opacity: isExiting ? 0 : 1,
@@ -355,19 +328,20 @@ export const Loader: React.FC<LoaderProps> = ({
       aria-label="Opening ceremony"
     >
       {/* ─────────────────────────────────────────────────────────────
-          1. DEEP COSMIC SPACE & LOW-FREQUENCY BREATHING GRADIENT
+          1. DEEP OBSIDIAN COSMIC SPACE LAYER (Act I & Background)
          ───────────────────────────────────────────────────────────── */}
       <div
-        className="absolute inset-0 pointer-events-none select-none z-0"
+        className="absolute inset-0 pointer-events-none select-none z-0 will-change-transform transition-transform duration-1000 ease-out"
         style={{
           background:
-            'radial-gradient(ellipse 80% 80% at 50% 50%, rgba(20, 8, 42, 0.75) 0%, rgba(10, 4, 24, 0.92) 55%, #030014 100%)',
+            'radial-gradient(ellipse 75% 75% at 50% 50%, rgba(18, 6, 38, 0.70) 0%, rgba(7, 2, 18, 0.94) 55%, #02000c 100%)',
+          transform: `scale(${spaceExpansion})`,
         }}
         aria-hidden="true"
       />
 
       {/* ─────────────────────────────────────────────────────────────
-          2. DELICATE COSMIC DUST MOTES (SPATIAL DEPTH ONLY)
+          2. DELICATE COSMIC DUST MOTES (Spatial depth only, no spam)
          ───────────────────────────────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden" aria-hidden="true">
         {COSMIC_DUST_MOTES.map((m) => (
@@ -379,78 +353,68 @@ export const Loader: React.FC<LoaderProps> = ({
               top: m.top,
               width: `${m.size}px`,
               height: `${m.size}px`,
-              opacity: m.opacity * (phase === 'VOID' ? 0.6 : 1),
-              filter: 'blur(0.5px)',
-              transform: `translate3d(${m.driftX * (phaseProgress || 0.5)}px, ${m.driftY * (phaseProgress || 0.5)}px, 0)`,
-              transition: 'transform 2.5s ease-out, opacity 1s ease',
+              opacity: m.opacity * (phase === 'VOID' ? 0.35 : 1),
+              filter: 'blur(0.4px)',
+              transform: `translate3d(${m.dirX * dustDisplacement}px, ${m.dirY * dustDisplacement}px, 0)`,
+              transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease',
             }}
           />
         ))}
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. RESPONSIVE ATMOSPHERIC CORE & APERTURE MASK
+          3. RESPONSIVE ATMOSPHERIC CORE (Breathes at Climax)
          ───────────────────────────────────────────────────────────── */}
       <div
-        className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden will-change-transform"
+        className="absolute w-[360px] sm:w-[480px] md:w-[560px] aspect-square rounded-full mix-blend-screen pointer-events-none select-none z-0 will-change-transform transition-all duration-700 ease-out"
         style={{
-          transform: isExiting ? 'scale(1.10)' : `scale(${cameraScale})`,
-          transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
-          maskImage: isExiting
-            ? 'radial-gradient(circle at 50% 50%, black 0%, black 55%, transparent 95%)'
-            : 'radial-gradient(circle at 50% 50%, black 0%, black 82%, transparent 100%)',
-          WebkitMaskImage: isExiting
-            ? 'radial-gradient(circle at 50% 50%, black 0%, black 55%, transparent 95%)'
-            : 'radial-gradient(circle at 50% 50%, black 0%, black 82%, transparent 100%)',
+          background:
+            'radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.20) 0%, rgba(225, 29, 72, 0.08) 40%, transparent 68%)',
+          filter: 'blur(48px)',
+          opacity: atmoBloomOpacity,
+          transform: `scale(${spaceExpansion * 1.06})`,
         }}
         aria-hidden="true"
-      >
-        {/* Responsive Volumetric Starlight Field */}
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] sm:w-[74vw] max-w-[680px] aspect-square rounded-full mix-blend-screen will-change-transform transition-all duration-800 ease-out"
-          style={{
-            background:
-              'radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.22) 0%, rgba(225, 29, 72, 0.10) 35%, rgba(99, 102, 241, 0.05) 55%, transparent 72%)',
-            filter: 'blur(52px)',
-            opacity: atmoOpacity,
-            transform: `translate(-50%, -50%) scale(${cameraScale * 1.05})`,
-          }}
-        />
+      />
 
-        {/* Botanical Velvet Rose with Authentic Lighting Story */}
+      {/* ─────────────────────────────────────────────────────────────
+          4. UNIFIED CELESTIAL ALTAR (Visual Hierarchy: Section 18)
+             SPACE → ROSE (Anchor) → SIGNATURE → IDENTITY → TELEMETRY
+         ───────────────────────────────────────────────────────────── */}
+      <div
+        className="relative z-10 w-full max-w-xl px-4 flex flex-col items-center justify-center will-change-transform"
+        style={{
+          transform: isExiting
+            ? 'scale(1.12) translate3d(0, -10px, 0)'
+            : `scale(${spaceExpansion})`,
+          transition: isExiting
+            ? 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1)'
+            : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+        {/* ── Visual Anchor: Precious physical rose at authentic scale ── */}
         <CeremonyFlower
           phase={phase}
           phaseProgress={phaseProgress}
           climaxProgress={climaxProgress}
+          convergenceProgress={convergenceProgress}
           isExiting={isExiting}
         />
-      </div>
 
-      {/* ─────────────────────────────────────────────────────────────
-          4. FOREGROUND CEREMONIAL STAGE (SIGNATURE + IDENTITY + PROGRESS)
-         ───────────────────────────────────────────────────────────── */}
-      <div
-        className="relative z-10 w-full max-w-4xl px-4 sm:px-6 flex flex-col items-center justify-center will-change-transform"
-        style={{
-          transform: `scale(${cameraScale}) translate3d(0, ${stageTranslateY}px, 0)`,
-          filter: cameraBlur > 0 ? `blur(${cameraBlur}px)` : 'none',
-          transition:
-            phase === 'EMERGENCE' || phase === 'CLIMAX'
-              ? 'none'
-              : 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.85s ease',
-        }}
-      >
-        {/* Handwritten Signature — Temporary Hero & Climax Detonator */}
-        <CeremonySignature
-          progress={strokeProgress}
-          phase={phase}
-          climaxProgress={climaxProgress}
-        />
+        {/* ── Calligraphic Signature: Sits elegantly below the rose ── */}
+        <div className="relative w-full flex flex-col items-center -mt-2 sm:-mt-3">
+          <CeremonySignature
+            progress={strokeProgress}
+            phase={phase}
+            climaxProgress={climaxProgress}
+            convergenceProgress={convergenceProgress}
+          />
+        </div>
 
-        {/* Typographic Identity Settle ("rocky babcock") — Climax Awakening */}
+        {/* ── Typographic Identity: rocky babcock ── */}
         <CeremonyIdentity phase={phase} climaxProgress={climaxProgress} />
 
-        {/* Architectural 6-Act Progress Instrumentation */}
+        {/* ── Precision System Telemetry ── */}
         <CeremonyProgress displayProgress={displayProgress} phase={phase} />
       </div>
     </div>
