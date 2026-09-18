@@ -5,16 +5,36 @@ export function fetchJsonData<T = any>(sourceFile: string): Promise<T> {
   });
 }
 
-export function loadImage(src: string): Promise<string> {
-  return new Promise((resolve, reject) => {
+export function loadImage(src: string, timeoutMs = 3500): Promise<string> {
+  return new Promise((resolve) => {
+    let settled = false;
     const img = new Image();
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        resolve(src);
+      }
+    }, timeoutMs);
+
     img.crossOrigin = 'anonymous';
     img.src = src;
-    img.onload = () => resolve(src);
+
+    img.onload = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(src);
+      }
+    };
+
     img.onerror = (err) => {
-      // Fallback if image fails, resolve path anyway so app doesn't stall
-      console.warn('Failed to load image:', src, err);
-      resolve(src);
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        console.warn('Non-blocking asset fallback:', src, err);
+        resolve(src);
+      }
     };
   });
 }

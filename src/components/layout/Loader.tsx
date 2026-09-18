@@ -64,9 +64,9 @@ export const Loader: React.FC<LoaderProps> = ({
   // Monotonic state tracking
   const currentPhaseIndexRef = useRef<number>(0);
   const maxDisplayProgressRef = useRef<number>(0);
-  const hasStartedRef = useRef<boolean>(false);
+  const persistedStartTimeRef = useRef<number | null>(null);
   const heroAwakenedRef = useRef<boolean>(false);
-  const reqAnimRef = useRef<number | null>(null);
+  const finishedRef = useRef<boolean>(false);
 
   // Keep callback refs synchronized without affecting the animation loop
   useEffect(() => {
@@ -103,11 +103,11 @@ export const Loader: React.FC<LoaderProps> = ({
     }
   };
 
-  // Master One-Shot Ceremony RAF Loop
+  // Master Ceremony RAF & Heartbeat Loop
   useEffect(() => {
-    // Ensure the ceremony loop is initialized strictly once
-    if (hasStartedRef.current) return;
-    hasStartedRef.current = true;
+    let isCancelled = false;
+    let animId: number | null = null;
+    let heartbeatId: number | null = null;
 
     // Check prefers-reduced-motion
     const prefersReducedMotion =
@@ -129,57 +129,75 @@ export const Loader: React.FC<LoaderProps> = ({
 
         setTimeout(() => {
           advancePhase('COMPLETE');
-          if (onFinishRef.current) onFinishRef.current();
-        }, 800);
-      }, 1200);
+          if (!finishedRef.current) {
+            finishedRef.current = true;
+            if (onFinishRef.current) onFinishRef.current();
+          }
+        }, 600);
+      }, 800);
 
       return () => clearTimeout(timer);
     }
 
-    const startTime = performance.now();
+    if (persistedStartTimeRef.current === null) {
+      persistedStartTimeRef.current = performance.now();
+    }
 
-    const T_INIT = 450;
-    const T_ATMO = 1100;
-    const T_SIGN = 3400;
-    const T_FLOWER = 4400;
-    const T_IDENTITY = 5200;
-    const T_READY = 5700;
-    const T_EXIT = 6500;
+    // Deterministic ceremony milestones (ms)
+    // 01 INITIALIZING:   0ms   – 600ms  (0%  -> 15%)
+    // 02 ATMOSPHERE:     600ms – 1500ms (15% -> 35%)
+    // 03 SIGNATURE:      1500ms– 3600ms (35% -> 70%)
+    // 04 AWAKENING:      3600ms– 5400ms (70% -> 96%) [Rose + Identity settle]
+    // 05 ARRIVAL:        5400ms– 5800ms (96% -> 100%) [Harmonic lockup]
+    // EXITING:           5800ms– 6600ms (100% locked, aperture expands)
+    // COMPLETE:          > 6600ms       (Hero handoff & unmount)
+    const T_INIT = 600;
+    const T_ATMO = 1500;
+    const T_SIGN = 3600;
+    const T_FLOWER = 4600;
+    const T_IDENTITY = 5400;
+    const T_READY = 5800;
+    const T_EXIT = 6600;
+    const T_TIMEOUT = 7000;
 
-    const animateCeremony = (now: number) => {
+    const tick = (now: number) => {
+      if (isCancelled) return;
+      const startTime = persistedStartTimeRef.current ?? now;
       const elapsed = now - startTime;
+
       let targetVisualPercent = 0;
 
       if (elapsed < T_INIT) {
         advancePhase('INITIALIZING');
         setStrokeProgress(0);
         setFlowerProgress(0);
-        const t = elapsed / T_INIT;
-        targetVisualPercent = t * 12; // 0% -> 12%
+        const t = Math.max(0, elapsed / T_INIT);
+        // Step immediately to minimum 1% so the user never sees a frozen 0% state
+        targetVisualPercent = Math.max(1, t * 15);
       } else if (elapsed < T_ATMO) {
         advancePhase('ATMOSPHERE');
         setStrokeProgress(0);
         setFlowerProgress(0);
         const t = (elapsed - T_INIT) / (T_ATMO - T_INIT);
-        targetVisualPercent = 12 + t * 12; // 12% -> 24%
+        targetVisualPercent = 15 + t * 20; // 15% -> 35%
       } else if (elapsed < T_SIGN) {
         advancePhase('SIGNING');
-        const signT = (elapsed - T_ATMO) / (T_SIGN - T_ATMO); // 0 -> 1
+        const signT = (elapsed - T_ATMO) / (T_SIGN - T_ATMO);
         setStrokeProgress(signT);
-        setFlowerProgress(0);
-        targetVisualPercent = 24 + signT * 44; // 24% -> 68%
+        setFlowerProgress(0.25 * signT);
+        targetVisualPercent = 35 + signT * 35; // 35% -> 70%
       } else if (elapsed < T_FLOWER) {
         advancePhase('FLOWER_EMERGE');
         setStrokeProgress(1);
-        const flowerT = (elapsed - T_SIGN) / (T_FLOWER - T_SIGN); // 0 -> 1
-        setFlowerProgress(flowerT);
-        targetVisualPercent = 68 + flowerT * 16; // 68% -> 84%
+        const flowerT = (elapsed - T_SIGN) / (T_FLOWER - T_SIGN);
+        setFlowerProgress(0.25 + flowerT * 0.75);
+        targetVisualPercent = 70 + flowerT * 15; // 70% -> 85%
       } else if (elapsed < T_IDENTITY) {
         advancePhase('IDENTITY_SETTLE');
         setStrokeProgress(1);
         setFlowerProgress(1);
-        const identityT = (elapsed - T_FLOWER) / (T_IDENTITY - T_FLOWER); // 0 -> 1
-        targetVisualPercent = 84 + identityT * 12; // 84% -> 96%
+        const identityT = (elapsed - T_FLOWER) / (T_IDENTITY - T_FLOWER);
+        targetVisualPercent = 85 + identityT * 11; // 85% -> 96%
       } else if (elapsed < T_READY) {
         advancePhase('READY');
         setStrokeProgress(1);
@@ -187,8 +205,9 @@ export const Loader: React.FC<LoaderProps> = ({
         const readyT = (elapsed - T_IDENTITY) / (T_READY - T_IDENTITY);
         targetVisualPercent = 96 + readyT * 4; // 96% -> 100%
 
-        // Asset readiness gate: hold gently at 99% if network assets are still in flight
-        const isNetworkReady = loadingDoneRef.current || elapsed >= 7000;
+        // Real asset readiness gate: hold gently at 99% if network assets are still in flight,
+        // unless master fail-safe timeout (7s) has been reached
+        const isNetworkReady = loadingDoneRef.current || elapsed >= T_TIMEOUT;
         if (!isNetworkReady && targetVisualPercent >= 99) {
           targetVisualPercent = 99;
           const nextVal = Math.max(maxDisplayProgressRef.current, 99);
@@ -196,7 +215,6 @@ export const Loader: React.FC<LoaderProps> = ({
             maxDisplayProgressRef.current = nextVal;
             setDisplayProgress(nextVal);
           }
-          reqAnimRef.current = requestAnimationFrame(animateCeremony);
           return;
         }
       } else if (elapsed < T_EXIT) {
@@ -211,7 +229,10 @@ export const Loader: React.FC<LoaderProps> = ({
         // COMPLETE: seamless handoff and unmount
         advancePhase('COMPLETE');
         triggerAwakenHero();
-        if (onFinishRef.current) onFinishRef.current();
+        if (!finishedRef.current) {
+          finishedRef.current = true;
+          if (onFinishRef.current) onFinishRef.current();
+        }
         return;
       }
 
@@ -221,16 +242,31 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = Math.min(100, computedProgress);
         setDisplayProgress(maxDisplayProgressRef.current);
       }
-
-      reqAnimRef.current = requestAnimationFrame(animateCeremony);
     };
 
-    reqAnimRef.current = requestAnimationFrame(animateCeremony);
+    const loop = (now: number) => {
+      if (isCancelled) return;
+      tick(now);
+      animId = requestAnimationFrame(loop);
+    };
+
+    // Immediate synchronous tick on mount
+    tick(performance.now());
+    animId = requestAnimationFrame(loop);
+
+    // Heartbeat fallback interval (every 80ms) guarantees progress continues even if tab is in background
+    heartbeatId = window.setInterval(() => {
+      if (!isCancelled) {
+        tick(performance.now());
+      }
+    }, 80);
 
     return () => {
-      if (reqAnimRef.current) cancelAnimationFrame(reqAnimRef.current);
+      isCancelled = true;
+      if (animId !== null) cancelAnimationFrame(animId);
+      if (heartbeatId !== null) clearInterval(heartbeatId);
     };
-  }, []); // Strictly empty dependency array: one-shot lifetime
+  }, []); // Empty dependency array: one-shot lifetime across re-renders
 
   return (
     <div

@@ -9,18 +9,16 @@ interface CeremonyProgressProps {
 export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({ displayProgress, phase }) => {
   const clamped = Math.max(0, Math.min(100, Math.round(displayProgress)));
 
-  // Concise, powerful milestone labels strictly aligned with ceremony phases & ranges
+  // Deterministic milestone labels strictly aligned with progress ranges (never reset)
   let statusText = '01 // INITIALIZING';
-  if (phase === 'ATMOSPHERE') {
+  if (clamped >= 15 && clamped < 35) {
     statusText = '02 // ATMOSPHERE';
-  } else if (phase === 'SIGNING') {
+  } else if (clamped >= 35 && clamped < 70) {
     statusText = '03 // SIGNATURE';
-  } else if (phase === 'FLOWER_EMERGE') {
-    statusText = '04 // BOTANICAL BLOOM';
-  } else if (phase === 'IDENTITY_SETTLE') {
-    statusText = '05 // IDENTITY';
-  } else if (phase === 'READY' || phase === 'EXITING' || phase === 'COMPLETE' || clamped >= 95) {
-    statusText = '06 // EXPERIENCE READY';
+  } else if (clamped >= 70 && clamped < 90) {
+    statusText = '04 // AWAKENING';
+  } else if (clamped >= 90) {
+    statusText = '05 // ARRIVAL';
   }
 
   const isComplete = clamped >= 100 || phase === 'READY' || phase === 'EXITING';

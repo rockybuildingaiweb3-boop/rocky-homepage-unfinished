@@ -23,6 +23,15 @@ export function usePreloadAssets(): PreloadAssetsResult {
   useEffect(() => {
     let isMounted = true;
 
+    // Master fail-safe timer: guarantees loadingDone within 4000ms regardless of network stalls
+    const masterSafetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setProgress(100);
+        setLoadingDone(true);
+        setLoading(false);
+      }
+    }, 4000);
+
     async function loadPortfolio() {
       try {
         const sData = await loadSiteData();
@@ -32,15 +41,10 @@ export function usePreloadAssets(): PreloadAssetsResult {
         setProgress(30);
 
         const criticalImages = [
-          '/assets/imgs/loader-flower.jpg',
+          '/assets/imgs/loader-flower.png',
           '/assets/imgs/home-back.jpg',
           '/assets/imgs/logo-rb-cyber.svg',
           '/assets/imgs/signature.svg',
-          '/assets/imgs/studio/project-1.jpg',
-          '/assets/imgs/studio/project-2.jpg',
-          '/assets/imgs/studio/project-3.jpg',
-          '/assets/imgs/studio/project-4.jpg',
-          '/assets/imgs/studio/project-5.jpg',
         ];
 
         let loadedCount = 0;
@@ -49,9 +53,9 @@ export function usePreloadAssets(): PreloadAssetsResult {
         await Promise.all(
           criticalImages.map(async (src) => {
             try {
-              await loadImage(src);
+              await loadImage(src, 3000);
             } catch {
-              // A single decorative asset should not block the page ceremony.
+              // Decorative assets must never block initialization
             }
 
             if (isMounted) {
@@ -71,6 +75,7 @@ export function usePreloadAssets(): PreloadAssetsResult {
         }
 
         if (!isMounted) return;
+        clearTimeout(masterSafetyTimer);
         setProgress(100);
 
         setTimeout(() => {
@@ -80,11 +85,12 @@ export function usePreloadAssets(): PreloadAssetsResult {
             if (!isMounted) return;
             setLoading(false);
             devMsg();
-          }, 1550);
-        }, 250);
+          }, 1000);
+        }, 200);
       } catch (err) {
         console.error('Failed to load portfolio:', err);
         if (isMounted) {
+          clearTimeout(masterSafetyTimer);
           setProgress(100);
           setLoadingDone(true);
           setLoading(false);
@@ -96,6 +102,7 @@ export function usePreloadAssets(): PreloadAssetsResult {
 
     return () => {
       isMounted = false;
+      clearTimeout(masterSafetyTimer);
     };
   }, []);
 
