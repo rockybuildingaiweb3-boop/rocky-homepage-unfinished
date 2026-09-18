@@ -1,10 +1,11 @@
 export type LoaderPhase =
-  | 'INITIALIZING'
-  | 'ATMOSPHERE'
+  | 'VOID'
+  | 'AWAKENING'
+  | 'EMERGENCE'
   | 'SIGNING'
-  | 'FLOWER_EMERGE'
-  | 'IDENTITY_SETTLE'
-  | 'READY'
+  | 'SUSPENSE'
+  | 'CLIMAX'
+  | 'ARRIVAL'
   | 'EXITING'
   | 'COMPLETE';
 
@@ -17,11 +18,12 @@ export interface StrokeMeasurement {
 }
 
 export interface CeremonyTimelineConfig {
-  initDuration: number;       // ms
-  atmosphereDuration: number; // ms
-  signingDuration: number;    // ms
-  flowerDuration: number;     // ms
-  identityDuration: number;   // ms
-  readyDuration: number;      // ms
-  exitDuration: number;       // ms
+  voidDuration: number;       // ms (Act I)
+  awakeningDuration: number;  // ms (Act II)
+  emergenceDuration: number;  // ms (Act III)
+  signingDuration: number;    // ms (Act IV)
+  suspenseDuration: number;   // ms (Act V Silence)
+  climaxDuration: number;     // ms (Act V Climax)
+  arrivalDuration: number;    // ms (Act VI Lockup)
+  exitDuration: number;       // ms (Act VI Transition)
 }

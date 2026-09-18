@@ -130,6 +130,8 @@ export const SIGNATURE_STROKE_DEFS: SignatureStrokeDef[] = [
   },
 ];
 
+export const INITIAL_PEN_COORDINATES = { x: 65, y: 190 };
+
 /**
  * Calculates authentic non-linear handwriting progress across strokes
  * Takes into account stroke length, stroke velocity weight, and pen-lift pauses.

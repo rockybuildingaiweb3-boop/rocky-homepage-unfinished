@@ -6,22 +6,36 @@ interface CeremonyProgressProps {
   phase: LoaderPhase;
 }
 
-export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({ displayProgress, phase }) => {
+/**
+ * CeremonyProgress
+ *
+ * Precision artistic instrumentation measuring the 6-Act ceremony:
+ * - Subordinate to the art (doesn't fight signature or rose for attention)
+ * - Monospaced uppercase tracking inspired by high-end digital art installations
+ * - Never truncates, never wraps
+ * - Deterministic milestone status matching the 6 Acts exactly
+ */
+export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
+  displayProgress,
+  phase,
+}) => {
   const clamped = Math.max(0, Math.min(100, Math.round(displayProgress)));
 
-  // Deterministic milestone labels strictly aligned with progress ranges (never reset)
-  let statusText = '01 // INITIALIZING';
-  if (clamped >= 15 && clamped < 35) {
-    statusText = '02 // ATMOSPHERE';
-  } else if (clamped >= 35 && clamped < 70) {
-    statusText = '03 // SIGNATURE';
-  } else if (clamped >= 70 && clamped < 90) {
-    statusText = '04 // AWAKENING';
-  } else if (clamped >= 90) {
-    statusText = '05 // ARRIVAL';
+  // Deterministic 6-Act narrative milestones aligned with percentage thresholds
+  let statusText = '01 // THE VOID';
+  if (clamped >= 15 && clamped < 30) {
+    statusText = '02 // AWAKENING';
+  } else if (clamped >= 30 && clamped < 48) {
+    statusText = '03 // EMERGENCE';
+  } else if (clamped >= 48 && clamped < 76) {
+    statusText = '04 // SIGNATURE';
+  } else if (clamped >= 76 && clamped < 96) {
+    statusText = '05 // CLIMAX';
+  } else if (clamped >= 96) {
+    statusText = '06 // ARRIVAL';
   }
 
-  const isComplete = clamped >= 100 || phase === 'READY' || phase === 'EXITING';
+  const isComplete = clamped >= 100 || phase === 'ARRIVAL' || phase === 'EXITING';
   const isHidden = phase === 'COMPLETE';
 
   return (
@@ -35,12 +49,12 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({ displayProgr
       aria-valuemin={0}
       aria-valuemax={100}
     >
-      {/* 1. Monospace Percentage & Phase Status — Guaranteed Never Truncated */}
-      <div className="flex items-center justify-between w-64 sm:w-72 md:w-80 mb-2.5 px-0.5">
+      {/* ── 1. CINEMATIC INSTRUMENTATION STATUS & TABULAR PERCENTAGE ── */}
+      <div className="flex items-center justify-between w-64 sm:w-72 md:w-80 mb-2 px-0.5">
         <span
-          className="text-[11px] sm:text-xs font-mono tracking-[0.22em] uppercase whitespace-nowrap transition-colors duration-500 select-none font-medium"
+          className="text-[10px] sm:text-[11px] font-mono tracking-[0.24em] uppercase whitespace-nowrap transition-colors duration-500 select-none font-medium"
           style={{
-            color: isComplete ? 'rgba(255, 255, 255, 0.95)' : 'rgba(216, 180, 254, 0.75)',
+            color: isComplete ? 'rgba(255, 255, 255, 0.95)' : 'rgba(216, 180, 254, 0.70)',
             textShadow: isComplete ? '0 0 12px rgba(168, 85, 247, 0.65)' : 'none',
           }}
         >
@@ -48,9 +62,9 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({ displayProgr
         </span>
 
         <span
-          className="text-xs sm:text-[13px] font-mono tracking-[0.2em] font-semibold select-none ml-3 tabular-nums transition-colors duration-300"
+          className="text-xs sm:text-[13px] font-mono tracking-[0.2em] font-medium select-none ml-3 tabular-nums transition-colors duration-300"
           style={{
-            color: isComplete ? '#ffffff' : 'rgba(255, 255, 255, 0.92)',
+            color: isComplete ? '#ffffff' : 'rgba(255, 255, 255, 0.88)',
             textShadow: isComplete ? '0 0 14px rgba(255, 255, 255, 0.95)' : 'none',
           }}
         >
@@ -58,25 +72,25 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({ displayProgr
         </span>
       </div>
 
-      {/* 2. High-Visibility Architectural Progress Bar */}
-      <div className="relative w-64 sm:w-72 md:w-80 h-[3.5px] rounded-full bg-white/[0.12] overflow-visible border border-white/[0.08] shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+      {/* ── 2. REFINED MINIMALIST ARCHITECTURAL PROGRESS BAR ── */}
+      <div className="relative w-64 sm:w-72 md:w-80 h-[3px] rounded-full bg-white/[0.10] overflow-visible border border-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
         {/* Track Fill */}
         <div
           className="h-full rounded-full transition-[width] duration-150 ease-out relative will-change-transform"
           style={{
             width: `${clamped}%`,
             background: isComplete
-              ? 'linear-gradient(90deg, #c084fc 0%, #a855f7 50%, #ffffff 100%)'
-              : 'linear-gradient(90deg, #9333ea 0%, #c084fc 65%, #ffffff 100%)',
+              ? 'linear-gradient(90deg, #a855f7 0%, #c084fc 60%, #ffffff 100%)'
+              : 'linear-gradient(90deg, #7e22ce 0%, #a855f7 50%, #e9d5ff 100%)',
             boxShadow: isComplete
-              ? '0 0 16px rgba(192, 132, 252, 0.9), 0 0 5px #ffffff'
-              : '0 0 12px rgba(168, 85, 247, 0.6), 0 0 2px rgba(255, 255, 255, 0.8)',
+              ? '0 0 14px rgba(192, 132, 252, 0.85), 0 0 4px #ffffff'
+              : '0 0 10px rgba(168, 85, 247, 0.55)',
           }}
         >
-          {/* Leading-Edge Starlight Spark Bead */}
+          {/* Subtle Leading-Edge Starlight Spark */}
           {clamped > 0 && clamped < 100 && (
             <div
-              className="absolute -right-1.5 -top-[3.5px] w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_6px_#ffffff,0_0_14px_#c084fc] will-change-transform pointer-events-none"
+              className="absolute -right-1 -top-[2.5px] w-2 h-2 rounded-full bg-white shadow-[0_0_5px_#ffffff,0_0_10px_#c084fc] will-change-transform pointer-events-none"
               aria-hidden="true"
             />
           )}
