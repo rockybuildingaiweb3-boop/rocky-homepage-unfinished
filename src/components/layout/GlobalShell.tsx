@@ -15,10 +15,10 @@ interface GlobalShellProps {
  * GlobalShell
  * 
  * Central coordinator for application-wide persistent systems:
- * - Interactive custom cursor (tracks across all routes & pages)
+ * - Interactive custom cursor (wakes up cleanly once Hero is active)
  * - Atmospheric 35mm cinematic film grain texture layer
  * - Atmospheric 3D starfield & cosmic depth layer (ParticleBackground)
- * - Ceremonial opening loader (deliberate cinematic opening ceremony)
+ * - Ceremonial opening loader (isolated cinematic opening ceremony)
  */
 export const GlobalShell: React.FC<GlobalShellProps> = ({
   progress,
@@ -31,8 +31,8 @@ export const GlobalShell: React.FC<GlobalShellProps> = ({
 
   return (
     <>
-      {/* Interactive custom cursor - global across all routes */}
-      <CursorDot isMobile={isMobile} />
+      {/* Interactive custom cursor - strictly hidden during ceremony, wakes up when Hero activates */}
+      {ceremonyDone && <CursorDot isMobile={isMobile} />}
 
       {/* Ceremonial Opening Sequence */}
       {!ceremonyDone && (

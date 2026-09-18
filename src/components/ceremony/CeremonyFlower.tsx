@@ -10,72 +10,71 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProg
   // Determine emergence metrics based on ceremony phase
   let opacity = 0;
   let scale = 0.88;
-  let rotation = -2.5;
+  let rotation = -2.0;
   let blurAmount = 6;
   let glowIntensity = 0.1;
 
   switch (phase) {
     case 'INITIALIZING':
       opacity = 0;
-      scale = 0.88;
+      scale = 0.86;
       rotation = -2.5;
       blurAmount = 8;
       glowIntensity = 0;
       break;
 
     case 'ATMOSPHERE':
-      // Subtle presence stirring in deep shadows
-      opacity = 0.22;
-      scale = 0.91;
-      rotation = -2.0;
-      blurAmount = 5;
-      glowIntensity = 0.25;
+      // Subtle organic presence stirring in the deep void
+      opacity = 0.25;
+      scale = 0.90;
+      rotation = -1.8;
+      blurAmount = 4;
+      glowIntensity = 0.3;
       break;
 
     case 'SIGNING':
-      // Gentle velvety silhouette behind the handwriting
-      opacity = 0.42;
-      scale = 0.95;
-      rotation = -1.2;
-      blurAmount = 3;
-      glowIntensity = 0.45;
+      // Gentle velvety silhouette blooming softly behind the calligraphy
+      opacity = 0.50;
+      scale = 0.94;
+      rotation = -1.0;
+      blurAmount = 2.5;
+      glowIntensity = 0.5;
       break;
 
     case 'FLOWER_EMERGE': {
-      // Organic bloom emergence with spring-like overshoot and settling
+      // Organic bloom emergence with subtle breathing overshoot and settling
       const t = Math.max(0, Math.min(1, phaseProgress));
-      // Spring overshoot curve
-      const easedT = 1 - Math.pow(1 - t, 3);
-      const overshoot = Math.sin(t * Math.PI) * 0.035;
-      scale = 0.95 + easedT * 0.05 + overshoot; // 0.95 -> 1.035 -> 1.00
-      opacity = 0.42 + easedT * 0.50; // 0.42 -> 0.92
-      rotation = -1.2 + easedT * 1.2; // -1.2 -> 0.0 deg
-      blurAmount = Math.max(0, 3 - easedT * 3);
-      glowIntensity = 0.45 + easedT * 0.45;
+      const easedT = 1 - Math.pow(1 - t, 2.8);
+      const overshoot = Math.sin(t * Math.PI) * 0.025;
+      scale = 0.94 + easedT * 0.06 + overshoot; // 0.94 -> 1.025 -> 1.00
+      opacity = 0.50 + easedT * 0.44; // 0.50 -> 0.94
+      rotation = -1.0 + easedT * 1.0; // -1.0 -> 0.0 deg
+      blurAmount = Math.max(0, 2.5 - easedT * 2.5);
+      glowIntensity = 0.5 + easedT * 0.45;
       break;
     }
 
     case 'IDENTITY_SETTLE':
     case 'READY':
-      opacity = 0.92;
+      opacity = 0.94;
       scale = 1.0;
       rotation = 0;
       blurAmount = 0;
-      glowIntensity = 0.85;
+      glowIntensity = 0.88;
       break;
 
     case 'EXITING':
-      // Atmospheric expansion: opening the aperture into the Hero world
+      // Atmospheric aperture expansion: flower dissolves as camera moves into Hero garden
       opacity = 0;
-      scale = 1.15;
-      rotation = 1.0;
+      scale = 1.18;
+      rotation = 0.8;
       blurAmount = 8;
       glowIntensity = 1.0;
       break;
 
     case 'COMPLETE':
       opacity = 0;
-      scale = 1.2;
+      scale = 1.25;
       break;
   }
 
@@ -86,19 +85,19 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProg
     >
       {/* 1. Luminous Ambient Backlight Corona (soft violet-magenta starlight glow behind petals) */}
       <div
-        className="absolute w-[85vw] sm:w-[65vw] max-w-[620px] aspect-square rounded-full pointer-events-none mix-blend-screen will-change-transform transition-all duration-1000 ease-out"
+        className="absolute w-[85vw] sm:w-[68vw] max-w-[640px] aspect-square rounded-full pointer-events-none mix-blend-screen will-change-transform transition-all duration-1000 ease-out"
         style={{
           background:
-            'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.45) 0%, rgba(129, 140, 248, 0.25) 35%, rgba(192, 132, 252, 0.12) 60%, transparent 80%)',
-          filter: 'blur(36px)',
+            'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.42) 0%, rgba(129, 140, 248, 0.22) 36%, rgba(192, 132, 252, 0.10) 62%, transparent 80%)',
+          filter: 'blur(40px)',
           opacity: glowIntensity,
-          transform: `scale(${scale * 1.08})`,
+          transform: `scale(${scale * 1.06})`,
         }}
       />
 
-      {/* 2. Studio Botanical Velvet Form with Organic Radial Vignette */}
+      {/* 2. Photographic Velvet Flower with 100% Alpha Transparency (no black box / rectangle) */}
       <div
-        className="relative w-[90vw] sm:w-[75vw] md:w-[65vw] max-w-[680px] aspect-square flex items-center justify-center will-change-transform"
+        className="relative w-[85vw] sm:w-[70vw] md:w-[60vw] max-w-[580px] aspect-square flex items-center justify-center will-change-transform"
         style={{
           opacity,
           transform: `scale(${scale}) rotate(${rotation}deg)`,
@@ -106,27 +105,26 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({ phase, phaseProg
           transition:
             phase === 'FLOWER_EMERGE'
               ? 'none'
-              : 'opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.0s ease',
-          maskImage:
-            'radial-gradient(circle at 50% 50%, black 28%, rgba(0, 0, 0, 0.95) 52%, rgba(0, 0, 0, 0.6) 72%, transparent 88%)',
-          WebkitMaskImage:
-            'radial-gradient(circle at 50% 50%, black 28%, rgba(0, 0, 0, 0.95) 52%, rgba(0, 0, 0, 0.6) 72%, transparent 88%)',
+              : 'opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1), transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s ease',
         }}
       >
-        <img
-          src="/assets/imgs/loader-flower.jpg"
-          alt="Studio botanical flower artwork"
-          draggable={false}
-          className="w-full h-full object-contain sm:object-cover object-center select-none pointer-events-none"
-        />
+        <picture className="w-full h-full flex items-center justify-center">
+          <source srcSet="/assets/imgs/loader-flower.webp" type="image/webp" />
+          <img
+            src="/assets/imgs/loader-flower.png"
+            alt="Studio botanical velvet flower"
+            draggable={false}
+            className="w-full h-full object-contain select-none pointer-events-none"
+          />
+        </picture>
 
-        {/* Delicate inner starlight breathing sheen */}
+        {/* Delicate inner starlight sheen breathing with the petals */}
         <div
           className="absolute inset-0 pointer-events-none mix-blend-screen"
           style={{
             background:
-              'radial-gradient(circle at 52% 48%, rgba(255, 255, 255, 0.22) 0%, rgba(199, 210, 254, 0.12) 30%, transparent 65%)',
-            opacity: glowIntensity * 0.8,
+              'radial-gradient(circle at 52% 48%, rgba(255, 255, 255, 0.24) 0%, rgba(216, 180, 254, 0.14) 32%, transparent 68%)',
+            opacity: glowIntensity * 0.75,
           }}
         />
       </div>

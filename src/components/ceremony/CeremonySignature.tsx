@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect, useState, useMemo } from 'react';
-import { SIGNATURE_STROKE_DEFS, easeHandwriting } from './signatureGeometry';
+import { SIGNATURE_STROKE_DEFS, computeStrokeProgressWindows } from './signatureGeometry';
 import { LoaderPhase } from './types';
 
 interface CeremonySignatureProps {
@@ -11,14 +11,13 @@ interface CeremonySignatureProps {
 export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
   progress,
   phase,
-  isMobile = false,
 }) => {
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
   const [measuredLengths, setMeasuredLengths] = useState<number[]>(() =>
     SIGNATURE_STROKE_DEFS.map((s) => s.approxLength)
   );
 
-  // Measure actual SVG geometry when mounted
+  // Measure actual SVG geometry precisely on mount
   useLayoutEffect(() => {
     const lengths = pathRefs.current.map((pathEl, idx) => {
       if (pathEl && typeof pathEl.getTotalLength === 'function') {
@@ -26,7 +25,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           const len = pathEl.getTotalLength();
           if (len > 10) return len;
         } catch {
-          // fallback to approx
+          // fallback
         }
       }
       return SIGNATURE_STROKE_DEFS[idx].approxLength;
@@ -34,58 +33,56 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
     setMeasuredLengths(lengths);
   }, []);
 
-  // Compute total virtual distance including natural pen lift pauses
-  const { strokeWindows, totalVirtualDistance } = useMemo(() => {
-    let currentDistance = 0;
-    const windows = SIGNATURE_STROKE_DEFS.map((stroke, idx) => {
-      const len = measuredLengths[idx] || stroke.approxLength;
-      const start = currentDistance;
-      const strokeEnd = start + len;
-      const windowEnd = strokeEnd + stroke.pauseAfter;
-      currentDistance = windowEnd;
-      return {
-        id: stroke.id,
-        index: idx,
-        length: len,
-        start,
-        strokeEnd,
-        windowEnd,
-        pauseAfter: stroke.pauseAfter,
-        pathD: stroke.pathD,
-      };
-    });
-    return { strokeWindows: windows, totalVirtualDistance: currentDistance };
+  // Compute stroke windows with per-stroke velocity profiles
+  const { windows, totalDuration } = useMemo(() => {
+    return computeStrokeProgressWindows(measuredLengths);
   }, [measuredLengths]);
 
-  // Determine drawing state from phase and progress
-  const effectiveProgress = useMemo(() => {
+  // Determine virtual handwriting time from phase and progress
+  const currentTime = useMemo(() => {
     if (phase === 'INITIALIZING' || phase === 'ATMOSPHERE') return 0;
-    if (phase === 'SIGNING') return easeHandwriting(progress);
-    // If FLOWER_EMERGE, IDENTITY_SETTLE, READY, EXITING: fully written
-    return 1;
-  }, [phase, progress]);
-
-  // Current distance along virtual drawing timeline
-  const currentVirtualDistance = effectiveProgress * totalVirtualDistance;
+    if (phase === 'SIGNING') {
+      // Smooth ease through the handwriting ceremony
+      const clamped = Math.max(0, Math.min(1, progress));
+      return clamped * totalDuration;
+    }
+    // Fully written during FLOWER_EMERGE, IDENTITY_SETTLE, READY, EXITING
+    return totalDuration;
+  }, [phase, progress, totalDuration]);
 
   // Compute stroke offsets & active pen tip coordinates
-  const { strokeOffsets, penPosition, isWriting, activeIndex } = useMemo(() => {
+  const { strokeOffsets, penPosition, isWriting, activeIndex, isPenLifting } = useMemo(() => {
     let penPos: { x: number; y: number } | null = null;
     let writing = false;
+    let lifting = false;
     let activeIdx = -1;
 
-    const offsets = strokeWindows.map((w, idx) => {
-      if (currentVirtualDistance <= w.start) {
+    const offsets = windows.map((w, idx) => {
+      if (currentTime <= w.startTime) {
         // Stroke has not started yet
         return { offset: w.length, opacity: 0 };
-      } else if (currentVirtualDistance >= w.strokeEnd) {
+      } else if (currentTime >= w.strokeEndTime) {
         // Stroke is completely drawn
         return { offset: 0, opacity: 1 };
       } else {
         // Currently drawing this stroke
         activeIdx = idx;
         writing = true;
-        const localDist = currentVirtualDistance - w.start;
+        const localT = (currentTime - w.startTime) / w.strokeDuration;
+        
+        // Final flourish custom deceleration at tail
+        let easedLocalT = localT;
+        if (w.id === 'babcock-k-flourish') {
+          // Accelerate initially into flourish, then decelerate into a graceful tip
+          if (localT < 0.6) {
+            easedLocalT = Math.pow(localT / 0.6, 1.25) * 0.65;
+          } else {
+            const tailT = (localT - 0.6) / 0.4;
+            easedLocalT = 0.65 + (1 - Math.pow(1 - tailT, 1.8)) * 0.35;
+          }
+        }
+
+        const localDist = easedLocalT * w.length;
         const offset = Math.max(0, w.length - localDist);
 
         const pathEl = pathRefs.current[idx];
@@ -101,21 +98,22 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
       }
     });
 
-    // Check if in a pen-lift pause between strokes
-    if (!penPos && effectiveProgress > 0 && effectiveProgress < 1) {
-      for (let i = 0; i < strokeWindows.length - 1; i++) {
-        const w = strokeWindows[i];
-        if (currentVirtualDistance > w.strokeEnd && currentVirtualDistance < w.windowEnd) {
+    // Check if currently in a natural pen-lift pause between strokes
+    if (!penPos && currentTime > 0 && currentTime < totalDuration) {
+      for (let i = 0; i < windows.length - 1; i++) {
+        const w = windows[i];
+        if (currentTime > w.strokeEndTime && currentTime < w.windowEndTime) {
           activeIdx = i;
+          lifting = true;
           const prevEl = pathRefs.current[i];
           const nextEl = pathRefs.current[i + 1];
           if (prevEl && nextEl) {
             try {
               const pEnd = prevEl.getPointAtLength(w.length);
               const pStart = nextEl.getPointAtLength(0);
-              const pauseT = (currentVirtualDistance - w.strokeEnd) / w.pauseAfter;
-              // Smooth air glide with slight arc
-              const arcY = -Math.sin(pauseT * Math.PI) * 14;
+              const pauseT = (currentTime - w.strokeEndTime) / w.pauseDuration;
+              // Gentle natural hand lift arc in air
+              const arcY = -Math.sin(pauseT * Math.PI) * 10;
               penPos = {
                 x: pEnd.x + (pStart.x - pEnd.x) * pauseT,
                 y: pEnd.y + (pStart.y - pEnd.y) * pauseT + arcY,
@@ -129,28 +127,26 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
       }
     }
 
-    // Default fallback pen position if writing but point sampling failed
-    if (!penPos && writing && activeIdx >= 0) {
-      penPos = { x: 65 + effectiveProgress * 1035, y: 190 };
-    }
-
     return {
       strokeOffsets: offsets,
       penPosition: penPos,
       isWriting: writing,
       activeIndex: activeIdx,
+      isPenLifting: lifting,
     };
-  }, [currentVirtualDistance, effectiveProgress, strokeWindows]);
+  }, [currentTime, totalDuration, windows]);
 
-  const isComplete = effectiveProgress >= 0.999 || phase !== 'SIGNING';
-  const showGlints = effectiveProgress > 0.92 || phase !== 'SIGNING';
+  // Settling moment: signature is complete
+  const isComplete = currentTime >= totalDuration || phase !== 'SIGNING';
+  // Rare, structural glints appear subtly only after the signature has settled
+  const showGlints = isComplete && phase !== 'INITIALIZING' && phase !== 'ATMOSPHERE';
 
   return (
     <div
-      className="relative w-full max-w-[620px] mx-auto select-none pointer-events-none transition-all duration-700 ease-out will-change-transform"
+      className="relative w-full max-w-[640px] mx-auto select-none pointer-events-none transition-all duration-700 ease-out will-change-transform"
       style={{
         opacity: phase === 'INITIALIZING' ? 0 : 1,
-        transform: phase === 'EXITING' ? 'scale(1.04) translate3d(0, -6px, 0)' : 'scale(1) translate3d(0, 0, 0)',
+        transform: phase === 'EXITING' ? 'scale(1.03) translate3d(0, -4px, 0)' : 'scale(1) translate3d(0, 0, 0)',
       }}
     >
       <svg
@@ -160,61 +156,57 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
         aria-hidden="true"
       >
         <defs>
-          {/* Celestial starlight glow matching the brand signature */}
-          <filter id="super-radiant-glow" x="-30%" y="-50%" width="160%" height="200%">
-            <feGaussianBlur stdDeviation="14" result="blurDeep" />
-            <feFlood floodColor="rgba(168, 85, 247, 0.72)" result="colorDeep" />
-            <feComposite in="colorDeep" in2="blurDeep" operator="in" result="glowDeep" />
-
-            <feGaussianBlur stdDeviation="6" result="blurMid" />
-            <feFlood floodColor="rgba(199, 210, 254, 0.92)" result="colorMid" />
-            <feComposite in="colorMid" in2="blurMid" operator="in" result="glowMid" />
-
-            <feGaussianBlur stdDeviation="2.5" result="blurTight" />
-            <feFlood floodColor="rgba(245, 243, 255, 1.0)" result="colorTight" />
-            <feComposite in="colorTight" in2="blurTight" operator="in" result="glowTight" />
-
-            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="rgba(0, 0, 0, 0.9)" />
-
-            <feMerge>
-              <feMergeNode in="glowDeep" />
-              <feMergeNode in="glowMid" />
-              <feMergeNode in="glowTight" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
-          {/* Starlight pen tip diamond flare filter */}
-          <filter id="pen-tip-flare" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feFlood floodColor="#c084fc" result="color" />
-            <feComposite in="color" in2="blur" operator="in" result="glow" />
+          {/* Subtle atmospheric aura: restrained, ethereal violet glow */}
+          <filter id="sig-atmospheric-aura" x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur stdDeviation="5.5" result="blurDeep" />
+            <feFlood floodColor="rgba(168, 85, 247, 0.45)" result="colorDeep" />
+            <feComposite in="colorDeep" in2="blurDeep" operator="in" result="glow" />
             <feMerge>
               <feMergeNode in="glow" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
 
-          <linearGradient id="radiant-core-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          {/* Soft luminous body: refined, non-neon illumination */}
+          <filter id="sig-luminous-body" x="-15%" y="-30%" width="130%" height="160%">
+            <feGaussianBlur stdDeviation="1.8" result="blurSoft" />
+            <feFlood floodColor="rgba(224, 210, 255, 0.85)" result="colorSoft" />
+            <feComposite in="colorSoft" in2="blurSoft" operator="in" result="glowSoft" />
+            <feMerge>
+              <feMergeNode in="glowSoft" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* Restrained pen tip micro-glow */}
+          <filter id="pen-tip-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feFlood floodColor="rgba(192, 132, 252, 0.75)" result="color" />
+            <feComposite in="color" in2="blur" operator="in" />
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* Subtle gradient along strokes */}
+          <linearGradient id="sig-core-white" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="30%" stopColor="#f5f3ff" />
-            <stop offset="70%" stopColor="#e0e7ff" />
+            <stop offset="50%" stopColor="#faf5ff" />
             <stop offset="100%" stopColor="#ffffff" />
           </linearGradient>
         </defs>
 
-        {/* 1. DEEP BLOOM UNDERLAYER (Radiant purple/cyan starlight aura) */}
-        <g opacity="0.88" filter="url(#super-radiant-glow)">
-          {strokeWindows.map((stroke, idx) => {
-            const isWordRocky = idx < 6;
-            const strokeWidth = isWordRocky ? 4.4 : 4.8;
+        {/* ── 1. SUBTLE ATMOSPHERIC AURA (Restrained, delicate background depth) ── */}
+        <g filter="url(#sig-atmospheric-aura)" opacity="0.65">
+          {windows.map((stroke, idx) => {
             const { offset, opacity } = strokeOffsets[idx] || { offset: stroke.length, opacity: 0 };
             return (
               <path
-                key={`bloom-${stroke.id}`}
+                key={`aura-${stroke.id}`}
                 d={stroke.pathD}
-                stroke="url(#radiant-core-grad)"
-                strokeWidth={strokeWidth}
+                stroke="rgba(168, 85, 247, 0.55)"
+                strokeWidth={5.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeDasharray={stroke.length}
@@ -228,20 +220,15 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           })}
         </g>
 
-        {/* 2. PURE BRILLIANT WHITE ULTRA-SHARP CORE (Laser-sharp foreground stroke) */}
-        <g stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round">
-          {strokeWindows.map((stroke, idx) => {
-            const isWordRocky = idx < 6;
-            const strokeWidth = isWordRocky ? 2.4 : 2.6;
+        {/* ── 2. SOFT LUMINOUS BODY (Soft white-lilac body of liquid ink) ── */}
+        <g filter="url(#sig-luminous-body)" stroke="rgba(238, 230, 255, 0.9)" strokeLinecap="round" strokeLinejoin="round">
+          {windows.map((stroke, idx) => {
             const { offset, opacity } = strokeOffsets[idx] || { offset: stroke.length, opacity: 0 };
             return (
               <path
-                key={`core-${stroke.id}`}
-                ref={(el) => {
-                  pathRefs.current[idx] = el;
-                }}
+                key={`body-${stroke.id}`}
                 d={stroke.pathD}
-                strokeWidth={strokeWidth}
+                strokeWidth={3.4}
                 strokeDasharray={stroke.length}
                 strokeDashoffset={offset}
                 opacity={opacity}
@@ -253,62 +240,70 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           })}
         </g>
 
-        {/* 3. DYNAMIC STARLIGHT PEN TIP FLARE (Follows real path coordinates as written) */}
+        {/* ── 3. SHARP CRISP WHITE CORE (Laser-sharp calligraphic line) ── */}
+        <g stroke="url(#sig-core-white)" strokeLinecap="round" strokeLinejoin="round">
+          {windows.map((stroke, idx) => {
+            const { offset, opacity } = strokeOffsets[idx] || { offset: stroke.length, opacity: 0 };
+            return (
+              <path
+                key={`core-${stroke.id}`}
+                ref={(el) => {
+                  pathRefs.current[idx] = el;
+                }}
+                d={stroke.pathD}
+                strokeWidth={1.85}
+                strokeDasharray={stroke.length}
+                strokeDashoffset={offset}
+                opacity={opacity}
+                style={{
+                  transition: isWriting && idx === activeIndex ? 'none' : 'opacity 0.25s ease',
+                }}
+              />
+            );
+          })}
+        </g>
+
+        {/* ── 4. REFINED PEN TIP (Point of contact + subtle local glow + no cartoon diamond) ── */}
         {penPosition && !isComplete && (
           <g
             transform={`translate(${penPosition.x}, ${penPosition.y})`}
-            className="will-change-transform pointer-events-none"
+            className="will-change-transform pointer-events-none transition-opacity duration-200"
+            style={{ opacity: isPenLifting ? 0.45 : 1 }}
           >
-            {/* Luminous diamond flare */}
-            <path
-              d="M 0 -16 Q 0 0 16 0 Q 0 0 0 16 Q 0 0 -16 0 Q 0 0 0 -16 Z"
-              fill="#ffffff"
-              filter="url(#pen-tip-flare)"
-              opacity="0.95"
-            />
-            {/* Inner hot white core */}
-            <circle r="3.2" fill="#ffffff" />
-            {/* Ambient starlight aura */}
+            {/* Subtle local glow halo */}
             <circle
-              r="12"
-              fill="none"
-              stroke="rgba(192, 132, 252, 0.6)"
-              strokeWidth="1.2"
-              className="animate-ping"
+              r={isPenLifting ? 3.5 : 5.5}
+              fill="rgba(192, 132, 252, 0.4)"
+              filter="url(#pen-tip-glow)"
+            />
+            {/* Tiny crisp point of contact */}
+            <circle
+              r={isPenLifting ? 1.2 : 2.0}
+              fill="#ffffff"
             />
           </g>
         )}
 
-        {/* 4. SPECULAR STARLIGHT GLINTS ON APICES (Flare as signature completes) */}
+        {/* ── 5. RESTRAINED SPECULAR GLINTS (At most 2 structural, subtle accents) ── */}
         {showGlints && (
-          <g className="transition-opacity duration-700 ease-out" style={{ opacity: showGlints ? 1 : 0 }}>
-            {/* Glint on R peak */}
-            <g transform="translate(160, 68) scale(0.65)">
+          <g className="transition-opacity duration-1000 ease-out opacity-85">
+            {/* Rare subtle glint on R crest */}
+            <g transform="translate(160, 68) scale(0.45)">
               <path
                 fill="#ffffff"
-                filter="drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 16px #a855f7)"
-                d="M 0 -18 Q 0 0 18 0 Q 0 0 0 18 Q 0 0 -18 0 Q 0 0 0 -18 Z"
+                filter="drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 10px rgba(168,85,247,0.7))"
+                d="M 0 -14 Q 0 0 14 0 Q 0 0 0 14 Q 0 0 -14 0 Q 0 0 0 -14 Z"
                 className="animate-pulse"
               />
             </g>
-            {/* Glint on B crest */}
-            <g transform="translate(615, 128) scale(0.55)">
+            {/* Subtle glint at the very flourish tip */}
+            <g transform="translate(1095, 174) scale(0.4)">
               <path
                 fill="#ffffff"
-                filter="drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 14px #38bdf8)"
-                d="M 0 -16 Q 0 0 16 0 Q 0 0 0 16 Q 0 0 -16 0 Q 0 0 0 -16 Z"
+                filter="drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 10px rgba(192,132,252,0.7))"
+                d="M 0 -14 Q 0 0 14 0 Q 0 0 0 14 Q 0 0 -14 0 Q 0 0 0 -14 Z"
                 className="animate-pulse"
-                style={{ animationDelay: '150ms' }}
-              />
-            </g>
-            {/* Glint on tail flourish tip */}
-            <g transform="translate(1095, 174) scale(0.6)">
-              <path
-                fill="#ffffff"
-                filter="drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 18px #c084fc)"
-                d="M 0 -18 Q 0 0 18 0 Q 0 0 0 18 Q 0 0 -18 0 Q 0 0 0 -18 Z"
-                className="animate-pulse"
-                style={{ animationDelay: '300ms' }}
+                style={{ animationDelay: '250ms' }}
               />
             </g>
           </g>

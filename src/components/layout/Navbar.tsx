@@ -5,6 +5,7 @@ import { useBackgroundMusic } from '../../features/audio';
 interface NavbarProps {
   onNavigate: (targetId: string) => void;
   activeSection?: string;
+  visible?: boolean;
 }
 
 const NAV_ITEMS = [
@@ -14,7 +15,7 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'CONTACT' },
 ] as const;
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'home' }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'home', visible = true }) => {
   const [mobileMenuActive, setMobileMenuActive] = useState(false);
   const isMobile = useIsMobile(768);
   const { isMuted, toggleMute } = useBackgroundMusic();
@@ -38,7 +39,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
   };
 
   return (
-    <nav className="fixed top-4 sm:top-6 left-0 w-full z-[100] px-6 sm:px-10 md:px-14 flex flex-row justify-between items-center box-border pointer-events-none transition-all duration-300">
+    <nav
+      className={`fixed top-4 sm:top-6 left-0 w-full z-[100] px-6 sm:px-10 md:px-14 flex flex-row justify-between items-center box-border pointer-events-none transition-all duration-700 ease-out ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
+      }`}
+    >
       <div className="h-8 sm:h-9 w-16 sm:w-20 cursor-pointer pointer-events-auto transition-transform duration-300 hover:scale-105 flex items-center justify-start">
         <button
           onClick={() => handleNavClick('home')}
