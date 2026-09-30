@@ -397,19 +397,19 @@ export const Loader: React.FC<LoaderProps> = ({
             : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* ── Midground Anchor: Large atmospheric photographic rose suspended in deep space behind signature ── */}
-        <div className="absolute top-1/2 -translate-y-[57%] pointer-events-none z-0 flex items-center justify-center">
-          <CeremonyFlower
-            phase={phase}
-            phaseProgress={phaseProgress}
-            climaxProgress={climaxProgress}
-            convergenceProgress={convergenceProgress}
-            isExiting={isExiting}
-          />
-        </div>
+        {/* ── Foreground Calligraphic Signature Crossing Naturally Across Lower Rose ── */}
+        <div className="relative z-10 w-full flex flex-col items-center">
+          {/* Midground Botanical Rose: Visual center in upper-middle, lower portion crossed by signature */}
+          <div className="absolute top-1/2 -translate-y-[60%] pointer-events-none z-0 flex items-center justify-center">
+            <CeremonyFlower
+              phase={phase}
+              phaseProgress={phaseProgress}
+              climaxProgress={climaxProgress}
+              convergenceProgress={convergenceProgress}
+              isExiting={isExiting}
+            />
+          </div>
 
-        {/* ── Foreground Calligraphic Signature: Crisp, bright foreground element ── */}
-        <div className="relative z-10 w-full flex flex-col items-center mt-1 sm:mt-2">
           <CeremonySignature
             progress={strokeProgress}
             phase={phase}
@@ -419,7 +419,7 @@ export const Loader: React.FC<LoaderProps> = ({
         </div>
 
         {/* ── Typographic Identity: rocky babcock ── */}
-        <div className="relative z-10 -mt-1 sm:-mt-2">
+        <div className="relative z-10 mt-1 sm:mt-2">
           <CeremonyIdentity phase={phase} climaxProgress={climaxProgress} />
         </div>
 

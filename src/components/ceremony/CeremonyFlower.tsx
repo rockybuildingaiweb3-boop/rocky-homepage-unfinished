@@ -171,12 +171,12 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
       className="relative flex items-center justify-center select-none pointer-events-none"
       aria-hidden="true"
     >
-      {/* ── 1. RESTRAINED LOCAL RED ILLUMINATION (Soft atmospheric falloff, no giant purple bloom) ── */}
+      {/* ── 1. RESTRAINED LOCAL RED ILLUMINATION (Soft atmospheric falloff, centered on bloom) ── */}
       <div
-        className="absolute w-[580px] sm:w-[700px] md:w-[820px] lg:w-[900px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
+        className="absolute w-[560px] sm:w-[680px] md:w-[800px] lg:w-[880px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
         style={{
           background:
-            'radial-gradient(circle at 50% 46%, rgba(136, 19, 55, 0.06) 0%, rgba(159, 18, 57, 0.015) 38%, transparent 62%)',
+            'radial-gradient(circle at 50% 42%, rgba(136, 19, 55, 0.06) 0%, rgba(159, 18, 57, 0.015) 38%, transparent 62%)',
           filter: 'blur(60px)',
           opacity: ambientHaloOpacity,
           transform: `scale(${scale * 1.02})`,
@@ -184,9 +184,9 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
       />
 
       {/* ── 2. LARGE PHOTOGRAPHIC BOTANICAL ROSE (Atmospheric visual anchor behind signature) ── */}
-      {/* Scaled ~1.9x to occupy expansive cinematic space, subdued deep crimson, authentic sharpness */}
+      {/* Authentic native scale, crisp detail, stem recedes into darkness */}
       <div
-        className="relative w-[700px] sm:w-[840px] md:w-[980px] lg:w-[1080px] aspect-[1024/682] flex items-center justify-center will-change-transform"
+        className="relative w-[640px] sm:w-[760px] md:w-[880px] lg:w-[960px] aspect-[1537/1023] flex items-center justify-center will-change-transform"
         style={{
           opacity,
           transform: `scale(${scale}) rotate(${rotation}deg)`,
@@ -198,7 +198,15 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
           ...maskStyle,
         }}
       >
-        <picture className="w-full h-full flex items-center justify-center relative">
+        <picture
+          className="w-full h-full flex items-center justify-center relative"
+          style={{
+            maskImage:
+              'radial-gradient(ellipse 65% 48% at 50% 41%, rgba(0,0,0,1) 36%, rgba(0,0,0,0.88) 50%, rgba(0,0,0,0.20) 64%, rgba(0,0,0,0) 73%)',
+            WebkitMaskImage:
+              'radial-gradient(ellipse 65% 48% at 50% 41%, rgba(0,0,0,1) 36%, rgba(0,0,0,0.88) 50%, rgba(0,0,0,0.20) 64%, rgba(0,0,0,0) 73%)',
+          }}
+        >
           <source srcSet="/assets/imgs/loader-flower.webp" type="image/webp" />
           <img
             src="/assets/imgs/loader-flower.png"
@@ -207,9 +215,9 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
             className="w-full h-full object-contain select-none pointer-events-none"
             style={{
               maskImage:
-                'radial-gradient(ellipse 72% 70% at 50% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 58%, rgba(0,0,0,0) 74%)',
+                'radial-gradient(ellipse 65% 48% at 50% 41%, rgba(0,0,0,1) 36%, rgba(0,0,0,0.88) 50%, rgba(0,0,0,0.20) 64%, rgba(0,0,0,0) 73%)',
               WebkitMaskImage:
-                'radial-gradient(ellipse 72% 70% at 50% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 58%, rgba(0,0,0,0) 74%)',
+                'radial-gradient(ellipse 65% 48% at 50% 41%, rgba(0,0,0,1) 36%, rgba(0,0,0,0.88) 50%, rgba(0,0,0,0.20) 64%, rgba(0,0,0,0) 73%)',
             }}
           />
         </picture>

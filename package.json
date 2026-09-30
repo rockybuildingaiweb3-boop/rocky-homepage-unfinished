@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit",
     "test": "tsx scripts/validateSkills.ts",
     "validate:skills": "tsx scripts/validateSkills.ts",
-    "validate:icons": "tsx scripts/validateIcons.ts"
+    "validate:icons": "tsx scripts/validateIcons.ts",
+    "optimize:flower": "node scripts/process-flower.cjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
