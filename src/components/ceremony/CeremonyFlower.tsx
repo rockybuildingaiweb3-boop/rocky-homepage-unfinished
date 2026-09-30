@@ -56,11 +56,11 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
       lightX = 38 + easedT * 12;
       lightY = 25 + easedT * 18;
 
-      opacity = 0.08 + easedT * 0.32; // 0.08 -> 0.40
+      opacity = 0.05 + easedT * 0.25; // 0.05 -> 0.30
       scale = 0.985 + easedT * 0.01;
       rotation = -1.0 + easedT * 0.4;
       revealRadius = 20 + easedT * 30; // 20% -> 50%
-      ambientHaloOpacity = 0.12 * easedT;
+      ambientHaloOpacity = 0.06 * easedT;
       break;
     }
 
@@ -72,32 +72,32 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
       lightX = 50;
       lightY = 48;
 
-      opacity = 0.40 + easedT * 0.44; // 0.40 -> 0.84
+      opacity = 0.30 + easedT * 0.36; // 0.30 -> 0.66
       scale = 0.995 + easedT * 0.005;
       rotation = -0.6 + easedT * 0.6;
       revealRadius = 50 + easedT * 50; // 50% -> 100%
-      ambientHaloOpacity = 0.12 + easedT * 0.28;
+      ambientHaloOpacity = 0.06 + easedT * 0.14; // 0.06 -> 0.20
       break;
     }
 
     case 'SIGNING': {
       // Act IV: Signature is drawing. Rose rests serenely as large atmospheric midground anchor behind signature
-      opacity = 0.84;
+      opacity = 0.66;
       scale = 1.0;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.38;
+      ambientHaloOpacity = 0.20;
       break;
     }
 
     case 'CONVERGENCE': {
       // Act V Part 1: Convergence
       const t = Math.max(0, Math.min(1, convergenceProgress));
-      opacity = 0.84;
+      opacity = 0.66;
       scale = 1.0;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.38 + t * 0.12;
+      ambientHaloOpacity = 0.20 + t * 0.06;
       break;
     }
 
@@ -106,41 +106,41 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
       const t = Math.max(0, Math.min(1, climaxProgress));
       const breathCurve = Math.sin(t * Math.PI);
 
-      opacity = 0.84 + breathCurve * 0.06;
+      opacity = 0.66 + breathCurve * 0.06;
       scale = 1.0 + breathCurve * 0.028;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.48 + breathCurve * 0.16;
+      ambientHaloOpacity = 0.24 + breathCurve * 0.08;
       break;
     }
 
     case 'SILENCE': {
       // Act V Part 3: Stillness
-      opacity = 0.84;
+      opacity = 0.66;
       scale = 1.005;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.42;
+      ambientHaloOpacity = 0.22;
       break;
     }
 
     case 'ARRIVAL': {
       // Act VI: Harmonic lockup
-      opacity = 0.84;
+      opacity = 0.66;
       scale = 1.0;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.38;
+      ambientHaloOpacity = 0.20;
       break;
     }
 
     case 'EXITING': {
       // Act VII: Smooth aperture transition into Hero
-      opacity = isExiting ? 0.30 : 0.65;
+      opacity = isExiting ? 0.20 : 0.50;
       scale = 1.08;
       rotation = 0.2;
       revealRadius = 100;
-      ambientHaloOpacity = 0.28;
+      ambientHaloOpacity = 0.14;
       break;
     }
 
@@ -176,8 +176,8 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
         className="absolute w-[580px] sm:w-[700px] md:w-[820px] lg:w-[900px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
         style={{
           background:
-            'radial-gradient(circle at 50% 46%, rgba(136, 19, 55, 0.10) 0%, rgba(159, 18, 57, 0.03) 42%, transparent 68%)',
-          filter: 'blur(55px)',
+            'radial-gradient(circle at 50% 46%, rgba(136, 19, 55, 0.06) 0%, rgba(159, 18, 57, 0.015) 38%, transparent 62%)',
+          filter: 'blur(60px)',
           opacity: ambientHaloOpacity,
           transform: `scale(${scale * 1.02})`,
         }}
@@ -190,8 +190,7 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
         style={{
           opacity,
           transform: `scale(${scale}) rotate(${rotation}deg)`,
-          filter:
-            'brightness(0.66) contrast(1.08) drop-shadow(0 24px 48px rgba(0, 0, 0, 0.96))',
+          filter: 'brightness(0.50) contrast(1.14) saturate(1.10)',
           transition:
             phase === 'EMERGENCE' || phase === 'CLIMAX' || phase === 'AWAKENING'
               ? 'none'
