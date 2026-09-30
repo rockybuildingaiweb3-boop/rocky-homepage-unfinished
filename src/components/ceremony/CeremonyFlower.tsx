@@ -248,9 +248,8 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
         }}
       >
         <picture className="w-full h-full flex items-center justify-center relative">
-          <source srcSet="/assets/imgs/loader-flower.webp" type="image/webp" />
           <img
-            src="/assets/imgs/loader-flower.png"
+            src="/assets/imgs/loader-flower.jpg"
             alt="Ceremonial botanical rose"
             draggable={false}
             className="w-full h-full object-contain select-none pointer-events-none"
