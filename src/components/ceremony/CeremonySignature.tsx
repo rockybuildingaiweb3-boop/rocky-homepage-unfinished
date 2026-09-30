@@ -185,7 +185,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
 
   return (
     <div
-      className={`relative w-full max-w-[440px] sm:max-w-[480px] aspect-[1150/360] flex items-center justify-center select-none will-change-transform transition-all duration-700 ease-out ${
+      className={`relative w-full max-w-[500px] sm:max-w-[550px] md:max-w-[580px] lg:max-w-[610px] aspect-[1150/360] flex items-center justify-center select-none will-change-transform transition-all duration-700 ease-out ${
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
       style={{

@@ -387,7 +387,7 @@ export const Loader: React.FC<LoaderProps> = ({
              SPACE → ROSE (Atmospheric Anchor) → SIGNATURE (Foreground) → IDENTITY → TELEMETRY
          ───────────────────────────────────────────────────────────── */}
       <div
-        className="relative z-10 w-full max-w-xl px-4 flex flex-col items-center justify-center will-change-transform"
+        className="relative z-10 w-full max-w-[780px] md:max-w-[860px] lg:max-w-[920px] px-4 sm:px-6 flex flex-col items-center justify-center will-change-transform"
         style={{
           transform: isExiting
             ? 'scale(1.12) translate3d(0, -10px, 0)'
@@ -398,7 +398,7 @@ export const Loader: React.FC<LoaderProps> = ({
         }}
       >
         {/* ── Midground Anchor: Large atmospheric photographic rose suspended in deep space behind signature ── */}
-        <div className="absolute -top-32 sm:-top-40 md:-top-44 pointer-events-none z-0 flex items-center justify-center">
+        <div className="absolute top-1/2 -translate-y-[57%] pointer-events-none z-0 flex items-center justify-center">
           <CeremonyFlower
             phase={phase}
             phaseProgress={phaseProgress}
@@ -409,7 +409,7 @@ export const Loader: React.FC<LoaderProps> = ({
         </div>
 
         {/* ── Foreground Calligraphic Signature: Crisp, bright foreground element ── */}
-        <div className="relative z-10 w-full flex flex-col items-center mt-6 sm:mt-10 md:mt-12">
+        <div className="relative z-10 w-full flex flex-col items-center mt-1 sm:mt-2">
           <CeremonySignature
             progress={strokeProgress}
             phase={phase}
@@ -419,7 +419,7 @@ export const Loader: React.FC<LoaderProps> = ({
         </div>
 
         {/* ── Typographic Identity: rocky babcock ── */}
-        <div className="relative z-10">
+        <div className="relative z-10 -mt-1 sm:-mt-2">
           <CeremonyIdentity phase={phase} climaxProgress={climaxProgress} />
         </div>
 

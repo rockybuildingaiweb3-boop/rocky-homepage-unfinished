@@ -45,7 +45,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
 
   return (
     <div
-      className={`relative z-30 flex flex-col items-center mt-5 sm:mt-7 transition-all duration-700 ease-out select-none will-change-transform ${
+      className={`relative z-30 flex flex-col items-center mt-3 sm:mt-4 md:mt-4.5 transition-all duration-700 ease-out select-none will-change-transform ${
         isHidden ? 'opacity-0 translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'
       }`}
       aria-label={`Ceremony progress: ${clamped}%`}
@@ -55,7 +55,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
       aria-valuemax={100}
     >
       {/* ── 1. CINEMATIC INSTRUMENTATION STATUS & TABULAR PERCENTAGE ── */}
-      <div className="flex items-center justify-between w-60 sm:w-68 md:w-72 mb-2 px-0.5">
+      <div className="flex items-center justify-between w-64 sm:w-72 md:w-80 lg:w-[340px] mb-1.5 px-0.5">
         <span
           className="text-[10px] sm:text-[11px] font-mono tracking-[0.24em] uppercase whitespace-nowrap transition-colors duration-500 select-none font-medium"
           style={{
@@ -78,7 +78,7 @@ export const CeremonyProgress: React.FC<CeremonyProgressProps> = ({
       </div>
 
       {/* ── 2. REFINED MINIMALIST ARCHITECTURAL PROGRESS BAR ── */}
-      <div className="relative w-60 sm:w-68 md:w-72 h-[2.5px] rounded-full bg-white/[0.10] overflow-visible border border-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+      <div className="relative w-64 sm:w-72 md:w-80 lg:w-[340px] h-[2.5px] rounded-full bg-white/[0.10] overflow-visible border border-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
         {/* Track Fill */}
         <div
           className="h-full rounded-full transition-[width] duration-150 ease-out relative will-change-transform"

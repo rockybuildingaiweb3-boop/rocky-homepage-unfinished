@@ -30,7 +30,7 @@ export const CeremonyIdentity: React.FC<CeremonyIdentityProps> = ({
 
   return (
     <div
-      className={`relative z-20 flex flex-col items-center mt-3 sm:mt-4 select-none will-change-transform transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`relative z-20 flex flex-col items-center mt-1 sm:mt-1.5 select-none will-change-transform transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isVisible
           ? 'opacity-100 translate-y-0 filter blur-0'
           : 'opacity-0 translate-y-3 filter blur-[5px] pointer-events-none'
@@ -43,7 +43,7 @@ export const CeremonyIdentity: React.FC<CeremonyIdentityProps> = ({
       }}
     >
       <h1
-        className="text-center m-0 p-0 font-normal lowercase tracking-[-0.015em] text-white text-2xl sm:text-3xl md:text-4xl select-none"
+        className="text-center m-0 p-0 font-normal lowercase tracking-[-0.015em] text-white text-2xl sm:text-3xl md:text-[38px] lg:text-[42px] select-none"
         style={{
           fontFamily: 'var(--title-font)',
           textShadow:
@@ -52,7 +52,7 @@ export const CeremonyIdentity: React.FC<CeremonyIdentityProps> = ({
       >
         rocky babcock
       </h1>
-      <p className="mt-1 text-center text-[10px] sm:text-[11px] font-mono tracking-[0.22em] text-purple-200/80 uppercase select-none">
+      <p className="mt-1.5 text-center text-[11px] sm:text-[12px] md:text-[12.5px] font-mono tracking-[0.24em] text-purple-200/80 uppercase select-none">
         creative technologist &amp; web developer
       </p>
     </div>

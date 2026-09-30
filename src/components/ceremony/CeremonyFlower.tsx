@@ -173,25 +173,25 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
     >
       {/* ── 1. RESTRAINED LOCAL RED ILLUMINATION (Soft atmospheric falloff, no giant purple bloom) ── */}
       <div
-        className="absolute w-[440px] sm:w-[540px] md:w-[620px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
+        className="absolute w-[580px] sm:w-[700px] md:w-[820px] lg:w-[900px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
         style={{
           background:
-            'radial-gradient(circle at 50% 46%, rgba(136, 19, 55, 0.12) 0%, rgba(159, 18, 57, 0.04) 42%, transparent 68%)',
-          filter: 'blur(45px)',
+            'radial-gradient(circle at 50% 46%, rgba(136, 19, 55, 0.10) 0%, rgba(159, 18, 57, 0.03) 42%, transparent 68%)',
+          filter: 'blur(55px)',
           opacity: ambientHaloOpacity,
           transform: `scale(${scale * 1.02})`,
         }}
       />
 
       {/* ── 2. LARGE PHOTOGRAPHIC BOTANICAL ROSE (Atmospheric visual anchor behind signature) ── */}
-      {/* Scaled ~2.5x to native image sharpness, subdued deep crimson, authentic texture */}
+      {/* Scaled ~1.9x to occupy expansive cinematic space, subdued deep crimson, authentic sharpness */}
       <div
-        className="relative w-[420px] sm:w-[540px] md:w-[640px] lg:w-[680px] aspect-[1024/682] flex items-center justify-center will-change-transform"
+        className="relative w-[700px] sm:w-[840px] md:w-[980px] lg:w-[1080px] aspect-[1024/682] flex items-center justify-center will-change-transform"
         style={{
           opacity,
           transform: `scale(${scale}) rotate(${rotation}deg)`,
           filter:
-            'brightness(0.70) contrast(1.06) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.95))',
+            'brightness(0.66) contrast(1.08) drop-shadow(0 24px 48px rgba(0, 0, 0, 0.96))',
           transition:
             phase === 'EMERGENCE' || phase === 'CLIMAX' || phase === 'AWAKENING'
               ? 'none'
