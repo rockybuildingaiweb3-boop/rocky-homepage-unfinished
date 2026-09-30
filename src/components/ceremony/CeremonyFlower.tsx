@@ -49,55 +49,55 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
     }
 
     case 'AWAKENING': {
-      // Act II: Awakening Light — Subtle spatial emergence
+      // Act II: Awakening Light — Subtle spatial emergence from obsidian space
       const t = Math.max(0, Math.min(1, phaseProgress));
       const easedT = t * t * (3 - 2 * t);
 
       lightX = 38 + easedT * 12;
       lightY = 25 + easedT * 18;
 
-      opacity = 0.12 + easedT * 0.38; // 0.12 -> 0.50
+      opacity = 0.08 + easedT * 0.32; // 0.08 -> 0.40
       scale = 0.985 + easedT * 0.01;
       rotation = -1.0 + easedT * 0.4;
       revealRadius = 20 + easedT * 30; // 20% -> 50%
-      ambientHaloOpacity = 0.15 * easedT;
+      ambientHaloOpacity = 0.12 * easedT;
       break;
     }
 
     case 'EMERGENCE': {
-      // Act III: Rose Emergence — Full photographic clarity
+      // Act III: Rose Emergence — Atmospheric clarity as midground anchor
       const t = Math.max(0, Math.min(1, phaseProgress));
       const easedT = 1 - Math.pow(1 - t, 2.2);
 
       lightX = 50;
       lightY = 48;
 
-      opacity = 0.50 + easedT * 0.50; // 0.50 -> 1.00
+      opacity = 0.40 + easedT * 0.44; // 0.40 -> 0.84
       scale = 0.995 + easedT * 0.005;
       rotation = -0.6 + easedT * 0.6;
       revealRadius = 50 + easedT * 50; // 50% -> 100%
-      ambientHaloOpacity = 0.15 + easedT * 0.35;
+      ambientHaloOpacity = 0.12 + easedT * 0.28;
       break;
     }
 
     case 'SIGNING': {
-      // Act IV: Signature is drawing. Rose rests as natural botanical anchor
-      opacity = 1.0;
+      // Act IV: Signature is drawing. Rose rests serenely as large atmospheric midground anchor behind signature
+      opacity = 0.84;
       scale = 1.0;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.50;
+      ambientHaloOpacity = 0.38;
       break;
     }
 
     case 'CONVERGENCE': {
       // Act V Part 1: Convergence
       const t = Math.max(0, Math.min(1, convergenceProgress));
-      opacity = 1.0;
+      opacity = 0.84;
       scale = 1.0;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.50 + t * 0.15;
+      ambientHaloOpacity = 0.38 + t * 0.12;
       break;
     }
 
@@ -106,41 +106,41 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
       const t = Math.max(0, Math.min(1, climaxProgress));
       const breathCurve = Math.sin(t * Math.PI);
 
-      opacity = 1.0;
+      opacity = 0.84 + breathCurve * 0.06;
       scale = 1.0 + breathCurve * 0.028;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.65 + breathCurve * 0.25;
+      ambientHaloOpacity = 0.48 + breathCurve * 0.16;
       break;
     }
 
     case 'SILENCE': {
       // Act V Part 3: Stillness
-      opacity = 1.0;
+      opacity = 0.84;
       scale = 1.005;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.60;
+      ambientHaloOpacity = 0.42;
       break;
     }
 
     case 'ARRIVAL': {
       // Act VI: Harmonic lockup
-      opacity = 1.0;
+      opacity = 0.84;
       scale = 1.0;
       rotation = 0;
       revealRadius = 100;
-      ambientHaloOpacity = 0.55;
+      ambientHaloOpacity = 0.38;
       break;
     }
 
     case 'EXITING': {
       // Act VII: Smooth aperture transition into Hero
-      opacity = isExiting ? 0.45 : 0.85;
+      opacity = isExiting ? 0.30 : 0.65;
       scale = 1.08;
       rotation = 0.2;
       revealRadius = 100;
-      ambientHaloOpacity = 0.40;
+      ambientHaloOpacity = 0.28;
       break;
     }
 
@@ -173,24 +173,25 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
     >
       {/* ── 1. RESTRAINED LOCAL RED ILLUMINATION (Soft atmospheric falloff, no giant purple bloom) ── */}
       <div
-        className="absolute w-[240px] sm:w-[280px] md:w-[320px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
+        className="absolute w-[440px] sm:w-[540px] md:w-[620px] aspect-square rounded-full pointer-events-none will-change-transform transition-all duration-700 ease-out"
         style={{
           background:
-            'radial-gradient(circle at 50% 50%, rgba(159, 18, 57, 0.16) 0%, rgba(136, 19, 55, 0.06) 42%, transparent 70%)',
-          filter: 'blur(30px)',
+            'radial-gradient(circle at 50% 46%, rgba(136, 19, 55, 0.12) 0%, rgba(159, 18, 57, 0.04) 42%, transparent 68%)',
+          filter: 'blur(45px)',
           opacity: ambientHaloOpacity,
-          transform: `scale(${scale * 1.04})`,
+          transform: `scale(${scale * 1.02})`,
         }}
       />
 
-      {/* ── 2. NATIVE-SCALE BOTANICAL ROSE CONTAINER ── */}
-      {/* Physical object suspended with authentic depth shadow */}
+      {/* ── 2. LARGE PHOTOGRAPHIC BOTANICAL ROSE (Atmospheric visual anchor behind signature) ── */}
+      {/* Scaled ~2.5x to native image sharpness, subdued deep crimson, authentic texture */}
       <div
-        className="relative w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[240px] md:h-[240px] aspect-square flex items-center justify-center will-change-transform"
+        className="relative w-[420px] sm:w-[540px] md:w-[640px] lg:w-[680px] aspect-[1024/682] flex items-center justify-center will-change-transform"
         style={{
           opacity,
           transform: `scale(${scale}) rotate(${rotation}deg)`,
-          filter: 'drop-shadow(0 14px 28px rgba(0, 0, 0, 0.88))',
+          filter:
+            'brightness(0.70) contrast(1.06) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.95))',
           transition:
             phase === 'EMERGENCE' || phase === 'CLIMAX' || phase === 'AWAKENING'
               ? 'none'

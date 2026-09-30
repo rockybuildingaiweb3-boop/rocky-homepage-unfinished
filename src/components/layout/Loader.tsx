@@ -383,8 +383,8 @@ export const Loader: React.FC<LoaderProps> = ({
       />
 
       {/* ─────────────────────────────────────────────────────────────
-          4. UNIFIED CELESTIAL ALTAR (Visual Hierarchy: Section 18)
-             SPACE → ROSE (Anchor) → SIGNATURE → IDENTITY → TELEMETRY
+          4. UNIFIED CELESTIAL ALTAR (Visual Hierarchy)
+             SPACE → ROSE (Atmospheric Anchor) → SIGNATURE (Foreground) → IDENTITY → TELEMETRY
          ───────────────────────────────────────────────────────────── */}
       <div
         className="relative z-10 w-full max-w-xl px-4 flex flex-col items-center justify-center will-change-transform"
@@ -397,17 +397,19 @@ export const Loader: React.FC<LoaderProps> = ({
             : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* ── Visual Anchor: Precious physical rose at authentic scale ── */}
-        <CeremonyFlower
-          phase={phase}
-          phaseProgress={phaseProgress}
-          climaxProgress={climaxProgress}
-          convergenceProgress={convergenceProgress}
-          isExiting={isExiting}
-        />
+        {/* ── Midground Anchor: Large atmospheric photographic rose suspended in deep space behind signature ── */}
+        <div className="absolute -top-32 sm:-top-40 md:-top-44 pointer-events-none z-0 flex items-center justify-center">
+          <CeremonyFlower
+            phase={phase}
+            phaseProgress={phaseProgress}
+            climaxProgress={climaxProgress}
+            convergenceProgress={convergenceProgress}
+            isExiting={isExiting}
+          />
+        </div>
 
-        {/* ── Calligraphic Signature: Sits elegantly below the rose with natural breathing room ── */}
-        <div className="relative w-full flex flex-col items-center mt-1 sm:mt-2">
+        {/* ── Foreground Calligraphic Signature: Crisp, bright foreground element ── */}
+        <div className="relative z-10 w-full flex flex-col items-center mt-6 sm:mt-10 md:mt-12">
           <CeremonySignature
             progress={strokeProgress}
             phase={phase}
@@ -417,10 +419,14 @@ export const Loader: React.FC<LoaderProps> = ({
         </div>
 
         {/* ── Typographic Identity: rocky babcock ── */}
-        <CeremonyIdentity phase={phase} climaxProgress={climaxProgress} />
+        <div className="relative z-10">
+          <CeremonyIdentity phase={phase} climaxProgress={climaxProgress} />
+        </div>
 
         {/* ── Precision System Telemetry ── */}
-        <CeremonyProgress displayProgress={displayProgress} phase={phase} />
+        <div className="relative z-10">
+          <CeremonyProgress displayProgress={displayProgress} phase={phase} />
+        </div>
       </div>
     </div>
   );
