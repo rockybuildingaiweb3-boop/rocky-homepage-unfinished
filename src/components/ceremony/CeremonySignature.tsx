@@ -204,8 +204,8 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
         <defs>
           {/* Atmospheric subtle ink falloff (restrained, NOT heavy neon) */}
           <filter id="sig-atmospheric-falloff" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3.0" result="blur" />
-            <feFlood floodColor="rgba(192, 132, 252, 0.45)" result="color" />
+            <feGaussianBlur stdDeviation="2.2" result="blur" />
+            <feFlood floodColor="rgba(216, 180, 254, 0.28)" result="color" />
             <feComposite in="color" in2="blur" operator="in" />
             <feMerge>
               <feMergeNode />
@@ -215,7 +215,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
 
           {/* Luminous fluid ink body filter */}
           <filter id="sig-fluid-body" x="-10%" y="-10%" width="120%" height="120%">
-            <feGaussianBlur stdDeviation="1.2" result="blur" />
+            <feGaussianBlur stdDeviation="0.9" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -224,7 +224,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
 
           {/* Micro-nib pen tip point of contact */}
           <filter id="pen-tip-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feGaussianBlur stdDeviation="2.0" result="blur" />
             <feFlood floodColor="rgba(233, 213, 255, 0.85)" result="color" />
             <feComposite in="color" in2="blur" operator="in" />
             <feMerge>
@@ -236,21 +236,21 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           {/* Natural ink core gradient: warm ivory to pure white */}
           <linearGradient id="sig-ink-core" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="50%" stopColor="#fdf4ff" />
+            <stop offset="50%" stopColor="#fdf8ff" />
             <stop offset="100%" stopColor="#ffffff" />
           </linearGradient>
         </defs>
 
         {/* ── 1. ATMOSPHERIC AURA (Subtle falloff layer) ── */}
-        <g filter="url(#sig-atmospheric-falloff)" opacity={0.75}>
+        <g filter="url(#sig-atmospheric-falloff)" opacity={0.65}>
           {windows.map((stroke, idx) => {
             const { offset, opacity } = strokeOffsets[idx] || { offset: stroke.length, opacity: 0 };
             return (
               <path
                 key={`aura-${stroke.id}`}
                 d={stroke.pathD}
-                stroke="rgba(192, 132, 252, 0.40)"
-                strokeWidth={3.8}
+                stroke="rgba(216, 180, 254, 0.35)"
+                strokeWidth={3.0}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeDasharray={stroke.length}
@@ -267,7 +267,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
         {/* ── 2. LUMINOUS INK BODY (Fluid calligraphic body) ── */}
         <g
           filter="url(#sig-fluid-body)"
-          stroke="rgba(243, 232, 255, 0.95)"
+          stroke="rgba(255, 248, 255, 0.90)"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -277,7 +277,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
               <path
                 key={`body-${stroke.id}`}
                 d={stroke.pathD}
-                strokeWidth={2.4}
+                strokeWidth={2.0}
                 strokeDasharray={stroke.length}
                 strokeDashoffset={offset}
                 opacity={opacity}
@@ -300,7 +300,7 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
                   pathRefs.current[idx] = el;
                 }}
                 d={stroke.pathD}
-                strokeWidth={1.8}
+                strokeWidth={1.5}
                 strokeDasharray={stroke.length}
                 strokeDashoffset={offset}
                 opacity={opacity}
@@ -320,39 +320,29 @@ export const CeremonySignature: React.FC<CeremonySignatureProps> = ({
           >
             {/* Luminous starlight bead */}
             <circle
-              r={isBridgeActive ? 4.2 : 3.2}
+              r={isBridgeActive ? 3.8 : 2.8}
               fill="rgba(216, 180, 254, 0.65)"
               filter="url(#pen-tip-glow)"
             />
             {/* Crisp white point of contact */}
             <circle
-              r={isBridgeActive ? 2.0 : 1.4}
+              r={isBridgeActive ? 1.8 : 1.2}
               fill="#ffffff"
             />
           </g>
         )}
 
-        {/* ── 5. CONVERGENCE ENERGY BEAM (Ascending to Rose) ── */}
+        {/* ── 5. CONVERGENCE ENERGY WAVE (Subtle starlight ripple along crests) ── */}
         {phase === 'CONVERGENCE' && convergenceWaveProgress > 0 && (
           <g className="pointer-events-none">
-            {/* Energy wave rushing from right flourish back to center */}
+            {/* Energy wave gently travelling back along flourish crest */}
             <circle
               cx={1100 - convergenceWaveProgress * 525}
-              cy={174 - Math.sin(convergenceWaveProgress * Math.PI) * 45}
-              r={3.5}
+              cy={174 - Math.sin(convergenceWaveProgress * Math.PI) * 35}
+              r={2.8}
               fill="#ffffff"
               filter="url(#pen-tip-glow)"
-            />
-            {/* Upward vertical energy beam connecting signature to rose base */}
-            <line
-              x1={575}
-              y1={160}
-              x2={575}
-              y2={160 - convergenceWaveProgress * 180}
-              stroke="rgba(244, 208, 254, 0.75)"
-              strokeWidth={2}
-              strokeDasharray="4 4"
-              opacity={convergenceWaveProgress}
+              opacity={1 - convergenceWaveProgress * 0.4}
             />
           </g>
         )}

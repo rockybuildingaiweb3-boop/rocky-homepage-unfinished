@@ -66,7 +66,7 @@ export const GlobalShell: React.FC<GlobalShellProps> = ({
           heroAwakened ? 'opacity-100' : 'opacity-0 pointer-events-none select-none'
         }`}
         style={{
-          visibility: heroAwakened ? 'visible' : 'hidden',
+          display: heroAwakened ? 'block' : 'none',
         }}
       >
         {children}

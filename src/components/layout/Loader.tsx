@@ -131,13 +131,13 @@ export const Loader: React.FC<LoaderProps> = ({
     // Timeline Configuration (ms)
     const T_VOID_END = 850;        // 0 to 850ms   (0% - 12%)
     const T_AWAKEN_END = 2050;     // 850 to 2050ms (12% - 28%)
-    const T_EMERGE_END = 3400;     // 2050 to 3400ms (28% - 48%)
-    const T_SIGN_END = 5250;       // 3400 to 5250ms (48% - 76%)
-    const T_CONVERGE_END = 5700;   // 5250 to 5700ms (76% - 82%)
-    const T_CLIMAX_END = 6450;     // 5700 to 6450ms (82% - 96%)
-    const T_SILENCE_END = 6800;    // 6450 to 6800ms (96% - 99%)
-    const T_ARRIVAL_END = 7200;    // 6800 to 7200ms (100% locked)
-    const T_EXIT_END = 7950;       // 7200 to 7950ms (transition into Hero)
+    const T_EMERGE_END = 3350;     // 2050 to 3350ms (28% - 48%)
+    const T_SIGN_END = 5150;       // 3350 to 5150ms (48% - 76%)
+    const T_CONVERGE_END = 5850;   // 5150 to 5850ms (76% - 82%: 300ms stillness hold + 400ms causal return)
+    const T_CLIMAX_END = 6600;     // 5850 to 6600ms (82% - 96%: inner illumination + spatial breath)
+    const T_SILENCE_END = 6950;    // 6600 to 6950ms (96% - 99%: stillness hold)
+    const T_ARRIVAL_END = 7350;    // 6950 to 7350ms (100% locked)
+    const T_EXIT_END = 8100;       // 7350 to 8100ms (spatial aperture transition into Hero)
 
     let animationFrameId: number;
     let fallbackIntervalId: NodeJS.Timeout;
@@ -170,7 +170,7 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = monotonicPct;
         setDisplayProgress(monotonicPct);
       }
-      // ── Act III: ROSE EMERGENCE (2050 - 3400ms) ───────────────────────
+      // ── Act III: ROSE EMERGENCE (2050 - 3350ms) ───────────────────────
       else if (elapsed < T_EMERGE_END) {
         advancePhase('EMERGENCE');
         const p = (elapsed - T_AWAKEN_END) / (T_EMERGE_END - T_AWAKEN_END);
@@ -180,7 +180,7 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = monotonicPct;
         setDisplayProgress(monotonicPct);
       }
-      // ── Act IV: SIGNATURE PERFORMANCE (3400 - 5250ms) ─────────────────
+      // ── Act IV: SIGNATURE PERFORMANCE (3350 - 5150ms) ─────────────────
       else if (elapsed < T_SIGN_END) {
         advancePhase('SIGNING');
         const p = (elapsed - T_EMERGE_END) / (T_SIGN_END - T_EMERGE_END);
@@ -191,19 +191,24 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = monotonicPct;
         setDisplayProgress(monotonicPct);
       }
-      // ── Act V Part 1: CONVERGENCE (5250 - 5700ms) ─────────────────────
+      // ── Act V Part 1: CONVERGENCE & PRE-CLIMAX STILLNESS (5150 - 5850ms) ──
       else if (elapsed < T_CONVERGE_END) {
         advancePhase('CONVERGENCE');
-        const p = (elapsed - T_SIGN_END) / (T_CONVERGE_END - T_SIGN_END);
-        setPhaseProgress(p);
+        const dt = elapsed - T_SIGN_END;
+        const STILLNESS_HOLD = 300; // 300ms tension stillness after signature completion
+        let convergeP = 0;
+        if (dt > STILLNESS_HOLD) {
+          convergeP = (dt - STILLNESS_HOLD) / (T_CONVERGE_END - T_SIGN_END - STILLNESS_HOLD);
+        }
+        setPhaseProgress(convergeP);
         setStrokeProgress(1.0);
-        setConvergenceProgress(p);
-        const targetPct = Math.round(76 + p * 6); // 76% -> 82%
+        setConvergenceProgress(convergeP);
+        const targetPct = Math.round(76 + convergeP * 6); // 76% -> 82%
         const monotonicPct = Math.max(maxDisplayProgressRef.current, targetPct);
         maxDisplayProgressRef.current = monotonicPct;
         setDisplayProgress(monotonicPct);
       }
-      // ── Act V Part 2: CLIMAX (5700 - 6450ms) ──────────────────────────
+      // ── Act V Part 2: CLIMAX (5850 - 6600ms) ──────────────────────────
       else if (elapsed < T_CLIMAX_END) {
         advancePhase('CLIMAX');
         const p = (elapsed - T_CONVERGE_END) / (T_CLIMAX_END - T_CONVERGE_END);
@@ -216,7 +221,7 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = monotonicPct;
         setDisplayProgress(monotonicPct);
       }
-      // ── Act V Part 3: SILENCE (6450 - 6800ms) ─────────────────────────
+      // ── Act V Part 3: SILENCE (6600 - 6950ms) ─────────────────────────
       else if (elapsed < T_SILENCE_END) {
         advancePhase('SILENCE');
         const p = (elapsed - T_CLIMAX_END) / (T_SILENCE_END - T_CLIMAX_END);
@@ -229,7 +234,7 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = monotonicPct;
         setDisplayProgress(monotonicPct);
       }
-      // ── Act VI: ARRIVAL (6800 - 7200ms) ───────────────────────────────
+      // ── Act VI: ARRIVAL (6950 - 7350ms) ───────────────────────────────
       else if (elapsed < T_ARRIVAL_END) {
         advancePhase('ARRIVAL');
         setStrokeProgress(1.0);
@@ -240,7 +245,7 @@ export const Loader: React.FC<LoaderProps> = ({
         maxDisplayProgressRef.current = 100;
         setDisplayProgress(100);
       }
-      // ── Act VII: HERO TRANSITION (7200 - 7950ms) ──────────────────────
+      // ── Act VII: HERO TRANSITION (7350 - 8100ms) ──────────────────────
       else if (elapsed < T_EXIT_END) {
         advancePhase('EXITING');
         setIsExiting(true);
@@ -253,7 +258,7 @@ export const Loader: React.FC<LoaderProps> = ({
           if (onAwakenHeroRef.current) onAwakenHeroRef.current();
         }
       }
-      // ── Act VIII: COMPLETE (> 7950ms) ──────────────────────────────────
+      // ── Act VIII: COMPLETE (> 8100ms) ──────────────────────────────────
       else {
         advancePhase('COMPLETE');
         maxDisplayProgressRef.current = 100;
@@ -401,8 +406,8 @@ export const Loader: React.FC<LoaderProps> = ({
           isExiting={isExiting}
         />
 
-        {/* ── Calligraphic Signature: Sits elegantly below the rose ── */}
-        <div className="relative w-full flex flex-col items-center -mt-2 sm:-mt-3">
+        {/* ── Calligraphic Signature: Sits elegantly below the rose with natural breathing room ── */}
+        <div className="relative w-full flex flex-col items-center mt-1 sm:mt-2">
           <CeremonySignature
             progress={strokeProgress}
             phase={phase}
