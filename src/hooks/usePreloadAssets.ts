@@ -41,9 +41,7 @@ export function usePreloadAssets(): PreloadAssetsResult {
         setProgress(30);
 
         const criticalImages = [
-          '/assets/imgs/loader-flower.webp',
           '/assets/imgs/loader-flower.png',
-          '/assets/imgs/loader-flower.jpg',
           '/assets/imgs/home-back.jpg',
           '/assets/imgs/logo-rb-cyber.svg',
           '/assets/imgs/signature.svg',

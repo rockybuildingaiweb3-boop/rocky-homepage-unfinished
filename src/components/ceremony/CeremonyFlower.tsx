@@ -205,6 +205,12 @@ export const CeremonyFlower: React.FC<CeremonyFlowerProps> = ({
             alt="Ceremonial botanical rose"
             draggable={false}
             className="w-full h-full object-contain select-none pointer-events-none"
+            style={{
+              maskImage:
+                'radial-gradient(ellipse 72% 70% at 50% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 58%, rgba(0,0,0,0) 74%)',
+              WebkitMaskImage:
+                'radial-gradient(ellipse 72% 70% at 50% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 58%, rgba(0,0,0,0) 74%)',
+            }}
           />
         </picture>
       </div>
