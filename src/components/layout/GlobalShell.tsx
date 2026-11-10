@@ -27,8 +27,24 @@ export const GlobalShell: React.FC<GlobalShellProps> = ({
   onAwakenHero,
   children,
 }) => {
-  const [ceremonyDone, setCeremonyDone] = useState<boolean>(false);
-  const [heroAwakened, setHeroAwakened] = useState<boolean>(false);
+  const [ceremonyDone, setCeremonyDone] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('autostart') === '1';
+    }
+    return false;
+  });
+  const [heroAwakened, setHeroAwakened] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('autostart') === '1';
+    }
+    return false;
+  });
+
+  React.useEffect(() => {
+    if (heroAwakened && onAwakenHero) {
+      onAwakenHero();
+    }
+  }, [heroAwakened, onAwakenHero]);
 
   const handleAwakenHero = () => {
     setHeroAwakened(true);

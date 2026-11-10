@@ -1,26 +1,24 @@
 /**
- * Constellation Spatial Field Engine (Skills V2 — Cross-Category Weaving)
+ * Constellation Spatial Field Engine
  *
- * Authored, deterministic 2D spatial field framing the central celestial planet.
- * Fully decouples skill category from spatial placement:
- * 1. 88 Authored Spatial Anchors:
- *    - Independent Cartesian coordinates across the 2D stage percentage space.
- *    - High radial variance, non-uniform angular density, and natural asymmetry.
- *    - No spatial region, zone, or quadrant is assigned to any category.
- *
- * 2. Deterministic Cross-Category Interleaving:
- *    - Skills from different disciplines are deterministically interleaved onto the spatial field.
- *    - Zero Math.random(). 100% reproducible across renders and platforms.
- *    - Local neighborhoods naturally contain diverse combinations
- *      (e.g., React + OpenAI + Three.js + PostgreSQL + Solidity).
- *
- * 3. Physics-Based Deterministic Clearance:
- *    - Local (dx, dy) repulsion ensures 0 node collisions.
- *    - Celestial planet exclusion boundary protection.
- *    - Viewport boundary containment.
+ * Provides:
+ * 1. Canonical V2 88-node layout exports (preserved for validation & diagnostic scripts).
+ * 2. Three-Level Hierarchical Constellation Architecture:
+ *    - Level 1: 8 Organized Category Constellations orbiting the central purple planet.
+ *    - Level 2: Expanded Category Constellation with 3 distinct gravitational orbital tiers
+ *               (Core -> inner gravity well, Professional -> mid orbit, Ecosystem -> outer halo).
+ *    - Level 3: Focused Skill Constellation with deterministic cross-category satellite anchors
+ *               for related technologies and selective relationship conduit geometry.
  */
 
-import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
+import {
+  SKILLS_DATA,
+  SKILL_CATEGORIES,
+  SkillItem,
+  SkillCategory,
+  SkillTier,
+} from '../../data/skills';
+import { getRelatedSkillIds, getSkillTier } from './skillRelationships';
 
 export interface ConstellationNodePosition {
   id: string;
@@ -91,11 +89,374 @@ export const CATEGORY_SHORT_LABELS: Record<string, string> = {
   rag: 'RAG & RETRIEVAL',
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW HIERARCHICAL CONSTELLATION TYPES & DETERMINISTIC ENGINE (LEVELS 1, 2, 3)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface CategoryConstellationCluster {
+  id: string;
+  number: string;
+  title: string;
+  shortLabel: string;
+  subtitle: string;
+  /** Desktop orbital coordinates (percentage 0..100 around central planet 50,50) */
+  x: number;
+  y: number;
+  /** Peripheral docked coordinates when another category is expanded */
+  recessedX: number;
+  recessedY: number;
+  /** Angle in degrees around the planetary core */
+  angleDeg: number;
+  /** Representative flagship core skill acting as the visual nucleus */
+  nucleusSkill: SkillItem;
+  /** Core & top supporting skills shown as orbiting micro-satellites in Level 1 */
+  satelliteSkills: SkillItem[];
+  /** Complete list of skills in this category (11 items) */
+  skills: SkillItem[];
+  /** Brand color accent derived from category core identity */
+  accentColor: string;
+  /** Tier counts for immediate structural hierarchy awareness */
+  tierCounts: {
+    core: number;
+    professional: number;
+    ecosystem: number;
+  };
+  /** Deterministic float animation phase offset (seconds) */
+  floatPhase: number;
+}
+
+export interface ExpandedSkillNodePosition {
+  skill: SkillItem;
+  tier: SkillTier;
+  x: number;
+  y: number;
+  /** Radial distance from center (50, 50) in percentage space */
+  radius: number;
+  /** Angle in degrees around center (50, 50) */
+  angleDeg: number;
+  /** True if this node belongs to another category and was summoned as a related node */
+  isCrossCategoryRelated: boolean;
+  /** Deterministic orbital drift phase */
+  driftPhase: number;
+}
+
+export interface ExpandedCategoryConstellation {
+  category: CategoryConstellationCluster;
+  /** Primary category nodes + any cross-category related nodes when a skill is focused */
+  nodes: ExpandedSkillNodePosition[];
+  nodeMap: Map<string, ExpandedSkillNodePosition>;
+  /** Orbital ring radii (rx, ry in stage percentage) for visual tier guides */
+  tierRings: {
+    core: { rx: number; ry: number };
+    professional: { rx: number; ry: number };
+    ecosystem: { rx: number; ry: number };
+  };
+}
+
 /**
- * 88 Authored 2D Spatial Anchors for Desktop Viewports (x: 4..96, y: 5..95)
- * Pure Cartesian coordinates defining the organic constellation composition.
- * Completely independent of skill categories.
+ * Authoritative Category Constellation Orbital Anchors (Level 1 Overview)
+ * Arranged as an balanced 8-region elliptical celestial ring framing the central
+ * purple planet at (50, 50). Leaves the central planet core (r < 24%) completely unobstructed.
  */
+const CATEGORY_ORBITAL_CONFIG: Record<
+  string,
+  {
+    x: number;
+    y: number;
+    recessedX: number;
+    recessedY: number;
+    nucleusId: string;
+    accentColor: string;
+  }
+> = {
+  frontend: {
+    x: 35,
+    y: 17,
+    recessedX: 8,
+    recessedY: 14,
+    nucleusId: 'react',
+    accentColor: '#61DAFB',
+  },
+  models: {
+    x: 65,
+    y: 17,
+    recessedX: 28,
+    recessedY: 8,
+    nucleusId: 'openai',
+    accentColor: '#8E75FF',
+  },
+  graphics: {
+    x: 18,
+    y: 37,
+    recessedX: 92,
+    recessedY: 14,
+    nucleusId: 'threedotjs',
+    accentColor: '#049EF4',
+  },
+  agents: {
+    x: 82,
+    y: 37,
+    recessedX: 6,
+    recessedY: 38,
+    nucleusId: 'langgraph',
+    accentColor: '#34D399',
+  },
+  web3: {
+    x: 14,
+    y: 60,
+    recessedX: 72,
+    recessedY: 8,
+    nucleusId: 'solidity',
+    accentColor: '#A855F7',
+  },
+  backend: {
+    x: 86,
+    y: 60,
+    recessedX: 94,
+    recessedY: 38,
+    nucleusId: 'fastapi',
+    accentColor: '#10B981',
+  },
+  rag: {
+    x: 24,
+    y: 82,
+    recessedX: 7,
+    recessedY: 64,
+    nucleusId: 'pgvector',
+    accentColor: '#38BDF8',
+  },
+  data: {
+    x: 76,
+    y: 82,
+    recessedX: 93,
+    recessedY: 64,
+    nucleusId: 'postgresql',
+    accentColor: '#4169E1',
+  },
+};
+
+/**
+ * Builds the 8 Category Constellation Clusters for Level 1 Overview.
+ */
+export function getCategoryConstellations(): CategoryConstellationCluster[] {
+  return SKILL_CATEGORIES.map((cat: SkillCategory, index: number) => {
+    const config = CATEGORY_ORBITAL_CONFIG[cat.id] || {
+      x: 50,
+      y: 50,
+      recessedX: 10,
+      recessedY: 10,
+      nucleusId: '',
+      accentColor: '#A855F7',
+    };
+
+    const skills = SKILLS_DATA.filter((s) => s.categoryId === cat.id);
+    const coreSkills = skills.filter((s) => getSkillTier(s.id) === 'core');
+    const professionalSkills = skills.filter((s) => getSkillTier(s.id) === 'professional');
+    const ecosystemSkills = skills.filter((s) => getSkillTier(s.id) === 'ecosystem');
+
+    const nucleusSkill =
+      skills.find((s) => s.id === config.nucleusId) ||
+      coreSkills[0] ||
+      skills[0];
+
+    // Pick 3 orbiting satellite preview skills (excluding the nucleus itself)
+    const remainingCoreAndProf = [...coreSkills, ...professionalSkills].filter(
+      (s) => s.id !== nucleusSkill.id
+    );
+    const satelliteSkills = remainingCoreAndProf.slice(0, 3);
+
+    const dx = config.x - 50;
+    const dy = config.y - 50;
+    let angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
+    if (angleDeg < 0) angleDeg += 360;
+
+    return {
+      id: cat.id,
+      number: cat.number,
+      title: cat.title,
+      shortLabel: CATEGORY_SHORT_LABELS[cat.id] || cat.title.toUpperCase(),
+      subtitle: cat.subtitle,
+      x: config.x,
+      y: config.y,
+      recessedX: config.recessedX,
+      recessedY: config.recessedY,
+      angleDeg: parseFloat(angleDeg.toFixed(1)),
+      nucleusSkill,
+      satelliteSkills,
+      skills,
+      accentColor: config.accentColor,
+      tierCounts: {
+        core: coreSkills.length,
+        professional: professionalSkills.length,
+        ecosystem: ecosystemSkills.length,
+      },
+      floatPhase: index * 0.85,
+    };
+  });
+}
+
+export const CATEGORY_CONSTELLATIONS: CategoryConstellationCluster[] =
+  getCategoryConstellations();
+
+/**
+ * Computes the deterministic Level 2 & Level 3 Expanded Category Constellation layout.
+ */
+export function computeExpandedCategoryLayout(
+  categoryId: string,
+  focusedSkillId: string | null = null
+): ExpandedCategoryConstellation {
+  const category =
+    CATEGORY_CONSTELLATIONS.find((c) => c.id === categoryId) ||
+    CATEGORY_CONSTELLATIONS[0];
+
+  const categorySkills = category.skills;
+
+  const coreSkills = categorySkills.filter((s) => getSkillTier(s.id) === 'core');
+  const profSkills = categorySkills.filter((s) => getSkillTier(s.id) === 'professional');
+  const ecoSkills = categorySkills.filter((s) => getSkillTier(s.id) === 'ecosystem');
+
+  const tierRings = {
+    core: { rx: 20.5, ry: 19.5 },
+    professional: { rx: 31.5, ry: 29.5 },
+    ecosystem: { rx: 41.5, ry: 38.0 },
+  };
+
+  const nodes: ExpandedSkillNodePosition[] = [];
+  const nodeMap = new Map<string, ExpandedSkillNodePosition>();
+
+  const catIndex = SKILL_CATEGORIES.findIndex((c) => c.id === category.id);
+  const baseRotationDeg = (catIndex * 25) % 360;
+
+  const placeTierBand = (
+    items: SkillItem[],
+    tier: SkillTier,
+    rx: number,
+    ry: number,
+    startAngleDeg: number
+  ) => {
+    const count = items.length;
+    if (count === 0) return;
+
+    for (let i = 0; i < count; i++) {
+      const skill = items[i];
+      const step = 360 / count;
+      const angleDeg = (startAngleDeg + i * step) % 360;
+      const rad = (angleDeg * Math.PI) / 180;
+
+      const radialMod = (i % 2 === 0 ? 1 : -1) * 1.1;
+      const effectiveRx = rx + radialMod;
+      const effectiveRy = ry + radialMod * 0.85;
+
+      const x = Math.max(9, Math.min(91, 50 + Math.cos(rad) * effectiveRx));
+      const y = Math.max(11, Math.min(86, 50 + Math.sin(rad) * effectiveRy));
+      const radius = Math.sqrt((x - 50) ** 2 + (y - 50) ** 2);
+
+      const pos: ExpandedSkillNodePosition = {
+        skill,
+        tier,
+        x: parseFloat(x.toFixed(2)),
+        y: parseFloat(y.toFixed(2)),
+        radius: parseFloat(radius.toFixed(2)),
+        angleDeg: parseFloat(angleDeg.toFixed(1)),
+        isCrossCategoryRelated: false,
+        driftPhase: i * 0.7 + (tier === 'core' ? 0 : tier === 'professional' ? 1.3 : 2.5),
+      };
+
+      nodes.push(pos);
+      nodeMap.set(skill.id, pos);
+    }
+  };
+
+  placeTierBand(coreSkills, 'core', tierRings.core.rx, tierRings.core.ry, -90 + baseRotationDeg * 0.3);
+  placeTierBand(
+    profSkills,
+    'professional',
+    tierRings.professional.rx,
+    tierRings.professional.ry,
+    -52 + baseRotationDeg * 0.5
+  );
+  placeTierBand(
+    ecoSkills,
+    'ecosystem',
+    tierRings.ecosystem.rx,
+    tierRings.ecosystem.ry,
+    -18 + baseRotationDeg * 0.7
+  );
+
+  // Place cross-category related skills in dedicated non-overlapping outer gateway slots
+  if (focusedSkillId) {
+    const relatedIds = getRelatedSkillIds(focusedSkillId).slice(0, 6);
+    const crossCategoryRelatedSkills = relatedIds
+      .map((rid) => SKILLS_DATA.find((s) => s.id === rid))
+      .filter((s): s is SkillItem => Boolean(s && !nodeMap.has(s.id)));
+
+    // Candidate outer gateway anchors around the perimeter
+    const gatewayCandidates = [
+      { x: 14, y: 18 },
+      { x: 86, y: 18 },
+      { x: 11, y: 42 },
+      { x: 89, y: 42 },
+      { x: 14, y: 68 },
+      { x: 86, y: 68 },
+      { x: 32, y: 14 },
+      { x: 68, y: 14 },
+      { x: 26, y: 82 },
+      { x: 74, y: 82 },
+    ];
+
+    crossCategoryRelatedSkills.forEach((relSkill, idx) => {
+      // Pick the gateway candidate with maximum clearance from all existing nodes
+      let bestPoint = gatewayCandidates[idx % gatewayCandidates.length];
+      let bestMinClearance = -1;
+
+      for (const cand of gatewayCandidates) {
+        let minClearance = Infinity;
+        for (const existing of nodes) {
+          const dx = (cand.x - existing.x) / 1.0;
+          const dy = (cand.y - existing.y) / 1.35; // Extra vertical weight for labels
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < minClearance) minClearance = d;
+        }
+        if (minClearance > bestMinClearance) {
+          bestMinClearance = minClearance;
+          bestPoint = cand;
+        }
+      }
+
+      const x = bestPoint.x;
+      const y = bestPoint.y;
+      const radius = Math.sqrt((x - 50) ** 2 + (y - 50) ** 2);
+      let angleDeg = Math.atan2(y - 50, x - 50) * (180 / Math.PI);
+      if (angleDeg < 0) angleDeg += 360;
+
+      const pos: ExpandedSkillNodePosition = {
+        skill: relSkill,
+        tier: getSkillTier(relSkill.id),
+        x: parseFloat(x.toFixed(2)),
+        y: parseFloat(y.toFixed(2)),
+        radius: parseFloat(radius.toFixed(2)),
+        angleDeg: parseFloat(angleDeg.toFixed(1)),
+        isCrossCategoryRelated: true,
+        driftPhase: 3.1 + idx * 0.9,
+      };
+
+      nodes.push(pos);
+      nodeMap.set(relSkill.id, pos);
+    });
+  }
+
+  return {
+    category,
+    nodes,
+    nodeMap,
+    tierRings,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGACY V2 88-ANCHOR SPATIAL ENGINE (PRESERVED FOR BUILD VALIDATION SCRIPTS)
+// ─────────────────────────────────────────────────────────────────────────────
+
 const AUTHORED_DESKTOP_SPATIAL_ANCHORS: { x: number; y: number }[] = [
   // Upper Crest & High Flanks
   { x: 44, y: 15 }, { x: 52, y: 13 }, { x: 60, y: 17 }, { x: 48, y: 22 }, { x: 38, y: 19 }, { x: 34, y: 12 },
@@ -124,10 +485,6 @@ const AUTHORED_DESKTOP_SPATIAL_ANCHORS: { x: number; y: number }[] = [
   { x: 61, y: 85 }, { x: 77, y: 82 }, { x: 86, y: 82 },
 ];
 
-/**
- * 88 Authored 2D Spatial Anchors for Mobile Viewports (Vertical stage, y: 5..97)
- * Pure Cartesian coordinates tailored to vertical mobile screens.
- */
 const AUTHORED_MOBILE_SPATIAL_ANCHORS: { x: number; y: number }[] = [
   // Top Sector (y: 5..33)
   { x: 50, y: 7 }, { x: 38, y: 8 }, { x: 62, y: 8 }, { x: 25, y: 8 }, { x: 75, y: 8 },
@@ -154,9 +511,6 @@ const AUTHORED_MOBILE_SPATIAL_ANCHORS: { x: number; y: number }[] = [
   { x: 16, y: 96 }, { x: 84, y: 96 }, { x: 6,  y: 96 }, { x: 94, y: 96 },
 ];
 
-/**
- * Editorial Category Labels Positioning (Non-circular, non-cluster framing)
- */
 const DESKTOP_EDITORIAL_LABELS: Record<string, { x: number; y: number }> = {
   frontend: { x: 34.0, y: 7.0 },
   graphics: { x: 76.0, y: 8.0 },
@@ -179,19 +533,12 @@ const MOBILE_EDITORIAL_LABELS: Record<string, { x: number; y: number }> = {
   rag:      { x: 22.0, y: 98.5 },
 };
 
-/**
- * Deterministically interleave skills from all 8 categories.
- * Produces an ordered array of 88 skills where adjacent entries
- * belong to different technological disciplines.
- * Zero Math.random().
- */
 export function getInterleavedSkills(): typeof SKILLS_DATA {
   const byCategory = new Map<string, typeof SKILLS_DATA>();
   for (const cat of SKILL_CATEGORIES) {
     byCategory.set(cat.id, SKILLS_DATA.filter((s) => s.categoryId === cat.id));
   }
 
-  // Cross-cutting sequence of disciplines
   const categoryCycle = [
     'frontend',
     'models',
@@ -205,9 +552,7 @@ export function getInterleavedSkills(): typeof SKILLS_DATA {
 
   const interleaved: typeof SKILLS_DATA = [];
 
-  // 11 items per category across 8 categories = 88 items
   for (let cycle = 0; cycle < 11; cycle++) {
-    // Subtle offset per cycle prevents repetition of exact adjacent pairs
     const shift = (cycle * 3) % categoryCycle.length;
     for (let i = 0; i < categoryCycle.length; i++) {
       const catId = categoryCycle[(i + shift) % categoryCycle.length];
@@ -221,10 +566,6 @@ export function getInterleavedSkills(): typeof SKILLS_DATA {
   return interleaved;
 }
 
-/**
- * Compute the complete deterministic 2D spatial constellation layout
- * with cross-category weaving.
- */
 export function computeConstellationLayout(isMobile: boolean = false): ConstellationLayout {
   const nodeNormW = isMobile ? 8.4 : 4.4;
   const nodeNormH = isMobile ? 3.6 : 6.0;
@@ -232,14 +573,10 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
   const planetRy = isMobile ? 15.0 : 20.5;
 
   const anchors = isMobile ? AUTHORED_MOBILE_SPATIAL_ANCHORS : AUTHORED_DESKTOP_SPATIAL_ANCHORS;
-
-  // Clone anchors for deterministic relaxation
   const rawAnchors = anchors.map((a, idx) => ({ idx, x: a.x, y: a.y }));
 
-  // Local physics-based relaxation loop
   const ITERATIONS = isMobile ? 55 : 45;
   for (let iter = 0; iter < ITERATIONS; iter++) {
-    // 1. Planet exclusion boundary protection
     for (const a of rawAnchors) {
       const dx = a.x - 50;
       const dy = a.y - 50;
@@ -251,7 +588,6 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
       }
     }
 
-    // 2. Node-to-node collision relaxation along local offset vectors
     for (let i = 0; i < rawAnchors.length; i++) {
       for (let j = i + 1; j < rawAnchors.length; j++) {
         const a1 = rawAnchors[i];
@@ -271,14 +607,12 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
       }
     }
 
-    // 3. Viewport bounds protection
     for (const a of rawAnchors) {
       a.x = Math.max(isMobile ? 4.5 : 3.8, Math.min(isMobile ? 95.5 : 96.2, a.x));
       a.y = Math.max(isMobile ? 4.0 : 4.5, Math.min(isMobile ? 97.0 : 95.5, a.y));
     }
   }
 
-  // Sort relaxed anchors along continuous spatial sweep around center (50, 50)
   const sortedAnchors = [...rawAnchors].sort((a, b) => {
     let angleA = Math.atan2(a.y - 50, a.x - 50) * (180 / Math.PI);
     if (angleA < 0) angleA += 360;
@@ -287,10 +621,7 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
     return angleA - angleB;
   });
 
-  // Interleave skills cross-categorically
   const interleavedSkills = getInterleavedSkills();
-
-  // Assign interleaved skills 1:1 to spatially continuous anchors
   const nodePositions = new Map<string, ConstellationNodePosition>();
   const nodeList: ConstellationNodePosition[] = [];
 
@@ -308,7 +639,6 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
     nodeList.push(formatted);
   }
 
-  // Editorial Category Labels
   const labelCoords = isMobile ? MOBILE_EDITORIAL_LABELS : DESKTOP_EDITORIAL_LABELS;
   const categoryLabels: CategoryLabelPosition[] = SKILL_CATEGORIES.map((cat) => {
     const pos = labelCoords[cat.id] || { x: 50, y: 50 };
@@ -329,13 +659,6 @@ export function computeConstellationLayout(isMobile: boolean = false): Constella
   };
 }
 
-/**
- * Compute geometric diagnostics for layout validation:
- * - Radial distance: min, max, mean, stdDev
- * - Angular distribution: 8 equal 45° bins
- * - Quadrant distribution: upperLeft, upperRight, lowerLeft, lowerRight
- * - Nearest-neighbor distance: min, mean, stdDev
- */
 export function computeGeometryDiagnostics(layout: ConstellationLayout): GeometryDiagnostics {
   const nodes = layout.nodeList;
   const radii: number[] = [];
@@ -396,10 +719,6 @@ export function computeGeometryDiagnostics(layout: ConstellationLayout): Geometr
   };
 }
 
-/**
- * Compute Category Adjacency Diversity Diagnostics (Prompt 03-C)
- * Inspects nearest spatial neighbors and measures cross-category weaving.
- */
 export function computeCategoryDiversityDiagnostics(
   layout: ConstellationLayout,
   k: number = 4
@@ -428,7 +747,6 @@ export function computeCategoryDiversityDiagnostics(
     distinctCategoriesInNeighborhood.push(uniqueCats.size);
   }
 
-  // Quadrant distribution per category
   const quadrantDistribution: Record<
     string,
     { upperLeft: number; upperRight: number; lowerLeft: number; lowerRight: number }
@@ -469,6 +787,5 @@ export function computeCategoryDiversityDiagnostics(
   };
 }
 
-// Precomputed static singletons for instantaneous rendering
 export const DESKTOP_CONSTELLATION = computeConstellationLayout(false);
 export const MOBILE_CONSTELLATION = computeConstellationLayout(true);
