@@ -1,25 +1,30 @@
 /**
- * LIVING ORBIT ENGINE — A Living Field of Technologies
+ * ORBITAL KINETIC SCULPTURE — Spatial Composition & Trajectory Engine
  *
- * Replaces static 8-sphere category clusters with a deterministic, continuous,
- * multi-layered orbital stream & spatial formation engine for all 88 validated skills.
+ * Art-directed 2.5D/3D spatial engine for the 88 validated technologies:
  *
- * Visual Hierarchy & Sizing (Desktop):
- * - CORE (21 skills):         64px logos, primary equatorial arc (Foreground layer, z=30)
- * - PROFESSIONAL (45 skills): 46px logos, upper & lower counter-flowing arcs (Mid layer, z=20)
- * - ECOSYSTEM (22 skills):    36px logos, deep horizon arc (Peripheral layer, z=10)
+ * 1. FEATURED TECHNOLOGY ANCHORS (7 Flagship Core Marks):
+ *    - Suspended in an asymmetric, non-linear, three-dimensional composition framing
+ *      the rotating purple planet (leaving the central planetary core unobstructed).
+ *    - Deliberately varied display scales (62px–80px) for optical hierarchy.
+ *    - Near-stationary zero-G Lissajous breathing + magnetic cursor attraction.
  *
- * Modes:
- * 1. Living Orbit ("All Categories"):
- *    4 curved orbital ribbons flowing continuously across the purple planet.
- *    Each ribbon has a curated visible aperture (so ~42 well-spaced logos are visible at any
- *    moment while all 88 cycle smoothly without jumps).
- * 2. Category Formation (when 1 of the 8 categories is selected):
- *    The selected category's 11 technologies transition into a spacious 3-tier curved
- *    formation across the center of the planet, while other categories recede into deep space.
- * 3. Focused Skill State (when a logo is clicked):
- *    Locks the focused technology and summons its 3–7 genuinely related technologies
- *    into clear view with curved relationship filaments.
+ * 2. THREE GENUINELY DISTINCT 3D CUBIC BÉZIER SPATIAL TRAJECTORIES:
+ *    - Replaces horizontal rows with three tilted, sweeping 3D Cubic Bézier splines:
+ *      a) Trajectory A (SW -> NE Ascending S-Spline): Sweeps from lower-left flank,
+ *         crests over the upper-left & upper-right planetary shoulders, exits mid-right.
+ *      b) Trajectory B (NW -> SE Descending Catenary): Enters high upper-left, plunges
+ *         around the western limb and beneath the southern nadir, rises lower-right.
+ *      c) Trajectory C (NNE -> SSW High-Inclination Polar Arc): Steep meridian path
+ *         curving around the eastern hemisphere in deep space.
+ *    - Non-uniform Golden-Ratio phase staggering + perpendicular normal offsets ensure
+ *      logos never align into mechanical horizontal rows or uniform chains.
+ *    - Controlled simultaneous visibility (~20 moving logos + 7 anchors = ~27 visible
+ *      on desktop at any moment), cycling seamlessly through all 88 skills.
+ *
+ * 3. ASYMMETRIC SCULPTURAL CATEGORY FORMATIONS:
+ *    - Selecting any of the 8 categories reorganizes its 11 technologies into an
+ *      asymmetric spatial composition around the planet (never horizontal rows).
  */
 
 import {
@@ -31,92 +36,178 @@ import {
 } from '../../data/skills';
 import { getRelatedSkillIds, getSkillTier } from './skillRelationships';
 
-export interface OrbitalRibbonConfig {
-  id: 'core-primary' | 'prof-upper' | 'prof-lower' | 'eco-horizon';
-  tier: SkillTier;
-  /** Direction of orbital flow: 1 = left-to-right, -1 = right-to-left */
-  direction: 1 | -1;
-  /** Base speed in normalized phase units [0..1) per second */
-  speed: number;
-  /** Center Y position (percentage of stage height, 0..100) at x = 50% */
-  centerY: number;
-  /** Vertical arch curvature delta at the left/right horizons (percentage of stage height) */
-  archDeltaY: number;
-  /** Horizontal span [minX, maxX] in stage percentage */
-  minX: number;
-  maxX: number;
-  /** Number of items simultaneously visible within the active stage aperture */
-  visibleCapacity: number;
-  /** Desktop icon pixel size */
-  desktopSize: number;
-  /** Mobile icon pixel size */
-  mobileSize: number;
-  /** Parallax multiplier for pointer responsiveness */
-  parallaxFactor: number;
-  /** Z-index layer */
-  zIndex: number;
+export interface Point2D {
+  x: number;
+  y: number;
 }
 
-export const ORBITAL_RIBBONS: readonly OrbitalRibbonConfig[] = [
+export interface CubicBezierSplineConfig {
+  id: 'spline-ascending' | 'spline-catenary' | 'spline-meridian';
+  /** 4 control points in stage percentage space (0..100) */
+  p0: Point2D;
+  p1: Point2D;
+  p2: Point2D;
+  p3: Point2D;
+  /** Direction of travel along parameter u: 1 = 0->1, -1 = 1->0 */
+  direction: 1 | -1;
+  /** Base speed in normalized cycle units per second */
+  speed: number;
+  /** Number of items simultaneously visible along the active spline segment */
+  visibleCapacity: number;
+  /** Depth range [minZ, maxZ] where 1.0 = foreground, 0.5 = deep background */
+  depthRange: [number, number];
+  /** Peak depth parameter uPeak in [0, 1] where the spline passes closest to the viewer */
+  uPeak: number;
+  /** Parallax multiplier for pointer movement */
+  parallaxFactor: number;
+}
+
+/**
+ * 7 Featured Core Technology Anchors
+ * Arranged asymmetrically around the purple planet (center ~ 50%, 48%).
+ * No two anchors share a horizontal row, vertical column, or identical pixel size.
+ */
+export interface FeaturedAnchorSpec {
+  id: string;
+  x: number;
+  y: number;
+  /** Deliberately varied desktop pixel size (62px–80px) */
+  desktopSize: number;
+  mobileSize: number;
+  /** Spatial depth plane (0.88..1.05) */
+  depth: number;
+  /** Zero-G breathing amplitude in stage % */
+  breathAmpX: number;
+  breathAmpY: number;
+  breathFreq: number;
+}
+
+export const FEATURED_ANCHOR_SPECS: readonly FeaturedAnchorSpec[] = [
   {
-    id: 'prof-upper',
-    tier: 'professional',
-    direction: -1,
-    speed: 0.0085,
-    centerY: 20.5,
-    archDeltaY: 8.5, // Curves gently downward toward the wings (20.5% -> 29%)
-    minX: 4,
-    maxX: 96,
-    visibleCapacity: 11,
-    desktopSize: 46,
-    mobileSize: 36,
-    parallaxFactor: 0.65,
-    zIndex: 20,
+    id: 'typescript',
+    x: 23.5,
+    y: 34.0,
+    desktopSize: 76,
+    mobileSize: 50,
+    depth: 1.04,
+    breathAmpX: 0.45,
+    breathAmpY: 0.75,
+    breathFreq: 0.85,
   },
   {
-    id: 'core-primary',
-    tier: 'core',
-    direction: 1,
-    speed: 0.0105,
-    centerY: 41.0,
-    archDeltaY: -4.5, // Gentle upward-arching equatorial ribbon across the planet heart
-    minX: 4,
-    maxX: 96,
-    visibleCapacity: 10,
-    desktopSize: 64,
+    id: 'react',
+    x: 35.5,
+    y: 17.5,
+    desktopSize: 68,
+    mobileSize: 46,
+    depth: 0.96,
+    breathAmpX: 0.55,
+    breathAmpY: 0.65,
+    breathFreq: 0.72,
+  },
+  {
+    id: 'threedotjs',
+    x: 28.0,
+    y: 64.5,
+    desktopSize: 74,
     mobileSize: 48,
-    parallaxFactor: 1.0,
-    zIndex: 30,
+    depth: 1.0,
+    breathAmpX: 0.5,
+    breathAmpY: 0.8,
+    breathFreq: 0.78,
   },
   {
-    id: 'prof-lower',
-    tier: 'professional',
+    id: 'openai',
+    x: 73.5,
+    y: 25.5,
+    desktopSize: 78,
+    mobileSize: 50,
+    depth: 1.05,
+    breathAmpX: 0.48,
+    breathAmpY: 0.72,
+    breathFreq: 0.82,
+  },
+  {
+    id: 'langgraph',
+    x: 80.5,
+    y: 51.0,
+    desktopSize: 64,
+    mobileSize: 44,
+    depth: 0.93,
+    breathAmpX: 0.6,
+    breathAmpY: 0.65,
+    breathFreq: 0.68,
+  },
+  {
+    id: 'solidity',
+    x: 66.0,
+    y: 71.5,
+    desktopSize: 66,
+    mobileSize: 45,
+    depth: 0.95,
+    breathAmpX: 0.52,
+    breathAmpY: 0.7,
+    breathFreq: 0.75,
+  },
+  {
+    id: 'postgresql',
+    x: 45.5,
+    y: 78.5,
+    desktopSize: 62,
+    mobileSize: 44,
+    depth: 0.91,
+    breathAmpX: 0.45,
+    breathAmpY: 0.6,
+    breathFreq: 0.64,
+  },
+] as const;
+
+/**
+ * 3 Genuinely Distinct 3D Cubic Bézier Spatial Trajectories
+ * Frame and interact with the planet asymmetrically without forming horizontal strips.
+ */
+export const SPATIAL_SPLINES: readonly CubicBezierSplineConfig[] = [
+  {
+    // Trajectory 1: Tilted SW -> NE Ascending S-Curve cresting the upper planetary shoulders
+    id: 'spline-ascending',
+    p0: { x: 6, y: 82 },
+    p1: { x: 18, y: 10 },
+    p2: { x: 66, y: 12 },
+    p3: { x: 94, y: 44 },
     direction: 1,
-    speed: 0.0078,
-    centerY: 61.5,
-    archDeltaY: -6.5, // Cradles the lower hemisphere of the planet (61.5% -> 55%)
-    minX: 4,
-    maxX: 96,
-    visibleCapacity: 11,
-    desktopSize: 46,
-    mobileSize: 36,
-    parallaxFactor: 0.7,
-    zIndex: 20,
+    speed: 0.0082,
+    visibleCapacity: 8,
+    depthRange: [0.78, 1.06],
+    uPeak: 0.42,
+    parallaxFactor: 0.9,
   },
   {
-    id: 'eco-horizon',
-    tier: 'ecosystem',
+    // Trajectory 2: Counter-Orbital NW -> SE Descending Catenary sweeping below the planet
+    id: 'spline-catenary',
+    p0: { x: 7, y: 16 },
+    p1: { x: 14, y: 78 },
+    p2: { x: 58, y: 92 },
+    p3: { x: 93, y: 62 },
     direction: -1,
-    speed: 0.0065,
-    centerY: 79.0,
-    archDeltaY: -7.5, // Outer horizon arc (79% -> 71.5%)
-    minX: 6,
-    maxX: 94,
-    visibleCapacity: 11,
-    desktopSize: 36,
-    mobileSize: 30,
-    parallaxFactor: 0.4,
-    zIndex: 10,
+    speed: 0.0066,
+    visibleCapacity: 8,
+    depthRange: [0.72, 0.98],
+    uPeak: 0.58,
+    parallaxFactor: 0.65,
+  },
+  {
+    // Trajectory 3: High-Inclination Polar Meridian Ribbon in deep ambient space
+    id: 'spline-meridian',
+    p0: { x: 58, y: 7 },
+    p1: { x: 95, y: 24 },
+    p2: { x: 92, y: 82 },
+    p3: { x: 30, y: 92 },
+    direction: 1,
+    speed: 0.0052,
+    visibleCapacity: 6,
+    depthRange: [0.62, 0.86],
+    uPeak: 0.48,
+    parallaxFactor: 0.42,
   },
 ] as const;
 
@@ -124,53 +215,85 @@ export interface LivingSkillParticle {
   skill: SkillItem;
   tier: SkillTier;
   category: SkillCategory;
-  ribbonId: OrbitalRibbonConfig['id'];
-  ribbonIndex: number;
-  /** Index within its assigned ribbon */
+  /** True if this skill is one of the 7 Featured Core Anchors */
+  isFeaturedAnchor: boolean;
+  anchorSpec?: FeaturedAnchorSpec;
+  splineId: CubicBezierSplineConfig['id'];
+  splineIndex: number;
   slotIndex: number;
-  /** Total items in its assigned ribbon */
-  ribbonTotal: number;
-  /** Initial normalized phase [0, 1) along the full ribbon cycle */
+  splineTotal: number;
+  /** Non-uniform initial phase in [0, 1) along the spline cycle */
   initialPhase: number;
-  /** Deterministic sine oscillation phase (radians) */
+  /** Signed perpendicular offset (in stage %) from the spline centerline so items form a spatial volume, not a single-file line */
+  normalOffset: number;
+  /** Deterministic oscillation phase (radians) */
   oscillationPhase: number;
-  /** Vertical oscillation amplitude in percentage units */
-  oscillationAmpY: number;
-  /** Desktop logo size in px */
+  /** Individual drift amplitude */
+  driftAmp: number;
+  /** Base desktop pixel size (before optical normalization and depth scaling) */
   desktopSize: number;
-  /** Mobile logo size in px */
+  /** Base mobile pixel size */
   mobileSize: number;
-  /** Target position when its category is selected (Category Formation Mode) */
+  /** Asymmetric sculptural target position when its category is selected */
   categoryFormationPos: {
     x: number;
     y: number;
     scale: number;
+    depth: number;
   };
-  /** Deep-space recessed position when another category is selected */
+  /** Deep-space peripheral coordinates when another category is selected */
   recessedPos: {
     x: number;
     y: number;
   };
 }
 
-export interface EvaluatedParticleFrame {
-  id: string;
-  skill: SkillItem;
-  tier: SkillTier;
-  x: number;
-  y: number;
-  scale: number;
-  opacity: number;
-  zIndex: number;
-  isVisibleInAperture: boolean;
-  isFocused: boolean;
-  isRelated: boolean;
-  isCategoryActive: boolean;
+/**
+ * Evaluates a 2D Cubic Bézier point B(u) and its unit normal vector N(u) for u in [0, 1].
+ */
+export function evaluateCubicBezier(
+  p0: Point2D,
+  p1: Point2D,
+  p2: Point2D,
+  p3: Point2D,
+  u: number
+): { x: number; y: number; nx: number; ny: number } {
+  const mt = 1 - u;
+  const mt2 = mt * mt;
+  const u2 = u * u;
+
+  const x =
+    mt2 * mt * p0.x +
+    3 * mt2 * u * p1.x +
+    3 * mt * u2 * p2.x +
+    u2 * u * p3.x;
+  const y =
+    mt2 * mt * p0.y +
+    3 * mt2 * u * p1.y +
+    3 * mt * u2 * p2.y +
+    u2 * u * p3.y;
+
+  // First derivative B'(u) for tangent / normal calculation
+  const tx =
+    3 * mt2 * (p1.x - p0.x) +
+    6 * mt * u * (p2.x - p1.x) +
+    3 * u2 * (p3.x - p2.x);
+  const ty =
+    3 * mt2 * (p1.y - p0.y) +
+    6 * mt * u * (p2.y - p1.y) +
+    3 * u2 * (p3.y - p2.y);
+
+  const len = Math.hypot(tx, ty) || 1;
+  return {
+    x,
+    y,
+    nx: -ty / len,
+    ny: tx / len,
+  };
 }
 
 /**
- * Interleaves a list of skills by category so same-category technologies
- * are evenly distributed along each orbital ribbon rather than clumped.
+ * Interleaves skills by category so same-category items are distributed around the sculpture.
  */
 function interleaveByCategory(items: SkillItem[]): SkillItem[] {
   const byCat = new Map<string, SkillItem[]>();
@@ -190,8 +313,7 @@ function interleaveByCategory(items: SkillItem[]): SkillItem[] {
       const catId = SKILL_CATEGORIES[(i + round * 3) % SKILL_CATEGORIES.length].id;
       const bucket = byCat.get(catId);
       if (bucket && bucket.length > 0) {
-        const next = bucket.shift()!;
-        result.push(next);
+        result.push(bucket.shift()!);
         added = true;
       }
     }
@@ -201,113 +323,194 @@ function interleaveByCategory(items: SkillItem[]): SkillItem[] {
 }
 
 /**
- * Computes the curated 11-node Category Formation coordinates for a single category.
- * Organizes the category's 11 technologies into 3 clear curved tiers across the planet:
- * - Core tier: Upper-central focal arc (y ~ 31%..36%)
- * - Professional tier: Mid-equatorial arc (y ~ 53%..59%)
- * - Ecosystem tier: Lower horizon arc (y ~ 74%..78%)
+ * Asymmetric 11-point sculptural templates around the planet for Category Selection Mode.
+ * Leaves the central planet core (x: 40..60, y: 34..60) open and avoids any horizontal rows.
  */
-function computeCategoryFormationMap(): Map<string, { x: number; y: number; scale: number }> {
-  const map = new Map<string, { x: number; y: number; scale: number }>();
+const ASYMMETRIC_CATEGORY_SLOTS: readonly {
+  x: number;
+  y: number;
+  scale: number;
+  depth: number;
+}[] = [
+  // Core slots (1..3): Inner asymmetric triangle framing the planet outside its sphere
+  { x: 25.5, y: 31.0, scale: 1.16, depth: 1.04 },
+  { x: 73.5, y: 27.5, scale: 1.14, depth: 1.02 },
+  { x: 31.0, y: 66.5, scale: 1.12, depth: 1.0 },
+  // Professional slots (4..8): Sweeping mid-field asymmetric anchors
+  { x: 48.5, y: 11.0, scale: 1.02, depth: 0.94 },
+  { x: 15.5, y: 49.5, scale: 1.0, depth: 0.92 },
+  { x: 82.0, y: 48.0, scale: 1.02, depth: 0.95 },
+  { x: 68.5, y: 68.5, scale: 0.98, depth: 0.91 },
+  { x: 51.5, y: 81.5, scale: 0.96, depth: 0.9 },
+  // Ecosystem slots (9..11): Outer peripheral horizon accents
+  { x: 14.5, y: 21.5, scale: 0.9, depth: 0.82 },
+  { x: 85.0, y: 19.5, scale: 0.88, depth: 0.8 },
+  { x: 18.0, y: 77.5, scale: 0.9, depth: 0.82 },
+] as const;
 
-  for (const cat of SKILL_CATEGORIES) {
+function computeCategoryFormationMap(): Map<
+  string,
+  { x: number; y: number; scale: number; depth: number }
+> {
+  const map = new Map<string, { x: number; y: number; scale: number; depth: number }>();
+
+  SKILL_CATEGORIES.forEach((cat, catIdx) => {
     const catSkills = SKILLS_DATA.filter((s) => s.categoryId === cat.id);
-    const core = catSkills.filter((s) => s.tier === 'core');
-    const prof = catSkills.filter((s) => s.tier === 'professional');
-    const eco = catSkills.filter((s) => s.tier === 'ecosystem');
+    const ordered = [
+      ...catSkills.filter((s) => s.tier === 'core'),
+      ...catSkills.filter((s) => s.tier === 'professional'),
+      ...catSkills.filter((s) => s.tier === 'ecosystem'),
+    ];
 
-    const placeArc = (
-      list: SkillItem[],
-      centerY: number,
-      archDropY: number,
-      spreadX: number,
-      scale: number
-    ) => {
-      const n = list.length;
-      if (n === 0) return;
-      for (let i = 0; i < n; i++) {
-        // Normalized position u in [-1, 1]
-        const u = n === 1 ? 0 : (i / (n - 1)) * 2 - 1;
-        const x = 50 + u * spreadX;
-        const y = centerY + u * u * archDropY + (i % 2 === 0 ? -1.2 : 1.2);
-        map.set(list[i].id, {
-          x: parseFloat(x.toFixed(2)),
-          y: parseFloat(y.toFixed(2)),
-          scale,
-        });
-      }
-    };
+    const shiftX = ((catIdx % 3) - 1) * 1.2;
+    const shiftY = (((catIdx + 1) % 3) - 1) * 1.0;
 
-    placeArc(core, 32.5, 4.5, core.length <= 2 ? 15 : core.length === 3 ? 23 : 29, 1.12);
-    placeArc(prof, 55.0, -5.0, prof.length <= 4 ? 28 : 35, 1.0);
-    placeArc(eco, 76.0, -4.5, eco.length <= 2 ? 18 : eco.length === 3 ? 26 : 33, 0.94);
-  }
+    ordered.forEach((skill, idx) => {
+      const slot = ASYMMETRIC_CATEGORY_SLOTS[idx % ASYMMETRIC_CATEGORY_SLOTS.length];
+      map.set(skill.id, {
+        x: parseFloat((slot.x + shiftX).toFixed(2)),
+        y: parseFloat((slot.y + shiftY).toFixed(2)),
+        scale: slot.scale,
+        depth: slot.depth,
+      });
+    });
+  });
 
   return map;
 }
 
 /**
- * Builds the canonical 88 LivingSkillParticle definitions.
+ * Builds the 88 LivingSkillParticle definitions combining the 7 Featured Anchors
+ * and the 81 Spline-Traveling Technologies.
  */
 export function buildLivingOrbitParticles(): LivingSkillParticle[] {
   const categoryMap = new Map<string, SkillCategory>(
     SKILL_CATEGORIES.map((c) => [c.id, c])
   );
   const formationMap = computeCategoryFormationMap();
+  const anchorMap = new Map<string, FeaturedAnchorSpec>(
+    FEATURED_ANCHOR_SPECS.map((a) => [a.id, a])
+  );
 
-  // Partition canonical 88 skills strictly by their SkillItem.tier
-  const coreSkills = interleaveByCategory(SKILLS_DATA.filter((s) => s.tier === 'core'));
-  const profSkills = interleaveByCategory(SKILLS_DATA.filter((s) => s.tier === 'professional'));
-  const ecoSkills = interleaveByCategory(SKILLS_DATA.filter((s) => s.tier === 'ecosystem'));
+  // Remaining 81 skills distributed across the 3 3D Cubic Bézier splines
+  const nonAnchorSkills = SKILLS_DATA.filter((s) => !anchorMap.has(s.id));
+  const remainingCore = interleaveByCategory(
+    nonAnchorSkills.filter((s) => s.tier === 'core')
+  );
+  const remainingProf = interleaveByCategory(
+    nonAnchorSkills.filter((s) => s.tier === 'professional')
+  );
+  const remainingEco = interleaveByCategory(
+    nonAnchorSkills.filter((s) => s.tier === 'ecosystem')
+  );
 
-  // Split professional skills evenly between upper and lower counter-flowing ribbons
-  const halfProf = Math.ceil(profSkills.length / 2);
-  const profUpperSkills = profSkills.slice(0, halfProf);
-  const profLowerSkills = profSkills.slice(halfProf);
+  // Spline 0 (Ascending S-Spline): Remaining Core (14) + 13 Professional = 27 items
+  const spline0Skills = [...remainingCore, ...remainingProf.slice(0, 13)];
+  // Spline 1 (Descending Catenary): 28 Professional items
+  const spline1Skills = remainingProf.slice(13, 41);
+  // Spline 2 (Polar Meridian): Remaining Professional (4) + Ecosystem (22) = 26 items
+  const spline2Skills = [...remainingProf.slice(41), ...remainingEco];
 
-  const ribbonBuckets: Record<OrbitalRibbonConfig['id'], SkillItem[]> = {
-    'prof-upper': profUpperSkills,
-    'core-primary': coreSkills,
-    'prof-lower': profLowerSkills,
-    'eco-horizon': ecoSkills,
+  const splineBuckets: Record<CubicBezierSplineConfig['id'], SkillItem[]> = {
+    'spline-ascending': spline0Skills,
+    'spline-catenary': spline1Skills,
+    'spline-meridian': spline2Skills,
   };
 
   const particles: LivingSkillParticle[] = [];
   let globalIdx = 0;
 
-  ORBITAL_RIBBONS.forEach((ribbon, ribbonIndex) => {
-    const bucket = ribbonBuckets[ribbon.id];
+  // 1. Add the 7 Featured Anchors first
+  FEATURED_ANCHOR_SPECS.forEach((spec, idx) => {
+    const skill = SKILLS_DATA.find((s) => s.id === spec.id)!;
+    const cat = categoryMap.get(skill.categoryId) || SKILL_CATEGORIES[0];
+    const formation = formationMap.get(skill.id) || {
+      x: spec.x,
+      y: spec.y,
+      scale: 1.15,
+      depth: 1.0,
+    };
+    const perimAngle = ((globalIdx * 137.5) % 360) * (Math.PI / 180);
+
+    particles.push({
+      skill,
+      tier: skill.tier,
+      category: cat,
+      isFeaturedAnchor: true,
+      anchorSpec: spec,
+      splineId: 'spline-ascending',
+      splineIndex: 0,
+      slotIndex: idx,
+      splineTotal: FEATURED_ANCHOR_SPECS.length,
+      initialPhase: idx / FEATURED_ANCHOR_SPECS.length,
+      normalOffset: 0,
+      oscillationPhase: idx * 1.15,
+      driftAmp: 0.65,
+      desktopSize: spec.desktopSize,
+      mobileSize: spec.mobileSize,
+      categoryFormationPos: formation,
+      recessedPos: {
+        x: parseFloat((50 + Math.cos(perimAngle) * 45).toFixed(2)),
+        y: parseFloat((50 + Math.sin(perimAngle) * 42).toFixed(2)),
+      },
+    });
+    globalIdx++;
+  });
+
+  // 2. Add the 81 Spline-Traveling Technologies
+  SPATIAL_SPLINES.forEach((spline, splineIndex) => {
+    const bucket = splineBuckets[spline.id];
     const total = bucket.length;
+
+    // Offsets perpendicular to the spline so logos occupy a 3D volume rather than a single-file line
+    const lateralPattern = [-5.8, 4.4, -2.6, 6.2, -4.1, 3.0, -5.0, 4.8];
 
     bucket.forEach((skill, slotIndex) => {
       const cat = categoryMap.get(skill.categoryId) || SKILL_CATEGORIES[0];
-      const formation = formationMap.get(skill.id) || { x: 50, y: 50, scale: 1 };
+      const formation = formationMap.get(skill.id) || {
+        x: 50,
+        y: 50,
+        scale: 1.0,
+        depth: 0.9,
+      };
 
-      // Recessed position around outer perimeter so unselected categories drift out of the way
       const perimAngle = ((globalIdx * 137.5) % 360) * (Math.PI / 180);
-      const recessedX = 50 + Math.cos(perimAngle) * 44;
-      const recessedY = 50 + Math.sin(perimAngle) * 41;
+
+      // Strictly monotonic phase with slight golden-ratio modulation so adjacent slots never bunch up
+      const mod = ((slotIndex % 2 === 0 ? 0.08 : -0.08) / total);
+      const initialPhase = (((slotIndex / total) + mod) % 1 + 1) % 1;
+
+      const baseDesktopSize =
+        skill.tier === 'core'
+          ? 56 + (slotIndex % 3) * 4 // 56–64px
+          : skill.tier === 'professional'
+          ? 42 + (slotIndex % 4) * 3 // 42–51px
+          : 33 + (slotIndex % 3) * 3; // 33–39px
+
+      const baseMobileSize =
+        skill.tier === 'core' ? 44 : skill.tier === 'professional' ? 36 : 30;
 
       particles.push({
         skill,
         tier: skill.tier,
         category: cat,
-        ribbonId: ribbon.id,
-        ribbonIndex,
+        isFeaturedAnchor: false,
+        splineId: spline.id,
+        splineIndex,
         slotIndex,
-        ribbonTotal: total,
-        initialPhase: slotIndex / total,
-        oscillationPhase: ((globalIdx * 1.6180339) % (Math.PI * 2)),
-        oscillationAmpY: skill.tier === 'core' ? 1.35 : skill.tier === 'professional' ? 1.1 : 0.85,
-        desktopSize: ribbon.desktopSize,
-        mobileSize: ribbon.mobileSize,
+        splineTotal: total,
+        initialPhase,
+        normalOffset: lateralPattern[slotIndex % lateralPattern.length],
+        oscillationPhase: (globalIdx * 1.6180339) % (Math.PI * 2),
+        driftAmp: skill.tier === 'core' ? 1.2 : skill.tier === 'professional' ? 1.0 : 0.8,
+        desktopSize: baseDesktopSize,
+        mobileSize: baseMobileSize,
         categoryFormationPos: formation,
         recessedPos: {
-          x: parseFloat(recessedX.toFixed(2)),
-          y: parseFloat(recessedY.toFixed(2)),
+          x: parseFloat((50 + Math.cos(perimAngle) * 45).toFixed(2)),
+          y: parseFloat((50 + Math.sin(perimAngle) * 42).toFixed(2)),
         },
       });
-
       globalIdx++;
     });
   });
@@ -319,89 +522,148 @@ export const LIVING_ORBIT_PARTICLES: readonly LivingSkillParticle[] =
   buildLivingOrbitParticles();
 
 /**
- * Evaluates the instantaneous 2D stage position, scale, and opacity for a particle
- * along its curved orbital ribbon at elapsed time `timeSec`.
- *
- * Uses a continuous virtual track where `visibleRatio = visibleCapacity / ribbonTotal`
- * of the phase cycle `[0, visibleRatio]` maps across the visible stage `[minX, maxX]`.
- * Items outside the visible aperture wrap smoothly behind the planet in deep space (`opacity: 0`),
- * guaranteeing generous spacing between visible logos while cycling through all 88 skills!
+ * Evaluates the instantaneous 2.5D spatial position, depth scale, and opacity for a particle
+ * at elapsed time `timeSec`.
  */
-export function evaluateRibbonTrajectory(
+export function evaluateSculptureTrajectory(
   particle: LivingSkillParticle,
-  ribbon: OrbitalRibbonConfig,
   timeSec: number,
   pointerOffset: { x: number; y: number } = { x: 0, y: 0 }
 ): {
   x: number;
   y: number;
   scale: number;
+  depth: number;
   opacity: number;
   isVisibleInAperture: boolean;
 } {
-  // Continuous wrapped phase in [0, 1)
+  // ─── CASE 1: FEATURED CORE ANCHOR (Quasi-stationary with zero-G Lissajous breathing) ───
+  if (particle.isFeaturedAnchor && particle.anchorSpec) {
+    const spec = particle.anchorSpec;
+    const dx =
+      Math.sin(timeSec * spec.breathFreq + particle.oscillationPhase) * spec.breathAmpX +
+      Math.cos(timeSec * (spec.breathFreq * 0.6) + particle.slotIndex) * (spec.breathAmpX * 0.4);
+    const dy =
+      Math.cos(timeSec * spec.breathFreq + particle.oscillationPhase * 1.3) * spec.breathAmpY +
+      Math.sin(timeSec * (spec.breathFreq * 0.5) + particle.slotIndex) * (spec.breathAmpY * 0.45);
+
+    const x = spec.x + dx + pointerOffset.x * spec.depth * 0.95;
+    const y = spec.y + dy + pointerOffset.y * spec.depth * 0.95;
+    const breathScale =
+      spec.depth * (1 + Math.sin(timeSec * 0.9 + particle.oscillationPhase) * 0.025);
+
+    return {
+      x,
+      y,
+      scale: breathScale,
+      depth: spec.depth,
+      opacity: 1.0,
+      isVisibleInAperture: true,
+    };
+  }
+
+  // ─── CASE 2: 3D CUBIC BÉZIER SPLINE TRAVELER ───
+  const spline = SPATIAL_SPLINES[particle.splineIndex];
   const rawPhase =
-    particle.initialPhase + timeSec * ribbon.speed * (ribbon.direction === 1 ? 1 : -1);
+    particle.initialPhase + timeSec * spline.speed * (spline.direction === 1 ? 1 : -1);
   const phase = ((rawPhase % 1) + 1) % 1;
 
-  // Fraction of the cycle that is on the front visible hemisphere of the orbit
-  const apertureFraction = Math.min(1.0, ribbon.visibleCapacity / particle.ribbonTotal);
+  const apertureFraction = Math.min(1.0, spline.visibleCapacity / particle.splineTotal);
 
   if (phase > apertureFraction) {
-    // Behind the planet (back hemisphere of the orbit) — keep off-stage cleanly
-    const backProgress = (phase - apertureFraction) / Math.max(0.0001, 1 - apertureFraction);
-    const backX = ribbon.maxX - backProgress * (ribbon.maxX - ribbon.minX);
+    // Traveling along the far side of the orbit in deep space
+    const endPt = spline.direction === 1 ? spline.p3 : spline.p0;
     return {
-      x: backX,
-      y: ribbon.centerY,
-      scale: 0.6,
+      x: endPt.x,
+      y: endPt.y,
+      scale: spline.depthRange[0] * 0.7,
+      depth: spline.depthRange[0],
       opacity: 0,
       isVisibleInAperture: false,
     };
   }
 
-  // Normalized progress `u` across the visible front arc: [0, 1]
+  // Parameter u in [0, 1] along the Cubic Bézier curve
   const u = phase / apertureFraction;
-  // Centered coordinate `c` in [-1, 1]
-  const c = u * 2 - 1;
+  const bz = evaluateCubicBezier(spline.p0, spline.p1, spline.p2, spline.p3, u);
 
-  // Base X along the arc with slight cosine foreshortening near the planet horizons
-  const foreshortenedC = Math.sin((c * Math.PI) / 2) * 0.35 + c * 0.65;
-  const halfSpanX = (ribbon.maxX - ribbon.minX) / 2;
-  const centerX = (ribbon.minX + ribbon.maxX) / 2;
-  const baseX = centerX + foreshortenedC * halfSpanX;
+  // Depth profile peaks near spline.uPeak and tapers toward the entry/exit horizons
+  const distFromPeak = Math.abs(u - spline.uPeak);
+  const depthNorm = Math.max(0, 1 - distFromPeak * 1.45);
+  const [minZ, maxZ] = spline.depthRange;
+  const depth = minZ + (maxZ - minZ) * depthNorm;
 
-  // Curved orbital Y trajectory + organic vertical sine oscillation
-  const archY = ribbon.centerY + c * c * ribbon.archDeltaY;
-  const waveY =
-    Math.sin(timeSec * 1.35 + particle.oscillationPhase) * particle.oscillationAmpY +
-    Math.cos(timeSec * 0.75 + particle.slotIndex * 0.9) * (particle.oscillationAmpY * 0.45);
+  // Organic lateral & vertical drift around the spline volume
+  const waveAlongNormal =
+    particle.normalOffset +
+    Math.sin(timeSec * 1.15 + particle.oscillationPhase) * particle.driftAmp;
+  const waveTangent =
+    Math.cos(timeSec * 0.8 + particle.oscillationPhase) * (particle.driftAmp * 0.6);
 
-  const x = baseX + pointerOffset.x * ribbon.parallaxFactor;
-  const y = archY + waveY + pointerOffset.y * ribbon.parallaxFactor;
+  let rawX = bz.x + bz.nx * waveAlongNormal + bz.ny * waveTangent;
+  let rawY = bz.y + bz.ny * waveAlongNormal - bz.nx * waveTangent;
 
-  // Smooth horizon entry/exit envelope (fades in over first 11% and out over last 11% of arc)
+  // 1. Planetary Core Exclusion Zone (keeps the central purple sphere at (50, 42) unobstructed)
+  const cdx = rawX - 50;
+  const cdy = rawY - 42;
+  const coreRadiusSq = (cdx / 18.5) ** 2 + (cdy / 21.5) ** 2;
+  if (coreRadiusSq < 1.0 && coreRadiusSq > 0.001) {
+    const push = 1.06 / Math.sqrt(coreRadiusSq);
+    rawX = 50 + cdx * push;
+    rawY = 42 + cdy * push;
+  }
+
+  // 2. Featured Core Anchor Repulsion Field (prevents moving spline logos from overlapping Featured Anchors)
+  for (let a = 0; a < FEATURED_ANCHOR_SPECS.length; a++) {
+    const anchor = FEATURED_ANCHOR_SPECS[a];
+    const adx = rawX - anchor.x;
+    const ady = rawY - anchor.y;
+    const anchorDistSq = (adx / 9.5) ** 2 + (ady / 12.0) ** 2;
+    if (anchorDistSq < 1.0 && anchorDistSq > 0.0001) {
+      const push = 1.05 / Math.sqrt(anchorDistSq);
+      rawX = anchor.x + adx * push;
+      rawY = anchor.y + ady * push;
+    }
+  }
+
+  const x = Math.max(5, Math.min(95, rawX + pointerOffset.x * spline.parallaxFactor * depth));
+  const y = Math.max(7, Math.min(92, rawY + pointerOffset.y * spline.parallaxFactor * depth));
+
+  // Smooth horizon entry/exit fade envelope
   const edgeDist = Math.min(u, 1 - u);
-  const horizonFade = edgeDist < 0.12 ? Math.sin((edgeDist / 0.12) * (Math.PI / 2)) : 1.0;
+  const horizonFade = edgeDist < 0.15 ? Math.sin((edgeDist / 0.15) * (Math.PI / 2)) : 1.0;
 
-  // 3D spherical depth scale: slightly larger near the center of the planet arc (c = 0)
-  const depthScale = (1 - c * c * 0.16) * (0.85 + 0.15 * horizonFade);
-
-  const baseTierOpacity =
-    particle.tier === 'core' ? 1.0 : particle.tier === 'professional' ? 0.94 : 0.84;
+  // Depth-based atmospheric opacity (Foreground = 1.0, Midground = 0.86, Background = 0.66)
+  const baseOpacity =
+    particle.tier === 'core'
+      ? 0.96
+      : particle.tier === 'professional'
+      ? 0.86
+      : 0.68;
 
   return {
     x,
     y,
-    scale: depthScale,
-    opacity: horizonFade * baseTierOpacity,
+    scale: depth * (0.86 + 0.14 * horizonFade),
+    depth,
+    opacity: horizonFade * baseOpacity,
     isVisibleInAperture: horizonFade > 0.05,
   };
 }
 
+// Keep alias for compatibility
+export const evaluateRibbonTrajectory = (
+  particle: LivingSkillParticle,
+  _ribbon: unknown,
+  timeSec: number,
+  pointerOffset: { x: number; y: number } = { x: 0, y: 0 }
+) => evaluateSculptureTrajectory(particle, timeSec, pointerOffset);
+
+export const ORBITAL_RIBBONS = SPATIAL_SPLINES;
+
 /**
- * Computes deterministic, non-overlapping satellite positions around a focused skill
- * for any related technologies that would otherwise be off-aperture or recessed.
+ * Computes collision-free satellite positions around a focused skill for its
+ * genuinely related technologies (above y = 58% so they never touch the bottom inspector).
  */
 export function computeFocusedNetworkPositions(
   focusedSkillId: string,
@@ -410,23 +672,22 @@ export function computeFocusedNetworkPositions(
   const result = new Map<string, { x: number; y: number }>();
   const focusedCurrent = currentPositions.get(focusedSkillId);
 
-  // Anchor the focused skill near its current visible spot (clamped to a comfortable inner stage zone)
   const anchorX =
     focusedCurrent && focusedCurrent.isVisible
       ? Math.max(24, Math.min(76, focusedCurrent.x))
       : 50;
   const anchorY =
     focusedCurrent && focusedCurrent.isVisible
-      ? Math.max(22, Math.min(62, focusedCurrent.y))
-      : 38;
+      ? Math.max(22, Math.min(56, focusedCurrent.y))
+      : 36;
 
   const placedPoints: { x: number; y: number }[] = [{ x: anchorX, y: anchorY }];
   result.set(focusedSkillId, { x: anchorX, y: anchorY });
 
-  const relatedIds = getRelatedSkillIds(focusedSkillId);
+  const relatedIds = getRelatedSkillIds(focusedSkillId).slice(0, 5);
   if (relatedIds.length === 0) return result;
 
-  const isWellSpaced = (pt: { x: number; y: number }, minDx = 11.5, minDy = 13.5) => {
+  const isWellSpaced = (pt: { x: number; y: number }, minDx = 12.0, minDy = 14.0) => {
     for (const existing of placedPoints) {
       const ndx = (pt.x - existing.x) / minDx;
       const ndy = (pt.y - existing.y) / minDy;
@@ -435,7 +696,6 @@ export function computeFocusedNetworkPositions(
     return true;
   };
 
-  // Pass 1: Keep related skills that are already visible on stage and well-spaced above the focus card
   const needsSummoning: string[] = [];
   for (const relId of relatedIds) {
     const existing = currentPositions.get(relId);
@@ -445,7 +705,7 @@ export function computeFocusedNetworkPositions(
       existing.x >= 10 &&
       existing.x <= 90 &&
       existing.y >= 14 &&
-      existing.y <= 58 &&
+      existing.y <= 57 &&
       isWellSpaced(existing)
     ) {
       const pt = { x: existing.x, y: existing.y };
@@ -456,7 +716,6 @@ export function computeFocusedNetworkPositions(
     }
   }
 
-  // Pass 2: Place summoned related skills onto non-overlapping orbital candidate slots above the focus card
   const candidateSlots: { x: number; y: number }[] = [];
   const rings = [
     { rx: 22, ry: 15, samples: 12 },
@@ -468,14 +727,14 @@ export function computeFocusedNetworkPositions(
       const angle = -Math.PI / 2 + (s / ring.samples) * Math.PI * 2;
       const cx = anchorX + Math.cos(angle) * ring.rx;
       const cy = anchorY + Math.sin(angle) * ring.ry;
-      if (cx >= 11 && cx <= 89 && cy >= 14 && cy <= 58) {
+      if (cx >= 11 && cx <= 89 && cy >= 14 && cy <= 57) {
         candidateSlots.push({ x: cx, y: cy });
       }
     }
   }
 
   needsSummoning.forEach((relId) => {
-    let bestSlot = candidateSlots[0] || { x: 50, y: 50 };
+    let bestSlot = candidateSlots[0] || { x: 50, y: 40 };
     let bestClearance = -1;
 
     for (const slot of candidateSlots) {

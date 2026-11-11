@@ -39,7 +39,7 @@ export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(({
   const tierMeta = TIER_LABELS[skill.tier];
 
   const relatedSkills = React.useMemo(() => {
-    const ids = getRelatedSkillIds(skill.id);
+    const ids = getRelatedSkillIds(skill.id).slice(0, 5);
     return ids
       .map((id) => SKILLS_DATA.find((s) => s.id === id))
       .filter((s): s is SkillItem => Boolean(s));

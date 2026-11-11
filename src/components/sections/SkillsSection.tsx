@@ -100,19 +100,16 @@ export const SkillsSection: React.FC = () => {
       />
 
       {/* ─── 2. MINIMAL EDITORIAL HEADER ─── */}
-      <div className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center relative z-10 mb-3 sm:mb-4">
-        <span className="font-mono text-[10px] sm:text-xs tracking-[0.28em] uppercase text-white/45 mb-1 select-none">
-          02 · Living Orbit
+      <div className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center relative z-10 mb-2">
+        <span className="font-mono text-[10px] tracking-[0.32em] uppercase text-white/40 mb-1 select-none">
+          02 · Technical Architecture
         </span>
         <h2
-          className="text-3xl sm:text-4xl md:text-5xl font-normal lowercase tracking-wide text-white/95 select-none mb-1.5"
+          className="text-3xl sm:text-4xl md:text-5xl font-normal lowercase tracking-wide text-white/95 select-none"
           style={{ fontFamily: 'var(--title-font)' }}
         >
           instruments
         </h2>
-        <p className="font-mono text-[11px] sm:text-xs tracking-[0.2em] text-white/40 uppercase max-w-[620px] select-none">
-          A living field of 88 technologies across frontend, spatial computing, web3 & agentic AI
-        </p>
       </div>
 
       {/* ─── 3. LIVING ORBIT FIELD OF TECHNOLOGIES ─── */}

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem } from '../../data/skills';
+import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
 import {
   LIVING_ORBIT_PARTICLES,
-  ORBITAL_RIBBONS,
-  evaluateRibbonTrajectory,
+  SPATIAL_SPLINES,
+  evaluateSculptureTrajectory,
   computeFocusedNetworkPositions,
   getRelatedSkillIds,
 } from '../../features/skills/livingOrbitEngine';
@@ -23,10 +23,10 @@ export interface LivingOrbitStageProps {
   onLeaveSkill: () => void;
 }
 
-const COMPACT_CATEGORY_TITLES: Record<string, string> = {
+const EDITORIAL_CATEGORY_LABELS: Record<string, string> = {
   frontend: 'Frontend',
-  graphics: '3D & Graphics',
-  backend: 'Backend & APIs',
+  graphics: 'Spatial & 3D',
+  backend: 'Backend',
   data: 'Data & Infra',
   web3: 'Web3',
   models: 'AI Models',
@@ -38,19 +38,20 @@ interface ParticleAnimState {
   x: number;
   y: number;
   scale: number;
+  depth: number;
   opacity: number;
   isVisible: boolean;
 }
 
 /**
- * LivingOrbitStage
+ * LivingOrbitStage — Orbital Kinetic Sculpture
  *
- * A Living Field of Technologies suspended in front of the cosmic purple planet.
- * - Authentic technology logos are the primary visual heroes.
- * - 4 curved orbital streams with counter-flowing velocities, organic vertical
- *   sine oscillation, and depth-based pointer parallax.
- * - Smooth spring-like interpolation into 11-skill Category Formations or
- *   Focused Skill relationship networks at 60fps without React re-render overhead.
+ * An asymmetric 2.5D/3D spatial composition suspended around the purple planet:
+ * - 7 Featured Core Technology Anchors with varied optical scales and zero-G breathing.
+ * - 3 tilted 3D Cubic Bézier trajectories carrying secondary technologies across
+ *   foreground, midground, and deep ambient planes.
+ * - Magnetic pointer field that subtly attracts nearby logos and releases them smoothly.
+ * - Editorial typographic category navigation with zero dashboard chrome.
  */
 export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   selectedCategoryId,
@@ -70,7 +71,6 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
   const [isMotionPaused, setIsMotionPaused] = useState(false);
 
-  // Latest reactive props stored in ref so the 60fps rAF loop always reads fresh state
   const stateRef = useRef({
     selectedCategoryId,
     focusedSkillId,
@@ -86,29 +86,34 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     };
   }, [selectedCategoryId, focusedSkillId, hoveredSkillId, isMotionPaused]);
 
-  // Pointer parallax ref (-1..1 normalized stage coordinates)
+  // Global parallax offset (-1..1) + local cursor position in stage % (0..100) for magnetic pull
   const pointerTargetRef = useRef({ x: 0, y: 0 });
   const pointerCurrentRef = useRef({ x: 0, y: 0 });
+  const cursorStagePosRef = useRef<{ x: number; y: number; active: boolean }>({
+    x: 50,
+    y: 50,
+    active: false,
+  });
 
   // Snapshot of focused network target positions when a skill is clicked
   const focusedNetworkMapRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
-  // Initialize particle states deterministically at t = 0
+  // Initialize particle states deterministically at t = 18.0s
   const animStatesRef = useRef<ParticleAnimState[]>(
     LIVING_ORBIT_PARTICLES.map((p) => {
-      const ribbon = ORBITAL_RIBBONS[p.ribbonIndex];
-      const init = evaluateRibbonTrajectory(p, ribbon, 0);
+      const init = evaluateSculptureTrajectory(p, 18.0);
       return {
         x: init.x,
         y: init.y,
         scale: init.scale,
+        depth: init.depth,
         opacity: init.opacity,
         isVisible: init.isVisibleInAperture,
       };
     })
   );
 
-  // Recompute focused satellite coordinates whenever focusedSkillId or selectedCategoryId changes
+  // Recompute collision-free satellite coordinates whenever focusedSkillId or selectedCategoryId changes
   useEffect(() => {
     if (!focusedSkillId) {
       focusedNetworkMapRef.current.clear();
@@ -142,7 +147,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     );
   }, [focusedSkillId, selectedCategoryId]);
 
-  // Active skill (focused takes priority over hovered for relationship filaments)
+  // Active skill (focused takes priority over hovered)
   const activeSkillId = focusedSkillId || hoveredSkillId;
   const activeSkill = useMemo(
     () => (activeSkillId ? SKILLS_DATA.find((s) => s.id === activeSkillId) || null : null),
@@ -154,9 +159,10 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     [focusedSkillId]
   );
 
+  // Highlight 3–5 explicitly mapped related technologies
   const activeRelatedIds = useMemo(() => {
     if (!activeSkillId) return [];
-    return getRelatedSkillIds(activeSkillId);
+    return getRelatedSkillIds(activeSkillId).slice(0, 5);
   }, [activeSkillId]);
 
   const activeRelatedSet = useMemo(() => new Set(activeRelatedIds), [activeRelatedIds]);
@@ -167,32 +173,31 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     return map;
   }, []);
 
-  // Active category metadata when a category pill is selected
-  const selectedCategoryMeta = useMemo(
-    () =>
-      selectedCategoryId
-        ? SKILL_CATEGORIES.find((c) => c.id === selectedCategoryId) || null
-        : null,
-    [selectedCategoryId]
-  );
-
-  // Pointer move handler on the desktop stage
   const handleStageMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!stageRef.current) return;
     const rect = stageRef.current.getBoundingClientRect();
-    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    const pctX = ((e.clientX - rect.left) / rect.width) * 100;
+    const pctY = ((e.clientY - rect.top) / rect.height) * 100;
+    const nx = (pctX / 100) * 2 - 1;
+    const ny = (pctY / 100) * 2 - 1;
+
     pointerTargetRef.current = {
-      x: Math.max(-1, Math.min(1, nx)) * 2.2,
-      y: Math.max(-1, Math.min(1, ny)) * 1.5,
+      x: Math.max(-1, Math.min(1, nx)) * 2.0,
+      y: Math.max(-1, Math.min(1, ny)) * 1.4,
+    };
+    cursorStagePosRef.current = {
+      x: pctX,
+      y: pctY,
+      active: true,
     };
   }, []);
 
   const handleStageMouseLeave = useCallback(() => {
     pointerTargetRef.current = { x: 0, y: 0 };
+    cursorStagePosRef.current.active = false;
   }, []);
 
-  // 60fps continuous Living Orbit animation & spring interpolation loop
+  // 60fps Orbital Kinetic Sculpture animation & magnetic field loop
   useEffect(() => {
     if (isMobile) return;
 
@@ -202,8 +207,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
     let rafId: number | null = null;
     let lastTime = performance.now();
-    let orbitalTimeSec = 14.5; // Rich initial phase with balanced Core & Professional distribution
-    let floatTimeSec = 0;
+    let sculptureTimeSec = 18.0;
+    let breathTimeSec = 0;
 
     const tick = (now: number) => {
       const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
@@ -216,181 +221,207 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         isMotionPaused: paused,
       } = stateRef.current;
 
-      // Smooth pointer parallax interpolation
-      const ptrLerp = 1 - Math.exp(-5.0 * dt);
+      // Smooth global parallax interpolation
+      const ptrLerp = 1 - Math.exp(-4.5 * dt);
       pointerCurrentRef.current.x +=
         (pointerTargetRef.current.x - pointerCurrentRef.current.x) * ptrLerp;
       pointerCurrentRef.current.y +=
         (pointerTargetRef.current.y - pointerCurrentRef.current.y) * ptrLerp;
 
-      // Advance orbital time with smooth time-dilation on hover/focus
       if (!prefersReducedMotion && !paused) {
-        floatTimeSec += dt;
+        breathTimeSec += dt;
         const speedMultiplier = focusId
           ? 0.0
           : catId
           ? 0.0
           : hoverId
-          ? 0.12
+          ? 0.15
           : 1.0;
-        orbitalTimeSec += dt * speedMultiplier;
+        sculptureTimeSec += dt * speedMultiplier;
       }
 
-      const focusedRelSet = focusId ? new Set(getRelatedSkillIds(focusId)) : null;
+      const focusedRelSet = focusId
+        ? new Set(getRelatedSkillIds(focusId).slice(0, 5))
+        : null;
       const hoveredRelSet =
-        !focusId && hoverId ? new Set(getRelatedSkillIds(hoverId)) : null;
+        !focusId && hoverId
+          ? new Set(getRelatedSkillIds(hoverId).slice(0, 5))
+          : null;
 
-      const posLerp = 1 - Math.exp(-7.5 * dt);
-      const opacityLerp = 1 - Math.exp(-12.0 * dt);
+      const posLerp = 1 - Math.exp(-7.0 * dt);
+      const opacityLerp = 1 - Math.exp(-11.0 * dt);
+      const cursor = cursorStagePosRef.current;
 
-      // Update all 88 particles
       for (let i = 0; i < LIVING_ORBIT_PARTICLES.length; i++) {
         const p = LIVING_ORBIT_PARTICLES[i];
-        const ribbon = ORBITAL_RIBBONS[p.ribbonIndex];
         const st = animStatesRef.current[i];
 
         let targetX = st.x;
         let targetY = st.y;
         let targetScale = 1.0;
+        let targetDepth = 0.9;
         let targetOpacity = 1.0;
 
-        // Vertical micro-oscillation so logos always feel gently suspended in zero-G
-        const gentleBobY = prefersReducedMotion || paused
-          ? 0
-          : Math.sin(floatTimeSec * 1.45 + p.oscillationPhase) * 0.85;
+        const gentleBobY =
+          prefersReducedMotion || paused
+            ? 0
+            : Math.sin(breathTimeSec * 1.2 + p.oscillationPhase) * 0.75;
+        const gentleBobX =
+          prefersReducedMotion || paused
+            ? 0
+            : Math.cos(breathTimeSec * 0.85 + p.oscillationPhase) * 0.45;
 
         if (catId) {
-          // ─── MODE B: CATEGORY FORMATION (11 skills of selected category) ───
+          // ─── ASYMMETRIC CATEGORY SCULPTURE MODE (11 technologies) ───
           const isInSelectedCategory = p.skill.categoryId === catId;
-          const isSummonedRelated = Boolean(focusId && focusedRelSet?.has(p.skill.id));
+          const isFocusNetworkMember = Boolean(
+            focusId && (p.skill.id === focusId || focusedRelSet?.has(p.skill.id))
+          );
 
-          if (isInSelectedCategory) {
+          if (isFocusNetworkMember && focusedNetworkMapRef.current.has(p.skill.id)) {
+            const netPos = focusedNetworkMapRef.current.get(p.skill.id)!;
+            targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
+            targetY = netPos.y + (p.skill.id === focusId ? 0 : gentleBobY);
+            targetScale = p.skill.id === focusId ? 1.2 : 1.02;
+            targetDepth = 1.04;
+            targetOpacity = 1.0;
+          } else if (isInSelectedCategory) {
             targetX =
               p.categoryFormationPos.x +
-              pointerCurrentRef.current.x * ribbon.parallaxFactor;
+              gentleBobX +
+              pointerCurrentRef.current.x * p.categoryFormationPos.depth * 0.8;
             targetY =
               p.categoryFormationPos.y +
               gentleBobY +
-              pointerCurrentRef.current.y * ribbon.parallaxFactor;
+              pointerCurrentRef.current.y * p.categoryFormationPos.depth * 0.8;
             targetScale = p.categoryFormationPos.scale;
+            targetDepth = p.categoryFormationPos.depth;
             targetOpacity = 1.0;
-          } else if (isSummonedRelated && focusedNetworkMapRef.current.has(p.skill.id)) {
-            const netPos = focusedNetworkMapRef.current.get(p.skill.id)!;
-            targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
-            targetY = netPos.y + gentleBobY;
-            targetScale = 1.0;
-            targetOpacity = 0.96;
           } else {
-            // Unrelated categories smoothly recede into deep peripheral space
             targetX = p.recessedPos.x;
             targetY = p.recessedPos.y;
             targetScale = 0.45;
+            targetDepth = 0.5;
             targetOpacity = 0.0;
           }
         } else {
-          // ─── MODE A: ALL 88 LIVING ORBIT STREAMS ───
-          const ribbonEval = evaluateRibbonTrajectory(
+          // ─── FULL ORBITAL KINETIC SCULPTURE MODE (7 Anchors + 3 3D Splines) ───
+          const evalState = evaluateSculptureTrajectory(
             p,
-            ribbon,
-            orbitalTimeSec,
+            sculptureTimeSec,
             pointerCurrentRef.current
           );
 
-          targetX = ribbonEval.x;
-          targetY = ribbonEval.y;
-          targetScale = ribbonEval.scale;
-          targetOpacity = ribbonEval.opacity;
+          targetX = evalState.x;
+          targetY = evalState.y;
+          targetScale = evalState.scale;
+          targetDepth = evalState.depth;
+          targetOpacity = evalState.opacity;
 
-          // If a skill is locked in Focus and this particle is the focused skill or one of its related skills,
-          // ensure it is brought into clear stage view even if it was on the back side of the orbit!
           if (focusId && (p.skill.id === focusId || focusedRelSet?.has(p.skill.id))) {
             const netPos = focusedNetworkMapRef.current.get(p.skill.id);
             if (netPos) {
-              targetX = netPos.x + pointerCurrentRef.current.x * 0.55;
-              targetY = netPos.y + gentleBobY + pointerCurrentRef.current.y * 0.55;
-              targetScale = p.skill.id === focusId ? 1.24 : 1.06;
+              targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
+              targetY =
+                netPos.y +
+                (p.skill.id === focusId ? 0 : gentleBobY) +
+                pointerCurrentRef.current.y * 0.5;
+              targetScale = p.skill.id === focusId ? 1.2 : 1.02;
+              targetDepth = 1.05;
               targetOpacity = 1.0;
             }
           }
 
-          // When wrapping behind the planet (opacity === 0), snap coordinates while invisible
-          // so the particle never flies backward across the visible stage
-          if (ribbonEval.opacity === 0 && st.opacity < 0.03 && !focusId) {
+          // Invisible wrap snap on far side of orbit
+          if (evalState.opacity === 0 && st.opacity < 0.03 && !focusId) {
             st.x = targetX;
             st.y = targetY;
           }
         }
 
-        // Apply focus / hover emphasis & dimming rules
-        if (focusId) {
-          if (p.skill.id === focusId) {
-            targetScale = Math.max(targetScale * 1.18, 1.24);
-            targetOpacity = 1.0;
-          } else if (focusedRelSet?.has(p.skill.id)) {
-            targetScale = Math.max(targetScale * 1.04, 1.04);
-            targetOpacity = Math.max(targetOpacity, 0.96);
-          } else {
-            targetOpacity *= 0.14;
-            targetScale *= 0.9;
-          }
-        } else if (hoverId) {
-          if (p.skill.id === hoverId) {
-            targetScale *= 1.22;
-            targetOpacity = 1.0;
-          } else if (hoveredRelSet?.has(p.skill.id)) {
-            targetScale *= 1.06;
-            targetOpacity = Math.max(targetOpacity, 0.95);
-          } else if (targetOpacity > 0.05) {
-            targetOpacity *= 0.52;
+        // Restrained magnetic pointer attraction when cursor is near a visible logo
+        if (cursor.active && targetOpacity > 0.2 && !focusId) {
+          const mdx = cursor.x - targetX;
+          const mdy = cursor.y - targetY;
+          const dist = Math.hypot(mdx, mdy);
+          const magRadius = 18.0;
+          if (dist < magRadius && dist > 0.1) {
+            const pull = (1 - dist / magRadius) ** 2 * 0.22;
+            targetX += mdx * pull;
+            targetY += mdy * pull;
+            targetScale *= 1 + (1 - dist / magRadius) * 0.06;
           }
         }
 
-        // Interpolate state
+        // Focus & Hover visual hierarchy
+        if (focusId) {
+          if (p.skill.id === focusId) {
+            targetScale = Math.max(targetScale * 1.16, 1.2);
+            targetOpacity = 1.0;
+          } else if (focusedRelSet?.has(p.skill.id)) {
+            targetScale = Math.max(targetScale * 1.02, 1.0);
+            targetOpacity = Math.max(targetOpacity, 0.94);
+          } else {
+            targetOpacity *= 0.12;
+            targetScale *= 0.88;
+          }
+        } else if (hoverId) {
+          if (p.skill.id === hoverId) {
+            targetScale *= 1.16;
+            targetOpacity = 1.0;
+          } else if (hoveredRelSet?.has(p.skill.id)) {
+            targetScale *= 1.04;
+            targetOpacity = Math.max(targetOpacity, 0.92);
+          } else if (targetOpacity > 0.05) {
+            targetOpacity *= 0.58;
+          }
+        }
+
         st.x += (targetX - st.x) * posLerp;
         st.y += (targetY - st.y) * posLerp;
         st.scale += (targetScale - st.scale) * posLerp;
+        st.depth += (targetDepth - st.depth) * posLerp;
         st.opacity += (targetOpacity - st.opacity) * opacityLerp;
         st.isVisible = st.opacity > 0.04;
 
-        // Write directly to DOM button element for 60fps zero-re-render smoothness
         const el = buttonRefs.current[i];
         if (el) {
           el.style.left = `${st.x.toFixed(3)}%`;
           el.style.top = `${st.y.toFixed(3)}%`;
-          el.style.transform = `translate(-50%, -50%) scale(${st.scale.toFixed(3)})`;
+          el.style.transform = `translate3d(-50%, -50%, 0) scale(${st.scale.toFixed(3)})`;
           el.style.opacity = st.opacity.toFixed(3);
-          el.style.pointerEvents = st.opacity > 0.2 ? 'auto' : 'none';
+          el.style.pointerEvents = st.opacity > 0.22 ? 'auto' : 'none';
           el.style.visibility = st.opacity > 0.02 ? 'visible' : 'hidden';
         }
       }
 
-      // Update curved SVG relationship filaments if a skill is focused or hovered
+      // Update selective relationship filaments
       const activeId = focusId || hoverId;
       if (activeId) {
         const srcIdx = particleIndexById.get(activeId);
         const srcState = srcIdx !== undefined ? animStatesRef.current[srcIdx] : null;
-        const relIds = getRelatedSkillIds(activeId);
+        const relIds = getRelatedSkillIds(activeId).slice(0, 5);
 
-        for (let r = 0; r < relIds.length; r++) {
+        for (let r = 0; r < 5; r++) {
           const pathEl = relationPathRefs.current[r];
           const glowEl = relationGlowPathRefs.current[r];
-          const dstIdx = particleIndexById.get(relIds[r]);
+          const relId = relIds[r];
+          const dstIdx = relId ? particleIndexById.get(relId) : undefined;
           const dstState = dstIdx !== undefined ? animStatesRef.current[dstIdx] : null;
 
           if (pathEl && srcState && dstState && srcState.opacity > 0.1 && dstState.opacity > 0.1) {
-            // Convert percentage coordinates (0..100) to SVG viewBox (1000 x 600)
             const x1 = srcState.x * 10;
-            const y1 = srcState.y * 6;
+            const y1 = srcState.y * 6.2;
             const x2 = dstState.x * 10;
-            const y2 = dstState.y * 6;
+            const y2 = dstState.y * 6.2;
             const mx = (x1 + x2) / 2;
-            const my = (y1 + y2) / 2 - Math.hypot(x2 - x1, y2 - y1) * 0.14;
+            const my = (y1 + y2) / 2 - Math.hypot(x2 - x1, y2 - y1) * 0.12;
             const d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
             pathEl.setAttribute('d', d);
-            pathEl.style.opacity = focusId ? '0.85' : '0.55';
+            pathEl.style.opacity = focusId ? '0.78' : '0.42';
             if (glowEl) {
               glowEl.setAttribute('d', d);
-              glowEl.style.opacity = focusId ? '0.35' : '0.18';
+              glowEl.style.opacity = focusId ? '0.28' : '0.14';
             }
           } else if (pathEl) {
             pathEl.style.opacity = '0';
@@ -422,27 +453,25 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
   return (
     <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-      {/* ─── 1. MINIMAL INTEGRATED CATEGORY SELECTOR BAR ─── */}
-      <div
-        className="relative z-30 flex flex-wrap items-center justify-center gap-1 px-2.5 py-1.5 rounded-2xl bg-[#060218]/65 border border-white/[0.08] backdrop-blur-md mb-2 max-w-full"
+      {/* ─── 1. SUBTLE EDITORIAL TYPOGRAPHIC CATEGORY NAVIGATION ─── */}
+      <nav
+        className="relative z-30 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 py-1.5 mb-2 border-b border-white/[0.06] px-4"
         role="tablist"
-        aria-label="Filter technologies by category"
+        aria-label="Technology disciplines"
       >
         <button
           type="button"
           role="tab"
           aria-selected={selectedCategoryId === null}
           onClick={() => onSelectCategory(null)}
-          className={`px-2.5 py-1 rounded-xl font-mono text-[10px] tracking-[0.09em] uppercase whitespace-nowrap transition-all duration-200 cursor-pointer border ${
+          className={`relative py-1 font-mono text-[10.5px] tracking-[0.2em] uppercase transition-colors duration-200 cursor-pointer ${
             selectedCategoryId === null
-              ? 'bg-purple-500/25 border-purple-400/60 text-white shadow-[0_0_20px_rgba(168,85,247,0.35)]'
-              : 'bg-transparent border-transparent text-white/55 hover:text-white/90 hover:bg-white/[0.04]'
+              ? 'text-white after:content-[""] after:absolute after:left-0 after:right-0 after:-bottom-[7px] after:h-[1.5px] after:bg-purple-400 after:shadow-[0_0_10px_rgba(168,85,247,0.8)]'
+              : 'text-white/40 hover:text-white/80'
           }`}
         >
-          All 88 · Orbit
+          All
         </button>
-
-        <span className="h-3.5 w-[1px] bg-white/10 hidden sm:inline-block" aria-hidden="true" />
 
         {SKILL_CATEGORIES.map((cat) => {
           const isSelected = selectedCategoryId === cat.id;
@@ -453,57 +482,31 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               role="tab"
               aria-selected={isSelected}
               onClick={() => onSelectCategory(isSelected ? null : cat.id)}
-              className={`px-2 py-1 rounded-xl font-mono text-[10px] tracking-[0.08em] uppercase whitespace-nowrap transition-all duration-200 cursor-pointer border ${
+              className={`relative py-1 font-mono text-[10.5px] tracking-[0.16em] uppercase transition-colors duration-200 cursor-pointer ${
                 isSelected
-                  ? 'bg-purple-500/25 border-purple-400/60 text-white shadow-[0_0_20px_rgba(168,85,247,0.35)]'
-                  : 'bg-transparent border-transparent text-white/55 hover:text-white/90 hover:bg-white/[0.04]'
+                  ? 'text-white after:content-[""] after:absolute after:left-0 after:right-0 after:-bottom-[7px] after:h-[1.5px] after:bg-purple-400 after:shadow-[0_0_10px_rgba(168,85,247,0.8)]'
+                  : 'text-white/40 hover:text-white/80'
               }`}
             >
-              <span className="text-purple-300/65 mr-1">{cat.number}</span>
-              <span>{COMPACT_CATEGORY_TITLES[cat.id] || cat.title}</span>
+              <span className="text-purple-300/45 mr-1 text-[9.5px]">{cat.number}</span>
+              <span>{EDITORIAL_CATEGORY_LABELS[cat.id] || cat.title}</span>
             </button>
           );
         })}
 
-        <span className="h-3.5 w-[1px] bg-white/10 hidden lg:inline-block" aria-hidden="true" />
-
+        {/* Discreet icon-only motion toggle */}
         <button
           type="button"
           onClick={() => setIsMotionPaused((prev) => !prev)}
           aria-label={isMotionPaused ? 'Resume orbital motion' : 'Pause orbital motion'}
-          className="px-2 py-1 rounded-xl font-mono text-[10px] tracking-[0.1em] uppercase whitespace-nowrap text-white/45 hover:text-white/85 hover:bg-white/[0.04] transition-colors cursor-pointer"
-          title={isMotionPaused ? 'Resume orbital flow' : 'Pause orbital flow'}
+          title={isMotionPaused ? 'Resume motion' : 'Pause motion'}
+          className="ml-1 w-5 h-5 flex items-center justify-center rounded-full text-[9px] text-white/30 hover:text-white/75 transition-colors cursor-pointer"
         >
-          {isMotionPaused ? '▶ Flow' : '❚❚ Pause'}
+          {isMotionPaused ? '▶' : '❚❚'}
         </button>
-      </div>
+      </nav>
 
-      {/* ─── 2. SUBTLE CONTEXTUAL SUBLINE WHEN A CATEGORY IS SELECTED ─── */}
-      <div className="h-6 flex items-center justify-center text-center mb-1">
-        {selectedCategoryMeta ? (
-          <div className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.18em] uppercase text-purple-200/80">
-            <span>
-              {selectedCategoryMeta.number} · {selectedCategoryMeta.title} —{' '}
-              <span className="text-white/50">{selectedCategoryMeta.subtitle}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => onSelectCategory(null)}
-              className="text-[10px] text-purple-300 hover:text-white underline underline-offset-4 cursor-pointer"
-            >
-              Restore Full Orbit
-            </button>
-          </div>
-        ) : (
-          <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/35 select-none">
-            {focusedSkill
-              ? `Focused: ${focusedSkill.name} · Click any connected technology or press Esc to release`
-              : '4 Counter-Flowing Orbital Streams · Click any technology logo to lock focus & inspect connections'}
-          </p>
-        )}
-      </div>
-
-      {/* ─── 3. LIVING ORBIT SPATIAL STAGE (IN FRONT OF THE PURPLE PLANET) ─── */}
+      {/* ─── 2. ORBITAL KINETIC SCULPTURE STAGE ─── */}
       <div
         ref={stageRef}
         onMouseMove={handleStageMouseMove}
@@ -511,63 +514,55 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         onClick={() => {
           if (focusedSkillId) onClearSkillFocus();
         }}
-        className="relative w-full h-[560px] lg:h-[610px] select-none overflow-visible"
+        className="relative w-full h-[580px] lg:h-[630px] select-none overflow-visible"
       >
-        {/* Subtle Curved Orbital Ribbon Guides & Selective Relationship Filaments */}
+        {/* Whisper-faint 3D Cubic Bézier Trajectory Filaments & Selective Focus Connections */}
         <svg
-          viewBox="0 0 1000 600"
+          viewBox="0 0 1000 620"
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"
           aria-hidden="true"
         >
           <defs>
-            <linearGradient id="livingOrbitArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="sculptureSplineGradA" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="rgba(168, 85, 247, 0)" />
-              <stop offset="18%" stopColor="rgba(168, 85, 247, 0.16)" />
-              <stop offset="50%" stopColor="rgba(216, 180, 254, 0.24)" />
-              <stop offset="82%" stopColor="rgba(168, 85, 247, 0.16)" />
+              <stop offset="25%" stopColor="rgba(192, 132, 252, 0.14)" />
+              <stop offset="65%" stopColor="rgba(216, 180, 254, 0.18)" />
               <stop offset="100%" stopColor="rgba(168, 85, 247, 0)" />
+            </linearGradient>
+            <linearGradient id="sculptureSplineGradB" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(139, 92, 246, 0)" />
+              <stop offset="30%" stopColor="rgba(168, 85, 247, 0.12)" />
+              <stop offset="70%" stopColor="rgba(192, 132, 252, 0.15)" />
+              <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
             </linearGradient>
           </defs>
 
-          {/* Whisper-subtle curved orbital trajectory arcs */}
+          {/* 3 Asymmetric 3D Cubic Bézier Spline Traces */}
           {!selectedCategoryId && (
-            <g className="transition-opacity duration-700" style={{ opacity: focusedSkillId ? 0.25 : 0.75 }}>
-              {/* Upper Professional Arc */}
-              <path
-                d="M 40 174 Q 500 72 960 174"
-                fill="none"
-                stroke="url(#livingOrbitArcGrad)"
-                strokeWidth="1"
-                strokeDasharray="3 7"
-              />
-              {/* Primary Core Equatorial Arc */}
-              <path
-                d="M 40 219 Q 500 273 960 219"
-                fill="none"
-                stroke="url(#livingOrbitArcGrad)"
-                strokeWidth="1.25"
-              />
-              {/* Lower Professional Arc */}
-              <path
-                d="M 40 330 Q 500 408 960 330"
-                fill="none"
-                stroke="url(#livingOrbitArcGrad)"
-                strokeWidth="1"
-                strokeDasharray="3 7"
-              />
-              {/* Deep Ecosystem Horizon Arc */}
-              <path
-                d="M 60 429 Q 500 519 940 429"
-                fill="none"
-                stroke="url(#livingOrbitArcGrad)"
-                strokeWidth="0.85"
-                strokeDasharray="2 8"
-              />
+            <g
+              className="transition-opacity duration-700"
+              style={{ opacity: focusedSkillId ? 0.18 : 0.7 }}
+            >
+              {SPATIAL_SPLINES.map((sp, idx) => {
+                const d = `M ${sp.p0.x * 10} ${sp.p0.y * 6.2} C ${sp.p1.x * 10} ${
+                  sp.p1.y * 6.2
+                }, ${sp.p2.x * 10} ${sp.p2.y * 6.2}, ${sp.p3.x * 10} ${sp.p3.y * 6.2}`;
+                return (
+                  <path
+                    key={sp.id}
+                    d={d}
+                    fill="none"
+                    stroke={idx === 0 ? 'url(#sculptureSplineGradA)' : 'url(#sculptureSplineGradB)'}
+                    strokeWidth={idx === 0 ? '1.1' : '0.85'}
+                    strokeDasharray={idx === 2 ? '2 9' : idx === 1 ? '4 8' : undefined}
+                  />
+                );
+              })}
             </g>
           )}
 
-          {/* Selective Relationship Filaments (Only rendered when a skill is focused or hovered) */}
+          {/* Selective Relationship Filaments (Rendered only when a skill is focused or hovered) */}
           {activeSkill &&
             activeRelatedIds.map((relId, idx) => (
               <g key={`${activeSkill.id}-${relId}`}>
@@ -577,7 +572,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                   }}
                   fill="none"
                   stroke={activeSkill.brandColor}
-                  strokeWidth="4"
+                  strokeWidth="3.5"
                   strokeLinecap="round"
                   style={{ opacity: 0, filter: 'blur(4px)', transition: 'opacity 180ms ease-out' }}
                 />
@@ -586,9 +581,9 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                     relationPathRefs.current[idx] = el;
                   }}
                   fill="none"
-                  stroke="rgba(243, 232, 255, 0.85)"
-                  strokeWidth="1.35"
-                  strokeDasharray="5 5"
+                  stroke="rgba(243, 232, 255, 0.8)"
+                  strokeWidth="1.2"
+                  strokeDasharray="4 5"
                   strokeLinecap="round"
                   style={{ opacity: 0, transition: 'opacity 180ms ease-out' }}
                 />
@@ -596,36 +591,36 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             ))}
         </svg>
 
-        {/* 88 Floating Technology Logos (The Visual Heroes) */}
+        {/* 88 Floating Technology Objects in 2.5D Space */}
         {LIVING_ORBIT_PARTICLES.map((particle, idx) => {
-          const { skill, tier, desktopSize } = particle;
+          const { skill, tier, isFeaturedAnchor, desktopSize } = particle;
           const isFocused = focusedSkillId === skill.id;
           const isHovered = hoveredSkillId === skill.id;
           const isRelated = activeRelatedSet.has(skill.id);
 
-          // Show label when:
-          // - hovered or focused
-          // - related to focused/hovered skill
-          // - in Category Formation mode (11 skills on stage)
-          // - Core tier in Living Orbit mode (subtle caption under flagship marks)
+          // Restrained label discipline:
+          // - In default ALL view, only the 7 Featured Core Anchors display quiet captions
+          // - Hovered, focused, related, or active category items reveal refined labels
           const showLabel =
             isFocused ||
             isHovered ||
             isRelated ||
             Boolean(selectedCategoryId) ||
-            tier === 'core';
+            isFeaturedAnchor;
 
           const zLayer = isFocused
-            ? 60
+            ? 65
             : isHovered
-            ? 55
+            ? 60
             : isRelated
-            ? 45
+            ? 50
+            : isFeaturedAnchor
+            ? 40
             : tier === 'core'
-            ? 30
+            ? 32
             : tier === 'professional'
-            ? 20
-            : 12;
+            ? 22
+            : 14;
 
           return (
             <button
@@ -648,58 +643,48 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               onMouseLeave={onLeaveSkill}
               onFocus={() => onHoverSkill(skill.id)}
               onBlur={onLeaveSkill}
-              className="group absolute flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/80 rounded-2xl"
+              className="group absolute flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 rounded-xl"
               style={{
                 left: `${animStatesRef.current[idx].x}%`,
                 top: `${animStatesRef.current[idx].y}%`,
-                transform: `translate(-50%, -50%) scale(${animStatesRef.current[idx].scale})`,
+                transform: `translate3d(-50%, -50%, 0) scale(${animStatesRef.current[idx].scale})`,
                 opacity: animStatesRef.current[idx].opacity,
                 zIndex: zLayer,
                 willChange: 'left, top, transform, opacity',
               }}
             >
-              {/* Pure Floating Brand Mark with Restrained Branded Aura */}
+              {/* Authentic Floating Brand Mark (No generic circular wrapper) */}
               <div
                 className="relative flex items-center justify-center transition-transform duration-300 ease-out"
                 style={{
                   width: desktopSize,
                   height: desktopSize,
                   filter: isFocused
-                    ? `drop-shadow(0 0 24px ${skill.brandColor}) drop-shadow(0 0 10px rgba(255,255,255,0.55))`
+                    ? `drop-shadow(0 0 22px ${skill.brandColor}) drop-shadow(0 2px 8px rgba(0,0,0,0.8))`
                     : isHovered
-                    ? `drop-shadow(0 0 20px ${skill.brandColor}cc) drop-shadow(0 0 6px rgba(255,255,255,0.4))`
+                    ? `drop-shadow(0 0 18px ${skill.brandColor}bb) drop-shadow(0 2px 6px rgba(0,0,0,0.75))`
                     : isRelated
-                    ? `drop-shadow(0 0 16px ${skill.brandColor}99)`
-                    : tier === 'core'
-                    ? `drop-shadow(0 6px 18px ${skill.brandColor}60)`
-                    : `drop-shadow(0 4px 12px ${skill.brandColor}40)`,
+                    ? `drop-shadow(0 0 14px ${skill.brandColor}88) drop-shadow(0 2px 6px rgba(0,0,0,0.75))`
+                    : isFeaturedAnchor
+                    ? `drop-shadow(0 8px 20px rgba(0,0,0,0.75)) drop-shadow(0 0 14px ${skill.brandColor}45)`
+                    : `drop-shadow(0 4px 12px rgba(0,0,0,0.65)) drop-shadow(0 0 8px ${skill.brandColor}28)`,
                 }}
               >
-                {/* Subtle focus/hover ambient halo behind the authentic SVG mark (not a generic circle container) */}
-                {(isFocused || isHovered) && (
-                  <span
-                    className="absolute -inset-2.5 rounded-full pointer-events-none transition-opacity duration-300"
-                    style={{
-                      background: `radial-gradient(circle, ${skill.brandColor}35 0%, transparent 70%)`,
-                    }}
-                  />
-                )}
-
                 <TechLogo id={skill.id} name={skill.name} size={desktopSize} />
               </div>
 
-              {/* Clean, Restrained Floating Technology Label */}
+              {/* Refined Typographic Label */}
               <span
                 className={`mt-1.5 font-mono whitespace-nowrap pointer-events-none transition-all duration-200 ${
                   isFocused || isHovered
-                    ? 'text-[11px] font-semibold tracking-wider text-white px-2.5 py-0.5 rounded-md bg-[#060218]/90 border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.65)] opacity-100'
+                    ? 'text-[10.5px] font-medium tracking-[0.14em] text-white px-2 py-0.5 rounded bg-[#050214]/90 border border-white/15 shadow-[0_4px_12px_rgba(0,0,0,0.7)] opacity-100'
                     : isRelated
-                    ? 'text-[10px] tracking-wider text-purple-100 px-2 py-0.5 rounded-md bg-[#060218]/80 border border-purple-400/30 opacity-100'
+                    ? 'text-[10px] tracking-[0.12em] text-purple-100 px-2 py-0.5 rounded bg-[#050214]/80 border border-purple-400/25 opacity-100'
                     : selectedCategoryId
-                    ? 'text-[10.5px] tracking-wider text-white/90 px-2 py-0.5 rounded-md bg-[#060218]/65 border border-white/10 opacity-95'
+                    ? 'text-[10px] tracking-[0.12em] text-white/85 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95'
                     : showLabel
-                    ? 'text-[10px] tracking-wider text-white/80 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-85 group-hover:opacity-100'
-                    : 'text-[10px] tracking-wider text-white/0 opacity-0'
+                    ? 'text-[9.5px] tracking-[0.14em] uppercase text-white/65 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-85 group-hover:text-white'
+                    : 'text-[9.5px] tracking-[0.12em] text-white/0 opacity-0'
                 }`}
               >
                 {skill.name}
@@ -708,9 +693,9 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           );
         })}
 
-        {/* ─── 4. COMPACT FLOATING INSPECTOR CARD (ONLY WHEN A SKILL IS FOCUSED) ─── */}
+        {/* ─── 3. COMPACT CONTEXTUAL FOCUS INSPECTOR (ONLY ON CLICK) ─── */}
         {focusedSkill && (
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-full max-w-[660px] px-4 z-[70]">
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-full max-w-[640px] px-4 z-[70]">
             <SkillFocusCard
               skill={focusedSkill}
               onSelectSkill={onSelectSkill}

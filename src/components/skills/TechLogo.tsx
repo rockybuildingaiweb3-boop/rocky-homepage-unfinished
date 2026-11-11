@@ -11,6 +11,48 @@ export interface TechLogoProps {
 }
 
 /**
+ * Optical Mass Normalization Multipliers
+ *
+ * Compensates for ink-density and bounding-box fill differences across brand SVGs:
+ * - Dense solid square/shield marks (TypeScript, JS, HTML5, Unstructured) are tempered (< 1.0)
+ *   so they don't overpower neighboring marks.
+ * - Thin-line wireframe, circular, or wide marks (Three.js, React, GraphQL, WebGL, LangChain,
+ *   MCP, ERC-4337) receive a calibrated optical boost (> 1.0).
+ */
+const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
+  // Dense solid squares / blocks -> tempered optical scale
+  typescript: 0.86,
+  javascript: 0.86,
+  html5: 0.88,
+  unstructured: 0.84,
+  css3: 0.88,
+  // Intricate wireframe / thin-stroke / open-geometry marks -> boosted optical scale
+  threedotjs: 1.12,
+  react: 1.08,
+  openai: 1.06,
+  langgraph: 1.1,
+  langchain: 1.08,
+  llamaindex: 1.08,
+  solidity: 1.08,
+  postgresql: 1.05,
+  graphql: 1.1,
+  webgl: 1.12,
+  glsl: 1.1,
+  r3f: 1.1,
+  mcp: 1.08,
+  erc4337: 1.08,
+  siwe: 1.08,
+  viem: 1.08,
+  wagmi: 1.08,
+  express: 1.08,
+  flask: 1.08,
+  vercel: 1.05,
+  ollama: 1.06,
+  kafka: 1.08,
+  thegraph: 1.08,
+};
+
+/**
  * Normalizes brand hex values so that dark/black brand logos
  * (e.g., wagmi, Next.js, Ollama, Vercel) remain crisp and legible
  * on dark atmospheric substrates.
@@ -20,15 +62,31 @@ function getNormalizedFill(hex: string, overrideColor?: string): string {
     return overrideColor.startsWith('#') ? overrideColor : `#${overrideColor}`;
   }
   const cleanHex = hex.replace('#', '').toLowerCase();
-  if (['000000', '000', '111111', '1a1b1f', '18181b', '09090b', '141414', '171717'].includes(cleanHex)) {
-    return '#F1F5F9';
+  if (
+    [
+      '000000',
+      '000',
+      '111111',
+      '1a1b1f',
+      '18181b',
+      '09090b',
+      '141414',
+      '171717',
+      '1c3c3c',
+      '0f172a',
+      '1e293b',
+      '231f20',
+      '2d3748',
+    ].includes(cleanHex)
+  ) {
+    return '#F8FAFC';
   }
   return `#${cleanHex}`;
 }
 
 /**
  * Standardized Technology Logo Rendering Pipeline:
- * 1. Metadata-driven scale normalization (equalizing perceived visual mass)
+ * 1. Metadata-driven scale + optical visual mass normalization
  * 2. Contrast & brightness adjustment for cosmic dark-substrate legibility
  * 3. Strict aspect ratio preservation (xMidYMid meet & object-contain)
  * 4. Deterministic multi-source resolution
@@ -56,8 +114,9 @@ export const TechLogo: React.FC<TechLogoProps> = ({
     );
   }
 
-  // Normalization transform & filter values derived strictly from registry metadata
-  const scale = resolved.scale ?? 1.0;
+  const normalizedId = id.toLowerCase();
+  const opticalMultiplier = OPTICAL_MASS_MULTIPLIER[normalizedId] ?? 1.0;
+  const scale = parseFloat(((resolved.scale ?? 1.0) * opticalMultiplier).toFixed(3));
   const brightness = resolved.brightness ?? 1.0;
 
   const containerStyle: React.CSSProperties = {
@@ -138,4 +197,3 @@ export const TechLogo: React.FC<TechLogoProps> = ({
 };
 
 export default TechLogo;
-
