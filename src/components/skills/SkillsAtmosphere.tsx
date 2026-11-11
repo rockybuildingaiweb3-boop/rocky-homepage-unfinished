@@ -8,10 +8,10 @@ interface SkillsAtmosphereProps {
 
 /**
  * SkillsAtmosphere
- * 
- * Cosmic atmosphere anchoring the Technical Constellation.
- * The rotating purple planet (/videos/skills-bg.webm) is the visual protagonist,
- * perfectly centered and framed by the orbital constellation.
+ *
+ * Cosmic atmosphere anchoring the Living Orbit field of technologies.
+ * Preserves the rotating purple planet (/videos/skills-bg.webm) and ambient
+ * purple celestial nebula as the atmospheric visual anchor behind the floating logos.
  */
 export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
   activeBrandColor = '#7042F8',
@@ -42,8 +42,8 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
         const clientX = e.clientX - rect.left - rect.width / 2;
         const clientY = e.clientY - rect.top - rect.height / 2;
         setMouseOffset({
-          x: (clientX / rect.width) * 12,
-          y: (clientY / rect.height) * 8,
+          x: (clientX / rect.width) * 10,
+          y: (clientY / rect.height) * 7,
         });
       });
     };
@@ -83,76 +83,52 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
         className="absolute w-[110vw] h-[880px] pointer-events-none transition-transform duration-500 ease-out"
         style={{
           background:
-            'radial-gradient(ellipse 70% 55% at 50% 50%, rgba(112, 66, 248, 0.32) 0%, rgba(147, 51, 234, 0.14) 35%, rgba(79, 70, 229, 0.04) 65%, transparent 80%)',
+            'radial-gradient(ellipse 70% 55% at 50% 50%, rgba(112, 66, 248, 0.30) 0%, rgba(147, 51, 234, 0.13) 35%, rgba(79, 70, 229, 0.04) 65%, transparent 80%)',
           filter: 'blur(75px)',
           transform: `translate(${mouseOffset.x * 0.15}px, ${mouseOffset.y * 0.15}px)`,
         }}
       />
 
-      {/* ─── LAYER 2: DYNAMIC BRAND RESONANCE CORE ─── */}
+      {/* ─── LAYER 2: SUBTLE BRAND RESONANCE CORE ─── */}
       <div
         className={`absolute rounded-full pointer-events-none transition-all duration-700 ease-out ${
           isHovered
-            ? 'w-[85vw] max-w-[950px] h-[580px] opacity-100'
-            : 'w-[70vw] max-w-[850px] h-[500px] opacity-75'
+            ? 'w-[80vw] max-w-[900px] h-[540px] opacity-95'
+            : 'w-[68vw] max-w-[820px] h-[480px] opacity-70'
         }`}
         style={{
-          background: `radial-gradient(circle at 50% 50%, ${activeBrandColor}30 0%, ${activeBrandColor}08 45%, transparent 70%)`,
+          background: `radial-gradient(circle at 50% 50%, ${activeBrandColor}24 0%, ${activeBrandColor}08 45%, transparent 70%)`,
           filter: 'blur(65px)',
           transform: `translate(${mouseOffset.x * 0.25}px, ${mouseOffset.y * 0.25}px)`,
         }}
       />
 
-      {/* ─── LAYER 3: PLANETARY ENERGY SHOCKWAVE (Emanates when skill is hovered) ─── */}
-      {isHovered && (
-        <>
-          <div
-            className="absolute rounded-full pointer-events-none animate-ping duration-1000 border"
-            style={{
-              width: '380px',
-              height: '380px',
-              borderColor: `${activeBrandColor}40`,
-              boxShadow: `0 0 30px ${activeBrandColor}35`,
-            }}
-          />
-          <div
-            className="absolute rounded-full pointer-events-none border border-purple-400/30 transition-all duration-700"
-            style={{
-              width: '520px',
-              height: '420px',
-              transform: `scale(1.05)`,
-              boxShadow: `0 0 45px rgba(168, 85, 247, 0.25)`,
-            }}
-          />
-        </>
-      )}
-
-      {/* ─── LAYER 4: FULL-BLEED ROTATING PURPLE PLANET (The Hero Protagonist) ─── */}
+      {/* ─── LAYER 3: FULL-BLEED ROTATING PURPLE PLANET (The Atmospheric Anchor) ─── */}
       <div
         className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-all duration-700 ease-out"
         style={{
-          transform: `translate(${mouseOffset.x * 0.4}px, ${mouseOffset.y * 0.4}px) scale(${
+          transform: `translate(${mouseOffset.x * 0.35}px, ${mouseOffset.y * 0.35}px) scale(${
             interactionLevel === 3
-              ? 1.045
+              ? 1.03
               : interactionLevel === 2
-              ? 1.022
-              : isHovered
               ? 1.015
+              : isHovered
+              ? 1.01
               : 1.0
           })`,
           filter:
             isHovered || interactionLevel > 1
-              ? 'brightness(1.14) contrast(1.06) drop-shadow(0 0 20px rgba(168, 85, 247, 0.35))'
+              ? 'brightness(1.08) contrast(1.04)'
               : 'brightness(1.0) contrast(1.0)',
           maskImage:
-            'radial-gradient(ellipse 85% 70% at 50% 50%, black 45%, rgba(0,0,0,0.6) 75%, transparent 100%)',
+            'radial-gradient(ellipse 85% 72% at 50% 50%, black 48%, rgba(0,0,0,0.65) 76%, transparent 100%)',
           WebkitMaskImage:
-            'radial-gradient(ellipse 85% 70% at 50% 50%, black 45%, rgba(0,0,0,0.6) 75%, transparent 100%)',
+            'radial-gradient(ellipse 85% 72% at 50% 50%, black 48%, rgba(0,0,0,0.65) 76%, transparent 100%)',
         }}
       >
         <video
           ref={videoRef}
-          className="w-full h-full object-cover min-w-[950px] opacity-75 sm:opacity-85 pointer-events-none select-none mix-blend-screen transition-opacity duration-300"
+          className="w-full h-full object-cover min-w-[950px] opacity-80 sm:opacity-90 pointer-events-none select-none mix-blend-screen transition-opacity duration-300"
           preload="auto"
           playsInline
           loop
@@ -162,34 +138,12 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
         />
       </div>
 
-      {/* ─── LAYER 5: ORBITAL HALO RINGS (Cosmic visual framing) ─── */}
-      <div
-        className={`absolute w-[680px] h-[540px] md:w-[860px] md:h-[660px] lg:w-[1050px] lg:h-[760px] rounded-[50%] border pointer-events-none transition-all duration-700 ease-out ${
-          isHovered || interactionLevel > 1 ? 'border-purple-400/25' : 'border-purple-500/10'
-        }`}
-        style={{
-          transform: `translate(${mouseOffset.x * 0.1}px, ${mouseOffset.y * 0.1}px) scale(${
-            interactionLevel === 3 ? 1.04 : interactionLevel === 2 ? 1.02 : 1.0
-          })`,
-        }}
-      />
-      <div
-        className={`absolute w-[460px] h-[370px] md:w-[600px] md:h-[460px] lg:w-[720px] lg:h-[520px] rounded-[50%] border pointer-events-none transition-all duration-700 ease-out ${
-          isHovered || interactionLevel > 1 ? 'border-purple-300/20' : 'border-purple-400/[0.07]'
-        }`}
-        style={{
-          transform: `translate(${mouseOffset.x * 0.18}px, ${mouseOffset.y * 0.18}px) scale(${
-            interactionLevel === 3 ? 1.03 : interactionLevel === 2 ? 1.015 : 1.0
-          })`,
-        }}
-      />
-
-      {/* ─── LAYER 6: SEAMLESS ATMOSPHERIC DEPTH VIGNETTE ─── */}
+      {/* ─── LAYER 4: SEAMLESS ATMOSPHERIC DEPTH VIGNETTE ─── */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, rgba(3, 0, 20, 0.5) 80%, rgba(3, 0, 20, 0.95) 100%)',
+            'radial-gradient(ellipse 92% 82% at 50% 50%, transparent 44%, rgba(3, 0, 20, 0.48) 82%, rgba(3, 0, 20, 0.94) 100%)',
         }}
       />
     </div>
