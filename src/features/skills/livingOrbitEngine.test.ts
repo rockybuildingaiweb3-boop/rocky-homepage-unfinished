@@ -7,10 +7,11 @@ import {
   SPATIAL_SPLINES,
   evaluateSculptureTrajectory,
   computeFocusedNetworkPositions,
+  buildTrajectorySvgPath,
   getRelatedSkillIds,
 } from './livingOrbitEngine';
 
-describe('Orbital Kinetic Sculpture Engine — 88 Skills & Spatial Trajectory Verification', () => {
+describe('Living Orbit 2.0 — Orbital Kinetic Sculpture Engine', () => {
   it('preserves all 88 canonical skills with zero duplicates', () => {
     assert.equal(LIVING_ORBIT_PARTICLES.length, 88);
     const ids = new Set(LIVING_ORBIT_PARTICLES.map((p) => p.skill.id));
@@ -21,27 +22,43 @@ describe('Orbital Kinetic Sculpture Engine — 88 Skills & Spatial Trajectory Ve
     }
   });
 
-  it('configures 7 asymmetric Featured Core Anchors with varied display sizes', () => {
+  it('configures 8 verified Featured Technology Anchors (58-76px) in an asymmetric arrangement', () => {
     const anchors = LIVING_ORBIT_PARTICLES.filter((p) => p.isFeaturedAnchor);
-    assert.equal(anchors.length, 7);
-    assert.equal(FEATURED_ANCHOR_SPECS.length, 7);
+    assert.equal(anchors.length, 8);
+    assert.equal(FEATURED_ANCHOR_SPECS.length, 8);
 
     const uniqueSizes = new Set(anchors.map((a) => a.desktopSize));
-    assert.ok(uniqueSizes.size >= 5, 'Featured anchors must have varied display sizes');
+    assert.ok(uniqueSizes.size >= 6, 'Featured anchors must have varied display sizes');
 
     const uniqueYs = new Set(FEATURED_ANCHOR_SPECS.map((a) => a.y));
-    assert.equal(uniqueYs.size, 7, 'Featured anchors must not align on a horizontal row');
+    assert.equal(uniqueYs.size, 8, 'Featured anchors must not align on a horizontal row');
 
     for (const a of anchors) {
-      assert.equal(a.tier, 'core', `Featured anchor ${a.skill.id} must be Core tier`);
+      assert.ok(
+        a.desktopSize >= 54 && a.desktopSize <= 76,
+        `Featured anchor ${a.skill.id} size ${a.desktopSize} outside 54-76px art direction range`
+      );
+      assert.ok(
+        SKILLS_DATA.some((s) => s.id === a.skill.id),
+        `Featured anchor ${a.skill.id} must exist in canonical registry`
+      );
     }
   });
 
-  it('uses 3 distinct 3D Cubic Bezier trajectories and cycles all 88 skills while keeping moving count around 18-24', () => {
+  it('defines 3 distinct trajectory systems (Orbit A Inner Celestial Flow, Orbit B Kinetic Sweep, Orbit C Deep Horizon) and cycles all 88 skills', () => {
     assert.equal(SPATIAL_SPLINES.length, 3);
+    assert.equal(SPATIAL_SPLINES[0].id, 'orbit-inner-celestial');
+    assert.equal(SPATIAL_SPLINES[1].id, 'orbit-kinetic-sweep');
+    assert.equal(SPATIAL_SPLINES[2].id, 'orbit-deep-horizon');
+
+    for (const orbit of SPATIAL_SPLINES) {
+      const svgPath = buildTrajectorySvgPath(orbit);
+      assert.ok(svgPath.startsWith('M '), `Invalid SVG path for ${orbit.id}`);
+    }
+
     const seenInAperture = new Set<string>();
 
-    for (let t = 0; t <= 220; t += 2) {
+    for (let t = 0; t <= 240; t += 2) {
       let movingVisibleCount = 0;
       for (const p of LIVING_ORBIT_PARTICLES) {
         const state = evaluateSculptureTrajectory(p, t);
@@ -102,7 +119,7 @@ describe('Orbital Kinetic Sculpture Engine — 88 Skills & Spatial Trajectory Ve
       const pos = net.get(relId);
       assert.ok(pos, `Missing related position for ${relId}`);
       assert.ok(pos.x >= 10 && pos.x <= 90);
-      assert.ok(pos.y >= 12 && pos.y <= 58);
+      assert.ok(pos.y >= 12 && pos.y <= 57);
     }
   });
 });

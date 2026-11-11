@@ -21,6 +21,7 @@ export const StarBackground: React.FC = (props) => {
   const refTiny = useRef<PointsType | null>(null);
   const refMed = useRef<PointsType | null>(null);
   const refBright = useRef<PointsType | null>(null);
+  const refAccent = useRef<PointsType | null>(null);
 
   // 1. Layer 1: Many tiny low-alpha stars (3900 points)
   const [sphereTiny] = useState(() =>
@@ -37,6 +38,11 @@ export const StarBackground: React.FC = (props) => {
     random.inSphere(new Float32Array(150 * 3), { radius: 1.05 }) as Float32Array
   );
 
+  // 4. Layer 4: Delicate celestial amethyst-ice horizon stars (65 points)
+  const [sphereAccent] = useState(() =>
+    random.inSphere(new Float32Array(65 * 3), { radius: 0.96 }) as Float32Array
+  );
+
   useFrame((_state, delta) => {
     // Gentle continuous movement with subtle rotational parallax between layers
     if (refTiny.current) {
@@ -50,6 +56,10 @@ export const StarBackground: React.FC = (props) => {
     if (refBright.current) {
       refBright.current.rotation.x -= delta / 18;
       refBright.current.rotation.y -= delta / 24;
+    }
+    if (refAccent.current) {
+      refAccent.current.rotation.x -= delta / 28;
+      refAccent.current.rotation.y += delta / 38;
     }
   });
 
@@ -86,6 +96,18 @@ export const StarBackground: React.FC = (props) => {
           color="#ffffff"
           size={0.0044}
           opacity={0.78}
+          sizeAttenuation
+          depthWrite={false}
+        />
+      </Points>
+
+      {/* 4. Subtle celestial amethyst-ice accent stars */}
+      <Points ref={refAccent} stride={3} positions={sphereAccent} frustumCulled {...props}>
+        <PointMaterial
+          transparent
+          color="#e9d5ff"
+          size={0.0036}
+          opacity={0.62}
           sizeAttenuation
           depthWrite={false}
         />

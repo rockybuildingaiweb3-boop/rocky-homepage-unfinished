@@ -28,8 +28,8 @@ const SHORT_CATEGORY_NAMES: Record<string, string> = {
 
 /**
  * Asymmetric 14-point mobile spatial coordinates in `All` mode:
- * - First 7 slots: Featured Core Anchors (large, foreground)
- * - Next 7 slots: Secondary cycling marks (midground/ambient)
+ * - First 8 slots: Featured Technology Anchors (large, foreground)
+ * - Next 6 slots: Secondary cycling marks (midground/ambient)
  * Leaves the central planet core (50%, 48%) visible.
  */
 const MOBILE_ALL_SLOTS: readonly {
@@ -38,22 +38,22 @@ const MOBILE_ALL_SLOTS: readonly {
   size: number;
   isFeatured: boolean;
 }[] = [
-  // 7 Featured Core Anchors
-  { x: 22, y: 24, size: 48, isFeatured: true }, // TypeScript
-  { x: 52, y: 12, size: 44, isFeatured: true }, // React
-  { x: 80, y: 22, size: 48, isFeatured: true }, // OpenAI
-  { x: 18, y: 56, size: 46, isFeatured: true }, // Three.js
-  { x: 83, y: 52, size: 42, isFeatured: true }, // LangGraph
-  { x: 74, y: 78, size: 44, isFeatured: true }, // Solidity
-  { x: 30, y: 80, size: 42, isFeatured: true }, // PostgreSQL
-  // 7 Secondary Midground/Ambient Slots (flanking the planet without covering its core)
-  { x: 14, y: 10, size: 32, isFeatured: false },
-  { x: 86, y: 9, size: 32, isFeatured: false },
-  { x: 14, y: 39, size: 34, isFeatured: false },
-  { x: 86, y: 37, size: 34, isFeatured: false },
-  { x: 14, y: 88, size: 31, isFeatured: false },
-  { x: 53, y: 89, size: 33, isFeatured: false },
-  { x: 88, y: 88, size: 31, isFeatured: false },
+  // 8 Featured Technology Anchors framing the planet perimeter
+  { x: 22, y: 22, size: 46, isFeatured: true }, // TypeScript
+  { x: 51, y: 11, size: 44, isFeatured: true }, // React
+  { x: 16, y: 62, size: 44, isFeatured: true }, // Three.js
+  { x: 79, y: 20, size: 48, isFeatured: true }, // OpenAI
+  { x: 84, y: 52, size: 42, isFeatured: true }, // LangGraph
+  { x: 14, y: 41, size: 40, isFeatured: true }, // FastAPI
+  { x: 78, y: 78, size: 42, isFeatured: true }, // Solidity
+  { x: 25, y: 81, size: 42, isFeatured: true }, // PostgreSQL
+  // 6 Secondary Midground/Ambient Slots (flanking the planet without covering its core)
+  { x: 14, y: 9, size: 31, isFeatured: false },
+  { x: 86, y: 8, size: 31, isFeatured: false },
+  { x: 86, y: 35, size: 33, isFeatured: false },
+  { x: 14, y: 91, size: 30, isFeatured: false },
+  { x: 52, y: 90, size: 32, isFeatured: false },
+  { x: 88, y: 91, size: 30, isFeatured: false },
 ];
 
 /**
@@ -101,7 +101,7 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
   useEffect(() => {
     if (selectedCategoryId || focusedSkillId || prefersReducedMotion) return;
     const timer = window.setInterval(() => {
-      setWaveIndex((prev) => (prev + 1) % 12);
+      setWaveIndex((prev) => (prev + 1) % 14);
     }, 4800);
     return () => window.clearInterval(timer);
   }, [selectedCategoryId, focusedSkillId, prefersReducedMotion]);
@@ -143,8 +143,8 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
     const secondaryPool = SKILLS_DATA.filter((s) => !anchorIds.has(s.id));
 
     const secondarySlice: SkillItem[] = [];
-    for (let i = 0; i < 7; i++) {
-      secondarySlice.push(secondaryPool[(waveIndex * 7 + i) % secondaryPool.length]);
+    for (let i = 0; i < 6; i++) {
+      secondarySlice.push(secondaryPool[(waveIndex * 6 + i) % secondaryPool.length]);
     }
 
     const combined = [...anchorSkills, ...secondarySlice];

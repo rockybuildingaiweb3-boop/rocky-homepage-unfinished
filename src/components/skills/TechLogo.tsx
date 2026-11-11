@@ -11,50 +11,91 @@ export interface TechLogoProps {
 }
 
 /**
- * Optical Mass Normalization Multipliers
+ * Optical Mass Normalization Multipliers (Living Orbit 2.0)
  *
- * Compensates for ink-density and bounding-box fill differences across brand SVGs:
- * - Dense solid square/shield marks (TypeScript, JS, HTML5, Unstructured) are tempered (< 1.0)
- *   so they don't overpower neighboring marks.
- * - Thin-line wireframe, circular, or wide marks (Three.js, React, GraphQL, WebGL, LangChain,
- *   MCP, ERC-4337) receive a calibrated optical boost (> 1.0).
+ * Calibrates perceived visual weight across all 88 technology marks so a 48px React
+ * orbital atom, a 48px dense TypeScript square, and a 48px thin Three.js wireframe
+ * feel optically balanced without placing icons inside generic circles:
+ * - Dense solid square/shield marks (TypeScript, JS, HTML5, Unstructured) are tempered (< 1.0).
+ * - Thin-stroke wireframe, open-lattice, or wide horizontal marks (Three.js, React, GraphQL,
+ *   WebGL, LangGraph, Solidity, Express, Docker, Kubernetes) receive a calibrated boost (> 1.0).
  */
 const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
-  // Dense solid squares / blocks -> tempered optical scale
-  typescript: 0.86,
-  javascript: 0.86,
+  // Dense solid squares / heavy shields -> tempered optical scale
+  typescript: 0.85,
+  javascript: 0.85,
   html5: 0.88,
   unstructured: 0.84,
-  css3: 0.88,
-  // Intricate wireframe / thin-stroke / open-geometry marks -> boosted optical scale
-  threedotjs: 1.12,
-  react: 1.08,
-  openai: 1.06,
-  langgraph: 1.1,
-  langchain: 1.08,
+  dify: 0.92,
+  coze: 0.92,
+  privy: 0.93,
+  // Intricate wireframe / thin-stroke / open-geometry / wide marks -> boosted optical scale
+  threedotjs: 1.14,
+  react: 1.09,
+  openai: 1.07,
+  langgraph: 1.12,
+  langchain: 1.1,
   llamaindex: 1.08,
-  solidity: 1.08,
-  postgresql: 1.05,
-  graphql: 1.1,
-  webgl: 1.12,
+  solidity: 1.12,
+  postgresql: 1.06,
+  fastapi: 1.06,
+  graphql: 1.12,
+  webgl: 1.14,
+  webgpu: 1.08,
   glsl: 1.1,
   r3f: 1.1,
-  mcp: 1.08,
-  erc4337: 1.08,
+  mcp: 1.1,
+  erc4337: 1.09,
   siwe: 1.08,
   viem: 1.08,
-  wagmi: 1.08,
-  express: 1.08,
-  flask: 1.08,
-  vercel: 1.05,
+  wagmi: 1.09,
+  ethers: 1.06,
+  express: 1.12,
+  flask: 1.1,
+  vercel: 1.04,
   ollama: 1.06,
-  kafka: 1.08,
+  kafka: 1.1,
   thegraph: 1.08,
+  pinecone: 1.08,
+  docker: 1.07,
+  kubernetes: 1.06,
+  tailwindcss: 1.08,
+  nodedotjs: 1.04,
+  prisma: 1.08,
+  trpc: 1.06,
+  qdrant: 1.05,
+  weaviate: 1.06,
+  milvus: 1.06,
+  pgvector: 1.07,
+  semantickernel: 1.08,
+  autogen: 1.06,
+  crewai: 1.05,
+  langsmith: 1.06,
 };
 
 /**
- * Normalizes brand hex values so that dark/black brand logos
- * (e.g., wagmi, Next.js, Ollama, Vercel) remain crisp and legible
+ * Brand-specific dark-substrate contrast enhancement filters for marks whose
+ * native SVG paths use dark slate, charcoal, or low-luminance strokes on `#030014`.
+ */
+const DARK_SUBSTRATE_FILTER_OVERRIDES: Record<string, string> = {
+  solidity: 'brightness(2.35) contrast(1.15)',
+  langchain: 'brightness(2.2) contrast(1.15)',
+  langgraph: 'brightness(2.25) contrast(1.15)',
+  langsmith: 'brightness(1.95) contrast(1.12)',
+  prisma: 'brightness(1.85) contrast(1.12)',
+  llamaindex: 'brightness(1.55) saturate(1.2)',
+  express: 'brightness(1.45) contrast(1.1)',
+  flask: 'brightness(1.4) contrast(1.1)',
+  threedotjs: 'brightness(1.35) contrast(1.1)',
+  pinecone: 'brightness(1.15)',
+  kafka: 'brightness(1.35)',
+  cohere: 'brightness(1.45) saturate(1.2)',
+  sentry: 'brightness(1.65) saturate(1.25)',
+};
+
+/**
+ * Normalizes brand hex values so that dark/black Simple Icons paths
+ * (e.g., wagmi, Next.js, Vercel, Haystack) remain crisp and legible
  * on dark atmospheric substrates.
  */
 function getNormalizedFill(hex: string, overrideColor?: string): string {
@@ -77,6 +118,8 @@ function getNormalizedFill(hex: string, overrideColor?: string): string {
       '1e293b',
       '231f20',
       '2d3748',
+      '0b2c4a',
+      '362d59',
     ].includes(cleanHex)
   ) {
     return '#F8FAFC';
@@ -85,11 +128,11 @@ function getNormalizedFill(hex: string, overrideColor?: string): string {
 }
 
 /**
- * Standardized Technology Logo Rendering Pipeline:
+ * Standardized Technology Logo Rendering Pipeline (Living Orbit 2.0):
  * 1. Metadata-driven scale + optical visual mass normalization
- * 2. Contrast & brightness adjustment for cosmic dark-substrate legibility
+ * 2. Brand-specific contrast & brightness calibration for dark-substrate legibility
  * 3. Strict aspect ratio preservation (xMidYMid meet & object-contain)
- * 4. Deterministic multi-source resolution
+ * 4. Deterministic multi-source resolution without generic circular containers
  */
 export const TechLogo: React.FC<TechLogoProps> = ({
   id,
@@ -118,11 +161,12 @@ export const TechLogo: React.FC<TechLogoProps> = ({
   const opticalMultiplier = OPTICAL_MASS_MULTIPLIER[normalizedId] ?? 1.0;
   const scale = parseFloat(((resolved.scale ?? 1.0) * opticalMultiplier).toFixed(3));
   const brightness = resolved.brightness ?? 1.0;
+  const customFilter = DARK_SUBSTRATE_FILTER_OVERRIDES[normalizedId];
 
   const containerStyle: React.CSSProperties = {
     ...(size ? { width: size, height: size } : {}),
     transform: scale !== 1.0 ? `scale(${scale})` : undefined,
-    filter: brightness !== 1.0 ? `brightness(${brightness})` : undefined,
+    filter: customFilter || (brightness !== 1.0 ? `brightness(${brightness})` : undefined),
     transformOrigin: 'center center',
   };
 
@@ -148,6 +192,12 @@ export const TechLogo: React.FC<TechLogoProps> = ({
 
   // Priority 2 & 4: SVGL and Verified Local SVG assets
   if (resolved.kind === 'svgl-svg' || resolved.kind === 'local-svg') {
+    // Use dark-background optimized SVGL variant when available on disk
+    const assetUrl =
+      normalizedId === 'kafka'
+        ? '/assets/icons/svgl/kafka_dark.svg'
+        : resolved.url;
+
     return (
       <span
         className={`inline-flex items-center justify-center shrink-0 pointer-events-none select-none ${className}`}
@@ -158,7 +208,7 @@ export const TechLogo: React.FC<TechLogoProps> = ({
         data-skill-type={resolved.type}
       >
         <img
-          src={resolved.url}
+          src={assetUrl}
           alt={displayName}
           className="w-full h-full object-contain pointer-events-none select-none"
           loading="lazy"
