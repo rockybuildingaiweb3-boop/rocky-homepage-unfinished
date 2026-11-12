@@ -22,7 +22,7 @@ export interface TechLogoProps {
  */
 export const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
   // Dense solid squares / heavy shields -> tempered optical scale
-  typescript: 0.85,
+  typescript: 0.86,
   javascript: 0.85,
   html5: 0.88,
   css3: 0.89,
@@ -30,10 +30,12 @@ export const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
   dify: 0.92,
   coze: 0.92,
   privy: 0.93,
+  vercel: 0.96,
+  nextdotjs: 0.96,
   // Intricate wireframe / thin-stroke / open-geometry / wide marks -> boosted optical scale
   threedotjs: 1.15,
   react: 1.09,
-  openai: 1.07,
+  openai: 1.08,
   langgraph: 1.12,
   langchain: 1.1,
   llamaindex: 1.08,
@@ -59,7 +61,6 @@ export const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
   foundry: 1.06,
   express: 1.12,
   flask: 1.1,
-  vercel: 1.04,
   ollama: 1.06,
   kafka: 1.1,
   thegraph: 1.08,
@@ -96,50 +97,44 @@ export const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
  * native SVG paths use dark slate, charcoal, or low-luminance strokes on `#030014`.
  */
 const DARK_SUBSTRATE_FILTER_OVERRIDES: Record<string, string> = {
-  solidity: 'brightness(2.35) contrast(1.15)',
-  langchain: 'brightness(2.2) contrast(1.15)',
-  langgraph: 'brightness(2.25) contrast(1.15)',
-  langsmith: 'brightness(1.95) contrast(1.12)',
-  prisma: 'brightness(1.85) contrast(1.12)',
-  llamaindex: 'brightness(1.55) saturate(1.2)',
-  express: 'brightness(1.45) contrast(1.1)',
-  flask: 'brightness(1.4) contrast(1.1)',
-  threedotjs: 'brightness(1.35) contrast(1.1)',
-  pinecone: 'brightness(1.15)',
-  kafka: 'brightness(1.35)',
-  cohere: 'brightness(1.45) saturate(1.2)',
-  sentry: 'brightness(1.65) saturate(1.25)',
+  solidity: 'brightness(2.38) contrast(1.16)',
+  langchain: 'brightness(2.22) contrast(1.15)',
+  langgraph: 'brightness(2.28) contrast(1.16)',
+  langsmith: 'brightness(1.98) contrast(1.12)',
+  prisma: 'brightness(1.88) contrast(1.12)',
+  llamaindex: 'brightness(1.58) saturate(1.2)',
+  express: 'brightness(1.48) contrast(1.1)',
+  flask: 'brightness(1.42) contrast(1.1)',
+  threedotjs: 'brightness(1.38) contrast(1.12)',
+  draco: 'brightness(2.35) contrast(1.15)',
+  nginx: 'brightness(1.38) saturate(1.2)',
+  pinecone: 'brightness(1.18)',
+  kafka: 'brightness(1.38)',
+  cohere: 'brightness(1.48) saturate(1.2)',
+  sentry: 'brightness(1.68) saturate(1.25)',
+  rust: 'brightness(1.28) contrast(1.08)',
+  ethers: 'brightness(1.35) saturate(1.15)',
 };
 
 /**
- * Normalizes brand hex values so that dark/black Simple Icons paths
- * (e.g., wagmi, Next.js, Vercel, Haystack) remain crisp and legible
- * on dark atmospheric substrates.
+ * Normalizes brand hex values so that dark/charcoal Simple Icons paths
+ * (e.g., Rive #1D1D1D, wagmi, Next.js, Vercel, Haystack) remain crisp and legible
+ * on dark atmospheric substrates using relative luminance check.
  */
 function getNormalizedFill(hex: string, overrideColor?: string): string {
   if (overrideColor) {
     return overrideColor.startsWith('#') ? overrideColor : `#${overrideColor}`;
   }
   const cleanHex = hex.replace('#', '').toLowerCase();
-  if (
-    [
-      '000000',
-      '000',
-      '111111',
-      '1a1b1f',
-      '18181b',
-      '09090b',
-      '141414',
-      '171717',
-      '1c3c3c',
-      '0f172a',
-      '1e293b',
-      '231f20',
-      '2d3748',
-      '0b2c4a',
-      '362d59',
-    ].includes(cleanHex)
-  ) {
+  if (cleanHex.length === 6) {
+    const r = parseInt(cleanHex.slice(0, 2), 16) / 255;
+    const g = parseInt(cleanHex.slice(2, 4), 16) / 255;
+    const b = parseInt(cleanHex.slice(4, 6), 16) / 255;
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    if (luminance < 0.2) {
+      return '#F8FAFC';
+    }
+  } else if (cleanHex === '000') {
     return '#F8FAFC';
   }
   return `#${cleanHex}`;

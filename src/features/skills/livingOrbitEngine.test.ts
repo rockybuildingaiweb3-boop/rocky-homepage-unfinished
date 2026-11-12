@@ -5,8 +5,11 @@ import {
   LIVING_ORBIT_PARTICLES,
   FEATURED_ANCHOR_SPECS,
   SPATIAL_SPLINES,
+  ORBIT_ARC_LENGTH_TABLES,
   STAGE_PERSPECTIVE_PX,
   depthToZPx,
+  mapArcLengthToParam,
+  evaluateOrbitAtArcLength,
   evaluateSculptureTrajectory,
   computeFocusedNetworkPositions,
   buildTrajectorySvgPath,
@@ -14,11 +17,14 @@ import {
 } from './livingOrbitEngine';
 import {
   STARFIELD_LAYER_SPECS,
+  STELLAR_TRAIL_SPECS,
+  generateScreenSpaceStarLayerData,
   generateStratifiedStarLayer,
+  evaluateStellarTrails,
   evaluateStarfieldCoverage,
 } from '../../components/ui/ParticleBackground';
 
-describe('Living Orbit 2.1 — True 2.5D Orbital Kinetic Sculpture & Starfield Engine', () => {
+describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture', () => {
   it('preserves all 88 canonical skills with zero duplicates', () => {
     assert.equal(LIVING_ORBIT_PARTICLES.length, 88);
     const ids = new Set(LIVING_ORBIT_PARTICLES.map((p) => p.skill.id));
@@ -29,53 +35,102 @@ describe('Living Orbit 2.1 — True 2.5D Orbital Kinetic Sculpture & Starfield E
     }
   });
 
-  it('configures 8 verified Featured Technology Anchors (58-76px) in an expansive asymmetric arrangement with true foreground zPx depth', () => {
+  it('configures Two-Level Featured Anchor Hierarchy (4 Primary 76-90px + 4 Secondary 56-68px) with true foreground zPx depth', () => {
     const anchors = LIVING_ORBIT_PARTICLES.filter((p) => p.isFeaturedAnchor);
     assert.equal(anchors.length, 8);
     assert.equal(FEATURED_ANCHOR_SPECS.length, 8);
-    assert.equal(STAGE_PERSPECTIVE_PX, 1100);
+    assert.equal(STAGE_PERSPECTIVE_PX, 1120);
 
-    const uniqueSizes = new Set(anchors.map((a) => a.desktopSize));
-    assert.ok(uniqueSizes.size >= 6, 'Featured anchors must have varied display sizes');
+    const primaryAnchors = anchors.filter((a) => a.anchorTier === 'primary');
+    const secondaryAnchors = anchors.filter((a) => a.anchorTier === 'secondary');
+    assert.equal(primaryAnchors.length, 4, 'Must have 4 Primary Featured Anchors');
+    assert.equal(secondaryAnchors.length, 4, 'Must have 4 Secondary Featured Anchors');
+
+    for (const p of primaryAnchors) {
+      assert.ok(
+        p.desktopSize >= 76 && p.desktopSize <= 90,
+        `Primary Featured Anchor ${p.skill.id} size ${p.desktopSize} outside 76-90px range`
+      );
+      assert.ok(['openai', 'typescript', 'react', 'threedotjs'].includes(p.skill.id));
+    }
+
+    for (const s of secondaryAnchors) {
+      assert.ok(
+        s.desktopSize >= 56 && s.desktopSize <= 68,
+        `Secondary Featured Anchor ${s.skill.id} size ${s.desktopSize} outside 56-68px range`
+      );
+      assert.ok(['langgraph', 'postgresql', 'fastapi', 'solidity'].includes(s.skill.id));
+    }
 
     const uniqueYs = new Set(FEATURED_ANCHOR_SPECS.map((a) => a.y));
     assert.equal(uniqueYs.size, 8, 'Featured anchors must not align on a horizontal row');
 
     for (const a of anchors) {
-      assert.ok(
-        a.desktopSize >= 54 && a.desktopSize <= 76,
-        `Featured anchor ${a.skill.id} size ${a.desktopSize} outside 54-76px art direction range`
-      );
-      assert.ok(
-        SKILLS_DATA.some((s) => s.id === a.skill.id),
-        `Featured anchor ${a.skill.id} must exist in canonical registry`
-      );
-
       const state = evaluateSculptureTrajectory(a, 18.0);
       assert.ok(
-        state.zPx > 20 && state.zPx <= 88,
+        state.zPx > 25 && state.zPx <= 95,
         `Featured anchor ${a.skill.id} must reside in positive foreground zPx depth, got ${state.zPx}`
       );
-      // Pure designScale must stay near 1.0 (not multiplied by depth a second time)
       assert.ok(
-        state.scale >= 0.97 && state.scale <= 1.03,
+        state.scale >= 0.96 && state.scale <= 1.04,
         `Featured anchor ${a.skill.id} designScale ${state.scale} should not double-apply depth`
       );
     }
   });
 
-  it('defines 3 distinct trajectory systems (Orbit A, Orbit B, Orbit C) with true 2.5D zPx depth separation and cycles all 88 skills', () => {
+  it('constructs Precomputed Arc-Length Lookup Tables (140 segments per orbit) for uniform screen-space velocity', () => {
     assert.equal(SPATIAL_SPLINES.length, 3);
-    assert.equal(SPATIAL_SPLINES[0].id, 'orbit-inner-celestial');
-    assert.equal(SPATIAL_SPLINES[1].id, 'orbit-kinetic-sweep');
-    assert.equal(SPATIAL_SPLINES[2].id, 'orbit-deep-horizon');
+    assert.equal(Object.keys(ORBIT_ARC_LENGTH_TABLES).length, 3);
+
+    for (const orbit of SPATIAL_SPLINES) {
+      const lut = ORBIT_ARC_LENGTH_TABLES[orbit.id];
+      assert.ok(lut, `Missing LUT for ${orbit.id}`);
+      assert.equal(lut.samples, 140);
+      assert.ok(lut.totalLength > 80, `Unexpected totalLength ${lut.totalLength}`);
+
+      // Verify monotonic arc-length mapping and uniform weighted screen-space step lengths
+      const stepLengths: number[] = [];
+      const steps = 20;
+      for (let i = 0; i < steps; i++) {
+        const s0 = i / steps;
+        const s1 = (i + 1) / steps;
+        const u0 = mapArcLengthToParam(orbit, s0);
+        const u1 = mapArcLengthToParam(orbit, s1);
+        assert.ok(u1 > u0, `Non-monotonic LUT mapping on ${orbit.id}: ${u0} -> ${u1}`);
+
+        const p0 = evaluateOrbitAtArcLength(orbit, s0);
+        const p1 = evaluateOrbitAtArcLength(orbit, s1);
+        stepLengths.push(Math.hypot((p1.x - p0.x) * 1.6, p1.y - p0.y));
+      }
+
+      const avgStep = stepLengths.reduce((a, b) => a + b, 0) / stepLengths.length;
+      for (const d of stepLengths) {
+        assert.ok(
+          Math.abs(d - avgStep) / avgStep < 0.08,
+          `Arc-length step ${d.toFixed(2)} deviates >8% from average ${avgStep.toFixed(2)} on ${orbit.id}`
+        );
+      }
+    }
+  });
+
+  it('calibrates target visible pass durations (Orbit A: 26-32s, Orbit B: 30-36s, Orbit C: 38-46s) and maintains 24-28 moving visible technologies in desktop All mode', () => {
+    const orbitA = SPATIAL_SPLINES[0];
+    const orbitB = SPATIAL_SPLINES[1];
+    const orbitC = SPATIAL_SPLINES[2];
+
+    assert.ok(orbitA.targetPassDurationSec >= 26 && orbitA.targetPassDurationSec <= 32);
+    assert.ok(orbitB.targetPassDurationSec >= 30 && orbitB.targetPassDurationSec <= 36);
+    assert.ok(orbitC.targetPassDurationSec >= 38 && orbitC.targetPassDurationSec <= 46);
+
+    const totalMovingCapacity =
+      orbitA.visibleCapacity + orbitB.visibleCapacity + orbitC.visibleCapacity;
+    assert.equal(totalMovingCapacity, 26);
 
     for (const orbit of SPATIAL_SPLINES) {
       const svgPath = buildTrajectorySvgPath(orbit);
       assert.ok(svgPath.startsWith('M '), `Invalid SVG path for ${orbit.id}`);
     }
 
-    // Verify depthToZPx maps foreground (>0.85) to positive Z and deep horizon (<0.85) to negative Z
     assert.equal(depthToZPx(0.85), 0);
     assert.ok(depthToZPx(1.05) > 65);
     assert.ok(depthToZPx(0.6) < -85);
@@ -91,14 +146,14 @@ describe('Living Orbit 2.1 — True 2.5D Orbital Kinetic Sculpture & Starfield E
           if (!p.isFeaturedAnchor) {
             movingVisibleCount++;
           }
-          assert.ok(state.x >= 4 && state.x <= 96, `Invalid x=${state.x}`);
-          assert.ok(state.y >= 5 && state.y <= 95, `Invalid y=${state.y}`);
-          assert.ok(state.zPx >= -170 && state.zPx <= 88, `Invalid zPx=${state.zPx}`);
+          assert.ok(state.x >= 3 && state.x <= 97, `Invalid x=${state.x}`);
+          assert.ok(state.y >= 4 && state.y <= 96, `Invalid y=${state.y}`);
+          assert.ok(state.zPx >= -180 && state.zPx <= 95, `Invalid zPx=${state.zPx}`);
         }
       }
       assert.ok(
-        movingVisibleCount >= 14 && movingVisibleCount <= 25,
-        `Unexpected moving visible count ${movingVisibleCount} at t=${t}`
+        movingVisibleCount >= 24 && movingVisibleCount <= 28,
+        `Expected 24-28 moving visible technologies at t=${t}, got ${movingVisibleCount}`
       );
     }
 
@@ -148,43 +203,83 @@ describe('Living Orbit 2.1 — True 2.5D Orbital Kinetic Sculpture & Starfield E
     }
   });
 
-  it('reconstructs the 4-layer Global Starfield with +13% richness (5,725 stars) and full quadrant/corner coverage across 1440x900, 1920x1080, and 390x844', () => {
+  it('reconstructs the 6,500-star Global Starfield (5000 tiny, 1250 medium, 180 bright, 70 accent) with full corner, edge, and grid occupancy across 1440x900, 1920x1080, 2048x1002, and 390x844 at t=0, 10, 30, 60s', () => {
     assert.equal(STARFIELD_LAYER_SPECS.length, 4);
+    assert.equal(STELLAR_TRAIL_SPECS.length, 5);
 
+    // Verify WebGL and 2D Canvas shared data parity
     for (const spec of STARFIELD_LAYER_SPECS) {
-      const buf = generateStratifiedStarLayer(spec, 16 / 9);
+      const data = generateScreenSpaceStarLayerData(spec);
+      assert.equal(data.uv0.length, spec.count * 2);
+      assert.equal(data.velocity.length, spec.count * 2);
+      assert.equal(data.depth.length, spec.count);
+      assert.equal(data.sizePx.length, spec.count);
+      assert.equal(data.baseOpacity.length, spec.count);
+      assert.equal(data.twinklePhase.length, spec.count);
+
+      const buf = generateStratifiedStarLayer(spec, 16 / 9, 0);
       assert.equal(buf.length, spec.count * 3);
       for (let i = 0; i < buf.length; i++) {
         assert.ok(Number.isFinite(buf[i]), `Non-finite star coordinate at index ${i}`);
       }
     }
 
+    // Verify delicate stellar trails evaluation
+    const trails0 = evaluateStellarTrails(4.5, 1920, 1080);
+    assert.ok(trails0.length >= 2 && trails0.length <= 5);
+    for (const tr of trails0) {
+      assert.ok(Number.isFinite(tr.headU) && Number.isFinite(tr.tailU));
+      assert.ok(tr.opacity >= 0 && tr.opacity <= 0.4);
+    }
+
     const viewports: readonly [number, number][] = [
       [1440, 900],
       [1920, 1080],
+      [2048, 1002],
       [390, 844],
     ];
+    const sampleTimes = [0, 10, 30, 60];
 
     for (const [w, h] of viewports) {
-      const cov = evaluateStarfieldCoverage(w, h);
-      assert.equal(cov.totalStars, 5725);
-      assert.equal(cov.layerCounts.tiny, 4400);
-      assert.equal(cov.layerCounts.medium, 1080);
-      assert.equal(cov.layerCounts.bright, 170);
-      assert.equal(cov.layerCounts.accent, 75);
+      for (const t of sampleTimes) {
+        const cov = evaluateStarfieldCoverage(w, h, t);
+        assert.equal(cov.totalStars, 6500);
+        assert.equal(cov.visibleStars, 6500);
+        assert.equal(cov.layerCounts.tiny, 5000);
+        assert.equal(cov.layerCounts.medium, 1250);
+        assert.equal(cov.layerCounts.bright, 180);
+        assert.equal(cov.layerCounts.accent, 70);
 
-      // Every quadrant must be richly populated
-      assert.ok(cov.quadrants.upperLeft > 400, `Sparse UL quadrant at ${w}x${h}`);
-      assert.ok(cov.quadrants.upperRight > 400, `Sparse UR quadrant at ${w}x${h}`);
-      assert.ok(cov.quadrants.lowerLeft > 400, `Sparse LL quadrant at ${w}x${h}`);
-      assert.ok(cov.quadrants.lowerRight > 400, `Sparse LR quadrant at ${w}x${h}`);
+        // Verify 12x8 desktop (96 cells) and 8x12 mobile (96 cells) grid occupancy
+        assert.equal(cov.gridCols * cov.gridRows, 96);
+        assert.equal(
+          cov.emptyCellCount,
+          0,
+          `Expected 0 empty cells at ${w}x${h} (t=${t}s), got ${cov.emptyCellCount}`
+        );
+        assert.ok(
+          cov.cellsWithAtLeast38Pct >= 95,
+          `Expected >=95% cells with >=38 stars at ${w}x${h} (t=${t}s), got ${cov.cellsWithAtLeast38Pct}%`
+        );
+        assert.ok(
+          cov.minCellCount >= 25,
+          `Expected minCellCount >= 25 at ${w}x${h} (t=${t}s), got ${cov.minCellCount}`
+        );
 
-      // All four outer corners and center must have stars
-      assert.ok(cov.corners.topLeft > 40, `Sparse topLeft corner at ${w}x${h}: ${cov.corners.topLeft}`);
-      assert.ok(cov.corners.topRight > 40, `Sparse topRight corner at ${w}x${h}: ${cov.corners.topRight}`);
-      assert.ok(cov.corners.bottomLeft > 40, `Sparse bottomLeft corner at ${w}x${h}: ${cov.corners.bottomLeft}`);
-      assert.ok(cov.corners.bottomRight > 40, `Sparse bottomRight corner at ${w}x${h}: ${cov.corners.bottomRight}`);
-      assert.ok(cov.centerRegion > 220, `Sparse center region at ${w}x${h}: ${cov.centerRegion}`);
+        // Quadrants, all four corners, and all four outer edges
+        assert.ok(cov.quadrants.upperLeft >= 1450);
+        assert.ok(cov.quadrants.upperRight >= 1450);
+        assert.ok(cov.quadrants.lowerLeft >= 1450);
+        assert.ok(cov.quadrants.lowerRight >= 1450);
+        assert.ok(cov.corners.topLeft >= 320);
+        assert.ok(cov.corners.topRight >= 320);
+        assert.ok(cov.corners.bottomLeft >= 320);
+        assert.ok(cov.corners.bottomRight >= 320);
+        assert.ok(cov.edges.leftEdge >= 800);
+        assert.ok(cov.edges.rightEdge >= 800);
+        assert.ok(cov.edges.topEdge >= 800);
+        assert.ok(cov.edges.bottomEdge >= 800);
+      }
     }
   });
 });

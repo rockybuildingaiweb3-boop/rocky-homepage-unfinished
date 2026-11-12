@@ -5,6 +5,7 @@ import {
   SPATIAL_SPLINES,
   STAGE_PERSPECTIVE_PX,
   depthToZPx,
+  evaluateOrbitAtArcLength,
   evaluateSculptureTrajectory,
   computeFocusedNetworkPositions,
   buildTrajectorySvgPath,
@@ -48,18 +49,87 @@ interface ParticleAnimState {
 }
 
 /**
- * LivingOrbitStage — LIVING ORBIT 2.1 (True 2.5D Orbital Kinetic Sculpture)
+ * Tracer specifications for the 3-part SVG trajectory visualization (2 tracers per orbit = 6 total).
+ */
+const ORBIT_TRACER_SPECS: readonly {
+  orbitIndex: number;
+  phaseOffset: number;
+  speedSign: 1 | -1;
+  speedRate: number;
+  radius: number;
+  coreColor: string;
+  glowColor: string;
+}[] = [
+  // Orbit A — Inner Celestial Flow (2 tracers)
+  {
+    orbitIndex: 0,
+    phaseOffset: 0.14,
+    speedSign: 1,
+    speedRate: 0.032,
+    radius: 2.3,
+    coreColor: '#F3E8FF',
+    glowColor: 'rgba(216, 180, 254, 0.75)',
+  },
+  {
+    orbitIndex: 0,
+    phaseOffset: 0.64,
+    speedSign: 1,
+    speedRate: 0.032,
+    radius: 1.8,
+    coreColor: '#E9D5FF',
+    glowColor: 'rgba(192, 132, 252, 0.65)',
+  },
+  // Orbit B — Kinetic Sweep (2 counter-flowing tracers)
+  {
+    orbitIndex: 1,
+    phaseOffset: 0.28,
+    speedSign: -1,
+    speedRate: 0.027,
+    radius: 2.1,
+    coreColor: '#EDE9FE',
+    glowColor: 'rgba(168, 85, 247, 0.7)',
+  },
+  {
+    orbitIndex: 1,
+    phaseOffset: 0.78,
+    speedSign: -1,
+    speedRate: 0.027,
+    radius: 1.7,
+    coreColor: '#DDD6FE',
+    glowColor: 'rgba(168, 85, 247, 0.58)',
+  },
+  // Orbit C — Deep Horizon (2 slow peripheral tracers)
+  {
+    orbitIndex: 2,
+    phaseOffset: 0.21,
+    speedSign: 1,
+    speedRate: 0.021,
+    radius: 1.7,
+    coreColor: '#C4B5FD',
+    glowColor: 'rgba(139, 92, 246, 0.52)',
+  },
+  {
+    orbitIndex: 2,
+    phaseOffset: 0.71,
+    speedSign: 1,
+    speedRate: 0.021,
+    radius: 1.5,
+    coreColor: '#C4B5FD',
+    glowColor: 'rgba(139, 92, 246, 0.45)',
+  },
+];
+
+/**
+ * LivingOrbitStage — LIVING ORBIT 2.2 (Expansive 2.5D Orbital Kinetic Sculpture)
  *
- * - Calibrated CSS 3D `perspective: 1100px` and `transform-style: preserve-3d` stage
- *   where each technology object is positioned via `translate3d(x, y, zPx)` without
- *   double-applying depth scaling.
- * - 8 verified Featured Technology Anchors with art-directed optical scales (58–76px)
- *   and restrained, near-stationary multi-harmonic zero-G breathing.
- * - 3 distinct trajectory systems:
- *   • Orbit A (Inner Celestial Flow): Tilted asymmetric elliptical arc framing the planet
- *   • Orbit B (Kinetic Sweep): Expansive diagonal counter-flowing cubic Bézier sweep
- *   • Orbit C (Deep Horizon): Wide peripheral deep-space trajectory
- * - Pre-filtered visible-only pairwise separation pass & dynamic depth-based zIndex ordering.
+ * - Wide architectural stage (`width: min(94vw, 1800px)`, `height: clamp(680px, 72vh, 780px)`)
+ *   with CSS 3D `perspective: 1100px` and `transform-style: preserve-3d`.
+ * - Two-Level Featured Anchor Hierarchy:
+ *   • 4 Primary Featured Anchors (80–88px: OpenAI, TypeScript, React, Three.js)
+ *   • 4 Secondary Featured Anchors (58–66px: LangGraph, PostgreSQL, FastAPI, Solidity)
+ * - 3 Arc-Length Parameterized Trajectory Systems (Orbits A, B, C) with 26 simultaneous
+ *   moving technologies (34 total visible objects) and 3-part SVG trajectory visualization
+ *   (continuous base path + animated luminous energy segment + 6 arc-length light tracers).
  */
 export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   selectedCategoryId,
@@ -74,12 +144,14 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   const isMobile = useIsMobile(768);
   const stageRef = useRef<HTMLDivElement>(null);
   const stageBoundsRef = useRef<{ width: number; height: number }>({
-    width: 1440,
-    height: 660,
+    width: 1560,
+    height: 720,
   });
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const relationPathRefs = useRef<(SVGPathElement | null)[]>([]);
   const relationGlowPathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const orbitPulseRefs = useRef<(SVGPathElement | null)[]>([]);
+  const orbitTracerGroupRefs = useRef<(SVGGElement | null)[]>([]);
 
   const [isMotionPaused, setIsMotionPaused] = useState(false);
 
@@ -288,7 +360,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     let sculptureTimeSec = 18.0;
     let breathTimeSec = 0;
 
-    // Reusable pre-filtered index buffer for visible particles (avoids 88×88 nested scan)
+    // Reusable pre-filtered index buffer for visible particles
     const visibleIndices: number[] = [];
 
     const tick = (now: number) => {
@@ -335,6 +407,43 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
       const opacityLerp = 1 - Math.exp(-10.5 * dt);
       const cursor = cursorStagePosRef.current;
       const { width: stageW, height: stageH } = stageBoundsRef.current;
+      const isCompactDesktop = stageW < 1160;
+
+      // Update 3-part SVG Trajectory Luminous Segments & Arc-Length Light Tracers
+      if (!catId) {
+        for (let oIdx = 0; oIdx < SPATIAL_SPLINES.length; oIdx++) {
+          const pulseEl = orbitPulseRefs.current[oIdx];
+          if (pulseEl) {
+            const dir = oIdx === 1 ? 1 : -1;
+            const rate = oIdx === 0 ? 34 : oIdx === 1 ? 28 : 22;
+            const offset = (sculptureTimeSec * rate * dir) % 1100;
+            pulseEl.style.strokeDashoffset = offset.toFixed(1);
+          }
+        }
+
+        for (let tIdx = 0; tIdx < ORBIT_TRACER_SPECS.length; tIdx++) {
+          const spec = ORBIT_TRACER_SPECS[tIdx];
+          const groupEl = orbitTracerGroupRefs.current[tIdx];
+          const orbit = SPATIAL_SPLINES[spec.orbitIndex];
+          if (groupEl && orbit) {
+            const rawArc =
+              spec.phaseOffset + sculptureTimeSec * spec.speedRate * spec.speedSign;
+            const s = ((rawArc % 1) + 1) % 1;
+            const pt = evaluateOrbitAtArcLength(orbit, s);
+            const svgX = pt.x * 10;
+            const svgY = pt.y * 6.2;
+            // Smooth fade near far-side wrap
+            const edgeFade =
+              s < 0.08
+                ? s / 0.08
+                : s > 0.92
+                ? (1 - s) / 0.08
+                : 1.0;
+            groupEl.setAttribute('transform', `translate(${svgX.toFixed(1)}, ${svgY.toFixed(1)})`);
+            groupEl.style.opacity = (edgeFade * (focusId ? 0.25 : 0.88)).toFixed(2);
+          }
+        }
+      }
 
       for (let i = 0; i < LIVING_ORBIT_PARTICLES.length; i++) {
         const p = LIVING_ORBIT_PARTICLES[i];
@@ -388,8 +497,6 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             targetScale = p.categoryFormationPos.scale;
             targetOpacity = 1.0;
           } else if (p.isFeaturedAnchor) {
-            // Keep Featured Anchors whisper-quiet in deep peripheral space so unrelated elements
-            // recede cleanly without competing with the 11 active category marks
             targetX = p.recessedPos.x + gentleBobX * 0.25;
             targetY = p.recessedPos.y + gentleBobY * 0.25;
             targetDepth = 0.52;
@@ -405,7 +512,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             targetOpacity = 0.0;
           }
         } else {
-          // ─── FULL LIVING ORBIT 2.1 SCULPTURE MODE (8 Featured Anchors + Orbits A, B, C) ───
+          // ─── FULL LIVING ORBIT 2.2 SCULPTURE MODE (8 Two-Tier Anchors + 26 Arc-Length Moving Marks) ───
           const evalState = evaluateSculptureTrajectory(
             p,
             sculptureTimeSec,
@@ -418,6 +525,11 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           targetScale = evalState.scale;
           targetDepth = evalState.depth;
           targetOpacity = evalState.opacity;
+
+          // Responsive density control on narrower desktop viewports (768–1160px)
+          if (isCompactDesktop && !p.isFeaturedAnchor && p.slotIndex % 5 === 4) {
+            targetOpacity *= 0.25;
+          }
 
           if (focusId && (p.skill.id === focusId || focusedRelSet?.has(p.skill.id))) {
             const netPos = focusedNetworkMapRef.current.get(p.skill.id);
@@ -447,7 +559,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           const mdx = cursor.x - targetX;
           const mdy = cursor.y - targetY;
           const dist = Math.hypot(mdx, mdy);
-          const magRadius = 18.0;
+          const magRadius = 17.5;
           if (dist < magRadius && dist > 0.1) {
             const pull = (1 - dist / magRadius) ** 2 * 0.22;
             targetX += mdx * pull;
@@ -468,7 +580,6 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             targetZPx = Math.max(targetZPx, 48);
             targetOpacity = Math.max(targetOpacity, 0.95);
           } else {
-            // Keep surrounding universe gently visible & drifting in dilated background
             targetOpacity *= 0.18;
             targetZPx = Math.min(targetZPx - 45, -60);
             targetScale *= 0.92;
@@ -517,12 +628,14 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             const stB = animStatesRef.current[idxB];
             const pB = LIVING_ORBIT_PARTICLES[idxB];
 
+            const involvesPrimary =
+              pA.anchorTier === 'primary' || pB.anchorTier === 'primary';
             const involvesAnchor = pA.isFeaturedAnchor || pB.isFeaturedAnchor;
-            const minDx = involvesAnchor ? 10.6 : 8.6;
-            const minDy = involvesAnchor ? 14.8 : 11.6;
+            const minDx = involvesPrimary ? 10.4 : involvesAnchor ? 9.4 : 7.8;
+            const minDy = involvesPrimary ? 14.5 : involvesAnchor ? 13.2 : 10.6;
 
-            const anchorShiftA = pA.isFeaturedAnchor ? 1.6 : 0;
-            const anchorShiftB = pB.isFeaturedAnchor ? 1.6 : 0;
+            const anchorShiftA = pA.isFeaturedAnchor ? 1.5 : 0;
+            const anchorShiftB = pB.isFeaturedAnchor ? 1.5 : 0;
             const dx = stB.x - stA.x;
             const dy = stB.y + anchorShiftB - (stA.y + anchorShiftA);
             const normDistSq = (dx / minDx) ** 2 + (dy / minDy) ** 2;
@@ -534,16 +647,16 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
               // Featured anchors remain stable while trajectory travelers deflect around them
               if (pA.isFeaturedAnchor && !pB.isFeaturedAnchor) {
-                stB.x = Math.max(4.5, Math.min(95.5, stB.x + ux * overlap * 1.75));
-                stB.y = Math.max(6.5, Math.min(92.5, stB.y + uy * overlap * 1.75));
+                stB.x = Math.max(4.0, Math.min(96.0, stB.x + ux * overlap * 1.75));
+                stB.y = Math.max(6.0, Math.min(93.0, stB.y + uy * overlap * 1.75));
               } else if (!pA.isFeaturedAnchor && pB.isFeaturedAnchor) {
-                stA.x = Math.max(4.5, Math.min(95.5, stA.x - ux * overlap * 1.75));
-                stA.y = Math.max(6.5, Math.min(92.5, stA.y - uy * overlap * 1.75));
+                stA.x = Math.max(4.0, Math.min(96.0, stA.x - ux * overlap * 1.75));
+                stA.y = Math.max(6.0, Math.min(93.0, stA.y - uy * overlap * 1.75));
               } else if (!pA.isFeaturedAnchor && !pB.isFeaturedAnchor) {
-                stA.x = Math.max(4.5, Math.min(95.5, stA.x - ux * overlap * 0.85));
-                stA.y = Math.max(6.5, Math.min(92.5, stA.y - uy * overlap * 0.85));
-                stB.x = Math.max(4.5, Math.min(95.5, stB.x + ux * overlap * 0.85));
-                stB.y = Math.max(6.5, Math.min(92.5, stB.y + uy * overlap * 0.85));
+                stA.x = Math.max(4.0, Math.min(96.0, stA.x - ux * overlap * 0.85));
+                stA.y = Math.max(6.0, Math.min(93.0, stA.y - uy * overlap * 0.85));
+                stB.x = Math.max(4.0, Math.min(96.0, stB.x + ux * overlap * 0.85));
+                stB.y = Math.max(6.0, Math.min(93.0, stB.y + uy * overlap * 0.85));
               }
             }
           }
@@ -680,10 +793,10 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   }
 
   return (
-    <div className="w-full max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col items-center">
+    <div className="w-[min(94vw,1800px)] max-w-[1800px] mx-auto px-2 sm:px-4 lg:px-6 flex flex-col items-center">
       {/* ─── 1. SUBTLE EDITORIAL TYPOGRAPHIC CATEGORY NAVIGATION ─── */}
       <nav
-        className="relative z-30 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 py-1.5 mb-2 border-b border-white/[0.06] px-4"
+        className="relative z-30 flex flex-wrap items-center justify-center gap-x-3.5 xl:gap-x-5 gap-y-1.5 py-1.5 mb-2 border-b border-white/[0.06] px-3"
         role="tablist"
         aria-label="Technology disciplines"
       >
@@ -756,7 +869,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         </div>
       )}
 
-      {/* ─── 2. TRUE 2.5D ORBITAL KINETIC SCULPTURE STAGE ─── */}
+      {/* ─── 2. EXPANSIVE 2.5D ORBITAL KINETIC SCULPTURE STAGE ─── */}
       <div
         ref={stageRef}
         onMouseMove={handleStageMouseMove}
@@ -764,13 +877,14 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         onClick={() => {
           if (focusedSkillId) onClearSkillFocus();
         }}
-        className="relative w-full h-[600px] lg:h-[660px] select-none overflow-visible"
+        className="relative w-full select-none overflow-visible"
         style={{
+          height: 'clamp(680px, 72vh, 780px)',
           perspective: `${STAGE_PERSPECTIVE_PX}px`,
           transformStyle: 'preserve-3d',
         }}
       >
-        {/* Whisper-faint 3 Trajectory System Filaments (Orbit A, B, C) & Selective Focus Connections */}
+        {/* 3-Part Expressive Trajectory Visualization (Base Path + Luminous Pulse + Light Tracers) */}
         <svg
           viewBox="0 0 1000 620"
           preserveAspectRatio="none"
@@ -779,38 +893,55 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         >
           <defs>
             {/* Orbit A: Inner Celestial Flow gradient */}
-            <linearGradient id="orbitInnerCelestialGrad" x1="15%" y1="75%" x2="85%" y2="20%">
+            <linearGradient id="orbitInnerCelestialGrad" x1="12%" y1="78%" x2="88%" y2="18%">
               <stop offset="0%" stopColor="rgba(192, 132, 252, 0)" />
-              <stop offset="22%" stopColor="rgba(216, 180, 254, 0.17)" />
-              <stop offset="55%" stopColor="rgba(233, 213, 255, 0.22)" />
-              <stop offset="82%" stopColor="rgba(192, 132, 252, 0.15)" />
+              <stop offset="18%" stopColor="rgba(216, 180, 254, 0.16)" />
+              <stop offset="52%" stopColor="rgba(233, 213, 255, 0.22)" />
+              <stop offset="84%" stopColor="rgba(192, 132, 252, 0.15)" />
               <stop offset="100%" stopColor="rgba(168, 85, 247, 0)" />
             </linearGradient>
             {/* Orbit B: Kinetic Sweep gradient */}
             <linearGradient id="orbitKineticSweepGrad" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="rgba(168, 85, 247, 0)" />
-              <stop offset="28%" stopColor="rgba(168, 85, 247, 0.13)" />
-              <stop offset="70%" stopColor="rgba(192, 132, 252, 0.16)" />
+              <stop offset="22%" stopColor="rgba(168, 85, 247, 0.13)" />
+              <stop offset="68%" stopColor="rgba(192, 132, 252, 0.17)" />
               <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
             </linearGradient>
             {/* Orbit C: Deep Horizon gradient */}
             <linearGradient id="orbitDeepHorizonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="rgba(139, 92, 246, 0)" />
-              <stop offset="35%" stopColor="rgba(147, 51, 234, 0.08)" />
-              <stop offset="70%" stopColor="rgba(168, 85, 247, 0.1)" />
+              <stop offset="30%" stopColor="rgba(147, 51, 234, 0.09)" />
+              <stop offset="72%" stopColor="rgba(168, 85, 247, 0.11)" />
+              <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
+            </linearGradient>
+            {/* Luminous Pulse Segment Gradients */}
+            <linearGradient id="orbitPulseGradA" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(216, 180, 254, 0)" />
+              <stop offset="50%" stopColor="rgba(243, 232, 255, 0.42)" />
+              <stop offset="100%" stopColor="rgba(192, 132, 252, 0)" />
+            </linearGradient>
+            <linearGradient id="orbitPulseGradB" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(192, 132, 252, 0)" />
+              <stop offset="50%" stopColor="rgba(216, 180, 254, 0.34)" />
+              <stop offset="100%" stopColor="rgba(168, 85, 247, 0)" />
+            </linearGradient>
+            <linearGradient id="orbitPulseGradC" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(168, 85, 247, 0)" />
+              <stop offset="50%" stopColor="rgba(192, 132, 252, 0.24)" />
               <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
             </linearGradient>
           </defs>
 
-          {/* 3 Distinct Spatial Trajectory Traces: Orbit A (Inner Celestial), Orbit B (Kinetic Sweep), Orbit C (Deep Horizon) */}
+          {/* 3-Part Orbital Trajectory System (Active in All mode) */}
           {!selectedCategoryId && (
             <g
               className="transition-opacity duration-700"
-              style={{ opacity: focusedSkillId ? 0.2 : 0.76 }}
+              style={{ opacity: focusedSkillId ? 0.22 : 0.85 }}
             >
+              {/* Part 1: Subtle Continuous Base Paths */}
               {trajectoryPaths.map((tp, idx) => (
                 <path
-                  key={tp.id}
+                  key={`${tp.id}-base`}
                   d={tp.d}
                   fill="none"
                   stroke={
@@ -820,10 +951,60 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                       ? 'url(#orbitKineticSweepGrad)'
                       : 'url(#orbitDeepHorizonGrad)'
                   }
-                  strokeWidth={idx === 0 ? '1.2' : idx === 1 ? '0.9' : '0.7'}
-                  strokeDasharray={idx === 2 ? '2 10' : idx === 1 ? '5 8' : undefined}
+                  strokeWidth={idx === 0 ? '1.25' : idx === 1 ? '0.95' : '0.75'}
+                  strokeDasharray={idx === 2 ? '3 9' : idx === 1 ? '6 8' : undefined}
                 />
               ))}
+
+              {/* Part 2: Restrained Luminous Moving Segments */}
+              {trajectoryPaths.map((tp, idx) => (
+                <path
+                  key={`${tp.id}-pulse`}
+                  ref={(el) => {
+                    orbitPulseRefs.current[idx] = el;
+                  }}
+                  d={tp.d}
+                  fill="none"
+                  stroke={
+                    idx === 0
+                      ? 'url(#orbitPulseGradA)'
+                      : idx === 1
+                      ? 'url(#orbitPulseGradB)'
+                      : 'url(#orbitPulseGradC)'
+                  }
+                  strokeWidth={idx === 0 ? '1.85' : idx === 1 ? '1.45' : '1.15'}
+                  strokeLinecap="round"
+                  strokeDasharray={
+                    idx === 0 ? '170 920' : idx === 1 ? '145 960' : '120 980'
+                  }
+                />
+              ))}
+
+              {/* Part 3: Moving Arc-Length Light Tracer Points (2 per orbit = 6 total) */}
+              {ORBIT_TRACER_SPECS.map((spec, tIdx) => {
+                const initPt = evaluateOrbitAtArcLength(
+                  SPATIAL_SPLINES[spec.orbitIndex],
+                  spec.phaseOffset
+                );
+                return (
+                  <g
+                    key={`orbit-tracer-${tIdx}`}
+                    ref={(el) => {
+                      orbitTracerGroupRefs.current[tIdx] = el;
+                    }}
+                    transform={`translate(${(initPt.x * 10).toFixed(1)}, ${(
+                      initPt.y * 6.2
+                    ).toFixed(1)})`}
+                  >
+                    <circle
+                      r={spec.radius * 2.8}
+                      fill={spec.glowColor}
+                      style={{ filter: 'blur(2.5px)' }}
+                    />
+                    <circle r={spec.radius} fill={spec.coreColor} />
+                  </g>
+                );
+              })}
             </g>
           )}
 
@@ -858,7 +1039,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
         {/* 88 Floating Technology Objects in True 2.5D Perspective Space */}
         {LIVING_ORBIT_PARTICLES.map((particle, idx) => {
-          const { skill, tier, isFeaturedAnchor, desktopSize } = particle;
+          const { skill, tier, isFeaturedAnchor, anchorTier, desktopSize } = particle;
+          const isPrimaryAnchor = anchorTier === 'primary';
           const isFocused = focusedSkillId === skill.id;
           const isHovered = hoveredSkillId === skill.id;
           const isRelated = activeRelatedSet.has(skill.id);
@@ -866,8 +1048,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             Boolean(selectedCategoryId) && skill.categoryId === selectedCategoryId;
 
           // Restrained label discipline:
-          // - In default ALL view, only the 8 Featured Technology Anchors display quiet captions
-          // - Hovered, focused, related, or active category items reveal refined labels
+          // - In default ALL view, only the 8 Featured Technology Anchors (4 Primary + 4 Secondary) display quiet captions
+          // - Moving orbit technologies reveal labels only on hover, focus, related highlight, or category filter
           const showLabel =
             isFocused ||
             isHovered ||
@@ -896,6 +1078,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               type="button"
               aria-label={`${skill.name} (${tier} tier)`}
               aria-pressed={isFocused}
+              data-anchor-tier={anchorTier ?? undefined}
               onClick={(e) => {
                 e.stopPropagation();
                 if (isFocused) {
@@ -925,13 +1108,15 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                   width: desktopSize,
                   height: desktopSize,
                   filter: isFocused
-                    ? `drop-shadow(0 0 22px ${skill.brandColor}) drop-shadow(0 2px 8px rgba(0,0,0,0.85))`
+                    ? `drop-shadow(0 0 24px ${skill.brandColor}) drop-shadow(0 3px 10px rgba(0,0,0,0.88))`
                     : isHovered
                     ? `drop-shadow(0 0 18px ${skill.brandColor}bb) drop-shadow(0 2px 6px rgba(0,0,0,0.78))`
                     : isRelated
                     ? `drop-shadow(0 0 14px ${skill.brandColor}88) drop-shadow(0 2px 6px rgba(0,0,0,0.78))`
+                    : isPrimaryAnchor
+                    ? `drop-shadow(0 10px 24px rgba(0,0,0,0.82)) drop-shadow(0 0 18px ${skill.brandColor}58)`
                     : isFeaturedAnchor
-                    ? `drop-shadow(0 8px 20px rgba(0,0,0,0.78)) drop-shadow(0 0 14px ${skill.brandColor}48)`
+                    ? `drop-shadow(0 7px 18px rgba(0,0,0,0.76)) drop-shadow(0 0 13px ${skill.brandColor}42)`
                     : `drop-shadow(0 4px 12px rgba(0,0,0,0.68)) drop-shadow(0 0 8px ${skill.brandColor}28)`,
                 }}
               >
@@ -947,8 +1132,10 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                     ? 'text-[10px] tracking-[0.12em] text-purple-100 px-2 py-0.5 rounded bg-[#050214]/80 border border-purple-400/25 opacity-100'
                     : isSelectedCatMember
                     ? 'text-[10px] tracking-[0.12em] text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95'
+                    : showLabel && isPrimaryAnchor
+                    ? 'text-[10px] font-medium tracking-[0.15em] uppercase text-white/85 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95 group-hover:text-white'
                     : showLabel
-                    ? 'text-[9.5px] tracking-[0.14em] uppercase text-white/70 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-90 group-hover:text-white'
+                    ? 'text-[9.5px] tracking-[0.13em] uppercase text-white/68 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-90 group-hover:text-white'
                     : 'text-[9.5px] tracking-[0.12em] text-white/0 opacity-0'
                 }`}
               >

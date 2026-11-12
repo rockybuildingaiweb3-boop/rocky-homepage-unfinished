@@ -1,0 +1,1077 @@
+# ROCKY HOMEPAGE — LIVING ORBIT 2.2
+## Full-Screen Star Sea + Advanced Kinetic Sculpture
+### Repository-Level Implementation Directive
+
+You are acting as a senior creative engineering team responsible for improving an existing production personal portfolio.
+
+Your disciplines include:
+
+- Senior React / TypeScript architecture.
+- Three.js and WebGL engineering.
+- Computational geometry.
+- Creative development.
+- Advanced motion design.
+- Premium digital experience art direction.
+
+Your task is to substantially improve the EXISTING production website.
+
+This is not a new project, a prototype, a playground, or a design exercise.
+
+The result must be implemented directly in my existing repository.
+
+**Visual quality, spatial composition, animation quality, and engineering correctness are all mandatory.**
+
+---
+
+# 0. CURRENT PROJECT STATE — USE THE LATEST VERSION
+
+Repository:
+
+https://github.com/rockybuildingaiweb3-boop/rocky-homepage-unfinished
+
+Live website:
+
+https://www.rockybabcock.fun/
+
+Latest public commit:
+
+`11a6c0b8fa97b7e2a98065047b6b83180e8d8e5b`
+
+Commit message:
+
+`feat(skills): upgrade to Living Orbit 2.1 engine`
+
+Current stack:
+
+- React 19
+- Vite
+- TypeScript
+- Three.js
+- React Three Fiber
+- Drei
+- Motion
+- Simple Icons
+- Tech Stack Icons
+
+I am providing three new full-screen screenshots of my current website.
+
+Use them as mandatory visual references.
+
+### Screenshot A — Studio and Skills transition
+
+Shows the Studio section, global background particles, navigation, and the beginning of Skills.
+
+### Screenshot B — Complete Skills presentation
+
+Shows the current Living Orbit 2.1 composition.
+
+### Screenshot C — Skills lower section and Footer
+
+Shows the remaining Skills composition, background coverage, and transition into the footer.
+
+These screenshots show the current implementation, NOT the desired final quality.
+
+The current result is approximately 4/10 according to my evaluation.
+
+I want a substantial improvement.
+
+## Critical workspace requirement
+
+The Google AI Studio workspace may contain newer files than public GitHub main.
+
+Inspect the actual loaded workspace first.
+
+Do not overwrite newer working changes with outdated repository code.
+
+Do not create another project.
+
+Do not create an isolated Skills Laboratory.
+
+Work directly inside the current production application.
+
+---
+
+# PART I — GLOBAL STARFIELD RECONSTRUCTION
+
+## Primary target file
+
+`src/components/ui/ParticleBackground.tsx`
+
+This is a global change affecting Home, Studio, Skills, Contact, and the entire website.
+
+I want the cosmic background to feel like a rich, immersive STAR SEA.
+
+The latest screenshot still looks too sparse.
+
+Increasing particle count without changing the distribution strategy will not solve this problem.
+
+## 1.1 Audit the current implementation
+
+Inspect these existing structures:
+
+- `STARFIELD_LAYER_SPECS`
+- `halton()`
+- `STELLAR_CLUSTER_DIRS`
+- `generateStratifiedStarLayer()`
+- `evaluateStarfieldCoverage()`
+- `StarBackground`
+- `StarBackground2D`
+
+The current implementation still uses a 3D spherical shell generated through Fibonacci spherical sampling, Halton sequences, radial distribution, and aspect-ratio adjustments.
+
+The problem:
+
+Generated 3D points are not necessarily visible in the actual browser viewport.
+
+A considerable proportion of points are behind the camera or projected outside the visible area.
+
+Additionally, the existing coverage evaluator primarily validates quadrants and corners. It does not rigorously validate every screen region over time using the same rotations as the actual renderer.
+
+**Replace the current sphere-shell distribution strategy with a genuinely viewport-aware particle system.**
+
+Do not simply increase the existing counts.
+
+## 1.2 Increase the particle quantity by more than one-third
+
+Current count: 5,725.
+
+New desktop target: **8,000 active visible stars**.
+
+This is approximately 39.7% more particles than the current implementation.
+
+Use the following initial allocation:
+
+| Layer | New count |
+|---|---:|
+| Tiny stellar dust | 6,100 |
+| Medium ambient stars | 1,450 |
+| Bright stars | 300 |
+| Amethyst accent glints | 150 |
+| **Total** | **8,000** |
+
+These are the target active visible objects, not merely the number of points allocated in an invisible spherical volume.
+
+The actual perceived density must be evaluated in the browser.
+
+## 1.3 Implement screen-space spatial distribution
+
+Use deterministic, viewport-aware 2D screen-space sampling while retaining layered depth.
+
+Possible approaches:
+
+- Stratified screen-space sampling.
+- Seeded Halton / Hammersley sequences.
+- Jittered grid distribution.
+- Blue-noise-inspired spacing.
+- Controlled density modulation.
+- Screen-space wrapping.
+
+Each star should have independent data:
+
+- Normalized screen position: `u, v`.
+- Depth.
+- Size.
+- Base opacity.
+- Movement direction.
+- Movement velocity.
+- Twinkle phase.
+- Deterministic seed.
+
+Generate particles across the complete normalized viewport.
+
+The base coverage must include:
+
+- All four corners.
+- Left and right edges.
+- Upper and lower regions.
+- Central areas.
+- Regions between the corners and center.
+
+Do not create a design in which most particles concentrate around the central screen region.
+
+### Recommended projection model
+
+For a perspective camera, calculate world coordinates from normalized screen coordinates and depth.
+
+For example:
+
+Given camera distance `d` and vertical field of view `fov`:
+
+`halfHeight = d * tan(fov / 2)`
+
+`halfWidth = halfHeight * aspect`
+
+Then:
+
+`worldX = (2 * u - 1) * halfWidth`
+
+`worldY = (1 - 2 * v) * halfHeight`
+
+`worldZ = cameraZ - d`
+
+This is an implementation reference. You may use an orthographic or shader-based architecture if it achieves more reliable results.
+
+The important condition is that screen-space distribution and actual camera projection must agree.
+
+Use a small controlled overscan region or screen wrapping so stars never disappear at the viewport edges during movement.
+
+Do not use the previous spherical shell as the primary distribution model.
+
+## 1.4 Create a genuine multi-layer starfield
+
+The four layers should have distinct visual characteristics.
+
+### Layer 1 — Stellar Dust
+
+- Approximately 6,100 particles.
+- Very small points.
+- Subtle lavender / amethyst colors.
+- Continuous full-screen coverage.
+- Slow movement.
+
+This is the foundation of the star sea.
+
+### Layer 2 — Ambient Stars
+
+- Approximately 1,450 particles.
+- Slightly larger.
+- Soft white, pale lavender, and violet variations.
+- Visible without competing with website content.
+- Medium movement speed.
+
+### Layer 3 — Bright Stars
+
+- Approximately 300 particles.
+- More visible luminous points.
+- Different sizes and brightness.
+- Restrained twinkling.
+- More noticeable depth movement.
+
+### Layer 4 — Celestial Glints
+
+- Approximately 150 particles.
+- Selectively brighter.
+- Rare visual accents.
+- Subtle amethyst / ice-white color palette.
+- Delicate sparkle.
+
+Do not make every star equally bright.
+
+The result should feel like a natural, expansive galaxy rather than a uniformly illuminated dotted texture.
+
+## 1.5 Give stars actual screen-wide movement
+
+The current rotating spherical system does not create the continuous screen-wide movement I want.
+
+Introduce independent movement vectors.
+
+Possible implementation:
+
+- Tiny stars: slow background drift.
+- Medium stars: slightly faster drift.
+- Bright stars: more perceptible movement.
+- Accent glints: independent counter-drift.
+
+Use normalized UV motion with edge wrapping or an equivalent seamless method.
+
+Do not allow particle movement to create empty regions.
+
+Movement must continue across the whole viewport.
+
+Avoid moving all layers around exactly the same center at identical speeds.
+
+## 1.6 Add delicate stellar motion trails
+
+Explore a restrained additional motion-detail system.
+
+I want a small number of elegant moving star trails.
+
+Suggested characteristics:
+
+- Approximately 3–6 simultaneously visible streaks at most.
+- Different starting positions.
+- Different directions.
+- Length approximately 20–70px.
+- Low-opacity luminous tails.
+- Smooth entry and exit.
+- No abrupt repositioning while visible.
+
+These should look like distant celestial movement, not a meteor shower.
+
+They must remain subordinate to the main starfield.
+
+## 1.7 Ensure WebGL and 2D fallback parity
+
+The current 2D fallback must reproduce the same visual system.
+
+Both implementations must share the same:
+
+- Particle counts.
+- Deterministic screen-space coordinates.
+- Depth assignments.
+- Size distribution.
+- Color palette.
+- Movement velocities.
+- Wrapping behavior.
+- Relative opacity.
+- Twinkle characteristics.
+
+Do not maintain two unrelated star-generation algorithms.
+
+Prefer a shared particle-data generator.
+
+Where appropriate, use a custom Three.js `BufferGeometry` and `ShaderMaterial`, with time-driven uniforms and per-particle attributes.
+
+This is preferable to triggering React re-renders for individual stars.
+
+A shader-based implementation is not mandatory if an efficient existing Three.js mechanism achieves the same result.
+
+## 1.8 Full-screen coverage validation
+
+Update `evaluateStarfieldCoverage()`.
+
+The current corner/quadrant validation is insufficient.
+
+Create screen occupancy diagnostics.
+
+Recommended desktop grid:
+
+12 columns × 8 rows.
+
+Mobile grid:
+
+8 columns × 12 rows.
+
+For the desktop 8,000-star configuration:
+
+- No empty cells.
+- Every corner has strong coverage.
+- At least 95% of cells should contain 45 or more visible points.
+- No individual cell should contain fewer than 25 points.
+- Distribution should remain balanced over time.
+
+Sample at:
+
+- 0 seconds.
+- 10 seconds.
+- 30 seconds.
+- 60 seconds.
+
+Validate:
+
+- 1440 × 900.
+- 1920 × 1080.
+- 2048 × 1002.
+- 390 × 844.
+
+Use the same mathematical projection, camera parameters, and movement rules as the actual WebGL renderer.
+
+Do not write a simplified diagnostic that gives positive results while the actual browser display remains sparse.
+
+The starfield should appear full and consistent at every tested viewport.
+
+---
+
+# PART II — LIVING ORBIT 2.2 SPATIAL RECONSTRUCTION
+
+## Mandatory target file
+
+`src/features/skills/livingOrbitEngine.ts`
+
+This file is responsible for the actual geometry and trajectory mathematics.
+
+The existing Living Orbit 2.1 engine contains valuable foundations.
+
+Preserve and improve them.
+
+Do not recreate a duplicate skill system.
+
+## 2.1 Improve the Featured Anchor hierarchy
+
+Inspect:
+
+`FEATURED_ANCHOR_SPECS`
+
+Currently, all eight Featured Anchors have broadly similar visual importance.
+
+I want a two-level hierarchy.
+
+### Primary Featured Anchors
+
+Four flagship technologies:
+
+- TypeScript.
+- React.
+- Three.js.
+- OpenAI.
+
+Suggested optical size: 76–90px.
+
+These are the most recognizable visual anchors of the entire composition.
+
+### Secondary Featured Anchors
+
+Four supporting technologies:
+
+- FastAPI.
+- LangGraph.
+- PostgreSQL.
+- Solidity.
+
+Suggested optical size: 56–68px.
+
+They should remain permanently visible, but their visual emphasis should be secondary.
+
+Verify all technology IDs against the existing data registry.
+
+Do not invent new technology records.
+
+### Layout requirements
+
+The eight anchors must create an asymmetric, art-directed spatial composition.
+
+They must not:
+
+- Form a horizontal row.
+- Form a perfectly symmetrical circular ring.
+- Overlap each other.
+- Obscure the planet's central focal point.
+- All have identical scale and brightness.
+
+Create meaningful relationships between their positions.
+
+Keep enough negative space for the other moving technologies.
+
+Featured presentation priority must remain independent of the existing technology tier classifications.
+
+Do not modify actual Core, Professional, or Ecosystem assignments.
+
+## 2.2 Re-engineer the three trajectory systems
+
+Inspect and update:
+
+- `SPATIAL_SPLINES`
+- `evaluateCubicBezier()`
+- `evaluateTiltedCelestialEllipse()`
+- `buildTrajectorySvgPath()`
+- `evaluateSculptureTrajectory()`
+- `buildLivingOrbitParticles()`
+
+Three trajectory systems must remain, but their spatial identity and animation must improve.
+
+### ORBIT A — Inner Celestial Flow
+
+The primary visual trajectory.
+
+Requirements:
+
+- Tilted asymmetric elliptical movement.
+- Closely integrated with the planet.
+- Elegant spatial depth.
+- More noticeable than the other trajectories.
+- Carry important moving Core and Professional technologies.
+
+### ORBIT B — Kinetic Sweep
+
+The main source of visual energy.
+
+Requirements:
+
+- Clearly diagonal sweeping trajectory.
+- Different curvature and orientation from Orbit A.
+- Counter-flowing direction.
+- More expansive spatial coverage.
+- More noticeable depth changes.
+
+### ORBIT C — Deep Horizon
+
+The atmospheric peripheral trajectory.
+
+Requirements:
+
+- Wide spatial distribution.
+- Slower motion.
+- Smaller and more distant technologies.
+- Subtle luminous appearance.
+- Independent trajectory geometry.
+
+Avoid three nearly concentric circular rings.
+
+Avoid three horizontal or nearly horizontal logo streams.
+
+Each trajectory must be visibly different in actual browser rendering.
+
+## 2.3 Implement arc-length-based movement
+
+The current engine progresses along trajectories using the Bézier/ellipse parameter `u`.
+
+Linear parameter progression does not guarantee constant screen-space velocity.
+
+For curved Bézier trajectories, the derivative varies along the path.
+
+Consequently, logos may move at inconsistent apparent speeds.
+
+Implement a precomputed arc-length lookup table for each trajectory.
+
+Suggested process:
+
+1. Sample the trajectory at approximately 100–160 points.
+2. Calculate cumulative distances.
+3. Normalize the total path length.
+4. Convert the time-based phase into normalized traveled distance.
+5. Find the corresponding path parameter using interpolation.
+6. Evaluate the actual position and tangent.
+
+Use the same geometry evaluation for logo positioning and trajectory visualization.
+
+This will provide more controlled, natural movement.
+
+## 2.4 Increase the active orbital population moderately
+
+Current large-desktop visible capacities:
+
+- Orbit A: 7.
+- Orbit B: 9.
+- Orbit C: 6.
+
+Total moving technologies: 22, excluding the eight permanent anchors.
+
+Increase the desktop target to approximately 24–28 moving technologies.
+
+Initial recommended allocation:
+
+- Orbit A: 8.
+- Orbit B: 10.
+- Orbit C: 8.
+
+Together with the eight anchors, this produces approximately 34 visible technology objects.
+
+Keep the composition readable.
+
+Do not allow excessive simultaneous overlap.
+
+Use responsive density controls for smaller desktop sizes.
+
+## 2.5 Improve orbital speed
+
+Current speed parameters:
+
+- Orbit A: `0.0072`.
+- Orbit B: `0.0060`.
+- Orbit C: `0.0042`.
+
+The current movement is not perceptible enough.
+
+Use target pass durations:
+
+| Orbit | Target visible pass |
+|---|---|
+| Inner Celestial | 26–32 seconds |
+| Kinetic Sweep | 30–36 seconds |
+| Deep Horizon | 38–46 seconds |
+
+Calculate the appropriate normalized phase speed from each trajectory's visible fraction and target pass duration.
+
+Do not blindly change values without understanding the phase model.
+
+Maintain independent speed variation for individual technologies.
+
+## 2.6 Preserve trajectory and viewport boundaries
+
+Retain the existing:
+
+- Planetary exclusion zone.
+- Featured anchor repulsion.
+- Screen-space limits.
+- Deterministic skill ordering.
+- Category-specific formations.
+- Focused network positions.
+
+Improve the mathematics where necessary.
+
+The positions must remain stable and predictable.
+
+No uncontrolled particle collisions.
+
+No sudden jumps.
+
+No logos permanently disappearing from the discoverable technology collection.
+
+---
+
+# PART III — LIVING ORBIT STAGE: VISUAL RENDERING AND ART DIRECTION
+
+## Mandatory target file
+
+`src/components/skills/LivingOrbitStage.tsx`
+
+This is the most important rendering component.
+
+Its job is to transform the mathematical engine into an exceptional visual composition.
+
+The current implementation already uses a requestAnimationFrame loop, direct DOM refs, GPU-composited transforms, depth parameters, and SVG trajectories.
+
+Keep these foundations.
+
+Improve their visual output.
+
+## 3.1 Expand desktop composition
+
+The current wrapper uses:
+
+`max-w-[1520px]`
+
+This unnecessarily restricts the composition on 2048px desktop displays.
+
+Expand the stage to approximately 1800px maximum width.
+
+Use responsive constraints such as:
+
+`width: min(94vw, 1800px)`
+
+Maintain appropriate margins.
+
+Do not make all content touch the screen edges.
+
+## 3.2 Increase vertical composition space
+
+The current stage is approximately 600px high, or 660px on large desktop.
+
+Explore a responsive desktop stage height of approximately:
+
+`clamp(680px, 72vh, 780px)`
+
+Calibrate the result with the existing title, category navigation, and planet position.
+
+Avoid excessive blank space beneath the logo composition.
+
+Do not alter the global page structure unnecessarily.
+
+## 3.3 Create more expressive trajectory visualization
+
+The current SVG orbit lines are relatively subtle static gradient paths.
+
+Give them more visual expression.
+
+For each orbit, implement:
+
+1. A subtle continuous base path.
+2. A restrained luminous moving segment.
+3. A small number of moving light particles or tracer points.
+
+Possible techniques:
+
+- SVG stroke dash animation.
+- `stroke-dashoffset`.
+- Motion-driven path position.
+- Gradient opacity variation.
+- Subtle blurred secondary stroke.
+
+Use a coherent visual language across the three orbit systems.
+
+The lines should help viewers understand that the logos are moving through a spatial environment.
+
+Do not create dozens of orbital rings.
+
+Do not cover the existing planet with a bright wireframe.
+
+Do not compete with the beautiful radial light beams already present in the background.
+
+## 3.4 Improve depth rendering
+
+The current implementation already maps `st.zPx` into:
+
+`translate3d(x, y, zPx)`
+
+and uses CSS perspective.
+
+Preserve this architecture.
+
+Refine the relationship between:
+
+- `STAGE_PERSPECTIVE_PX`.
+- `depthToZPx()`.
+- Dynamic scale.
+- Dynamic zIndex.
+- Base logo size.
+- Focus enlargement.
+
+Make foreground objects feel closer and background objects feel farther away.
+
+Avoid exaggerated perspective distortion.
+
+Technology logos must remain upright and readable.
+
+## 3.5 Refine composition and density
+
+The screenshot currently shows too much empty space around certain parts of the orbital field.
+
+Improve the distribution of the 34–36 visible technology objects.
+
+The composition should have:
+
+- Clear visual focal points.
+- Strong asymmetric balance.
+- Different levels of visual density.
+- Deliberate negative space.
+- Meaningful spatial relationships.
+- Continuous motion.
+- Better use of the expanded stage width.
+
+Do not distribute all nodes uniformly like a scatter plot.
+
+Do not align technologies into rows.
+
+Do not create an excessive number of visual elements.
+
+## 3.6 Refine logo labels
+
+In the ALL view:
+
+- Featured logos can retain subtle labels.
+- Other logos should reveal their names on hover or keyboard focus.
+- Focused and related technologies receive clearer labels.
+- Avoid permanent labels underneath every moving logo.
+
+Improve the readability of the existing monospace typography.
+
+Keep the editorial design restrained.
+
+---
+
+# PART IV — TECHNOLOGY LOGO OPTICAL AUDIT
+
+## Target file
+
+`src/components/skills/TechLogo.tsx`
+
+Inspect the current optical normalization implementation.
+
+Review:
+
+- `OPTICAL_MASS_MULTIPLIER`.
+- `DARK_SUBSTRATE_FILTER_OVERRIDES`.
+- `resolveSkillIcon()`.
+- SVG viewBox dimensions.
+- Tech Stack Icons rendering.
+- Local SVG assets.
+
+Audit all 88 authentic brand marks.
+
+Identify assets with:
+
+- Excessive internal whitespace.
+- Incorrect perceived size.
+- Poor contrast.
+- Unnecessary brightness suppression.
+- Oversized silhouettes.
+- Thin shapes that disappear against the dark background.
+
+Correct individual outliers.
+
+Do not simply increase every logo by the same percentage.
+
+Keep original brand colors and recognizable proportions.
+
+Do not create fake logos.
+
+Do not replace correct assets with AI-generated marks.
+
+The final logo collection must feel optically curated.
+
+---
+
+# PART V — MOBILE ADAPTATION
+
+## Target file
+
+`src/components/skills/MobileLivingOrbit.tsx`
+
+Preserve the existing dedicated mobile implementation.
+
+Update its Featured Anchor presentation to reflect the new two-level hierarchy.
+
+Requirements:
+
+- Four stronger primary anchors.
+- Four secondary anchors.
+- Proper spacing around the planetary background.
+- Smaller but still recognizable supporting technology marks.
+- Touch-friendly controls.
+- A controlled number of visible moving objects.
+- All 88 technologies remain discoverable.
+- Category navigation remains functional.
+- Focus and related technology interactions remain usable.
+
+Do not simply scale the entire desktop scene.
+
+Do not allow icons or labels to overlap or clip.
+
+Maintain reduced-motion support.
+
+---
+
+# PART VI — GLOBAL BACKGROUND PROTECTION
+
+## Existing planet and atmosphere
+
+`src/components/skills/SkillsAtmosphere.tsx`
+
+Preserve the existing implementation unless a genuine integration problem is identified.
+
+The following must remain:
+
+- `/videos/skills-bg.webm`.
+- Existing planetary object.
+- Existing nebula lighting.
+- Existing purple environmental identity.
+- Existing atmospheric radial light beams.
+
+The global `ParticleBackground.tsx` is being enriched, but the Skills-specific planet and atmosphere must not be redesigned.
+
+Do not modify the Studio cards, their horizontal interaction, or other unrelated content.
+
+The global starfield must improve the entire website consistently.
+
+---
+
+# PART VII — TESTS AND VALIDATION
+
+## Mandatory target files
+
+`src/features/skills/livingOrbitEngine.test.ts`
+
+`scripts/validateSkills.ts`
+
+The current repository already contains automated skill and spatial validation.
+
+Update it rather than replacing useful existing tests.
+
+## 7.1 Starfield tests
+
+Verify:
+
+- Exact target desktop count of 8,000.
+- Four independent starfield layers.
+- Correct layer allocation.
+- Deterministic position generation.
+- Full screen-space coverage.
+- No empty screen grid cells.
+- Sufficient minimum particle density per grid cell.
+- Aspect-ratio handling.
+- Motion wrapping.
+- Coverage at 0, 10, 30, and 60 seconds.
+- 2D and WebGL data parity.
+
+## 7.2 Orbital tests
+
+Verify:
+
+- Exactly 88 technology records.
+- No duplicate technologies.
+- Exactly eight Featured Anchors.
+- Correct four primary / four secondary hierarchy.
+- Exactly three orbital systems.
+- Arc-length trajectory evaluation.
+- Correct movement directions.
+- Valid speed and pass-duration ranges.
+- 24–28 moving secondary objects in desktop ALL mode.
+- No severe overlapping of Featured Anchors.
+- All 88 technologies eventually become discoverable.
+- Valid screen-space boundaries.
+- Correct depth values.
+- Valid category formations.
+- Correct focused network mapping.
+
+## 7.3 Existing commands
+
+Run:
+
+`npm run lint`
+
+`npm run validate:skills`
+
+`npm run validate:icons`
+
+`npm test`
+
+`npm run build`
+
+Do not declare completion if any relevant validation fails.
+
+Do not delete tests to make the build pass.
+
+---
+
+# PART VIII — ACTUAL BROWSER VISUAL QUALITY CONTROL
+
+Do not evaluate success by reading code alone.
+
+Launch the actual application.
+
+Inspect the real production rendering.
+
+Use the following target viewports:
+
+| Viewport | Purpose |
+|---|---|
+| 1440 × 900 | Standard desktop |
+| 1920 × 1080 | Full HD desktop |
+| 2048 × 1002 | My provided screenshot reference |
+| 390 × 844 | Mobile |
+
+Capture screenshots.
+
+Compare them with my three supplied reference screenshots.
+
+### Global Starfield Review
+
+Verify:
+
+- All four corners are populated.
+- No large empty areas exist.
+- The upper and lower parts of the page have consistent particle richness.
+- Stars move across the complete background.
+- Density feels substantially richer than the current version.
+- The result is still dark, elegant, and atmospheric.
+
+### Skills Review
+
+Verify:
+
+- The planet remains visible.
+- Featured anchors have unmistakable visual hierarchy.
+- The orbital trajectories are visibly different.
+- Motion is perceptible without waiting excessively long.
+- Logos remain recognizable.
+- Visual density is controlled.
+- The composition uses the wider stage.
+- No unwanted logo collisions.
+- The foreground feels integrated with the background.
+
+### Full Website Review
+
+Inspect both Studio and Skills.
+
+The global starfield must improve the entire website, not just one section.
+
+Do not modify the Studio content to make the new starfield appear better.
+
+---
+
+# PART IX — MANDATORY FILE-LEVEL DELIVERY REPORT
+
+This is extremely important.
+
+I do not want another implementation that only edits a few simple CSS values and claims everything is complete.
+
+At minimum, the following five files require substantive implementation work:
+
+1. `src/components/ui/ParticleBackground.tsx`
+2. `src/features/skills/livingOrbitEngine.ts`
+3. `src/components/skills/LivingOrbitStage.tsx`
+4. `src/features/skills/livingOrbitEngine.test.ts`
+5. `scripts/validateSkills.ts`
+
+Also inspect and update `TechLogo.tsx` and `MobileLivingOrbit.tsx` where required by the new visual system.
+
+Do not modify a file just to increase the number of changed files.
+
+However, you must not ignore an actual defect in one of the mandatory implementation areas.
+
+At completion, provide a detailed report:
+
+### 1. Actual repository findings
+
+Explain the original problems identified in the current 2.1 implementation.
+
+### 2. Exact files changed
+
+List every modified file.
+
+For each file, provide:
+
+- Its original responsibility.
+- The problem discovered.
+- The actual code changes made.
+- The new responsibility or behavior.
+
+### 3. Particle background improvements
+
+Explain:
+
+- New particle allocation.
+- New screen-space algorithm.
+- Actual visible density.
+- Full-screen movement.
+- Edge wrapping.
+- WebGL and fallback parity.
+- Coverage validation.
+
+### 4. Skills improvements
+
+Explain:
+
+- Featured anchor hierarchy.
+- Three trajectory geometry systems.
+- Arc-length motion.
+- Active node population.
+- Spatial rendering.
+- Motion choreography.
+- Optical logo calibration.
+
+### 5. Validation results
+
+Report actual outputs from all required validation commands.
+
+### 6. Visual verification
+
+Provide browser screenshots for all target viewports.
+
+### 7. Remaining issues
+
+Be honest about what has not been completed.
+
+Do not report success merely because code was changed.
+
+---
+
+# FINAL ART DIRECTION
+
+I want two major improvements to happen together.
+
+## GLOBAL ENVIRONMENT
+
+A genuinely rich, full-screen cosmic starfield.
+
+Thousands of tiny stars across the complete viewport, different depth layers, subtle continuous movement, and occasional elegant stellar trails.
+
+The background should feel like looking into an expansive universe.
+
+It must not be sparse.
+
+## SKILLS EXPERIENCE
+
+An impressive kinetic technology sculpture surrounding the existing purple planet.
+
+Four unmistakable flagship technology marks.
+
+Three distinct orbital systems.
+
+Approximately 24–28 additional moving technologies on large desktop screens.
+
+Continuous, graceful motion with meaningful spatial depth.
+
+Better trajectory visualization.
+
+Precise authentic technology logos.
+
+Elegant interaction and refined editorial controls.
+
+The result must be cohesive with the rest of my portfolio.
+
+**Do not merely adjust the current implementation. Refine the underlying algorithms and rendering systems that are responsible for its visual weaknesses.**
+
+I want substantial, coordinated, verifiable changes across the actual production files.
+
+The final result should feel like an original, carefully art-directed digital experience worthy of a premium creative portfolio.

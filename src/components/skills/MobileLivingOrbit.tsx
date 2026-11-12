@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem } from '../../data/skills';
 import {
   FEATURED_ANCHOR_SPECS,
+  FeaturedAnchorTier,
   getRelatedSkillIds,
 } from '../../features/skills/livingOrbitEngine';
 import { TechLogo } from './TechLogo';
@@ -27,33 +28,36 @@ const SHORT_CATEGORY_NAMES: Record<string, string> = {
 };
 
 /**
- * Asymmetric 14-point mobile spatial coordinates in `All` mode:
- * - First 8 slots: Featured Technology Anchors (large, foreground)
- * - Next 6 slots: Secondary cycling marks (midground/ambient)
- * Leaves the central planet core (50%, 48%) visible.
+ * Asymmetric 14-point mobile spatial coordinates in `All` mode (Living Orbit 2.2):
+ * - First 4 slots: Level 1 Primary Featured Anchors (OpenAI, TypeScript, React, Three.js — 48–52px)
+ * - Next 4 slots: Level 2 Secondary Featured Anchors (LangGraph, PostgreSQL, FastAPI, Solidity — 38–40px)
+ * - Next 6 slots: Supporting cycling ambient marks (26–28px)
+ * Leaves the central planet core (50%, 48%) clear and luminous.
  */
 const MOBILE_ALL_SLOTS: readonly {
   x: number;
   y: number;
   size: number;
   isFeatured: boolean;
+  anchorTier: FeaturedAnchorTier | null;
 }[] = [
-  // 8 Featured Technology Anchors framing the planet perimeter with generous clearance
-  { x: 20, y: 24, size: 44, isFeatured: true }, // TypeScript
-  { x: 50, y: 11, size: 42, isFeatured: true }, // React
-  { x: 16, y: 63, size: 42, isFeatured: true }, // Three.js
-  { x: 80, y: 24, size: 46, isFeatured: true }, // OpenAI
-  { x: 84, y: 55, size: 40, isFeatured: true }, // LangGraph
-  { x: 14, y: 43, size: 38, isFeatured: true }, // FastAPI
-  { x: 78, y: 78, size: 40, isFeatured: true }, // Solidity
-  { x: 26, y: 81, size: 40, isFeatured: true }, // PostgreSQL
-  // 6 Secondary Midground/Ambient Slots (placed in open channels away from anchor icons & captions)
-  { x: 22, y: 7, size: 26, isFeatured: false },
-  { x: 78, y: 7, size: 26, isFeatured: false },
-  { x: 86, y: 39, size: 27, isFeatured: false },
-  { x: 50, y: 72, size: 28, isFeatured: false },
-  { x: 52, y: 92, size: 26, isFeatured: false },
-  { x: 86, y: 93, size: 26, isFeatured: false },
+  // 4 Primary Featured Anchors (Level 1 — Dominant Focal Anchors, 48–52px)
+  { x: 80, y: 23, size: 52, isFeatured: true, anchorTier: 'primary' }, // OpenAI
+  { x: 20, y: 24, size: 50, isFeatured: true, anchorTier: 'primary' }, // TypeScript
+  { x: 50, y: 8.5, size: 48, isFeatured: true, anchorTier: 'primary' }, // React
+  { x: 16, y: 63, size: 48, isFeatured: true, anchorTier: 'primary' }, // Three.js
+  // 4 Secondary Featured Anchors (Level 2 — Supporting Focal Anchors, 38–40px)
+  { x: 84, y: 55, size: 40, isFeatured: true, anchorTier: 'secondary' }, // LangGraph
+  { x: 26, y: 81, size: 40, isFeatured: true, anchorTier: 'secondary' }, // PostgreSQL
+  { x: 14, y: 43, size: 38, isFeatured: true, anchorTier: 'secondary' }, // FastAPI
+  { x: 78, y: 78, size: 38, isFeatured: true, anchorTier: 'secondary' }, // Solidity
+  // 6 Supporting Ambient Slots (placed in open channels away from anchor icons & captions)
+  { x: 22, y: 7, size: 26, isFeatured: false, anchorTier: null },
+  { x: 78, y: 7, size: 26, isFeatured: false, anchorTier: null },
+  { x: 86, y: 39, size: 27, isFeatured: false, anchorTier: null },
+  { x: 50, y: 72, size: 28, isFeatured: false, anchorTier: null },
+  { x: 52, y: 92, size: 26, isFeatured: false, anchorTier: null },
+  { x: 86, y: 93, size: 26, isFeatured: false, anchorTier: null },
 ];
 
 /**
@@ -132,6 +136,7 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
           y: slot.y,
           size: slot.size,
           showLabel: true,
+          anchorTier: null as FeaturedAnchorTier | null,
         };
       });
     }
@@ -156,6 +161,7 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
         y: slot.y,
         size: slot.size,
         showLabel: slot.isFeatured,
+        anchorTier: slot.anchorTier,
       };
     });
   }, [selectedCategoryId, waveIndex]);
@@ -209,14 +215,15 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
 
       {/* ─── 2. ASYMMETRIC MOBILE 2.5D SPATIAL SCULPTURE OVER THE PLANET ─── */}
       <div
-        className="relative w-full max-w-[420px] h-[430px] my-1 select-none"
+        className="relative w-full max-w-[420px] h-[435px] my-1 select-none"
         style={{ perspective: '900px', transformStyle: 'preserve-3d' }}
       >
-        {positionedMobileNodes.map(({ skill, x, y, size, showLabel }, idx) => {
+        {positionedMobileNodes.map(({ skill, x, y, size, showLabel, anchorTier }, idx) => {
           const isFocused = focusedSkillId === skill.id;
           const isRelated = relatedSet.has(skill.id);
           const isDimmed = Boolean(focusedSkillId && !isFocused && !isRelated);
-          const zPx = isFocused ? 42 : showLabel ? 18 : -36;
+          const isPrimary = anchorTier === 'primary';
+          const zPx = isFocused ? 42 : isPrimary ? 28 : showLabel ? 14 : -36;
 
           return (
             <button
@@ -232,13 +239,17 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
                 }
               }}
               className={`absolute flex flex-col items-center justify-center p-1 transition-all duration-300 cursor-pointer ${
-                isDimmed ? 'opacity-20 scale-90' : showLabel || isFocused || isRelated ? 'opacity-100' : 'opacity-80'
+                isDimmed
+                  ? 'opacity-20 scale-90'
+                  : showLabel || isFocused || isRelated
+                  ? 'opacity-100'
+                  : 'opacity-80'
               }`}
               style={{
                 left: `${x}%`,
                 top: `${y}%`,
                 transform: `translate3d(-50%, -50%, ${zPx}px)`,
-                zIndex: isFocused ? 40 : showLabel ? 25 : 15,
+                zIndex: isFocused ? 40 : isPrimary ? 30 : showLabel ? 22 : 14,
               }}
             >
               <div
@@ -247,6 +258,8 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
                   animationDelay: `${(idx * 0.55) % 4}s`,
                   filter: isFocused
                     ? `drop-shadow(0 0 18px ${skill.brandColor}) drop-shadow(0 2px 6px rgba(0,0,0,0.8))`
+                    : isPrimary
+                    ? `drop-shadow(0 6px 14px rgba(0,0,0,0.8)) drop-shadow(0 0 14px ${skill.brandColor}55)`
                     : `drop-shadow(0 4px 12px rgba(0,0,0,0.75)) drop-shadow(0 0 10px ${skill.brandColor}40)`,
                 }}
               >
@@ -258,7 +271,9 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
                   className={`mt-1 font-mono text-[9.5px] tracking-[0.1em] whitespace-nowrap ${
                     isFocused
                       ? 'text-white font-semibold bg-[#060218]/90 px-1.5 py-0.5 rounded border border-white/15'
-                      : 'text-white/82 drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
+                      : isPrimary
+                      ? 'text-white/90 font-medium drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
+                      : 'text-white/75 drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
                   }`}
                 >
                   {skill.name}
