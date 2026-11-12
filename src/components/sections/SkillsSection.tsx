@@ -100,7 +100,7 @@ export const SkillsSection: React.FC = () => {
       />
 
       {/* ─── 2. MINIMAL EDITORIAL HEADER ─── */}
-      <div className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center relative z-10 mb-2">
+      <div className="w-full max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col items-center text-center relative z-10 mb-2">
         <span className="font-mono text-[10px] tracking-[0.32em] uppercase text-white/40 mb-1 select-none">
           02 · Technical Architecture
         </span>

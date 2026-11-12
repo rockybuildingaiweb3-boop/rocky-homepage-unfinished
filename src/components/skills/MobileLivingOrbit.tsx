@@ -38,22 +38,22 @@ const MOBILE_ALL_SLOTS: readonly {
   size: number;
   isFeatured: boolean;
 }[] = [
-  // 8 Featured Technology Anchors framing the planet perimeter
-  { x: 22, y: 22, size: 46, isFeatured: true }, // TypeScript
-  { x: 51, y: 11, size: 44, isFeatured: true }, // React
-  { x: 16, y: 62, size: 44, isFeatured: true }, // Three.js
-  { x: 79, y: 20, size: 48, isFeatured: true }, // OpenAI
-  { x: 84, y: 52, size: 42, isFeatured: true }, // LangGraph
-  { x: 14, y: 41, size: 40, isFeatured: true }, // FastAPI
-  { x: 78, y: 78, size: 42, isFeatured: true }, // Solidity
-  { x: 25, y: 81, size: 42, isFeatured: true }, // PostgreSQL
-  // 6 Secondary Midground/Ambient Slots (flanking the planet without covering its core)
-  { x: 14, y: 9, size: 31, isFeatured: false },
-  { x: 86, y: 8, size: 31, isFeatured: false },
-  { x: 86, y: 35, size: 33, isFeatured: false },
-  { x: 14, y: 91, size: 30, isFeatured: false },
-  { x: 52, y: 90, size: 32, isFeatured: false },
-  { x: 88, y: 91, size: 30, isFeatured: false },
+  // 8 Featured Technology Anchors framing the planet perimeter with generous clearance
+  { x: 20, y: 24, size: 44, isFeatured: true }, // TypeScript
+  { x: 50, y: 11, size: 42, isFeatured: true }, // React
+  { x: 16, y: 63, size: 42, isFeatured: true }, // Three.js
+  { x: 80, y: 24, size: 46, isFeatured: true }, // OpenAI
+  { x: 84, y: 55, size: 40, isFeatured: true }, // LangGraph
+  { x: 14, y: 43, size: 38, isFeatured: true }, // FastAPI
+  { x: 78, y: 78, size: 40, isFeatured: true }, // Solidity
+  { x: 26, y: 81, size: 40, isFeatured: true }, // PostgreSQL
+  // 6 Secondary Midground/Ambient Slots (placed in open channels away from anchor icons & captions)
+  { x: 22, y: 7, size: 26, isFeatured: false },
+  { x: 78, y: 7, size: 26, isFeatured: false },
+  { x: 86, y: 39, size: 27, isFeatured: false },
+  { x: 50, y: 72, size: 28, isFeatured: false },
+  { x: 52, y: 92, size: 26, isFeatured: false },
+  { x: 86, y: 93, size: 26, isFeatured: false },
 ];
 
 /**
@@ -207,12 +207,16 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
         </div>
       </nav>
 
-      {/* ─── 2. ASYMMETRIC MOBILE SPATIAL SCULPTURE OVER THE PLANET ─── */}
-      <div className="relative w-full max-w-[420px] h-[420px] my-1 select-none">
+      {/* ─── 2. ASYMMETRIC MOBILE 2.5D SPATIAL SCULPTURE OVER THE PLANET ─── */}
+      <div
+        className="relative w-full max-w-[420px] h-[430px] my-1 select-none"
+        style={{ perspective: '900px', transformStyle: 'preserve-3d' }}
+      >
         {positionedMobileNodes.map(({ skill, x, y, size, showLabel }, idx) => {
           const isFocused = focusedSkillId === skill.id;
           const isRelated = relatedSet.has(skill.id);
           const isDimmed = Boolean(focusedSkillId && !isFocused && !isRelated);
+          const zPx = isFocused ? 42 : showLabel ? 18 : -36;
 
           return (
             <button
@@ -227,12 +231,13 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
                   onSelectSkill(skill.id);
                 }
               }}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center p-1 transition-all duration-300 cursor-pointer ${
-                isDimmed ? 'opacity-20 scale-90' : 'opacity-100'
+              className={`absolute flex flex-col items-center justify-center p-1 transition-all duration-300 cursor-pointer ${
+                isDimmed ? 'opacity-20 scale-90' : showLabel || isFocused || isRelated ? 'opacity-100' : 'opacity-80'
               }`}
               style={{
                 left: `${x}%`,
                 top: `${y}%`,
+                transform: `translate3d(-50%, -50%, ${zPx}px)`,
                 zIndex: isFocused ? 40 : showLabel ? 25 : 15,
               }}
             >
@@ -253,7 +258,7 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
                   className={`mt-1 font-mono text-[9.5px] tracking-[0.1em] whitespace-nowrap ${
                     isFocused
                       ? 'text-white font-semibold bg-[#060218]/90 px-1.5 py-0.5 rounded border border-white/15'
-                      : 'text-white/80 drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
+                      : 'text-white/82 drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
                   }`}
                 >
                   {skill.name}

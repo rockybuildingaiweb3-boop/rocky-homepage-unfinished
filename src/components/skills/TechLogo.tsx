@@ -11,31 +11,33 @@ export interface TechLogoProps {
 }
 
 /**
- * Optical Mass Normalization Multipliers (Living Orbit 2.0)
+ * Optical Mass Normalization Multipliers (Living Orbit 2.1)
  *
  * Calibrates perceived visual weight across all 88 technology marks so a 48px React
  * orbital atom, a 48px dense TypeScript square, and a 48px thin Three.js wireframe
  * feel optically balanced without placing icons inside generic circles:
  * - Dense solid square/shield marks (TypeScript, JS, HTML5, Unstructured) are tempered (< 1.0).
  * - Thin-stroke wireframe, open-lattice, or wide horizontal marks (Three.js, React, GraphQL,
- *   WebGL, LangGraph, Solidity, Express, Docker, Kubernetes) receive a calibrated boost (> 1.0).
+ *   WebGL, LangGraph, Solidity, Express, Docker, Kubernetes, Rust, PyTorch) receive a calibrated boost (> 1.0).
  */
-const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
+export const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
   // Dense solid squares / heavy shields -> tempered optical scale
   typescript: 0.85,
   javascript: 0.85,
   html5: 0.88,
+  css3: 0.89,
   unstructured: 0.84,
   dify: 0.92,
   coze: 0.92,
   privy: 0.93,
   // Intricate wireframe / thin-stroke / open-geometry / wide marks -> boosted optical scale
-  threedotjs: 1.14,
+  threedotjs: 1.15,
   react: 1.09,
   openai: 1.07,
   langgraph: 1.12,
   langchain: 1.1,
   llamaindex: 1.08,
+  llamaparse: 1.06,
   solidity: 1.12,
   postgresql: 1.06,
   fastapi: 1.06,
@@ -44,12 +46,17 @@ const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
   webgpu: 1.08,
   glsl: 1.1,
   r3f: 1.1,
+  draco: 1.06,
+  spline: 1.05,
+  canvasapi: 1.05,
   mcp: 1.1,
   erc4337: 1.09,
   siwe: 1.08,
   viem: 1.08,
   wagmi: 1.09,
   ethers: 1.06,
+  hardhat: 1.05,
+  foundry: 1.06,
   express: 1.12,
   flask: 1.1,
   vercel: 1.04,
@@ -57,10 +64,21 @@ const OPTICAL_MASS_MULTIPLIER: Record<string, number> = {
   kafka: 1.1,
   thegraph: 1.08,
   pinecone: 1.08,
+  chroma: 1.05,
   docker: 1.07,
   kubernetes: 1.06,
   tailwindcss: 1.08,
   nodedotjs: 1.04,
+  rust: 1.06,
+  go: 1.06,
+  redis: 1.04,
+  mongodb: 1.06,
+  supabase: 1.05,
+  anthropic: 1.06,
+  pytorch: 1.06,
+  cohere: 1.06,
+  groq: 1.06,
+  togetherai: 1.06,
   prisma: 1.08,
   trpc: 1.06,
   qdrant: 1.05,

@@ -1,36 +1,34 @@
 /**
- * LIVING ORBIT 2.0 — Orbital Kinetic Sculpture Spatial & Trajectory Engine
+ * LIVING ORBIT 2.1 — Orbital Kinetic Sculpture Spatial & True 2.5D Trajectory Engine
  *
  * Art-directed 2.5D/3D spatial engine for the 88 validated technologies:
  *
  * 1. FEATURED TECHNOLOGY ANCHORS (8 Maintainable Flagship Marks):
  *    - Verified against the 88-skill registry:
  *      `react`, `typescript`, `threedotjs`, `openai`, `fastapi`, `postgresql`, `langgraph`, `solidity`
- *      (Note: `python` is not a standalone entry in the 88-skill registry; `fastapi` represents the
- *      Python backend stack alongside `solidity` for smart-contract architecture).
  *    - Independent presentation configuration (does not mutate canonical Core/Professional/Ecosystem tiers).
- *    - Suspended in an asymmetric 3D arrangement framing the rotating purple planet
- *      (leaving the central planetary core at ~50%, 42% unobstructed).
- *    - Art-directed display scales (58px–76px) with multi-harmonic zero-G organic floating.
+ *    - Suspended in an expansive, asymmetric 3D arrangement framing the rotating purple planet
+ *      (leaving the central planetary core at ~50%, 43% unobstructed).
+ *    - Art-directed display scales (58px–76px) with restrained, near-stationary multi-harmonic breathing.
  *
- * 2. THREE DISTINCT TRAJECTORY SYSTEMS (Replacing Horizontal Rows):
+ * 2. THREE DISTINCT TRAJECTORY SYSTEMS:
  *    - ORBIT A — INNER CELESTIAL FLOW (`orbit-inner-celestial`):
  *      A broad, tilted, asymmetric elliptical trajectory (-19° inclination with harmonic radial
- *      modulation) positioned close to the planetary focal region. Carries primary Core and
- *      flagship Professional marks with higher prominence.
+ *      modulation) cradling the planetary focal region. Carries primary Core and flagship
+ *      Professional marks in the foreground/midground depth plane.
  *    - ORBIT B — KINETIC SWEEP (`orbit-kinetic-sweep`):
- *      A large diagonal, counter-flowing 3D Cubic Bézier sweeping trajectory across the
- *      planetary expanse. Carries the majority of supporting Professional technologies.
+ *      An expansive diagonal, counter-flowing 3D Cubic Bézier sweeping trajectory across the
+ *      planetary expanse. Carries supporting Professional technologies.
  *    - ORBIT C — DEEP HORIZON (`orbit-deep-horizon`):
  *      A wide peripheral catenary-spline trajectory in deep ambient space with slower velocity,
- *      smaller scale, and subtler illumination for Ecosystem & peripheral technologies.
+ *      recessed z-depth, and subtler illumination for Ecosystem & peripheral technologies.
  *
- * 3. INTELLIGENT 88-SKILL MANAGEMENT & CATEGORY REORGANIZATION:
- *    - Preserves all 88 validated technologies across 8 categories.
- *    - In ALL mode: 8 Featured Anchors remain continuously visible while ~19–22 additional
- *      technologies flow through the 3 trajectory apertures with smooth horizon fade-ins/outs.
- *    - In Category mode: Smoothly reorganizes the 11 category technologies into an asymmetric
- *      sculptural formation while reducing unrelated technologies to quiet peripheral depth.
+ * 3. TRUE 2.5D PERSPECTIVE DEPTH (`zPx`) WITHOUT DOUBLE SCALING:
+ *    - Maps normalized `depth` ([0.56..1.08]) to physical `zPx` ([-165px..+85px]) inside a
+ *      `perspective: 1100px` CSS 3D stage.
+ *    - Because CSS perspective automatically scales elements by `1100 / (1100 - zPx)`,
+ *      `evaluateSculptureTrajectory` outputs pure `designScale` (breathing / horizon taper)
+ *      without multiplying by `depth` a second time.
  */
 
 import {
@@ -51,6 +49,18 @@ export type OrbitSystemId =
   | 'orbit-inner-celestial'
   | 'orbit-kinetic-sweep'
   | 'orbit-deep-horizon';
+
+/** Calibrated CSS 3D perspective distance in pixels for LivingOrbitStage */
+export const STAGE_PERSPECTIVE_PX = 1100;
+
+/**
+ * Converts normalized spatial depth (`0.50..1.08`, where `0.85` is the neutral midground plane)
+ * into physical Z translation in pixels (`-170px..+88px`) for `translate3d(x, y, zPx)`.
+ */
+export function depthToZPx(depth: number): number {
+  const rawZ = (depth - 0.85) * 375;
+  return Math.max(-170, Math.min(88, parseFloat(rawZ.toFixed(2))));
+}
 
 export interface OrbitTrajectoryConfig {
   id: OrbitSystemId;
@@ -80,7 +90,7 @@ export interface OrbitTrajectoryConfig {
   speed: number;
   /** Number of items simultaneously visible along the active trajectory aperture */
   visibleCapacity: number;
-  /** Depth range [minZ, maxZ] where 1.0 = foreground, 0.55 = deep horizon */
+  /** Depth range [minZ, maxZ] where 1.07 = foreground, 0.56 = deep horizon */
   depthRange: [number, number];
   /** Peak depth parameter uPeak in [0, 1] where the trajectory passes closest to the viewer */
   uPeak: number;
@@ -91,8 +101,8 @@ export interface OrbitTrajectoryConfig {
 /**
  * Maintainable Featured Technology Anchor Configuration (8 Verified IDs)
  * Independent of Core / Professional / Ecosystem data tiers.
- * Arranged asymmetrically around the purple planet (center ~ 50%, 42%).
- * Range: 58px–76px (within the 54–76px art direction guideline).
+ * Arranged asymmetrically around the purple planet (center ~ 50%, 43%) with
+ * expansive horizontal reach and restrained near-stationary breathing.
  */
 export interface FeaturedAnchorSpec {
   id: string;
@@ -101,9 +111,9 @@ export interface FeaturedAnchorSpec {
   /** Art-directed desktop pixel size (58px–76px) */
   desktopSize: number;
   mobileSize: number;
-  /** Spatial depth plane (0.90..1.06) */
+  /** Spatial depth plane (0.92..1.07) */
   depth: number;
-  /** Zero-G organic floating amplitudes in stage % */
+  /** Restrained zero-G organic breathing amplitudes in stage % */
   breathAmpX: number;
   breathAmpY: number;
   breathFreq: number;
@@ -112,91 +122,91 @@ export interface FeaturedAnchorSpec {
 export const FEATURED_ANCHOR_SPECS: readonly FeaturedAnchorSpec[] = [
   {
     id: 'typescript',
-    x: 22.5,
-    y: 33.5,
+    x: 20.5,
+    y: 31.0,
     desktopSize: 74,
     mobileSize: 48,
-    depth: 1.04,
-    breathAmpX: 0.46,
-    breathAmpY: 0.72,
-    breathFreq: 0.82,
+    depth: 1.05,
+    breathAmpX: 0.34,
+    breathAmpY: 0.52,
+    breathFreq: 0.68,
   },
   {
     id: 'react',
-    x: 34.5,
-    y: 16.5,
+    x: 35.0,
+    y: 15.0,
     desktopSize: 68,
     mobileSize: 46,
-    depth: 0.98,
-    breathAmpX: 0.52,
-    breathAmpY: 0.64,
-    breathFreq: 0.71,
+    depth: 0.99,
+    breathAmpX: 0.38,
+    breathAmpY: 0.48,
+    breathFreq: 0.62,
   },
   {
     id: 'threedotjs',
-    x: 27.5,
-    y: 63.5,
+    x: 25.5,
+    y: 65.5,
     desktopSize: 72,
     mobileSize: 48,
-    depth: 1.01,
-    breathAmpX: 0.48,
-    breathAmpY: 0.78,
-    breathFreq: 0.76,
+    depth: 1.02,
+    breathAmpX: 0.36,
+    breathAmpY: 0.56,
+    breathFreq: 0.65,
   },
   {
     id: 'openai',
-    x: 73.5,
-    y: 23.5,
+    x: 75.5,
+    y: 21.5,
     desktopSize: 76,
     mobileSize: 50,
-    depth: 1.06,
-    breathAmpX: 0.45,
-    breathAmpY: 0.7,
-    breathFreq: 0.84,
+    depth: 1.07,
+    breathAmpX: 0.32,
+    breathAmpY: 0.5,
+    breathFreq: 0.72,
   },
   {
     id: 'langgraph',
-    x: 81.5,
-    y: 48.5,
+    x: 83.5,
+    y: 49.0,
     desktopSize: 64,
     mobileSize: 44,
-    depth: 0.94,
-    breathAmpX: 0.56,
-    breathAmpY: 0.62,
-    breathFreq: 0.67,
+    depth: 0.95,
+    breathAmpX: 0.4,
+    breathAmpY: 0.46,
+    breathFreq: 0.58,
   },
   {
     id: 'fastapi',
-    x: 15.5,
-    y: 50.5,
+    x: 12.5,
+    y: 51.5,
     desktopSize: 60,
     mobileSize: 42,
-    depth: 0.92,
-    breathAmpX: 0.5,
-    breathAmpY: 0.68,
-    breathFreq: 0.73,
+    depth: 0.93,
+    breathAmpX: 0.38,
+    breathAmpY: 0.5,
+    breathFreq: 0.61,
   },
   {
     id: 'solidity',
-    x: 67.5,
-    y: 71.0,
+    x: 70.5,
+    y: 73.0,
     desktopSize: 58,
     mobileSize: 42,
-    depth: 0.93,
-    breathAmpX: 0.52,
-    breathAmpY: 0.68,
-    breathFreq: 0.74,
+    depth: 0.94,
+    breathAmpX: 0.38,
+    breathAmpY: 0.48,
+    breathFreq: 0.64,
   },
   {
     id: 'postgresql',
-    x: 45.0,
-    y: 79.0,
+    x: 45.5,
+    y: 81.5,
     desktopSize: 62,
     mobileSize: 44,
-    depth: 0.91,
-    breathAmpX: 0.44,
-    breathAmpY: 0.58,
-    breathFreq: 0.63,
+    depth: 0.92,
+    breathAmpX: 0.34,
+    breathAmpY: 0.44,
+    breathFreq: 0.55,
   },
 ] as const;
 
@@ -213,39 +223,39 @@ export const SPATIAL_SPLINES: readonly OrbitTrajectoryConfig[] = [
     id: 'orbit-inner-celestial',
     label: 'Orbit A · Inner Celestial Flow',
     kind: 'tilted-ellipse',
-    p0: { x: 18, y: 58 },
-    p1: { x: 30, y: 12 },
-    p2: { x: 70, y: 14 },
-    p3: { x: 84, y: 42 },
+    p0: { x: 16, y: 59 },
+    p1: { x: 28, y: 11 },
+    p2: { x: 72, y: 13 },
+    p3: { x: 86, y: 41 },
     ellipse: {
       cx: 50.5,
       cy: 44.5,
-      rx: 33.5,
-      ry: 24.5,
+      rx: 35.5,
+      ry: 25.5,
       tiltDeg: -19,
-      startAngle: -2.75,
-      endAngle: 1.65,
-      asymmetryAmp: 3.2,
+      startAngle: -2.8,
+      endAngle: 1.7,
+      asymmetryAmp: 3.4,
     },
     direction: 1,
-    speed: 0.0074,
+    speed: 0.0072,
     visibleCapacity: 7,
-    depthRange: [0.84, 1.06],
+    depthRange: [0.85, 1.06],
     uPeak: 0.46,
-    parallaxFactor: 0.92,
+    parallaxFactor: 0.95,
   },
   {
     // ORBIT B — KINETIC SWEEP
-    // Diagonal counter-flowing cubic Bézier sweep from upper-right horizon across to lower-left & southern limb
+    // Expansive diagonal counter-flowing cubic Bézier sweep from upper-right horizon across to lower-left
     id: 'orbit-kinetic-sweep',
     label: 'Orbit B · Kinetic Sweep',
     kind: 'cubic-bezier',
-    p0: { x: 8, y: 78 },
-    p1: { x: 34, y: 88 },
-    p2: { x: 64, y: 10 },
-    p3: { x: 93, y: 18 },
+    p0: { x: 6, y: 80 },
+    p1: { x: 33, y: 90 },
+    p2: { x: 66, y: 9 },
+    p3: { x: 94, y: 17 },
     direction: -1,
-    speed: 0.0064,
+    speed: 0.006,
     visibleCapacity: 9,
     depthRange: [0.74, 0.98],
     uPeak: 0.54,
@@ -257,16 +267,16 @@ export const SPATIAL_SPLINES: readonly OrbitTrajectoryConfig[] = [
     id: 'orbit-deep-horizon',
     label: 'Orbit C · Deep Horizon',
     kind: 'cubic-bezier',
-    p0: { x: 7, y: 15 },
-    p1: { x: 12, y: 92 },
-    p2: { x: 88, y: 94 },
-    p3: { x: 94, y: 34 },
+    p0: { x: 5, y: 14 },
+    p1: { x: 10, y: 93 },
+    p2: { x: 89, y: 95 },
+    p3: { x: 95, y: 32 },
     direction: 1,
-    speed: 0.0046,
+    speed: 0.0042,
     visibleCapacity: 6,
-    depthRange: [0.58, 0.82],
+    depthRange: [0.56, 0.8],
     uPeak: 0.5,
-    parallaxFactor: 0.38,
+    parallaxFactor: 0.36,
   },
 ] as const;
 
@@ -292,7 +302,7 @@ export interface LivingSkillParticle {
   floatFreq: number;
   /** Individual drift amplitude */
   driftAmp: number;
-  /** Base desktop pixel size (Featured: 58–76px, Core: 46–58px, Prof: 38–48px, Eco: 31–39px) */
+  /** Base desktop pixel size (Featured: 58–76px, Core: 48–57px, Prof: 38–47px, Eco: 31–39px) */
   desktopSize: number;
   /** Base mobile pixel size */
   mobileSize: number;
@@ -302,6 +312,7 @@ export interface LivingSkillParticle {
     y: number;
     scale: number;
     depth: number;
+    zPx: number;
   };
   /** Deep-space peripheral coordinates when another category is selected */
   recessedPos: {
@@ -409,7 +420,7 @@ export function buildTrajectorySvgPath(
     ).toFixed(1)}, ${(orbit.p3.x * scaleX).toFixed(1)} ${(orbit.p3.y * scaleY).toFixed(1)}`;
   }
 
-  const samples = 36;
+  const samples = 40;
   const pts: string[] = [];
   for (let i = 0; i <= samples; i++) {
     const u = i / samples;
@@ -452,7 +463,7 @@ function interleaveByCategory(items: SkillItem[]): SkillItem[] {
 
 /**
  * Asymmetric 11-point sculptural templates around the planet for Category Selection Mode.
- * Leaves the central planet core (x: 40..60, y: 34..58) open and avoids any horizontal rows.
+ * Leaves the central planet core (x: 38..62, y: 33..58) open and avoids any horizontal rows.
  */
 const ASYMMETRIC_CATEGORY_SLOTS: readonly {
   x: number;
@@ -460,27 +471,30 @@ const ASYMMETRIC_CATEGORY_SLOTS: readonly {
   scale: number;
   depth: number;
 }[] = [
-  // Core slots (1..3): Inner asymmetric triad framing the planet
-  { x: 25.0, y: 30.5, scale: 1.16, depth: 1.04 },
-  { x: 74.0, y: 27.0, scale: 1.14, depth: 1.02 },
-  { x: 30.5, y: 65.5, scale: 1.12, depth: 1.0 },
+  // Core slots (1..3): Inner asymmetric triad framing the planet in foreground depth
+  { x: 23.5, y: 29.5, scale: 1.08, depth: 1.05 },
+  { x: 75.5, y: 26.0, scale: 1.06, depth: 1.03 },
+  { x: 29.0, y: 66.0, scale: 1.05, depth: 1.01 },
   // Professional slots (4..8): Sweeping mid-field asymmetric anchors
-  { x: 48.0, y: 11.5, scale: 1.02, depth: 0.94 },
-  { x: 15.0, y: 49.0, scale: 1.0, depth: 0.92 },
-  { x: 82.5, y: 47.5, scale: 1.02, depth: 0.95 },
-  { x: 68.5, y: 68.0, scale: 0.98, depth: 0.91 },
-  { x: 51.5, y: 81.0, scale: 0.96, depth: 0.9 },
+  { x: 48.0, y: 11.5, scale: 0.98, depth: 0.94 },
+  { x: 13.5, y: 49.0, scale: 0.96, depth: 0.92 },
+  { x: 84.0, y: 47.5, scale: 0.98, depth: 0.95 },
+  { x: 69.5, y: 69.0, scale: 0.95, depth: 0.91 },
+  { x: 51.5, y: 82.0, scale: 0.94, depth: 0.89 },
   // Ecosystem slots (9..11): Outer peripheral horizon accents
-  { x: 14.5, y: 21.0, scale: 0.9, depth: 0.82 },
-  { x: 85.0, y: 19.0, scale: 0.88, depth: 0.8 },
-  { x: 18.0, y: 77.5, scale: 0.9, depth: 0.82 },
+  { x: 13.0, y: 20.0, scale: 0.9, depth: 0.78 },
+  { x: 86.5, y: 18.0, scale: 0.89, depth: 0.76 },
+  { x: 16.5, y: 78.5, scale: 0.9, depth: 0.78 },
 ] as const;
 
 function computeCategoryFormationMap(): Map<
   string,
-  { x: number; y: number; scale: number; depth: number }
+  { x: number; y: number; scale: number; depth: number; zPx: number }
 > {
-  const map = new Map<string, { x: number; y: number; scale: number; depth: number }>();
+  const map = new Map<
+    string,
+    { x: number; y: number; scale: number; depth: number; zPx: number }
+  >();
 
   SKILL_CATEGORIES.forEach((cat, catIdx) => {
     const catSkills = SKILLS_DATA.filter((s) => s.categoryId === cat.id);
@@ -500,6 +514,7 @@ function computeCategoryFormationMap(): Map<
         y: parseFloat((slot.y + shiftY).toFixed(2)),
         scale: slot.scale,
         depth: slot.depth,
+        zPx: depthToZPx(slot.depth),
       });
     });
   });
@@ -555,8 +570,9 @@ export function buildLivingOrbitParticles(): LivingSkillParticle[] {
     const formation = formationMap.get(skill.id) || {
       x: spec.x,
       y: spec.y,
-      scale: 1.15,
-      depth: 1.0,
+      scale: 1.06,
+      depth: spec.depth,
+      zPx: depthToZPx(spec.depth),
     };
     const perimAngle = ((globalIdx * 137.508) % 360) * (Math.PI / 180);
 
@@ -575,13 +591,13 @@ export function buildLivingOrbitParticles(): LivingSkillParticle[] {
       oscillationPhase: idx * 1.18,
       secondaryPhase: (idx * 2.39996) % (Math.PI * 2),
       floatFreq: spec.breathFreq,
-      driftAmp: 0.65,
+      driftAmp: 0.45,
       desktopSize: spec.desktopSize,
       mobileSize: spec.mobileSize,
       categoryFormationPos: formation,
       recessedPos: {
-        x: parseFloat((50 + Math.cos(perimAngle) * 43).toFixed(2)),
-        y: parseFloat((50 + Math.sin(perimAngle) * 40).toFixed(2)),
+        x: parseFloat((50 + Math.cos(perimAngle) * 46.5).toFixed(2)),
+        y: parseFloat((50 + Math.sin(perimAngle) * 43.5).toFixed(2)),
       },
     });
     globalIdx++;
@@ -595,10 +611,10 @@ export function buildLivingOrbitParticles(): LivingSkillParticle[] {
     // Perpendicular normal offsets so logos inhabit a spatial volume rather than a single-file track
     const lateralPattern =
       orbit.id === 'orbit-inner-celestial'
-        ? [-3.8, 3.4, -2.1, 4.2, -3.2, 2.5, -4.0, 3.6]
+        ? [-4.2, 3.8, -2.4, 4.6, -3.5, 2.8, -4.4, 3.9]
         : orbit.id === 'orbit-kinetic-sweep'
-        ? [-5.6, 4.8, -2.8, 6.0, -4.2, 3.2, -5.0, 4.5]
-        : [-4.4, 3.8, -2.4, 4.8, -3.6, 2.8, -4.2, 3.9];
+        ? [-6.0, 5.2, -3.2, 6.4, -4.5, 3.6, -5.4, 4.8]
+        : [-4.6, 4.0, -2.6, 5.0, -3.8, 3.0, -4.4, 4.1];
 
     bucket.forEach((skill, slotIndex) => {
       const cat = categoryMap.get(skill.categoryId) || SKILL_CATEGORIES[0];
@@ -607,17 +623,18 @@ export function buildLivingOrbitParticles(): LivingSkillParticle[] {
         y: 50,
         scale: 1.0,
         depth: 0.9,
+        zPx: depthToZPx(0.9),
       };
 
       const perimAngle = ((globalIdx * 137.508) % 360) * (Math.PI / 180);
 
       // Non-uniform Golden-Ratio phase staggering so adjacent slots never form mechanical chains
-      const mod = ((slotIndex % 2 === 0 ? 0.085 : -0.085) / total);
+      const mod = (slotIndex % 2 === 0 ? 0.085 : -0.085) / total;
       const initialPhase = (((slotIndex / total) + mod) % 1 + 1) % 1;
 
-      // Art-directed tier scale ranges per Section 6:
-      // - Other Core technologies: 46–58px (within 44–60px)
-      // - Professional: 38–48px (within 36–50px)
+      // Art-directed tier scale ranges:
+      // - Other Core technologies: 48–57px (within 44–60px)
+      // - Professional: 38–47px (within 36–50px)
       // - Ecosystem: 31–39px (within 30–42px)
       const baseDesktopSize =
         skill.tier === 'core'
@@ -642,18 +659,18 @@ export function buildLivingOrbitParticles(): LivingSkillParticle[] {
         normalOffset: lateralPattern[slotIndex % lateralPattern.length],
         oscillationPhase: (globalIdx * 1.6180339) % (Math.PI * 2),
         secondaryPhase: (globalIdx * 2.3999632) % (Math.PI * 2),
-        floatFreq: 0.62 + ((globalIdx * 7) % 11) * 0.045,
+        floatFreq: 0.58 + ((globalIdx * 7) % 11) * 0.04,
         driftAmp:
           skill.tier === 'core'
-            ? 1.15
+            ? 1.05
             : skill.tier === 'professional'
-            ? 0.95
-            : 0.78,
+            ? 0.88
+            : 0.72,
         desktopSize: Math.round(baseDesktopSize),
         mobileSize: baseMobileSize,
         categoryFormationPos: formation,
         recessedPos: {
-          x: parseFloat((50 + Math.cos(perimAngle) * 44).toFixed(2)),
+          x: parseFloat((50 + Math.cos(perimAngle) * 45).toFixed(2)),
           y: parseFloat((50 + Math.sin(perimAngle) * 41).toFixed(2)),
         },
       });
@@ -668,7 +685,8 @@ export const LIVING_ORBIT_PARTICLES: readonly LivingSkillParticle[] =
   buildLivingOrbitParticles();
 
 /**
- * Evaluates the instantaneous 2.5D spatial position, depth scale, and opacity for a particle
+ * Evaluates the instantaneous 2.5D spatial position (`x`, `y`, `zPx`), pure `designScale`
+ * (without double-applying perspective depth), normalized `depth`, and `opacity` for a particle
  * at elapsed time `timeSec`.
  */
 export function evaluateSculptureTrajectory(
@@ -678,33 +696,41 @@ export function evaluateSculptureTrajectory(
 ): {
   x: number;
   y: number;
+  zPx: number;
   scale: number;
   depth: number;
   opacity: number;
   isVisibleInAperture: boolean;
 } {
-  // ─── CASE 1: FEATURED TECHNOLOGY ANCHOR (Asymmetric composition with multi-harmonic organic float) ───
+  // ─── CASE 1: FEATURED TECHNOLOGY ANCHOR (Asymmetric composition with near-stationary breathing) ───
   if (particle.isFeaturedAnchor && particle.anchorSpec) {
     const spec = particle.anchorSpec;
     const dx =
       Math.sin(timeSec * spec.breathFreq + particle.oscillationPhase) * spec.breathAmpX +
       Math.cos(timeSec * (spec.breathFreq * 0.58) + particle.secondaryPhase) *
-        (spec.breathAmpX * 0.42);
+        (spec.breathAmpX * 0.38);
     const dy =
       Math.cos(timeSec * spec.breathFreq + particle.oscillationPhase * 1.27) * spec.breathAmpY +
       Math.sin(timeSec * (spec.breathFreq * 0.52) + particle.secondaryPhase) *
-        (spec.breathAmpY * 0.46);
+        (spec.breathAmpY * 0.42);
 
-    const x = spec.x + dx + pointerOffset.x * spec.depth * 0.95;
-    const y = spec.y + dy + pointerOffset.y * spec.depth * 0.95;
-    const breathScale =
-      spec.depth * (1 + Math.sin(timeSec * 0.85 + particle.oscillationPhase) * 0.024);
+    const x = spec.x + dx + pointerOffset.x * spec.depth * 0.92;
+    const y = spec.y + dy + pointerOffset.y * spec.depth * 0.92;
+
+    // Subtle depth breathing in Z (+-6px) while CSS perspective provides hardware depth magnification
+    const dynamicDepth =
+      spec.depth + Math.sin(timeSec * 0.65 + particle.oscillationPhase) * 0.016;
+    const zPx = depthToZPx(dynamicDepth);
+
+    // Pure designScale (does NOT multiply by `depth` again, preventing double depth scaling)
+    const designScale = 1 + Math.sin(timeSec * 0.75 + particle.oscillationPhase) * 0.018;
 
     return {
       x,
       y,
-      scale: breathScale,
-      depth: spec.depth,
+      zPx,
+      scale: designScale,
+      depth: dynamicDepth,
       opacity: 1.0,
       isVisibleInAperture: true,
     };
@@ -723,11 +749,13 @@ export function evaluateSculptureTrajectory(
   if (phase > apertureFraction) {
     // Traveling along the far side of the orbit in deep space (smoothly hidden)
     const endPt = orbit.direction === 1 ? orbit.p3 : orbit.p0;
+    const minDepth = orbit.depthRange[0];
     return {
       x: endPt.x,
       y: endPt.y,
-      scale: orbit.depthRange[0] * 0.72,
-      depth: orbit.depthRange[0],
+      zPx: depthToZPx(minDepth),
+      scale: 0.86,
+      depth: minDepth,
       opacity: 0,
       isVisibleInAperture: false,
     };
@@ -745,6 +773,7 @@ export function evaluateSculptureTrajectory(
   const depthNorm = Math.max(0, 1 - distFromPeak * 1.45);
   const [minZ, maxZ] = orbit.depthRange;
   const depth = minZ + (maxZ - minZ) * depthNorm;
+  const zPx = depthToZPx(depth);
 
   // Multi-frequency organic floating around the trajectory volume
   const waveAlongNormal =
@@ -754,7 +783,7 @@ export function evaluateSculptureTrajectory(
       (particle.driftAmp * 0.35);
   const waveTangent =
     Math.cos(timeSec * (particle.floatFreq * 0.78) + particle.oscillationPhase) *
-    (particle.driftAmp * 0.55);
+    (particle.driftAmp * 0.52);
 
   let rawX = curvePt.x + curvePt.nx * waveAlongNormal + curvePt.ny * waveTangent;
   let rawY = curvePt.y + curvePt.ny * waveAlongNormal - curvePt.nx * waveTangent;
@@ -762,28 +791,28 @@ export function evaluateSculptureTrajectory(
   // 1. Planetary Core Exclusion Zone (keeps the central purple sphere at (50, 43.5) unobstructed)
   const cdx = rawX - 50;
   const cdy = rawY - 43.5;
-  const coreRadiusSq = (cdx / 21.0) ** 2 + (cdy / 24.0) ** 2;
+  const coreRadiusSq = (cdx / 21.5) ** 2 + (cdy / 24.5) ** 2;
   if (coreRadiusSq < 1.0 && coreRadiusSq > 0.001) {
     const push = 1.06 / Math.sqrt(coreRadiusSq);
     rawX = 50 + cdx * push;
     rawY = 43.5 + cdy * push;
   }
 
-  // 2. Featured Anchor Repulsion Field (prevents moving logos from overlapping Featured Anchors)
+  // 2. Featured Anchor Repulsion Field (protects both the Featured Anchor mark and its bottom caption)
   for (let a = 0; a < FEATURED_ANCHOR_SPECS.length; a++) {
     const anchor = FEATURED_ANCHOR_SPECS[a];
     const adx = rawX - anchor.x;
-    const ady = rawY - anchor.y;
-    const anchorDistSq = (adx / 9.2) ** 2 + (ady / 11.5) ** 2;
+    const ady = rawY - (anchor.y + 1.8);
+    const anchorDistSq = (adx / 11.4) ** 2 + (ady / 14.8) ** 2;
     if (anchorDistSq < 1.0 && anchorDistSq > 0.0001) {
-      const push = 1.05 / Math.sqrt(anchorDistSq);
+      const push = 1.08 / Math.sqrt(anchorDistSq);
       rawX = anchor.x + adx * push;
-      rawY = anchor.y + ady * push;
+      rawY = anchor.y + 1.8 + ady * push;
     }
   }
 
-  const x = Math.max(5, Math.min(95, rawX + pointerOffset.x * orbit.parallaxFactor * depth));
-  const y = Math.max(7, Math.min(92, rawY + pointerOffset.y * orbit.parallaxFactor * depth));
+  const x = Math.max(4.5, Math.min(95.5, rawX + pointerOffset.x * orbit.parallaxFactor * depth));
+  const y = Math.max(6.5, Math.min(92.5, rawY + pointerOffset.y * orbit.parallaxFactor * depth));
 
   // Smooth horizon entry/exit fade envelope (no visible wrapping jumps)
   const edgeDist = Math.min(u, 1 - u);
@@ -794,13 +823,17 @@ export function evaluateSculptureTrajectory(
     orbit.id === 'orbit-inner-celestial'
       ? 0.96
       : orbit.id === 'orbit-kinetic-sweep'
-      ? 0.86
+      ? 0.87
       : 0.68;
+
+  // Pure designScale (horizon entry/exit taper only — 3D depth magnification comes from `zPx` perspective)
+  const designScale = 0.88 + 0.12 * horizonFade;
 
   return {
     x,
     y,
-    scale: depth * (0.86 + 0.14 * horizonFade),
+    zPx,
+    scale: designScale,
     depth,
     opacity: horizonFade * orbitBrightness,
     isVisibleInAperture: horizonFade > 0.05,

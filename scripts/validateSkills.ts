@@ -7,7 +7,17 @@ import {
   computeGeometryDiagnostics,
   computeCategoryDiversityDiagnostics,
 } from '../src/features/skills/constellationLayout';
-import { SKILLS_DATA } from '../src/data/skills';
+import {
+  LIVING_ORBIT_PARTICLES,
+  FEATURED_ANCHOR_SPECS,
+  SPATIAL_SPLINES,
+  evaluateSculptureTrajectory,
+} from '../src/features/skills/livingOrbitEngine';
+import {
+  STARFIELD_LAYER_SPECS,
+  evaluateStarfieldCoverage,
+} from '../src/components/ui/ParticleBackground';
+import { SKILLS_DATA, SKILL_CATEGORIES } from '../src/data/skills';
 
 /**
  * Repository-level disk verification.
@@ -22,7 +32,7 @@ const nodeFsAssetChecker = (url: string): boolean => {
 const report = validateSkillsDataset(nodeFsAssetChecker);
 
 console.log('==================================================');
-console.log('SKILLS V2 — DATASET & ICON INTEGRITY REPORT');
+console.log('SKILLS V2.1 — DATASET & ICON INTEGRITY REPORT');
 console.log('==================================================');
 console.log(report.formattedReport);
 console.log('==================================================');
@@ -37,14 +47,87 @@ if (!report.isValid) {
   console.log('\n[SKILLS_VALIDATION_SUCCESS] All 88 skills and icon registry entries verified.');
 }
 
-// ─── SPATIAL CONSTELLATION VERIFICATION ───
+// ─── LIVING ORBIT 2.1 & STARFIELD VERIFICATION ───
 console.log('\n==================================================');
-console.log('SKILLS V2 — SPATIAL CONSTELLATION INTEGRITY REPORT');
+console.log('LIVING ORBIT 2.1 — 2.5D SCULPTURE & STARFIELD REPORT');
 console.log('==================================================');
 
 const spatialErrors: string[] = [];
 
-// 1. Verify exact 88 node counts
+// 1. Verify Living Orbit 2.1 particle count & Featured Anchors
+if (LIVING_ORBIT_PARTICLES.length !== 88) {
+  spatialErrors.push(`Living Orbit 2.1 has ${LIVING_ORBIT_PARTICLES.length} particles (expected 88).`);
+}
+if (FEATURED_ANCHOR_SPECS.length !== 8) {
+  spatialErrors.push(`Living Orbit 2.1 has ${FEATURED_ANCHOR_SPECS.length} Featured Anchors (expected 8).`);
+}
+if (SPATIAL_SPLINES.length !== 3) {
+  spatialErrors.push(`Living Orbit 2.1 has ${SPATIAL_SPLINES.length} trajectories (expected 3).`);
+}
+
+const seenInOrbitCycle = new Set<string>();
+for (let t = 0; t <= 240; t += 4) {
+  for (const p of LIVING_ORBIT_PARTICLES) {
+    const st = evaluateSculptureTrajectory(p, t);
+    if (st.isVisibleInAperture) {
+      seenInOrbitCycle.add(p.skill.id);
+    }
+    if (!Number.isFinite(st.zPx) || st.zPx < -175 || st.zPx > 95) {
+      spatialErrors.push(`Invalid zPx=${st.zPx} for ${p.skill.id} at t=${t}`);
+    }
+  }
+}
+if (seenInOrbitCycle.size !== 88) {
+  spatialErrors.push(
+    `Living Orbit 2.1 cycled ${seenInOrbitCycle.size}/88 skills across t=0..240s (expected all 88).`
+  );
+}
+
+for (const cat of SKILL_CATEGORIES) {
+  const catCount = LIVING_ORBIT_PARTICLES.filter((p) => p.skill.categoryId === cat.id).length;
+  if (catCount !== 11) {
+    spatialErrors.push(`Category ${cat.id} has ${catCount} particles (expected 11).`);
+  }
+}
+
+// 2. Verify 4-layer Global Starfield parity & multi-viewport corner/quadrant coverage
+const cov1440 = evaluateStarfieldCoverage(1440, 900);
+const cov1920 = evaluateStarfieldCoverage(1920, 1080);
+const covMobile = evaluateStarfieldCoverage(390, 844);
+
+if (STARFIELD_LAYER_SPECS.length !== 4 || cov1440.totalStars !== 5725) {
+  spatialErrors.push(
+    `Starfield expected 4 layers and 5,725 total stars, got ${STARFIELD_LAYER_SPECS.length} layers and ${cov1440.totalStars} stars.`
+  );
+}
+
+for (const [label, cov] of [
+  ['1440x900', cov1440],
+  ['1920x1080', cov1920],
+  ['390x844', covMobile],
+] as const) {
+  if (
+    cov.corners.topLeft < 40 ||
+    cov.corners.topRight < 40 ||
+    cov.corners.bottomLeft < 40 ||
+    cov.corners.bottomRight < 40
+  ) {
+    spatialErrors.push(
+      `Starfield corner coverage too low at ${label}: ${JSON.stringify(cov.corners)}`
+    );
+  }
+}
+
+console.log(`Living Orbit Particles: ${LIVING_ORBIT_PARTICLES.length} / 88`);
+console.log(`Featured Anchors:       ${FEATURED_ANCHOR_SPECS.length} (${FEATURED_ANCHOR_SPECS.map((a) => a.id).join(', ')})`);
+console.log(`Trajectory Systems:     ${SPATIAL_SPLINES.length} (${SPATIAL_SPLINES.map((s) => s.id).join(', ')})`);
+console.log(`Cycled in Aperture:     ${seenInOrbitCycle.size} / 88`);
+console.log(`Starfield Total Stars:  ${cov1440.totalStars} (tiny=${cov1440.layerCounts.tiny}, medium=${cov1440.layerCounts.medium}, bright=${cov1440.layerCounts.bright}, accent=${cov1440.layerCounts.accent})`);
+console.log(`Starfield 1440x900:     Quadrants=${JSON.stringify(cov1440.quadrants)} | Corners=${JSON.stringify(cov1440.corners)}`);
+console.log(`Starfield 1920x1080:    Quadrants=${JSON.stringify(cov1920.quadrants)} | Corners=${JSON.stringify(cov1920.corners)}`);
+console.log(`Starfield 390x844:      Quadrants=${JSON.stringify(covMobile.quadrants)} | Corners=${JSON.stringify(covMobile.corners)}`);
+
+// 3. Legacy constellation checks
 if (DESKTOP_CONSTELLATION.nodePositions.size !== 88) {
   spatialErrors.push(`Desktop constellation has ${DESKTOP_CONSTELLATION.nodePositions.size} nodes (expected 88).`);
 }
@@ -52,7 +135,6 @@ if (MOBILE_CONSTELLATION.nodePositions.size !== 88) {
   spatialErrors.push(`Mobile constellation has ${MOBILE_CONSTELLATION.nodePositions.size} nodes (expected 88).`);
 }
 
-// 2. Verify all skills mapped
 for (const s of SKILLS_DATA) {
   if (!DESKTOP_CONSTELLATION.nodePositions.has(s.id)) {
     spatialErrors.push(`Skill ${s.id} missing from Desktop constellation.`);
@@ -62,125 +144,18 @@ for (const s of SKILLS_DATA) {
   }
 }
 
-// 3. Verify Desktop collisions & planet clearance
-const desktopNodes = DESKTOP_CONSTELLATION.nodeList;
-let desktopCollisions = 0;
-let desktopPlanetCollisions = 0;
-
-for (let i = 0; i < desktopNodes.length; i++) {
-  const n1 = desktopNodes[i];
-  // Planet clearance: rx=19.5, ry=20.5
-  const dPlanet = Math.sqrt(((n1.x - 50) / 19.5) ** 2 + ((n1.y - 50) / 20.5) ** 2);
-  if (dPlanet < 1.0) desktopPlanetCollisions++;
-
-  // Viewport bounds
-  if (n1.x < 3.0 || n1.x > 97.0 || n1.y < 3.0 || n1.y > 97.0) {
-    spatialErrors.push(`Desktop node ${n1.id} out of bounds: (${n1.x}%, ${n1.y}%)`);
-  }
-
-  for (let j = i + 1; j < desktopNodes.length; j++) {
-    const n2 = desktopNodes[j];
-    const dx = n2.x - n1.x;
-    const dy = n2.y - n1.y;
-    const normDist = Math.sqrt((dx / 4.4) ** 2 + (dy / 6.0) ** 2);
-    if (normDist < 1.0) desktopCollisions++;
-  }
-}
-
-// 4. Verify Mobile collisions & planet clearance
-const mobileNodes = MOBILE_CONSTELLATION.nodeList;
-let mobileCollisions = 0;
-let mobilePlanetCollisions = 0;
-
-for (let i = 0; i < mobileNodes.length; i++) {
-  const n1 = mobileNodes[i];
-  const dPlanet = Math.sqrt(((n1.x - 50) / 18.0) ** 2 + ((n1.y - 50) / 15.0) ** 2);
-  if (dPlanet < 1.0) mobilePlanetCollisions++;
-
-  if (n1.x < 3.0 || n1.x > 97.0 || n1.y < 3.0 || n1.y > 97.5) {
-    spatialErrors.push(`Mobile node ${n1.id} out of bounds: (${n1.x}%, ${n1.y}%)`);
-  }
-
-  for (let j = i + 1; j < mobileNodes.length; j++) {
-    const n2 = mobileNodes[j];
-    const dx = n2.x - n1.x;
-    const dy = n2.y - n1.y;
-    const normDist = Math.sqrt((dx / 8.4) ** 2 + (dy / 3.6) ** 2);
-    if (normDist < 1.0) mobileCollisions++;
-  }
-}
-
-// 5. Geometry Diagnostics Computation (Computed from actual final positions)
 const desktopDiag = computeGeometryDiagnostics(DESKTOP_CONSTELLATION);
-const mobileDiag = computeGeometryDiagnostics(MOBILE_CONSTELLATION);
-
-// 6. Category Adjacency Diversity Diagnostics (Prompt 03-C)
 const desktopDiversity = computeCategoryDiversityDiagnostics(DESKTOP_CONSTELLATION, 4);
-const mobileDiversity = computeCategoryDiversityDiagnostics(MOBILE_CONSTELLATION, 4);
-
-if (desktopDiversity.sameCategoryPercentage > 10.0) {
-  spatialErrors.push(
-    `Desktop same-category neighbor percentage too high: ${desktopDiversity.sameCategoryPercentage}% (expected < 10%).`
-  );
-}
-if (mobileDiversity.sameCategoryPercentage > 10.0) {
-  spatialErrors.push(
-    `Mobile same-category neighbor percentage too high: ${mobileDiversity.sameCategoryPercentage}% (expected < 10%).`
-  );
-}
-if (desktopDiversity.maxQuadrantConcentration > 5) {
-  spatialErrors.push(
-    `Desktop category quadrant concentration too high: max ${desktopDiversity.maxQuadrantConcentration} nodes in one quadrant (expected <= 5).`
-  );
-}
-if (mobileDiversity.maxQuadrantConcentration > 5) {
-  spatialErrors.push(
-    `Mobile category quadrant concentration too high: max ${mobileDiversity.maxQuadrantConcentration} nodes in one quadrant (expected <= 5).`
-  );
-}
-
-console.log(`Desktop Nodes:          ${desktopNodes.length} / 88`);
-console.log(`Mobile Nodes:           ${mobileNodes.length} / 88`);
-console.log(`Desktop Collisions:     ${desktopCollisions}`);
-console.log(`Desktop Planet Bounds:  ${desktopPlanetCollisions}`);
-console.log(`Mobile Collisions:      ${mobileCollisions}`);
-console.log(`Mobile Planet Bounds:   ${mobilePlanetCollisions}`);
-console.log(`Editorial Labels:       ${DESKTOP_CONSTELLATION.categoryLabels.length} / 8`);
-
-console.log('\n--- DESKTOP GEOMETRY DIAGNOSTICS ---');
-console.log(`Radial distance:        min=${desktopDiag.radialDistance.min}% | max=${desktopDiag.radialDistance.max}% | mean=${desktopDiag.radialDistance.mean}% | stdDev=${desktopDiag.radialDistance.stdDev}%`);
-console.log(`Angular distribution:   ${JSON.stringify(desktopDiag.angularBins)} (8 bins: [0-45°, 45-90°, 90-135°, 135-180°, 180-225°, 225-270°, 270-315°, 315-360°])`);
-console.log(`Quadrant distribution:  UL=${desktopDiag.quadrants.upperLeft} | UR=${desktopDiag.quadrants.upperRight} | LL=${desktopDiag.quadrants.lowerLeft} | LR=${desktopDiag.quadrants.lowerRight}`);
-console.log(`Nearest-neighbor dist:  min=${desktopDiag.nearestNeighborDistance.min}% | mean=${desktopDiag.nearestNeighborDistance.mean}% | stdDev=${desktopDiag.nearestNeighborDistance.stdDev}%`);
-
-console.log('\n--- DESKTOP CATEGORY ADJACENCY DIVERSITY (k=4) ---');
-console.log(`Avg same-category neighbors: ${desktopDiversity.avgSameCategoryNeighbors} / 4`);
-console.log(`Same-category neighbor rate: ${desktopDiversity.sameCategoryPercentage}% (Baseline random: 12.5%, Clustered: >60%)`);
-console.log(`Avg distinct categories/hood: ${desktopDiversity.avgDistinctCategoriesInNeighborhood} / 5`);
-console.log(`Max single-quadrant share:  ${desktopDiversity.maxQuadrantConcentration} / 11 items per category (no quadrant monopoly)`);
-
-console.log('\n--- MOBILE GEOMETRY DIAGNOSTICS ---');
-console.log(`Radial distance:        min=${mobileDiag.radialDistance.min}% | max=${mobileDiag.radialDistance.max}% | mean=${mobileDiag.radialDistance.mean}% | stdDev=${mobileDiag.radialDistance.stdDev}%`);
-console.log(`Angular distribution:   ${JSON.stringify(mobileDiag.angularBins)} (8 bins: [0-45°, 45-90°, 90-135°, 135-180°, 180-225°, 225-270°, 270-315°, 315-360°])`);
-console.log(`Quadrant distribution:  UL=${mobileDiag.quadrants.upperLeft} | UR=${mobileDiag.quadrants.upperRight} | LL=${mobileDiag.quadrants.lowerLeft} | LR=${mobileDiag.quadrants.lowerRight}`);
-console.log(`Nearest-neighbor dist:  min=${mobileDiag.nearestNeighborDistance.min}% | mean=${mobileDiag.nearestNeighborDistance.mean}% | stdDev=${mobileDiag.nearestNeighborDistance.stdDev}%`);
-
-console.log('\n--- MOBILE CATEGORY ADJACENCY DIVERSITY (k=4) ---');
-console.log(`Avg same-category neighbors: ${mobileDiversity.avgSameCategoryNeighbors} / 4`);
-console.log(`Same-category neighbor rate: ${mobileDiversity.sameCategoryPercentage}% (Baseline random: 12.5%, Clustered: >60%)`);
-console.log(`Avg distinct categories/hood: ${mobileDiversity.avgDistinctCategoriesInNeighborhood} / 5`);
-console.log(`Max single-quadrant share:  ${mobileDiversity.maxQuadrantConcentration} / 11 items per category (no quadrant monopoly)`);
+console.log(`Legacy Constellation:   Desktop=${DESKTOP_CONSTELLATION.nodeList.length}/88 | NN min=${desktopDiag.nearestNeighborDistance.min}% | Same-cat rate=${desktopDiversity.sameCategoryPercentage}%`);
 console.log('==================================================');
 
 if (spatialErrors.length > 0) {
-  console.error('\n[CONSTELLATION_VALIDATION_ERROR] Spatial validation failed:');
+  console.error('\n[LIVING_ORBIT_VALIDATION_ERROR] Spatial validation failed:');
   spatialErrors.forEach((err, idx) => {
     console.error(`  ${idx + 1}. ${err}`);
   });
   process.exit(1);
 } else {
-  console.log('\n[CONSTELLATION_VALIDATION_SUCCESS] Constellation spatial composition verified.\n');
+  console.log('\n[LIVING_ORBIT_VALIDATION_SUCCESS] Living Orbit 2.1 & Global Starfield verified.\n');
   process.exit(0);
 }
-
-

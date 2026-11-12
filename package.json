@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx scripts/validateSkills.ts",
+    "test": "tsx scripts/validateSkills.ts && tsx --test src/features/skills/livingOrbitEngine.test.ts",
     "validate:skills": "tsx scripts/validateSkills.ts",
     "validate:icons": "tsx scripts/validateIcons.ts",
     "optimize:flower": "node scripts/process-flower.cjs"

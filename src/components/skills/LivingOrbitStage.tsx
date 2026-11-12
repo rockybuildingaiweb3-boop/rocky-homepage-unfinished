@@ -3,6 +3,8 @@ import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
 import {
   LIVING_ORBIT_PARTICLES,
   SPATIAL_SPLINES,
+  STAGE_PERSPECTIVE_PX,
+  depthToZPx,
   evaluateSculptureTrajectory,
   computeFocusedNetworkPositions,
   buildTrajectorySvgPath,
@@ -38,6 +40,7 @@ const EDITORIAL_CATEGORY_LABELS: Record<string, string> = {
 interface ParticleAnimState {
   x: number;
   y: number;
+  zPx: number;
   scale: number;
   depth: number;
   opacity: number;
@@ -45,18 +48,18 @@ interface ParticleAnimState {
 }
 
 /**
- * LivingOrbitStage — LIVING ORBIT 2.0 (Orbital Kinetic Sculpture)
+ * LivingOrbitStage — LIVING ORBIT 2.1 (True 2.5D Orbital Kinetic Sculpture)
  *
+ * - Calibrated CSS 3D `perspective: 1100px` and `transform-style: preserve-3d` stage
+ *   where each technology object is positioned via `translate3d(x, y, zPx)` without
+ *   double-applying depth scaling.
  * - 8 verified Featured Technology Anchors with art-directed optical scales (58–76px)
- *   and multi-harmonic zero-G organic floating.
+ *   and restrained, near-stationary multi-harmonic zero-G breathing.
  * - 3 distinct trajectory systems:
  *   • Orbit A (Inner Celestial Flow): Tilted asymmetric elliptical arc framing the planet
- *   • Orbit B (Kinetic Sweep): Diagonal counter-flowing cubic Bézier sweep
+ *   • Orbit B (Kinetic Sweep): Expansive diagonal counter-flowing cubic Bézier sweep
  *   • Orbit C (Deep Horizon): Wide peripheral deep-space trajectory
- * - GPU-composited `transform: translate3d(...)` animation loop (measured via ResizeObserver,
- *   zero per-frame `left`/`top` layout thrashing, auto-paused offscreen or when tab hidden).
- * - Focus Dilation: Selecting a skill stabilizes its network while the surrounding orbital
- *   universe continues drifting gently in dilated time.
+ * - Pre-filtered visible-only pairwise separation pass & dynamic depth-based zIndex ordering.
  */
 export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   selectedCategoryId,
@@ -71,8 +74,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   const isMobile = useIsMobile(768);
   const stageRef = useRef<HTMLDivElement>(null);
   const stageBoundsRef = useRef<{ width: number; height: number }>({
-    width: 1360,
-    height: 630,
+    width: 1440,
+    height: 660,
   });
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const relationPathRefs = useRef<(SVGPathElement | null)[]>([]);
@@ -138,6 +141,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
       return {
         x: init.x,
         y: init.y,
+        zPx: init.zPx,
         scale: init.scale,
         depth: init.depth,
         opacity: init.opacity,
@@ -236,8 +240,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     const ny = (pctY / 100) * 2 - 1;
 
     pointerTargetRef.current = {
-      x: Math.max(-1, Math.min(1, nx)) * 2.1,
-      y: Math.max(-1, Math.min(1, ny)) * 1.45,
+      x: Math.max(-1, Math.min(1, nx)) * 2.15,
+      y: Math.max(-1, Math.min(1, ny)) * 1.5,
     };
     cursorStagePosRef.current = {
       x: pctX,
@@ -284,6 +288,9 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     let sculptureTimeSec = 18.0;
     let breathTimeSec = 0;
 
+    // Reusable pre-filtered index buffer for visible particles (avoids 88×88 nested scan)
+    const visibleIndices: number[] = [];
+
     const tick = (now: number) => {
       if (!isInViewport || !isDocumentVisible) {
         rafId = null;
@@ -311,7 +318,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
       if (!prefersReducedMotion && !paused) {
         breathTimeSec += dt;
-        // Focus Dilation (Section 8.E):
+        // Focus Dilation:
         // When a skill is focused, slow the orbital universe down gently (0.22x)
         // rather than freezing the entire cosmos to 0.
         const speedMultiplier = focusId
@@ -335,21 +342,22 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
         let targetX = st.x;
         let targetY = st.y;
+        let targetZPx = st.zPx;
         let targetScale = 1.0;
         let targetDepth = 0.9;
         let targetOpacity = 1.0;
 
-        // Multi-harmonic organic floating per logo (Section 8.B)
+        // Multi-harmonic organic floating per logo
         const gentleBobY =
           prefersReducedMotion || paused
             ? 0
-            : Math.sin(breathTimeSec * p.floatFreq + p.oscillationPhase) * 0.72 +
-              Math.cos(breathTimeSec * (p.floatFreq * 0.57) + p.secondaryPhase) * 0.28;
+            : Math.sin(breathTimeSec * p.floatFreq + p.oscillationPhase) * 0.62 +
+              Math.cos(breathTimeSec * (p.floatFreq * 0.57) + p.secondaryPhase) * 0.24;
         const gentleBobX =
           prefersReducedMotion || paused
             ? 0
-            : Math.cos(breathTimeSec * (p.floatFreq * 0.82) + p.oscillationPhase) * 0.44 +
-              Math.sin(breathTimeSec * (p.floatFreq * 0.51) + p.secondaryPhase) * 0.2;
+            : Math.cos(breathTimeSec * (p.floatFreq * 0.82) + p.oscillationPhase) * 0.38 +
+              Math.sin(breathTimeSec * (p.floatFreq * 0.51) + p.secondaryPhase) * 0.18;
 
         if (catId) {
           // ─── ASYMMETRIC CATEGORY SCULPTURE MODE (11 Featured Category Technologies + Soft Peripheral Context) ───
@@ -361,9 +369,10 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           if (isFocusNetworkMember && focusedNetworkMapRef.current.has(p.skill.id)) {
             const netPos = focusedNetworkMapRef.current.get(p.skill.id)!;
             targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
-            targetY = netPos.y + (p.skill.id === focusId ? 0 : gentleBobY * 0.6);
-            targetScale = p.skill.id === focusId ? 1.2 : 1.02;
-            targetDepth = 1.04;
+            targetY = netPos.y + (p.skill.id === focusId ? 0 : gentleBobY * 0.55);
+            targetDepth = p.skill.id === focusId ? 1.07 : 1.02;
+            targetZPx = depthToZPx(targetDepth);
+            targetScale = p.skill.id === focusId ? 1.14 : 1.02;
             targetOpacity = 1.0;
           } else if (isInSelectedCategory) {
             targetX =
@@ -374,26 +383,29 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               p.categoryFormationPos.y +
               gentleBobY +
               pointerCurrentRef.current.y * p.categoryFormationPos.depth * 0.82;
-            targetScale = p.categoryFormationPos.scale;
             targetDepth = p.categoryFormationPos.depth;
+            targetZPx = p.categoryFormationPos.zPx;
+            targetScale = p.categoryFormationPos.scale;
             targetOpacity = 1.0;
           } else if (p.isFeaturedAnchor) {
-            // Keep Featured Anchors softly visible in deep peripheral space so unrelated elements
-            // reduce without disappearing abruptly (Section 7)
-            targetX = p.recessedPos.x + gentleBobX * 0.35;
-            targetY = p.recessedPos.y + gentleBobY * 0.35;
-            targetScale = 0.62;
-            targetDepth = 0.55;
-            targetOpacity = focusId ? 0.06 : 0.14;
+            // Keep Featured Anchors whisper-quiet in deep peripheral space so unrelated elements
+            // recede cleanly without competing with the 11 active category marks
+            targetX = p.recessedPos.x + gentleBobX * 0.25;
+            targetY = p.recessedPos.y + gentleBobY * 0.25;
+            targetDepth = 0.52;
+            targetZPx = depthToZPx(targetDepth);
+            targetScale = 0.64;
+            targetOpacity = focusId ? 0.03 : 0.06;
           } else {
             targetX = p.recessedPos.x;
             targetY = p.recessedPos.y;
-            targetScale = 0.48;
             targetDepth = 0.5;
+            targetZPx = depthToZPx(targetDepth);
+            targetScale = 0.6;
             targetOpacity = 0.0;
           }
         } else {
-          // ─── FULL LIVING ORBIT 2.0 SCULPTURE MODE (8 Featured Anchors + Orbits A, B, C) ───
+          // ─── FULL LIVING ORBIT 2.1 SCULPTURE MODE (8 Featured Anchors + Orbits A, B, C) ───
           const evalState = evaluateSculptureTrajectory(
             p,
             sculptureTimeSec,
@@ -402,6 +414,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
           targetX = evalState.x;
           targetY = evalState.y;
+          targetZPx = evalState.zPx;
           targetScale = evalState.scale;
           targetDepth = evalState.depth;
           targetOpacity = evalState.opacity;
@@ -412,10 +425,11 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
               targetY =
                 netPos.y +
-                (p.skill.id === focusId ? 0 : gentleBobY * 0.65) +
+                (p.skill.id === focusId ? 0 : gentleBobY * 0.6) +
                 pointerCurrentRef.current.y * 0.5;
-              targetScale = p.skill.id === focusId ? 1.2 : 1.04;
-              targetDepth = 1.05;
+              targetDepth = p.skill.id === focusId ? 1.07 : 1.02;
+              targetZPx = depthToZPx(targetDepth);
+              targetScale = p.skill.id === focusId ? 1.14 : 1.03;
               targetOpacity = 1.0;
             }
           }
@@ -424,111 +438,148 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           if (evalState.opacity === 0 && st.opacity < 0.03 && !focusId) {
             st.x = targetX;
             st.y = targetY;
+            st.zPx = targetZPx;
           }
         }
 
-        // Localized Magnetic Response when pointer approaches a technology logo (Section 8.D)
+        // Localized Magnetic Response when pointer approaches a technology logo
         if (cursor.active && targetOpacity > 0.2 && !focusId) {
           const mdx = cursor.x - targetX;
           const mdy = cursor.y - targetY;
           const dist = Math.hypot(mdx, mdy);
-          const magRadius = 18.5;
+          const magRadius = 18.0;
           if (dist < magRadius && dist > 0.1) {
-            const pull = (1 - dist / magRadius) ** 2 * 0.24;
+            const pull = (1 - dist / magRadius) ** 2 * 0.22;
             targetX += mdx * pull;
             targetY += mdy * pull;
-            targetScale *= 1 + (1 - dist / magRadius) * 0.065;
+            targetZPx += (1 - dist / magRadius) * 24;
+            targetScale *= 1 + (1 - dist / magRadius) * 0.05;
           }
         }
 
-        // Focus Dilation & Hover visual hierarchy (Section 8.E)
+        // Focus Dilation & Hover visual hierarchy
         if (focusId) {
           if (p.skill.id === focusId) {
-            targetScale = Math.max(targetScale * 1.16, 1.22);
+            targetScale = Math.max(targetScale * 1.12, 1.16);
+            targetZPx = Math.max(targetZPx, 78);
             targetOpacity = 1.0;
           } else if (focusedRelSet?.has(p.skill.id)) {
             targetScale = Math.max(targetScale * 1.04, 1.02);
+            targetZPx = Math.max(targetZPx, 48);
             targetOpacity = Math.max(targetOpacity, 0.95);
           } else {
             // Keep surrounding universe gently visible & drifting in dilated background
             targetOpacity *= 0.18;
-            targetScale *= 0.88;
+            targetZPx = Math.min(targetZPx - 45, -60);
+            targetScale *= 0.92;
           }
         } else if (hoverId) {
           if (p.skill.id === hoverId) {
-            targetScale *= 1.16;
+            targetScale *= 1.12;
+            targetZPx += 36;
             targetOpacity = 1.0;
           } else if (hoveredRelSet?.has(p.skill.id)) {
             targetScale *= 1.05;
+            targetZPx += 18;
             targetOpacity = Math.max(targetOpacity, 0.93);
           } else if (targetOpacity > 0.05) {
-            targetOpacity *= 0.62;
+            targetOpacity *= 0.64;
           }
         }
 
         st.x += (targetX - st.x) * posLerp;
         st.y += (targetY - st.y) * posLerp;
+        st.zPx += (targetZPx - st.zPx) * posLerp;
         st.scale += (targetScale - st.scale) * posLerp;
         st.depth += (targetDepth - st.depth) * posLerp;
         st.opacity += (targetOpacity - st.opacity) * opacityLerp;
         st.isVisible = st.opacity > 0.04;
       }
 
-      // Smooth inter-particle spatial separation so crossing trajectories never overlap logos
+      // Optimized inter-particle spatial separation over visible particles only
       if (!catId && !focusId) {
-        const minDx = 8.2;
-        const minDy = 11.2;
+        visibleIndices.length = 0;
         for (let i = 0; i < LIVING_ORBIT_PARTICLES.length; i++) {
-          const stA = animStatesRef.current[i];
-          if (stA.opacity < 0.15) continue;
-          const pA = LIVING_ORBIT_PARTICLES[i];
+          if (animStatesRef.current[i].opacity >= 0.15) {
+            visibleIndices.push(i);
+          }
+        }
 
-          for (let j = i + 1; j < LIVING_ORBIT_PARTICLES.length; j++) {
-            const stB = animStatesRef.current[j];
-            if (stB.opacity < 0.15) continue;
-            const pB = LIVING_ORBIT_PARTICLES[j];
+        const visCount = visibleIndices.length;
 
+        for (let a = 0; a < visCount; a++) {
+          const idxA = visibleIndices[a];
+          const stA = animStatesRef.current[idxA];
+          const pA = LIVING_ORBIT_PARTICLES[idxA];
+
+          for (let b = a + 1; b < visCount; b++) {
+            const idxB = visibleIndices[b];
+            const stB = animStatesRef.current[idxB];
+            const pB = LIVING_ORBIT_PARTICLES[idxB];
+
+            const involvesAnchor = pA.isFeaturedAnchor || pB.isFeaturedAnchor;
+            const minDx = involvesAnchor ? 10.6 : 8.6;
+            const minDy = involvesAnchor ? 14.8 : 11.6;
+
+            const anchorShiftA = pA.isFeaturedAnchor ? 1.6 : 0;
+            const anchorShiftB = pB.isFeaturedAnchor ? 1.6 : 0;
             const dx = stB.x - stA.x;
-            const dy = stB.y - stA.y;
+            const dy = stB.y + anchorShiftB - (stA.y + anchorShiftA);
             const normDistSq = (dx / minDx) ** 2 + (dy / minDy) ** 2;
             if (normDistSq < 1.0 && normDistSq > 0.0001) {
               const normDist = Math.sqrt(normDistSq);
-              const overlap = (1.0 - normDist) * 0.45;
+              const overlap = (1.0 - normDist) * 0.52;
               const ux = dx / normDist;
               const uy = dy / normDist;
 
               // Featured anchors remain stable while trajectory travelers deflect around them
               if (pA.isFeaturedAnchor && !pB.isFeaturedAnchor) {
-                stB.x = Math.max(5, Math.min(95, stB.x + ux * overlap * 1.6));
-                stB.y = Math.max(7, Math.min(92, stB.y + uy * overlap * 1.6));
+                stB.x = Math.max(4.5, Math.min(95.5, stB.x + ux * overlap * 1.75));
+                stB.y = Math.max(6.5, Math.min(92.5, stB.y + uy * overlap * 1.75));
               } else if (!pA.isFeaturedAnchor && pB.isFeaturedAnchor) {
-                stA.x = Math.max(5, Math.min(95, stA.x - ux * overlap * 1.6));
-                stA.y = Math.max(7, Math.min(92, stA.y - uy * overlap * 1.6));
+                stA.x = Math.max(4.5, Math.min(95.5, stA.x - ux * overlap * 1.75));
+                stA.y = Math.max(6.5, Math.min(92.5, stA.y - uy * overlap * 1.75));
               } else if (!pA.isFeaturedAnchor && !pB.isFeaturedAnchor) {
-                stA.x = Math.max(5, Math.min(95, stA.x - ux * overlap * 0.8));
-                stA.y = Math.max(7, Math.min(92, stA.y - uy * overlap * 0.8));
-                stB.x = Math.max(5, Math.min(95, stB.x + ux * overlap * 0.8));
-                stB.y = Math.max(7, Math.min(92, stB.y + uy * overlap * 0.8));
+                stA.x = Math.max(4.5, Math.min(95.5, stA.x - ux * overlap * 0.85));
+                stA.y = Math.max(6.5, Math.min(92.5, stA.y - uy * overlap * 0.85));
+                stB.x = Math.max(4.5, Math.min(95.5, stB.x + ux * overlap * 0.85));
+                stB.y = Math.max(6.5, Math.min(92.5, stB.y + uy * overlap * 0.85));
               }
             }
           }
         }
       }
 
-      // Apply GPU-composited transform and opacity to DOM elements
+      // Apply GPU-composited 3D transform (`translate3d(px, py, zPx)`) and dynamic depth zIndex
       for (let i = 0; i < LIVING_ORBIT_PARTICLES.length; i++) {
         const st = animStatesRef.current[i];
+        const p = LIVING_ORBIT_PARTICLES[i];
         const el = buttonRefs.current[i];
         if (el) {
           const px = (st.x / 100) * stageW;
           const py = (st.y / 100) * stageH;
-          // GPU-composited transform-only position + scale update (no per-frame left/top layout reflow)
+
           el.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(
             2
-          )}px, 0) translate(-50%, -50%) scale(${st.scale.toFixed(3)})`;
+          )}px, ${st.zPx.toFixed(1)}px) translate(-50%, -50%) scale(${st.scale.toFixed(3)})`;
           el.style.opacity = st.opacity.toFixed(3);
           el.style.pointerEvents = st.opacity > 0.24 ? 'auto' : 'none';
           el.style.visibility = st.opacity > 0.02 ? 'visible' : 'hidden';
+
+          // Dynamic depth-coherent zIndex ordering
+          const isFocused = focusId === p.skill.id;
+          const isHovered = hoverId === p.skill.id;
+          const isRelated = Boolean(
+            focusedRelSet?.has(p.skill.id) || hoveredRelSet?.has(p.skill.id)
+          );
+          const dynamicZ = isFocused
+            ? 68
+            : isHovered
+            ? 64
+            : isRelated
+            ? 56
+            : Math.round(12 + Math.max(0, Math.min(1.15, st.depth)) * 34);
+          el.style.zIndex = String(dynamicZ);
         }
       }
 
@@ -555,7 +606,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             const my = (y1 + y2) / 2 - Math.hypot(x2 - x1, y2 - y1) * 0.12;
             const d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
             pathEl.setAttribute('d', d);
-            pathEl.style.opacity = focusId ? '0.8' : '0.44';
+            pathEl.style.opacity = focusId ? '0.82' : '0.46';
             if (glowEl) {
               glowEl.setAttribute('d', d);
               glowEl.style.opacity = focusId ? '0.28' : '0.14';
@@ -629,7 +680,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   }
 
   return (
-    <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+    <div className="w-full max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col items-center">
       {/* ─── 1. SUBTLE EDITORIAL TYPOGRAPHIC CATEGORY NAVIGATION ─── */}
       <nav
         className="relative z-30 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 py-1.5 mb-2 border-b border-white/[0.06] px-4"
@@ -705,7 +756,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         </div>
       )}
 
-      {/* ─── 2. ORBITAL KINETIC SCULPTURE STAGE ─── */}
+      {/* ─── 2. TRUE 2.5D ORBITAL KINETIC SCULPTURE STAGE ─── */}
       <div
         ref={stageRef}
         onMouseMove={handleStageMouseMove}
@@ -713,7 +764,11 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         onClick={() => {
           if (focusedSkillId) onClearSkillFocus();
         }}
-        className="relative w-full h-[580px] lg:h-[630px] select-none overflow-visible"
+        className="relative w-full h-[600px] lg:h-[660px] select-none overflow-visible"
+        style={{
+          perspective: `${STAGE_PERSPECTIVE_PX}px`,
+          transformStyle: 'preserve-3d',
+        }}
       >
         {/* Whisper-faint 3 Trajectory System Filaments (Orbit A, B, C) & Selective Focus Connections */}
         <svg
@@ -726,23 +781,23 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             {/* Orbit A: Inner Celestial Flow gradient */}
             <linearGradient id="orbitInnerCelestialGrad" x1="15%" y1="75%" x2="85%" y2="20%">
               <stop offset="0%" stopColor="rgba(192, 132, 252, 0)" />
-              <stop offset="22%" stopColor="rgba(216, 180, 254, 0.18)" />
-              <stop offset="55%" stopColor="rgba(233, 213, 255, 0.24)" />
-              <stop offset="82%" stopColor="rgba(192, 132, 252, 0.16)" />
+              <stop offset="22%" stopColor="rgba(216, 180, 254, 0.17)" />
+              <stop offset="55%" stopColor="rgba(233, 213, 255, 0.22)" />
+              <stop offset="82%" stopColor="rgba(192, 132, 252, 0.15)" />
               <stop offset="100%" stopColor="rgba(168, 85, 247, 0)" />
             </linearGradient>
             {/* Orbit B: Kinetic Sweep gradient */}
             <linearGradient id="orbitKineticSweepGrad" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="rgba(168, 85, 247, 0)" />
-              <stop offset="28%" stopColor="rgba(168, 85, 247, 0.14)" />
-              <stop offset="70%" stopColor="rgba(192, 132, 252, 0.17)" />
+              <stop offset="28%" stopColor="rgba(168, 85, 247, 0.13)" />
+              <stop offset="70%" stopColor="rgba(192, 132, 252, 0.16)" />
               <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
             </linearGradient>
             {/* Orbit C: Deep Horizon gradient */}
             <linearGradient id="orbitDeepHorizonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="rgba(139, 92, 246, 0)" />
-              <stop offset="35%" stopColor="rgba(147, 51, 234, 0.09)" />
-              <stop offset="70%" stopColor="rgba(168, 85, 247, 0.11)" />
+              <stop offset="35%" stopColor="rgba(147, 51, 234, 0.08)" />
+              <stop offset="70%" stopColor="rgba(168, 85, 247, 0.1)" />
               <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
             </linearGradient>
           </defs>
@@ -751,7 +806,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           {!selectedCategoryId && (
             <g
               className="transition-opacity duration-700"
-              style={{ opacity: focusedSkillId ? 0.22 : 0.78 }}
+              style={{ opacity: focusedSkillId ? 0.2 : 0.76 }}
             >
               {trajectoryPaths.map((tp, idx) => (
                 <path
@@ -765,7 +820,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                       ? 'url(#orbitKineticSweepGrad)'
                       : 'url(#orbitDeepHorizonGrad)'
                   }
-                  strokeWidth={idx === 0 ? '1.25' : idx === 1 ? '0.95' : '0.75'}
+                  strokeWidth={idx === 0 ? '1.2' : idx === 1 ? '0.9' : '0.7'}
                   strokeDasharray={idx === 2 ? '2 10' : idx === 1 ? '5 8' : undefined}
                 />
               ))}
@@ -801,7 +856,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             ))}
         </svg>
 
-        {/* 88 Floating Technology Objects in GPU-Composited 2.5D Space */}
+        {/* 88 Floating Technology Objects in True 2.5D Perspective Space */}
         {LIVING_ORBIT_PARTICLES.map((particle, idx) => {
           const { skill, tier, isFeaturedAnchor, desktopSize } = particle;
           const isFocused = focusedSkillId === skill.id;
@@ -820,22 +875,17 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             isSelectedCatMember ||
             (!selectedCategoryId && isFeaturedAnchor);
 
+          const st = animStatesRef.current[idx];
           const zLayer = isFocused
-            ? 65
+            ? 68
             : isHovered
-            ? 60
+            ? 64
             : isRelated
-            ? 50
-            : isFeaturedAnchor
-            ? 40
-            : tier === 'core'
-            ? 32
-            : tier === 'professional'
-            ? 22
-            : 14;
+            ? 56
+            : Math.round(12 + Math.max(0, Math.min(1.15, st.depth)) * 34);
 
-          const initX = (animStatesRef.current[idx].x / 100) * stageBoundsRef.current.width;
-          const initY = (animStatesRef.current[idx].y / 100) * stageBoundsRef.current.height;
+          const initX = (st.x / 100) * stageBoundsRef.current.width;
+          const initY = (st.y / 100) * stageBoundsRef.current.height;
 
           return (
             <button
@@ -862,8 +912,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               style={{
                 transform: `translate3d(${initX.toFixed(1)}px, ${initY.toFixed(
                   1
-                )}px, 0) translate(-50%, -50%) scale(${animStatesRef.current[idx].scale})`,
-                opacity: animStatesRef.current[idx].opacity,
+                )}px, ${st.zPx.toFixed(1)}px) translate(-50%, -50%) scale(${st.scale.toFixed(3)})`,
+                opacity: st.opacity,
                 zIndex: zLayer,
                 willChange: 'transform, opacity',
               }}
@@ -898,7 +948,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                     : isSelectedCatMember
                     ? 'text-[10px] tracking-[0.12em] text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95'
                     : showLabel
-                    ? 'text-[9.5px] tracking-[0.14em] uppercase text-white/68 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-88 group-hover:text-white'
+                    ? 'text-[9.5px] tracking-[0.14em] uppercase text-white/70 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-90 group-hover:text-white'
                     : 'text-[9.5px] tracking-[0.12em] text-white/0 opacity-0'
                 }`}
               >
