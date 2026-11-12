@@ -36,22 +36,22 @@ export interface StarLayerSpec {
 }
 
 /**
- * GLOBAL STARFIELD REFINEMENT — 6,500 Active Visible Stars
+ * LIVING ORBIT 2.3 — GLOBAL STARFIELD CALIBRATION (5,500 Active Visible Stars)
  *
  * Calibrated 4-layer cosmic particle architecture:
- * - Layer 1 (tiny — Tiny Stellar Dust):     5,000 stars
- * - Layer 2 (medium — Medium Ambient Stars): 1,250 stars
- * - Layer 3 (bright — Bright Stars):          180 stars
- * - Layer 4 (accent — Accent Glints):          70 stars
- * - Total:                                  6,500 active visible stars
+ * - Layer 1 (tiny — Tiny Stellar Dust):     4,500 stars (subtle, continuous foundation)
+ * - Layer 2 (medium — Medium Ambient Stars):  800 stars (less visually dominant)
+ * - Layer 3 (bright — Bright Stars):          150 stars (selective focal points)
+ * - Layer 4 (accent — Accent Glints):          50 stars (rare, elegant celestial glints)
+ * - Total:                                  5,500 active visible stars
  */
 export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
   {
     id: 'tiny',
     label: 'Layer 1 · Tiny Stellar Dust',
-    count: 5000,
-    minDepth: 1.32,
-    maxDepth: 2.22,
+    count: 4500,
+    minDepth: 1.34,
+    maxDepth: 2.24,
     color: '#d8b4fe',
     paletteRgb: [
       [216, 180, 254],
@@ -59,23 +59,23 @@ export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
       [233, 213, 255],
       [178, 132, 248],
     ],
-    baseSizePx: 1.85,
-    baseOpacity: 0.56,
-    driftU: 0.0031,
-    driftV: -0.0019,
-    velocitySpread: 0.0011,
-    swayAmp: 0.0018,
-    twinkleAmp: 0.12,
-    twinkleFreq: 0.95,
+    baseSizePx: 1.55,
+    baseOpacity: 0.48,
+    driftU: 0.0028,
+    driftV: -0.0017,
+    velocitySpread: 0.00095,
+    swayAmp: 0.0016,
+    twinkleAmp: 0.1,
+    twinkleFreq: 0.88,
     isGlintLayer: 0.0,
     seed: 101,
   },
   {
     id: 'medium',
     label: 'Layer 2 · Medium Ambient Stars',
-    count: 1250,
-    minDepth: 0.98,
-    maxDepth: 1.62,
+    count: 800,
+    minDepth: 1.0,
+    maxDepth: 1.66,
     color: '#f3e8ff',
     paletteRgb: [
       [243, 232, 255],
@@ -83,46 +83,46 @@ export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
       [250, 245, 255],
       [216, 180, 254],
     ],
-    baseSizePx: 2.75,
-    baseOpacity: 0.76,
-    driftU: -0.0046,
-    driftV: -0.0029,
-    velocitySpread: 0.0015,
-    swayAmp: 0.0026,
-    twinkleAmp: 0.18,
-    twinkleFreq: 1.35,
+    baseSizePx: 2.25,
+    baseOpacity: 0.64,
+    driftU: -0.0041,
+    driftV: -0.0025,
+    velocitySpread: 0.0013,
+    swayAmp: 0.0022,
+    twinkleAmp: 0.14,
+    twinkleFreq: 1.22,
     isGlintLayer: 0.0,
     seed: 202,
   },
   {
     id: 'bright',
     label: 'Layer 3 · Bright Stars',
-    count: 180,
-    minDepth: 0.76,
-    maxDepth: 1.24,
+    count: 150,
+    minDepth: 0.78,
+    maxDepth: 1.26,
     color: '#ffffff',
     paletteRgb: [
       [255, 255, 255],
       [245, 243, 255],
       [224, 231, 255],
     ],
-    baseSizePx: 3.95,
-    baseOpacity: 0.9,
-    driftU: 0.0068,
-    driftV: -0.0042,
-    velocitySpread: 0.0019,
-    swayAmp: 0.0034,
-    twinkleAmp: 0.24,
-    twinkleFreq: 1.85,
+    baseSizePx: 3.35,
+    baseOpacity: 0.82,
+    driftU: 0.0058,
+    driftV: -0.0036,
+    velocitySpread: 0.0016,
+    swayAmp: 0.0029,
+    twinkleAmp: 0.2,
+    twinkleFreq: 1.65,
     isGlintLayer: 0.0,
     seed: 303,
   },
   {
     id: 'accent',
     label: 'Layer 4 · Accent Glints',
-    count: 70,
-    minDepth: 0.68,
-    maxDepth: 1.12,
+    count: 50,
+    minDepth: 0.7,
+    maxDepth: 1.14,
     color: '#e9d5ff',
     paletteRgb: [
       [245, 240, 255],
@@ -130,14 +130,14 @@ export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
       [255, 255, 255],
       [224, 242, 254],
     ],
-    baseSizePx: 5.2,
-    baseOpacity: 0.95,
-    driftU: -0.0054,
-    driftV: 0.0035,
-    velocitySpread: 0.0017,
-    swayAmp: 0.0038,
-    twinkleAmp: 0.32,
-    twinkleFreq: 2.4,
+    baseSizePx: 4.35,
+    baseOpacity: 0.88,
+    driftU: -0.0048,
+    driftV: 0.0031,
+    velocitySpread: 0.0014,
+    swayAmp: 0.0032,
+    twinkleAmp: 0.26,
+    twinkleFreq: 2.1,
     isGlintLayer: 1.0,
     seed: 404,
   },
@@ -382,7 +382,8 @@ export function generateStratifiedStarLayer(
 
 /**
  * Delicate Stellar Motion Trails Specification
- * 5 staggered celestial streak slots so 3–5 subtle trails are visible at most.
+ * 3 staggered celestial streak slots calibrated so strictly 1–2 subtle trails
+ * are visible simultaneously at any moment.
  */
 export interface StellarTrailSpec {
   id: number;
@@ -406,12 +407,12 @@ export const STELLAR_TRAIL_SPECS: readonly StellarTrailSpec[] = [
     startV: 0.14,
     dirX: 0.88,
     dirY: 0.47,
-    speedUv: 0.046,
-    lengthPx: 46,
-    periodSec: 9.5,
-    activeDurationSec: 5.8,
-    phaseOffsetSec: 0.4,
-    maxOpacity: 0.34,
+    speedUv: 0.042,
+    lengthPx: 42,
+    periodSec: 10.5,
+    activeDurationSec: 5.6,
+    phaseOffsetSec: 0.5,
+    maxOpacity: 0.26,
     colorRgb: [233, 213, 255],
   },
   {
@@ -420,12 +421,12 @@ export const STELLAR_TRAIL_SPECS: readonly StellarTrailSpec[] = [
     startV: 0.2,
     dirX: -0.84,
     dirY: 0.54,
-    speedUv: 0.044,
-    lengthPx: 54,
-    periodSec: 11.0,
-    activeDurationSec: 6.4,
-    phaseOffsetSec: 2.1,
-    maxOpacity: 0.3,
+    speedUv: 0.04,
+    lengthPx: 48,
+    periodSec: 10.5,
+    activeDurationSec: 5.6,
+    phaseOffsetSec: 4.0,
+    maxOpacity: 0.24,
     colorRgb: [224, 231, 255],
   },
   {
@@ -434,41 +435,13 @@ export const STELLAR_TRAIL_SPECS: readonly StellarTrailSpec[] = [
     startV: 0.82,
     dirX: 0.91,
     dirY: -0.41,
-    speedUv: 0.042,
-    lengthPx: 40,
-    periodSec: 10.2,
-    activeDurationSec: 6.0,
-    phaseOffsetSec: 4.3,
-    maxOpacity: 0.3,
+    speedUv: 0.039,
+    lengthPx: 38,
+    periodSec: 10.5,
+    activeDurationSec: 5.6,
+    phaseOffsetSec: 7.5,
+    maxOpacity: 0.23,
     colorRgb: [216, 180, 254],
-  },
-  {
-    id: 3,
-    startU: 0.78,
-    startV: 0.74,
-    dirX: -0.89,
-    dirY: -0.45,
-    speedUv: 0.048,
-    lengthPx: 58,
-    periodSec: 12.5,
-    activeDurationSec: 7.0,
-    phaseOffsetSec: 6.2,
-    maxOpacity: 0.32,
-    colorRgb: [243, 232, 255],
-  },
-  {
-    id: 4,
-    startU: 0.52,
-    startV: 0.12,
-    dirX: 0.79,
-    dirY: 0.61,
-    speedUv: 0.045,
-    lengthPx: 44,
-    periodSec: 10.8,
-    activeDurationSec: 6.2,
-    phaseOffsetSec: 8.0,
-    maxOpacity: 0.29,
-    colorRgb: [196, 181, 253],
   },
 ] as const;
 
@@ -542,6 +515,8 @@ export interface StarfieldCoverageReport {
   maxCellCount: number;
   meanCellCount: number;
   emptyCellCount: number;
+  cellsWithAtLeast32Count: number;
+  cellsWithAtLeast32Pct: number;
   cellsWithAtLeast38Count: number;
   cellsWithAtLeast38Pct: number;
   quadrants: {
@@ -566,12 +541,12 @@ export interface StarfieldCoverageReport {
 }
 
 /**
- * Full-Screen Occupancy & Coverage Diagnostics (6,500-Star Configuration)
+ * Full-Screen Occupancy & Coverage Diagnostics (5,500-Star Configuration)
  *
  * Uses the exact same screen-space UV -> 3D world coordinate -> 75° FOV camera
  * perspective projection and wrapping rules as the WebGL renderer:
- * - Desktop (`width >= height`): 12 columns × 8 rows (96 cells, mean ~67.7 stars/cell)
- * - Mobile (`width < height`):   8 columns × 12 rows (96 cells, mean ~67.7 stars/cell)
+ * - Desktop (`width >= height`): 12 columns × 8 rows (96 cells, mean ~57.29 stars/cell)
+ * - Mobile (`width < height`):   8 columns × 12 rows (96 cells, mean ~57.29 stars/cell)
  * - Evaluates at any `timeSec` (e.g. 0s, 10s, 30s, 60s) across 1440×900,
  *   1920×1080, 2048×1002, and 390×844.
  */
@@ -653,6 +628,7 @@ export function evaluateStarfieldCoverage(
   let minCellCount = Infinity;
   let maxCellCount = 0;
   let emptyCellCount = 0;
+  let cellsWithAtLeast32Count = 0;
   let cellsWithAtLeast38Count = 0;
 
   for (let c = 0; c < totalCells; c++) {
@@ -660,12 +636,16 @@ export function evaluateStarfieldCoverage(
     if (cnt < minCellCount) minCellCount = cnt;
     if (cnt > maxCellCount) maxCellCount = cnt;
     if (cnt === 0) emptyCellCount++;
+    if (cnt >= 32) cellsWithAtLeast32Count++;
     if (cnt >= 38) cellsWithAtLeast38Count++;
   }
 
   const totalStars =
     layerCounts.tiny + layerCounts.medium + layerCounts.bright + layerCounts.accent;
   const meanCellCount = parseFloat((visibleStars / totalCells).toFixed(2));
+  const cellsWithAtLeast32Pct = parseFloat(
+    ((cellsWithAtLeast32Count / totalCells) * 100).toFixed(2)
+  );
   const cellsWithAtLeast38Pct = parseFloat(
     ((cellsWithAtLeast38Count / totalCells) * 100).toFixed(2)
   );
@@ -681,6 +661,8 @@ export function evaluateStarfieldCoverage(
     maxCellCount,
     meanCellCount,
     emptyCellCount,
+    cellsWithAtLeast32Count,
+    cellsWithAtLeast32Pct,
     cellsWithAtLeast38Count,
     cellsWithAtLeast38Pct,
     quadrants,
@@ -691,11 +673,11 @@ export function evaluateStarfieldCoverage(
 }
 
 /**
- * Custom GPU Shader for the 6,500-Star Full-Screen Cosmic Starfield
+ * Custom GPU Shader for the 5,500-Star Full-Screen Cosmic Starfield
  * - Seamless screen-space UV drift + gentle harmonic sway
  * - Dynamic aspect ratio projection (`uAspect` updated live from `state.size`)
  * - Subtle peripheral/corner luminance compensation so outer edges, corners,
- *   and lower regions against pure `#030014` remain richly visible
+ *   and lower regions against pure `#030014` remain naturally visible
  * - Delicate 4-point cross-diffraction spikes for Layer 4 Accent Glints
  */
 const STARFIELD_VERTEX_SHADER = /* glsl */ `
@@ -743,23 +725,23 @@ const STARFIELD_VERTEX_SHADER = /* glsl */ `
     vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // Subtle peripheral/corner/lower-region presence boost against dark #030014 margins
+    // Gentle peripheral/corner/lower-region presence compensation against dark #030014 margins
     vec2 centeredUv = abs(uv * 2.0 - 1.0);
-    float edgePresence = smoothstep(0.45, 0.98, max(centeredUv.x, centeredUv.y));
-    float lowerPresence = smoothstep(0.55, 0.98, uv.y);
-    float marginBoost = 1.0 + 0.16 * max(edgePresence, lowerPresence);
+    float edgePresence = smoothstep(0.48, 0.98, max(centeredUv.x, centeredUv.y));
+    float lowerPresence = smoothstep(0.58, 0.98, uv.y);
+    float marginBoost = 1.0 + 0.12 * max(edgePresence, lowerPresence);
 
     float twinkle = sin(uTime * aTwinkleFreq + aTwinklePhase) * uTwinkleAmp;
     float alphaScale = mix(0.68, 1.0, uViewportScale);
-    vAlpha = clamp((aBaseOpacity + twinkle) * marginBoost * alphaScale, 0.12, 1.0);
+    vAlpha = clamp((aBaseOpacity + twinkle) * marginBoost * alphaScale, 0.11, 0.96);
     vColor = aColor;
     vIsGlint = uIsGlintLayer;
 
-    float depthScale = 1.34 / pow(aDepth, 0.45);
+    float depthScale = 1.28 / pow(aDepth, 0.44);
     gl_PointSize = clamp(
-      aSizePx * uViewportScale * uPixelRatio * depthScale * (1.0 + 0.08 * edgePresence),
-      1.15,
-      15.0
+      aSizePx * uViewportScale * uPixelRatio * depthScale * (1.0 + 0.06 * edgePresence),
+      1.1,
+      12.5
     );
   }
 `;
@@ -775,16 +757,16 @@ const STARFIELD_FRAGMENT_SHADER = /* glsl */ `
     if (r2 > 1.0) discard;
 
     // Crisp luminous stellar core + soft atmospheric halo
-    float core = exp(-r2 * 2.35);
-    float halo = (1.0 - smoothstep(0.08, 1.0, r2)) * 0.52;
+    float core = exp(-r2 * 2.55);
+    float halo = (1.0 - smoothstep(0.08, 1.0, r2)) * 0.44;
     float intensity = clamp(core + halo, 0.0, 1.0);
 
     // Delicate 4-point celestial cross-glint for Layer 4 accent stars
     if (vIsGlint > 0.5) {
-      float crossX = exp(-abs(cxy.y) * 9.5) * exp(-abs(cxy.x) * 1.8);
-      float crossY = exp(-abs(cxy.x) * 9.5) * exp(-abs(cxy.y) * 1.8);
-      float glintSpikes = (crossX + crossY) * 0.65;
-      intensity = clamp(intensity * 0.85 + glintSpikes, 0.0, 1.0);
+      float crossX = exp(-abs(cxy.y) * 10.5) * exp(-abs(cxy.x) * 2.0);
+      float crossY = exp(-abs(cxy.x) * 10.5) * exp(-abs(cxy.y) * 2.0);
+      float glintSpikes = (crossX + crossY) * 0.58;
+      intensity = clamp(intensity * 0.82 + glintSpikes, 0.0, 1.0);
     }
 
     gl_FragColor = vec4(vColor, vAlpha * intensity);

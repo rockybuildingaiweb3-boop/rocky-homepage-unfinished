@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { motion } from 'motion/react';
 import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem } from '../../data/skills';
 import { getRelatedSkillIds } from '../../features/skills/livingOrbitEngine';
 import { TechLogo } from './TechLogo';
@@ -9,123 +10,189 @@ interface SkillFocusCardProps {
   onClose: () => void;
 }
 
-const TIER_LABELS: Record<SkillItem['tier'], { label: string; badgeClass: string }> = {
+const TIER_EDITORIAL_META: Record<
+  SkillItem['tier'],
+  { label: string; roleDescriptor: string; toneClass: string }
+> = {
   core: {
     label: 'Core Architecture',
-    badgeClass: 'text-amber-200/95 border-amber-400/35 bg-amber-500/10',
+    roleDescriptor: 'Primary Foundation',
+    toneClass: 'text-amber-200/90',
   },
   professional: {
     label: 'Professional Stack',
-    badgeClass: 'text-purple-200/95 border-purple-400/35 bg-purple-500/10',
+    roleDescriptor: 'Production Systems',
+    toneClass: 'text-purple-200/90',
   },
   ecosystem: {
     label: 'Ecosystem & Tooling',
-    badgeClass: 'text-sky-200/90 border-sky-400/30 bg-sky-500/10',
+    roleDescriptor: 'Specialized Integration',
+    toneClass: 'text-sky-200/85',
   },
 };
 
 /**
- * SkillFocusCard
+ * SkillFocusCard — Editorial Technology Dossier (Living Orbit 2.3)
  *
- * Compact, floating glassmorphic inspector displayed only when a technology logo
- * is locked into persistent focus. Secondary to the visual composition.
+ * Refined, floating editorial dossier designed for a cosmic exhibition portfolio:
+ * - Asymmetric two-column composition on desktop, clean vertical flow on mobile
+ * - Authentic floating logo presentation without generic boxed icon wrappers
+ * - Unboxed editorial metadata with typographic separators (zero-pill discipline)
+ * - Fine structural hairlines and restrained brand-color top luminance accent
+ * - Interactive connected architecture nodes with authentic logos
  */
-export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(({
-  skill,
-  onSelectSkill,
-  onClose,
-}) => {
-  const category = SKILL_CATEGORIES.find((c) => c.id === skill.categoryId);
-  const tierMeta = TIER_LABELS[skill.tier];
+export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(
+  ({ skill, onSelectSkill, onClose }) => {
+    const category = SKILL_CATEGORIES.find((c) => c.id === skill.categoryId);
+    const tierMeta = TIER_EDITORIAL_META[skill.tier];
 
-  const relatedSkills = React.useMemo(() => {
-    const ids = getRelatedSkillIds(skill.id).slice(0, 5);
-    return ids
-      .map((id) => SKILLS_DATA.find((s) => s.id === id))
-      .filter((s): s is SkillItem => Boolean(s));
-  }, [skill.id]);
+    const relatedSkills = React.useMemo(() => {
+      const ids = getRelatedSkillIds(skill.id).slice(0, 5);
+      return ids
+        .map((id) => SKILLS_DATA.find((s) => s.id === id))
+        .filter((s): s is SkillItem => Boolean(s));
+    }, [skill.id]);
 
-  return (
-    <div
-      role="dialog"
-      aria-label={`${skill.name} technical details`}
-      onClick={(e) => e.stopPropagation()}
-      className="w-full max-w-[660px] mx-auto rounded-2xl border border-white/15 bg-[#070318]/85 backdrop-blur-xl px-5 py-4 shadow-[0_18px_50px_rgba(3,0,20,0.85)] transition-all duration-300"
-      style={{
-        boxShadow: `0 16px 48px rgba(3, 0, 20, 0.85), 0 0 28px ${skill.brandColor}22`,
-      }}
-    >
-      {/* Top Row: Logo, Name, Category & Tier, Close button */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-white/[0.04] border border-white/10"
-            style={{
-              boxShadow: `0 0 20px ${skill.brandColor}30`,
-            }}
-          >
-            <TechLogo id={skill.id} name={skill.name} size={28} />
-          </div>
+    return (
+      <motion.div
+        key={skill.id}
+        role="dialog"
+        aria-label={`${skill.name} technical details`}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 12, scale: 0.985 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 8, scale: 0.99 }}
+        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full max-w-[760px] mx-auto overflow-hidden rounded-2xl border border-white/[0.12] bg-[#050214]/94 backdrop-blur-2xl px-5 py-4 sm:px-6 sm:py-5 shadow-[0_24px_64px_rgba(2,0,14,0.94)]"
+      >
+        {/* Restrained Top Luminance Hairline & Subtle Atmospheric Aura */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[1px]"
+          style={{
+            background: `linear-gradient(90deg, transparent 6%, ${skill.brandColor}aa 36%, rgba(243,232,255,0.65) 52%, transparent 94%)`,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-20 left-8 w-56 h-32 rounded-full blur-3xl opacity-20"
+          style={{ background: skill.brandColor }}
+        />
 
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base sm:text-lg font-semibold tracking-tight text-white truncate">
-                {skill.name}
-              </h3>
-              <span
-                className={`font-mono text-[9px] uppercase tracking-[0.16em] px-2 py-0.5 rounded-md border ${tierMeta.badgeClass}`}
-              >
-                {tierMeta.label}
-              </span>
-            </div>
+        {/* Header Eyebrow Row + Minimal Close Control */}
+        <div className="relative flex items-center justify-between gap-4 pb-3 border-b border-white/[0.07]">
+          <div className="flex items-center gap-2 min-w-0 font-mono text-[10px] tracking-[0.2em] uppercase text-white/50 truncate">
+            <span className="text-purple-200/75">Technical Profile</span>
             {category && (
-              <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-white/50 mt-0.5 truncate">
-                {category.number} · {category.title}
-              </p>
+              <>
+                <span aria-hidden="true" className="text-white/25">
+                  ·
+                </span>
+                <span className="text-white/65 truncate">
+                  {category.number} {category.title}
+                </span>
+              </>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Clear focused technology"
+            className="shrink-0 group inline-flex items-center gap-1.5 py-0.5 px-1.5 rounded text-white/55 hover:text-white transition-colors duration-150 cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-400/60"
+          >
+            <span className="font-mono text-[9.5px] tracking-[0.18em] uppercase text-white/45 group-hover:text-white/85 transition-colors">
+              Esc
+            </span>
+            <span aria-hidden="true" className="text-white/20">
+              /
+            </span>
+            <span className="text-xs leading-none text-white/70 group-hover:text-white">
+              ✕
+            </span>
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Clear focused technology"
-          className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/10 bg-white/[0.04] hover:bg-white/[0.1] hover:border-white/25 font-mono text-[10px] tracking-widest uppercase text-white/70 hover:text-white transition-colors cursor-pointer"
-        >
-          <span>✕</span>
-          <span className="hidden sm:inline">Esc</span>
-        </button>
-      </div>
+        {/* Asymmetric Two-Column Desktop Dossier / Clean Vertical Mobile Flow */}
+        <div className="relative mt-3.5 grid grid-cols-1 md:grid-cols-[1.22fr_0.78fr] gap-4 md:gap-6 items-start">
+          {/* Left Column: Authentic Floating Brand Mark, Title, Unboxed Metadata & Insight */}
+          <div className="min-w-0">
+            <div className="flex items-center gap-3.5">
+              {/* Floating Authentic Logo (No generic square box enclosure) */}
+              <div
+                className="relative flex items-center justify-center shrink-0 w-9 h-9 sm:w-10 sm:h-10"
+                style={{
+                  filter: `drop-shadow(0 0 16px ${skill.brandColor}66) drop-shadow(0 4px 10px rgba(0,0,0,0.8))`,
+                }}
+              >
+                <TechLogo id={skill.id} name={skill.name} size={36} />
+              </div>
 
-      {/* Technical Insight */}
-      <p className="mt-2.5 text-xs sm:text-[13px] leading-relaxed text-white/80 font-normal">
-        {skill.insight}
-      </p>
+              <div className="min-w-0">
+                <h3
+                  className="text-lg sm:text-xl font-normal tracking-[0.03em] text-white truncate"
+                  style={{ fontFamily: 'var(--title-font)' }}
+                >
+                  {skill.name}
+                </h3>
 
-      {/* Related Technologies */}
-      {relatedSkills.length > 0 && (
-        <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5">
-          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-white/40 mr-1">
-            Connected:
-          </span>
-          {relatedSkills.map((rel) => (
-            <button
-              key={rel.id}
-              type="button"
-              onClick={() => onSelectSkill(rel.id)}
-              className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.09] hover:border-purple-400/40 transition-all cursor-pointer"
-            >
-              <TechLogo id={rel.id} name={rel.name} size={14} />
-              <span className="font-mono text-[10px] tracking-wider text-white/75 group-hover:text-white">
-                {rel.name}
-              </span>
-            </button>
-          ))}
+                {/* Unboxed Editorial Tier & Role Metadata */}
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
+                  <span className={tierMeta.toneClass}>{tierMeta.label}</span>
+                  <span aria-hidden="true" className="text-white/25">
+                    ·
+                  </span>
+                  <span className="text-white/45">{tierMeta.roleDescriptor}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Technical Insight Prose */}
+            <p className="mt-3 text-[13px] sm:text-[13.5px] leading-[1.65] text-white/82 font-normal max-w-[54ch]">
+              {skill.insight}
+            </p>
+          </div>
+
+          {/* Right Column: Connected Architecture Interactive Stack */}
+          {relatedSkills.length > 0 && (
+            <div className="pt-3 md:pt-0 md:pl-5 border-t md:border-t-0 md:border-l border-white/[0.08] flex flex-col justify-between">
+              <div className="font-mono text-[9.5px] tracking-[0.18em] uppercase text-white/40 mb-2">
+                Connected Architecture
+              </div>
+
+              <div className="flex flex-wrap md:flex-col gap-x-3 gap-y-1.5">
+                {relatedSkills.map((rel) => (
+                  <button
+                    key={rel.id}
+                    type="button"
+                    onClick={() => onSelectSkill(rel.id)}
+                    className="group inline-flex items-center justify-between gap-2 py-1 px-1.5 -mx-1.5 rounded-md hover:bg-white/[0.04] transition-colors duration-150 cursor-pointer text-left"
+                  >
+                    <span className="inline-flex items-center gap-2 min-w-0">
+                      <span className="shrink-0 flex items-center justify-center w-4 h-4 opacity-85 group-hover:opacity-100 transition-opacity">
+                        <TechLogo id={rel.id} name={rel.name} size={15} />
+                      </span>
+                      <span className="font-mono text-[11px] tracking-[0.06em] text-white/75 group-hover:text-white transition-colors truncate">
+                        {rel.name}
+                      </span>
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="hidden md:inline-block font-mono text-[10px] text-white/25 group-hover:text-purple-300 group-hover:translate-x-0.5 transition-all"
+                    >
+                      →
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );
-});
+      </motion.div>
+    );
+  }
+);
 
 SkillFocusCard.displayName = 'SkillFocusCard';
 export default SkillFocusCard;
+

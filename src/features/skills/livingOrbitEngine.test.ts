@@ -203,9 +203,9 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
     }
   });
 
-  it('reconstructs the 6,500-star Global Starfield (5000 tiny, 1250 medium, 180 bright, 70 accent) with full corner, edge, and grid occupancy across 1440x900, 1920x1080, 2048x1002, and 390x844 at t=0, 10, 30, 60s', () => {
+  it('calibrates the 5,500-star Global Starfield (4500 tiny, 800 medium, 150 bright, 50 accent) with 1–2 simultaneous stellar trails and full corner, edge, and grid occupancy across 1440x900, 1920x1080, 2048x1002, and 390x844 at t=0, 10, 30, 60s', () => {
     assert.equal(STARFIELD_LAYER_SPECS.length, 4);
-    assert.equal(STELLAR_TRAIL_SPECS.length, 5);
+    assert.equal(STELLAR_TRAIL_SPECS.length, 3);
 
     // Verify WebGL and 2D Canvas shared data parity
     for (const spec of STARFIELD_LAYER_SPECS) {
@@ -224,12 +224,17 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
       }
     }
 
-    // Verify delicate stellar trails evaluation
-    const trails0 = evaluateStellarTrails(4.5, 1920, 1080);
-    assert.ok(trails0.length >= 2 && trails0.length <= 5);
-    for (const tr of trails0) {
-      assert.ok(Number.isFinite(tr.headU) && Number.isFinite(tr.tailU));
-      assert.ok(tr.opacity >= 0 && tr.opacity <= 0.4);
+    // Verify delicate stellar trails evaluation maintains 1–2 simultaneous active trails
+    for (const sampleT of [0, 2.5, 4.5, 7.0, 9.5, 14.0]) {
+      const trails = evaluateStellarTrails(sampleT, 1920, 1080);
+      assert.ok(
+        trails.length >= 1 && trails.length <= 2,
+        `Expected 1–2 simultaneous stellar trails at t=${sampleT}s, got ${trails.length}`
+      );
+      for (const tr of trails) {
+        assert.ok(Number.isFinite(tr.headU) && Number.isFinite(tr.tailU));
+        assert.ok(tr.opacity >= 0 && tr.opacity <= 0.3);
+      }
     }
 
     const viewports: readonly [number, number][] = [
@@ -243,12 +248,12 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
     for (const [w, h] of viewports) {
       for (const t of sampleTimes) {
         const cov = evaluateStarfieldCoverage(w, h, t);
-        assert.equal(cov.totalStars, 6500);
-        assert.equal(cov.visibleStars, 6500);
-        assert.equal(cov.layerCounts.tiny, 5000);
-        assert.equal(cov.layerCounts.medium, 1250);
-        assert.equal(cov.layerCounts.bright, 180);
-        assert.equal(cov.layerCounts.accent, 70);
+        assert.equal(cov.totalStars, 5500);
+        assert.equal(cov.visibleStars, 5500);
+        assert.equal(cov.layerCounts.tiny, 4500);
+        assert.equal(cov.layerCounts.medium, 800);
+        assert.equal(cov.layerCounts.bright, 150);
+        assert.equal(cov.layerCounts.accent, 50);
 
         // Verify 12x8 desktop (96 cells) and 8x12 mobile (96 cells) grid occupancy
         assert.equal(cov.gridCols * cov.gridRows, 96);
@@ -258,28 +263,29 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
           `Expected 0 empty cells at ${w}x${h} (t=${t}s), got ${cov.emptyCellCount}`
         );
         assert.ok(
-          cov.cellsWithAtLeast38Pct >= 95,
-          `Expected >=95% cells with >=38 stars at ${w}x${h} (t=${t}s), got ${cov.cellsWithAtLeast38Pct}%`
+          cov.cellsWithAtLeast32Pct >= 95,
+          `Expected >=95% cells with >=32 stars at ${w}x${h} (t=${t}s), got ${cov.cellsWithAtLeast32Pct}%`
         );
         assert.ok(
-          cov.minCellCount >= 25,
-          `Expected minCellCount >= 25 at ${w}x${h} (t=${t}s), got ${cov.minCellCount}`
+          cov.minCellCount >= 22,
+          `Expected minCellCount >= 22 at ${w}x${h} (t=${t}s), got ${cov.minCellCount}`
         );
 
         // Quadrants, all four corners, and all four outer edges
-        assert.ok(cov.quadrants.upperLeft >= 1450);
-        assert.ok(cov.quadrants.upperRight >= 1450);
-        assert.ok(cov.quadrants.lowerLeft >= 1450);
-        assert.ok(cov.quadrants.lowerRight >= 1450);
-        assert.ok(cov.corners.topLeft >= 320);
-        assert.ok(cov.corners.topRight >= 320);
-        assert.ok(cov.corners.bottomLeft >= 320);
-        assert.ok(cov.corners.bottomRight >= 320);
-        assert.ok(cov.edges.leftEdge >= 800);
-        assert.ok(cov.edges.rightEdge >= 800);
-        assert.ok(cov.edges.topEdge >= 800);
-        assert.ok(cov.edges.bottomEdge >= 800);
+        assert.ok(cov.quadrants.upperLeft >= 1200);
+        assert.ok(cov.quadrants.upperRight >= 1200);
+        assert.ok(cov.quadrants.lowerLeft >= 1200);
+        assert.ok(cov.quadrants.lowerRight >= 1200);
+        assert.ok(cov.corners.topLeft >= 270);
+        assert.ok(cov.corners.topRight >= 270);
+        assert.ok(cov.corners.bottomLeft >= 270);
+        assert.ok(cov.corners.bottomRight >= 270);
+        assert.ok(cov.edges.leftEdge >= 680);
+        assert.ok(cov.edges.rightEdge >= 680);
+        assert.ok(cov.edges.topEdge >= 680);
+        assert.ok(cov.edges.bottomEdge >= 680);
       }
     }
   });
 });
+

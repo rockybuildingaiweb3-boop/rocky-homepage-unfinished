@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
 import {
   LIVING_ORBIT_PARTICLES,
@@ -580,7 +581,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             targetZPx = Math.max(targetZPx, 48);
             targetOpacity = Math.max(targetOpacity, 0.95);
           } else {
-            targetOpacity *= 0.18;
+            targetOpacity *= 0.12;
             targetZPx = Math.min(targetZPx - 45, -60);
             targetScale *= 0.92;
           }
@@ -1145,16 +1146,18 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           );
         })}
 
-        {/* ─── 3. COMPACT CONTEXTUAL FOCUS INSPECTOR (ONLY ON CLICK) ─── */}
-        {focusedSkill && (
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-full max-w-[640px] px-4 z-[70]">
-            <SkillFocusCard
-              skill={focusedSkill}
-              onSelectSkill={onSelectSkill}
-              onClose={onClearSkillFocus}
-            />
-          </div>
-        )}
+        {/* ─── 3. EDITORIAL TECHNOLOGY DOSSIER INSPECTOR (ONLY ON CLICK) ─── */}
+        <AnimatePresence mode="wait">
+          {focusedSkill && (
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-full max-w-[780px] px-4 z-[70]">
+              <SkillFocusCard
+                skill={focusedSkill}
+                onSelectSkill={onSelectSkill}
+                onClose={onClearSkillFocus}
+              />
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -48,19 +48,19 @@ if (!report.isValid) {
   console.log('\n[SKILLS_VALIDATION_SUCCESS] All 88 skills and icon registry entries verified.');
 }
 
-// ─── LIVING ORBIT 2.2 & FULL-SCREEN STAR SEA VERIFICATION ───
+// ─── LIVING ORBIT 2.3 & 5,500-STAR GLOBAL STARFIELD VERIFICATION ───
 console.log('\n==================================================');
-console.log('LIVING ORBIT 2.2 — 2.5D SCULPTURE & 8,000-STAR SEA REPORT');
+console.log('LIVING ORBIT 2.3 — 2.5D SCULPTURE & 5,500-STAR GLOBAL STARFIELD REPORT');
 console.log('==================================================');
 
 const spatialErrors: string[] = [];
 
-// 1. Verify Living Orbit 2.2 particle count, Two-Level Featured Anchors & Arc-Length LUTs
+// 1. Verify Living Orbit 2.3 particle count, Two-Level Featured Anchors & Arc-Length LUTs
 if (LIVING_ORBIT_PARTICLES.length !== 88) {
-  spatialErrors.push(`Living Orbit 2.2 has ${LIVING_ORBIT_PARTICLES.length} particles (expected 88).`);
+  spatialErrors.push(`Living Orbit 2.3 has ${LIVING_ORBIT_PARTICLES.length} particles (expected 88).`);
 }
 if (FEATURED_ANCHOR_SPECS.length !== 8) {
-  spatialErrors.push(`Living Orbit 2.2 has ${FEATURED_ANCHOR_SPECS.length} Featured Anchors (expected 8).`);
+  spatialErrors.push(`Living Orbit 2.3 has ${FEATURED_ANCHOR_SPECS.length} Featured Anchors (expected 8).`);
 }
 const primaryAnchors = FEATURED_ANCHOR_SPECS.filter((a) => a.anchorTier === 'primary');
 const secondaryAnchors = FEATURED_ANCHOR_SPECS.filter((a) => a.anchorTier === 'secondary');
@@ -70,7 +70,7 @@ if (primaryAnchors.length !== 4 || secondaryAnchors.length !== 4) {
   );
 }
 if (SPATIAL_SPLINES.length !== 3 || Object.keys(ORBIT_ARC_LENGTH_TABLES).length !== 3) {
-  spatialErrors.push(`Living Orbit 2.2 expected 3 trajectories and 3 arc-length LUTs.`);
+  spatialErrors.push(`Living Orbit 2.3 expected 3 trajectories and 3 arc-length LUTs.`);
 }
 
 const seenInOrbitCycle = new Set<string>();
@@ -92,7 +92,7 @@ for (let t = 0; t <= 240; t += 4) {
 }
 if (seenInOrbitCycle.size !== 88) {
   spatialErrors.push(
-    `Living Orbit 2.2 cycled ${seenInOrbitCycle.size}/88 skills across t=0..240s (expected all 88).`
+    `Living Orbit 2.3 cycled ${seenInOrbitCycle.size}/88 skills across t=0..240s (expected all 88).`
   );
 }
 
@@ -103,7 +103,7 @@ for (const cat of SKILL_CATEGORIES) {
   }
 }
 
-// 2. Verify 4-layer 6,500-Star Global Starfield & 12x8 / 8x12 grid occupancy across viewports & times
+// 2. Verify 4-layer 5,500-Star Global Starfield & 12x8 / 8x12 grid occupancy across viewports & times
 const viewports: readonly [string, number, number][] = [
   ['1440x900', 1440, 900],
   ['1920x1080', 1920, 1080],
@@ -115,18 +115,25 @@ const sampleTimes = [0, 10, 30, 60];
 for (const [label, w, h] of viewports) {
   for (const t of sampleTimes) {
     const cov = evaluateStarfieldCoverage(w, h, t);
-    if (STARFIELD_LAYER_SPECS.length !== 4 || cov.totalStars !== 6500) {
+    if (
+      STARFIELD_LAYER_SPECS.length !== 4 ||
+      cov.totalStars !== 5500 ||
+      cov.layerCounts.tiny !== 4500 ||
+      cov.layerCounts.medium !== 800 ||
+      cov.layerCounts.bright !== 150 ||
+      cov.layerCounts.accent !== 50
+    ) {
       spatialErrors.push(
-        `Starfield at ${label} (t=${t}s) expected 6,500 stars across 4 layers, got ${cov.totalStars}.`
+        `Starfield at ${label} (t=${t}s) expected 5,500 stars (4500/800/150/50) across 4 layers, got ${cov.totalStars}.`
       );
     }
     if (
       cov.emptyCellCount > 0 ||
-      cov.cellsWithAtLeast38Pct < 95 ||
-      cov.minCellCount < 25
+      cov.cellsWithAtLeast32Pct < 95 ||
+      cov.minCellCount < 22
     ) {
       spatialErrors.push(
-        `Starfield grid occupancy failed at ${label} (t=${t}s): empty=${cov.emptyCellCount}, >=38Pct=${cov.cellsWithAtLeast38Pct}%, minCell=${cov.minCellCount}`
+        `Starfield grid occupancy failed at ${label} (t=${t}s): empty=${cov.emptyCellCount}, >=32Pct=${cov.cellsWithAtLeast32Pct}%, minCell=${cov.minCellCount}`
       );
     }
   }
@@ -154,16 +161,16 @@ console.log(
   `Starfield Total Stars:  ${cov1440.totalStars} (tiny=${cov1440.layerCounts.tiny}, medium=${cov1440.layerCounts.medium}, bright=${cov1440.layerCounts.bright}, accent=${cov1440.layerCounts.accent})`
 );
 console.log(
-  `Starfield 1440x900:     12x8 Grid min=${cov1440.minCellCount}, max=${cov1440.maxCellCount}, >=38=${cov1440.cellsWithAtLeast38Pct}%`
+  `Starfield 1440x900:     12x8 Grid min=${cov1440.minCellCount}, max=${cov1440.maxCellCount}, >=32=${cov1440.cellsWithAtLeast32Pct}%`
 );
 console.log(
-  `Starfield 1920x1080:    12x8 Grid min=${cov1920.minCellCount}, max=${cov1920.maxCellCount}, >=38=${cov1920.cellsWithAtLeast38Pct}%`
+  `Starfield 1920x1080:    12x8 Grid min=${cov1920.minCellCount}, max=${cov1920.maxCellCount}, >=32=${cov1920.cellsWithAtLeast32Pct}%`
 );
 console.log(
-  `Starfield 2048x1002:    12x8 Grid min=${cov2048.minCellCount}, max=${cov2048.maxCellCount}, >=38=${cov2048.cellsWithAtLeast38Pct}%`
+  `Starfield 2048x1002:    12x8 Grid min=${cov2048.minCellCount}, max=${cov2048.maxCellCount}, >=32=${cov2048.cellsWithAtLeast32Pct}%`
 );
 console.log(
-  `Starfield 390x844:      8x12 Grid min=${covMobile.minCellCount}, max=${covMobile.maxCellCount}, >=38=${covMobile.cellsWithAtLeast38Pct}%`
+  `Starfield 390x844:      8x12 Grid min=${covMobile.minCellCount}, max=${covMobile.maxCellCount}, >=32=${covMobile.cellsWithAtLeast32Pct}%`
 );
 
 // 3. Legacy constellation checks
@@ -197,6 +204,7 @@ if (spatialErrors.length > 0) {
   });
   process.exit(1);
 } else {
-  console.log('\n[LIVING_ORBIT_VALIDATION_SUCCESS] Living Orbit 2.2 & 8,000-Star Sea verified.\n');
+  console.log('\n[LIVING_ORBIT_VALIDATION_SUCCESS] Living Orbit 2.3 & 5,500-Star Global Starfield verified.\n');
   process.exit(0);
 }
+
