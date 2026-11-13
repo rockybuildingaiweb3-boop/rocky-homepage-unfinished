@@ -1,6 +1,9 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { getGPUTier } from 'detect-gpu';
 import { STUDIO_PROJECTS } from '../../data/studioProjects';
+import {
+  getReducedMotionPreference,
+  probeGpuCapabilities,
+} from '../../hooks/useDeviceCapabilities';
 import { StudioRenderer } from './StudioRenderer';
 import { StudioItem } from './StudioItem';
 import { StudioDetails } from './StudioDetails';
@@ -284,7 +287,7 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
 
     let isCancelled = false;
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReduced = getReducedMotionPreference();
     if (prefersReduced) {
       isReducedMotionRef.current = true;
       setIsReducedMotion(true);
@@ -466,15 +469,11 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
       try {
         if (prefersReduced) return;
 
-        const gpuTier = await getGPUTier();
+        const gpu = await probeGpuCapabilities();
         if (isCancelled || !containerRef.current) return;
 
-        // Strict high-fidelity threshold: GPU tier >= 2, non-mobile, stable FPS >= 30
-        const fps = gpuTier.fps ?? 60;
-        const isCapableDesktop = gpuTier.tier >= 2 && !gpuTier.isMobile && fps >= 30;
-
         const validImages = imageRefs.current.filter(Boolean) as HTMLImageElement[];
-        if (validImages.length > 0 && isCapableDesktop) {
+        if (validImages.length > 0 && gpu.canUseStudioWebGL) {
           rendererRef.current = new StudioRenderer(containerRef.current, validImages, {
             getTrackX: () => sliderState.current.currentPosition,
             onNeedsRender: () => wakeLoopRef.current(),

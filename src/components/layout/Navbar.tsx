@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { useIsMobile } from '../../hooks/useIsMobile';
+import { useDeviceCapabilities } from '../../hooks/useDeviceCapabilities';
 import { useBackgroundMusic } from '../../features/audio';
 import {
   computeNavbarBackdropState,
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
 
 export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection = 'home', visible = true }) => {
   const [mobileMenuActive, setMobileMenuActive] = useState(false);
-  const isMobile = useIsMobile(768);
+  const { isMobile } = useDeviceCapabilities();
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   const [backdropState, setBackdropState] = useState(() =>
@@ -107,6 +107,33 @@ export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection =
           e.preventDefault();
           skipFocusRestoreRef.current = false;
           setMobileMenuActive(false);
+          return;
+        }
+
+        if (e.key === 'Tab' && drawer) {
+          const drawerFocusable = Array.from(
+            drawer.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )
+          );
+          const focusables: HTMLElement[] = menuToggleBtnRef.current
+            ? [menuToggleBtnRef.current, ...drawerFocusable]
+            : drawerFocusable;
+          if (focusables.length === 0) return;
+
+          const firstEl = focusables[0];
+          const lastEl = focusables[focusables.length - 1];
+          const activeEl = document.activeElement as HTMLElement | null;
+
+          if (e.shiftKey) {
+            if (!activeEl || activeEl === firstEl || !focusables.includes(activeEl)) {
+              e.preventDefault();
+              lastEl.focus({ preventScroll: true });
+            }
+          } else if (!activeEl || activeEl === lastEl || !focusables.includes(activeEl)) {
+            e.preventDefault();
+            firstEl.focus({ preventScroll: true });
+          }
         }
       };
 
@@ -158,11 +185,11 @@ export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection =
   return (
     <nav
       aria-label="Primary navigation"
-      className={`fixed top-0 left-0 w-full z-[100] px-6 sm:px-10 md:px-14 py-3.5 sm:py-5 flex flex-row justify-between items-center box-border pointer-events-none transition-all duration-500 ease-out ${navSurfaceClass} ${
+      className={`fixed top-0 left-0 w-full z-[100] px-5 sm:px-8 md:px-8 lg:px-14 py-3.5 sm:py-4 lg:py-5 flex flex-row justify-between items-center box-border pointer-events-none transition-all duration-500 ease-out ${navSurfaceClass} ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
       }`}
     >
-      <div className="h-8 sm:h-9 w-16 sm:w-20 cursor-pointer pointer-events-auto transition-transform duration-300 hover:scale-105 flex items-center justify-start">
+      <div className="h-7 sm:h-8 lg:h-9 w-14 sm:w-16 lg:w-20 shrink-0 cursor-pointer pointer-events-auto transition-transform duration-300 hover:scale-105 flex items-center justify-start">
         <button
           type="button"
           onClick={() => handleNavClick('home')}
@@ -180,8 +207,8 @@ export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection =
         </button>
       </div>
 
-      <div className="flex items-center pointer-events-auto">
-        <ul className="hidden md:flex list-none overflow-hidden m-0 p-0 items-center gap-6 lg:gap-8">
+      <div className="flex items-center shrink-0 pointer-events-auto">
+        <ul className="hidden md:flex list-none overflow-hidden m-0 p-0 items-center md:gap-4 lg:gap-7 xl:gap-8">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.id);
             const showStudioDot = shouldShowStudioActiveDot(item.id, activeSection);
@@ -203,12 +230,12 @@ export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection =
               : 'bg-purple-300/80 opacity-0 scale-x-50 group-hover:opacity-100 group-hover:scale-x-100 shadow-[0_0_10px_1px_rgba(216,180,254,0.85)]';
 
             return (
-              <li key={item.id} className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
+              <li key={item.id} className="font-mono uppercase text-[11px] lg:text-xs tracking-[0.14em] lg:tracking-[0.2em] inline-flex items-center whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleNavClick(item.id)}
                   aria-current={active ? 'location' : undefined}
-                  className={`group border-none bg-transparent uppercase tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${linkColorClass}`}
+                  className={`group border-none bg-transparent uppercase tracking-inherit cursor-pointer clickable transition-all duration-300 relative py-1 px-1 lg:px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${linkColorClass}`}
                 >
                   {showStudioDot ? (
                     <span className="flex items-center gap-1.5">
@@ -230,12 +257,12 @@ export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection =
             );
           })}
 
-          <li className="font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center">
+          <li className="font-mono uppercase text-[11px] lg:text-xs tracking-[0.14em] lg:tracking-[0.2em] inline-flex items-center whitespace-nowrap">
             <a
               href="https://github.com/rockybuildingaiweb3-boop/rocky-homepage-unfinished"
               target="_blank"
               rel="noreferrer"
-              className={`uppercase tracking-inherit no-underline clickable transition-colors py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
+              className={`uppercase tracking-inherit no-underline clickable transition-colors py-1 px-1 lg:px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded ${
                 useLightInk
                   ? 'text-[#1c1630]/75 hover:text-[#0f0b1c] drop-shadow-[0_1px_6px_rgba(255,255,255,0.65)]'
                   : 'text-white/75 hover:text-white'
@@ -246,7 +273,7 @@ export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection =
           </li>
 
           <li
-            className={`font-mono uppercase text-xs tracking-[0.2em] inline-flex items-center pl-2 border-l ${
+            className={`font-mono uppercase text-[11px] lg:text-xs tracking-[0.14em] lg:tracking-[0.2em] inline-flex items-center pl-2 lg:pl-2.5 border-l whitespace-nowrap ${
               useLightInk ? 'border-[#1c1630]/15' : 'border-white/10'
             }`}
           >

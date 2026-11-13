@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { GlobalShell } from './components/layout';
 import { HomePage } from './pages/HomePage';
-import { useIsMobile } from './hooks/useIsMobile';
+import { useDeviceCapabilities } from './hooks/useDeviceCapabilities';
 import { usePreloadAssets } from './hooks/usePreloadAssets';
 
 function PortfolioApp() {
-  const isMobile = useIsMobile();
+  const { isMobile } = useDeviceCapabilities();
   const { loadingDone, progress, siteData } = usePreloadAssets();
   const [heroAwake, setHeroAwake] = useState(false);
 

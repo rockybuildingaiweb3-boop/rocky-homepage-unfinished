@@ -9,6 +9,7 @@ import {
 } from 'react-icons/rx';
 import { FaYoutube, FaSpotify, FaTelegramPlane } from 'react-icons/fa';
 import { onScrolledIntoView } from '../../utils';
+import { getReducedMotionPreference } from '../../hooks/useDeviceCapabilities';
 import { SiteData } from '../../types';
 import {
   FOOTER_SIGNATURE_STROKES,
@@ -100,9 +101,7 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
       signaturePath4.current,
     ];
 
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = getReducedMotionPreference();
 
     // Measure actual path lengths so strokeDashoffset draws smoothly on scroll entry
     const pathLengths = pathRefs.map((pathEl) => {

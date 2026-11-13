@@ -21,6 +21,11 @@ import {
   getTotalSignatureDrawDurationMs,
 } from '../../components/layout/footerSignatureLogic';
 import { resolveSkillIcon } from '../../components/skills/iconResolver';
+import {
+  classifyViewportWidth,
+  computeStudioWebGLEligibility,
+  isMobileViewportWidth,
+} from '../../features/device/deviceCapabilities';
 
 describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-Demand Loop', () => {
   it('computes Hero day-to-night parallax metrics smoothly across scroll progression', () => {
@@ -252,5 +257,36 @@ describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-
     assert.equal(computeNextStudioSnapTarget(offsets, -380, 1, 1200), -760);
     assert.equal(computeNextStudioSnapTarget(offsets, -760, -1, 1200), -380);
     assert.equal(computeNextStudioSnapTarget(offsets, -380, -1, 1200), 0);
+  });
+
+  it('unifies mobile/tablet/desktop breakpoints with CSS md: (768px) and centralizes Studio WebGL gating', () => {
+    assert.equal(isMobileViewportWidth(767), true);
+    assert.equal(isMobileViewportWidth(768), false);
+    assert.equal(classifyViewportWidth(390), 'mobile');
+    assert.equal(classifyViewportWidth(767), 'mobile');
+    assert.equal(classifyViewportWidth(768), 'tablet');
+    assert.equal(classifyViewportWidth(1023), 'tablet');
+    assert.equal(classifyViewportWidth(1024), 'desktop');
+
+    assert.equal(
+      computeStudioWebGLEligibility({ tier: 3, isMobile: false, fps: 60, prefersReducedMotion: false }),
+      true
+    );
+    assert.equal(
+      computeStudioWebGLEligibility({ tier: 3, isMobile: false, fps: 60, prefersReducedMotion: true }),
+      false
+    );
+    assert.equal(
+      computeStudioWebGLEligibility({ tier: 3, isMobile: true, fps: 60, prefersReducedMotion: false }),
+      false
+    );
+    assert.equal(
+      computeStudioWebGLEligibility({ tier: 1, isMobile: false, fps: 60, prefersReducedMotion: false }),
+      false
+    );
+    assert.equal(
+      computeStudioWebGLEligibility({ tier: 2, isMobile: false, fps: 24, prefersReducedMotion: false }),
+      false
+    );
   });
 });
