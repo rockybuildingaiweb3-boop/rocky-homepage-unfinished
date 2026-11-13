@@ -22,8 +22,17 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
   const progressCircleRef = useRef<SVGCircleElement>(null);
   const trackCircleRef = useRef<SVGCircleElement>(null);
   const isReturningRef = useRef(false);
+  const isMountedRef = useRef(true);
   const scrollAnimRafRef = useRef<number | null>(null);
   const scrollSyncRafRef = useRef<number | null>(null);
+  const abortListenersCleanupRef = useRef<(() => void) | null>(null);
+
+  const detachAbortListeners = useCallback(() => {
+    if (abortListenersCleanupRef.current) {
+      abortListenersCleanupRef.current();
+      abortListenersCleanupRef.current = null;
+    }
+  }, []);
 
   const paintRing = useCallback((progress: number, returning: boolean) => {
     const metrics = computeBackToTopRingMetrics({
@@ -58,6 +67,7 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    isMountedRef.current = true;
 
     const syncFromScroll = () => {
       scrollSyncRafRef.current = null;
@@ -74,24 +84,35 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
     window.addEventListener('resize', scheduleSync, { passive: true });
 
     return () => {
+      isMountedRef.current = false;
+      detachAbortListeners();
       window.removeEventListener('scroll', scheduleSync);
       window.removeEventListener('resize', scheduleSync);
-      if (scrollSyncRafRef.current !== null) cancelAnimationFrame(scrollSyncRafRef.current);
-      if (scrollAnimRafRef.current !== null) cancelAnimationFrame(scrollAnimRafRef.current);
+      if (scrollSyncRafRef.current !== null) {
+        cancelAnimationFrame(scrollSyncRafRef.current);
+        scrollSyncRafRef.current = null;
+      }
+      if (scrollAnimRafRef.current !== null) {
+        cancelAnimationFrame(scrollAnimRafRef.current);
+        scrollAnimRafRef.current = null;
+      }
     };
-  }, [paintRing, readCurrentProgress]);
+  }, [detachAbortListeners, paintRing, readCurrentProgress]);
 
   const cancelReturnAnimation = useCallback(() => {
+    detachAbortListeners();
     if (scrollAnimRafRef.current !== null) {
       cancelAnimationFrame(scrollAnimRafRef.current);
       scrollAnimRafRef.current = null;
     }
     if (isReturningRef.current) {
       isReturningRef.current = false;
-      setIsReturning(false);
+      if (isMountedRef.current) {
+        setIsReturning(false);
+      }
       paintRing(readCurrentProgress(), false);
     }
-  }, [paintRing, readCurrentProgress]);
+  }, [detachAbortListeners, paintRing, readCurrentProgress]);
 
   const handleBackToTopClick = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -101,11 +122,12 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
 
     if (prefersReducedMotion || startY <= 2) {
       cancelReturnAnimation();
-      window.scrollTo({ top: 0, behavior: 'auto' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
       paintRing(0, false);
       return;
     }
 
+    detachAbortListeners();
     if (scrollAnimRafRef.current !== null) {
       cancelAnimationFrame(scrollAnimRafRef.current);
       scrollAnimRafRef.current = null;
@@ -117,21 +139,29 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
     const initialProgress = Math.max(0.15, readCurrentProgress());
 
     const abortOnUserInput = () => {
-      window.removeEventListener('wheel', abortOnUserInput);
-      window.removeEventListener('touchstart', abortOnUserInput);
       cancelReturnAnimation();
     };
     window.addEventListener('wheel', abortOnUserInput, { passive: true });
     window.addEventListener('touchstart', abortOnUserInput, { passive: true });
+    abortListenersCleanupRef.current = () => {
+      window.removeEventListener('wheel', abortOnUserInput);
+      window.removeEventListener('touchstart', abortOnUserInput);
+    };
 
     const animateReturn = (now: number) => {
+      if (!isMountedRef.current) {
+        scrollAnimRafRef.current = null;
+        detachAbortListeners();
+        return;
+      }
+
       const elapsed = now - startTime;
       const t = Math.min(1, elapsed / RETURN_SCROLL_DURATION_MS);
       const eased = easeInOutQuart(t);
 
-      // Scroll smoothly back to Hero (explicit 'auto' prevents CSS scroll-behavior: smooth from resetting each RAF step)
+      // Scroll smoothly back to Hero (explicit 'instant' overrides CSS scroll-behavior: smooth on each RAF step)
       const nextY = Math.round(startY * (1 - eased));
-      window.scrollTo({ top: nextY, behavior: 'auto' });
+      window.scrollTo({ top: nextY, behavior: 'instant' });
 
       // Reverse collapse of outer progress ring synced tightly with return progression
       const liveRatio = Math.max(0, initialProgress * (1 - eased));
@@ -141,8 +171,7 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
         scrollAnimRafRef.current = requestAnimationFrame(animateReturn);
       } else {
         scrollAnimRafRef.current = null;
-        window.removeEventListener('wheel', abortOnUserInput);
-        window.removeEventListener('touchstart', abortOnUserInput);
+        detachAbortListeners();
         isReturningRef.current = false;
         setIsReturning(false);
         paintRing(0, false);
@@ -150,7 +179,7 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
     };
 
     scrollAnimRafRef.current = requestAnimationFrame(animateReturn);
-  }, [cancelReturnAnimation, paintRing, readCurrentProgress]);
+  }, [cancelReturnAnimation, detachAbortListeners, paintRing, readCurrentProgress]);
 
   const circumference = 2 * Math.PI * BACK_TO_TOP_RING_RADIUS;
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { easeInOutQuad } from '../../utils';
+import { getReducedMotionPreference } from '../../hooks/useDeviceCapabilities';
 
 export interface CursorDotProps {
   isMobile?: boolean;
@@ -7,6 +8,8 @@ export interface CursorDotProps {
 }
 
 export type CursorMode = 'default' | 'pointer' | 'drag' | 'dragging' | 'view';
+
+const CURSOR_CONVERGE_EPSILON_PX = 0.12;
 
 /**
  * Global Interactive Cursor Feature
@@ -16,6 +19,7 @@ export type CursorMode = 'default' | 'pointer' | 'drag' | 'dragging' | 'view';
  * - Autonomous interaction classification (default, pointer, view, drag, dragging)
  * - Trailing stardust comet particles with eased spring physics
  * - Subtle magnetic attraction on compact interactive targets
+ * - On-demand RAF loop that sleeps automatically once particles converge or when hidden/blurred
  */
 export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled = false }) => {
   const [mode, setMode] = useState<CursorMode>('default');
@@ -34,6 +38,17 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
   const trail2Pos = useRef({ x: -100, y: -100 });
   const animFrameId = useRef<number | null>(null);
   const isMouseDownRef = useRef(false);
+  const modeRef = useRef<CursorMode>('default');
+  const hasPointerMovedRef = useRef(false);
+  const isPageVisibleRef = useRef(
+    typeof document !== 'undefined' ? document.visibilityState !== 'hidden' : true
+  );
+  const isWindowFocusedRef = useRef(
+    typeof document !== 'undefined' && typeof document.hasFocus === 'function'
+      ? document.hasFocus()
+      : true
+  );
+  const prefersReducedMotionRef = useRef(getReducedMotionPreference());
 
   useEffect(() => {
     const timer = setTimeout(() => setIntroDisabled(false), 300);
@@ -41,7 +56,14 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
   }, []);
 
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || disabled) return;
+
+    const commitMode = (nextMode: CursorMode) => {
+      if (modeRef.current !== nextMode) {
+        modeRef.current = nextMode;
+        setMode(nextMode);
+      }
+    };
 
     const getTargetMode = (target: HTMLElement | null, isDown: boolean): { mode: CursorMode; isMagnetic: boolean } => {
       if (!target) return { mode: 'default', isMagnetic: false };
@@ -93,10 +115,107 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
       return { mode: 'default', isMagnetic: false };
     };
 
+    const applyTransforms = () => {
+      if (coreRef.current) {
+        coreRef.current.style.transform = `translate3d(${corePos.current.x}px, ${corePos.current.y}px, 0px)`;
+      }
+      if (auraRef.current) {
+        auraRef.current.style.transform = `translate3d(${auraPos.current.x}px, ${auraPos.current.y}px, 0px)`;
+      }
+      if (trail1Ref.current) {
+        trail1Ref.current.style.transform = `translate3d(${trail1Pos.current.x}px, ${trail1Pos.current.y}px, 0px)`;
+      }
+      if (trail2Ref.current) {
+        trail2Ref.current.style.transform = `translate3d(${trail2Pos.current.x}px, ${trail2Pos.current.y}px, 0px)`;
+      }
+    };
+
+    const snapAllToTarget = () => {
+      const { x, y } = targetPos.current;
+      corePos.current = { x, y };
+      auraPos.current = { x, y };
+      trail1Pos.current = { x, y };
+      trail2Pos.current = { x, y };
+      applyTransforms();
+    };
+
+    const stopLoop = () => {
+      if (animFrameId.current !== null) {
+        cancelAnimationFrame(animFrameId.current);
+        animFrameId.current = null;
+      }
+    };
+
+    const animate = () => {
+      animFrameId.current = null;
+
+      if (!hasPointerMovedRef.current || !isPageVisibleRef.current || !isWindowFocusedRef.current) {
+        return;
+      }
+
+      if (prefersReducedMotionRef.current) {
+        snapAllToTarget();
+        return;
+      }
+
+      // 1. Core snappy follower (fast response)
+      const tCore = 0.52;
+      corePos.current.x += easeInOutQuad(tCore) * (targetPos.current.x - corePos.current.x);
+      corePos.current.y += easeInOutQuad(tCore) * (targetPos.current.y - corePos.current.y);
+
+      // 2. Trailing chromatic halo follower (organic celestial lag)
+      const tAura = 0.18;
+      auraPos.current.x += easeInOutQuad(tAura) * (targetPos.current.x - auraPos.current.x);
+      auraPos.current.y += easeInOutQuad(tAura) * (targetPos.current.y - auraPos.current.y);
+
+      // 3. Stardust trail particle 1 (lagging further behind)
+      const tTrail1 = 0.11;
+      trail1Pos.current.x += easeInOutQuad(tTrail1) * (targetPos.current.x - trail1Pos.current.x);
+      trail1Pos.current.y += easeInOutQuad(tTrail1) * (targetPos.current.y - trail1Pos.current.y);
+
+      // 4. Stardust trail particle 2 (ethereal comet tail)
+      const tTrail2 = 0.07;
+      trail2Pos.current.x += easeInOutQuad(tTrail2) * (targetPos.current.x - trail2Pos.current.x);
+      trail2Pos.current.y += easeInOutQuad(tTrail2) * (targetPos.current.y - trail2Pos.current.y);
+
+      const isSettled =
+        Math.abs(targetPos.current.x - corePos.current.x) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.y - corePos.current.y) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.x - auraPos.current.x) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.y - auraPos.current.y) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.x - trail1Pos.current.x) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.y - trail1Pos.current.y) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.x - trail2Pos.current.x) < CURSOR_CONVERGE_EPSILON_PX &&
+        Math.abs(targetPos.current.y - trail2Pos.current.y) < CURSOR_CONVERGE_EPSILON_PX;
+
+      if (isSettled) {
+        snapAllToTarget();
+        return;
+      }
+
+      applyTransforms();
+      animFrameId.current = requestAnimationFrame(animate);
+    };
+
+    const wakeLoop = () => {
+      if (!hasPointerMovedRef.current || !isPageVisibleRef.current || !isWindowFocusedRef.current) {
+        return;
+      }
+      if (prefersReducedMotionRef.current) {
+        stopLoop();
+        snapAllToTarget();
+        return;
+      }
+      if (animFrameId.current === null) {
+        animFrameId.current = requestAnimationFrame(animate);
+      }
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
+      isWindowFocusedRef.current = true;
       const target = e.target as HTMLElement | null;
       const { mode: detectedMode, isMagnetic } = getTargetMode(target, isMouseDownRef.current || e.buttons === 1);
-      setMode(detectedMode);
+      commitMode(detectedMode);
 
       if (isMagnetic && target) {
         const interactiveEl =
@@ -119,6 +238,14 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
           y: e.clientY,
         };
       }
+
+      if (!hasPointerMovedRef.current) {
+        hasPointerMovedRef.current = true;
+        snapAllToTarget();
+        return;
+      }
+
+      wakeLoop();
     };
 
     const handleMouseDown = (e: MouseEvent) => {
@@ -126,7 +253,7 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
         isMouseDownRef.current = true;
         const target = e.target as HTMLElement | null;
         const { mode: detectedMode } = getTargetMode(target, true);
-        setMode(detectedMode);
+        commitMode(detectedMode);
       }
     };
 
@@ -134,60 +261,61 @@ export const CursorDot: React.FC<CursorDotProps> = ({ isMobile = false, disabled
       isMouseDownRef.current = false;
       const target = e.target as HTMLElement | null;
       const { mode: detectedMode } = getTargetMode(target, false);
-      setMode(detectedMode);
+      commitMode(detectedMode);
+    };
+
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = document.visibilityState !== 'hidden';
+      if (!isPageVisibleRef.current) {
+        isMouseDownRef.current = false;
+        stopLoop();
+      } else {
+        wakeLoop();
+      }
+    };
+
+    const handleWindowBlur = () => {
+      isWindowFocusedRef.current = false;
+      isMouseDownRef.current = false;
+      stopLoop();
+    };
+
+    const handleWindowFocus = () => {
+      isWindowFocusedRef.current = true;
+      wakeLoop();
+    };
+
+    const motionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    prefersReducedMotionRef.current = motionMq.matches;
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      prefersReducedMotionRef.current = e.matches;
+      if (e.matches) {
+        stopLoop();
+        if (hasPointerMovedRef.current) {
+          snapAllToTarget();
+        }
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mousedown', handleMouseDown, { passive: true });
     window.addEventListener('mouseup', handleMouseUp, { passive: true });
-
-    const animate = () => {
-      // 1. Core snappy follower (fast response)
-      const tCore = 0.52;
-      corePos.current.x += easeInOutQuad(tCore) * (targetPos.current.x - corePos.current.x);
-      corePos.current.y += easeInOutQuad(tCore) * (targetPos.current.y - corePos.current.y);
-
-      // 2. Trailing chromatic halo follower (organic celestial lag)
-      const tAura = 0.18;
-      auraPos.current.x += easeInOutQuad(tAura) * (targetPos.current.x - auraPos.current.x);
-      auraPos.current.y += easeInOutQuad(tAura) * (targetPos.current.y - auraPos.current.y);
-
-      // 3. Stardust trail particle 1 (lagging further behind)
-      const tTrail1 = 0.11;
-      trail1Pos.current.x += easeInOutQuad(tTrail1) * (targetPos.current.x - trail1Pos.current.x);
-      trail1Pos.current.y += easeInOutQuad(tTrail1) * (targetPos.current.y - trail1Pos.current.y);
-
-      // 4. Stardust trail particle 2 (ethereal comet tail)
-      const tTrail2 = 0.07;
-      trail2Pos.current.x += easeInOutQuad(tTrail2) * (targetPos.current.x - trail2Pos.current.x);
-      trail2Pos.current.y += easeInOutQuad(tTrail2) * (targetPos.current.y - trail2Pos.current.y);
-
-      // Apply GPU translate3d transforms
-      if (coreRef.current) {
-        coreRef.current.style.transform = `translate3d(${corePos.current.x}px, ${corePos.current.y}px, 0px)`;
-      }
-      if (auraRef.current) {
-        auraRef.current.style.transform = `translate3d(${auraPos.current.x}px, ${auraPos.current.y}px, 0px)`;
-      }
-      if (trail1Ref.current) {
-        trail1Ref.current.style.transform = `translate3d(${trail1Pos.current.x}px, ${trail1Pos.current.y}px, 0px)`;
-      }
-      if (trail2Ref.current) {
-        trail2Ref.current.style.transform = `translate3d(${trail2Pos.current.x}px, ${trail2Pos.current.y}px, 0px)`;
-      }
-
-      animFrameId.current = requestAnimationFrame(animate);
-    };
-
-    animFrameId.current = requestAnimationFrame(animate);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    motionMq.addEventListener?.('change', handleMotionChange);
 
     return () => {
+      stopLoop();
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
-      if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      motionMq.removeEventListener?.('change', handleMotionChange);
     };
-  }, [isMobile]);
+  }, [isMobile, disabled]);
 
   if (isMobile) return null;
 

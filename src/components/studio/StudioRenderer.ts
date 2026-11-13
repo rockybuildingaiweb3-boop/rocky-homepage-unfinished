@@ -37,7 +37,11 @@ export class StudioRenderer {
   }
 
   private measureContainerDimensions(): void {
-    const width = window.innerWidth || 1200;
+    const width =
+      this.container.clientWidth ||
+      this.container.getBoundingClientRect().width ||
+      window.innerWidth ||
+      1200;
     const height =
       this.container.clientHeight ||
       this.container.getBoundingClientRect().height ||

@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { Navbar, Footer } from '../components/layout';
 import { HomeSection, StudioSection, SkillsSection } from '../components/sections';
 import { useScrollSpy } from '../features/scroll';
+import { getReducedMotionPreference } from '../hooks/useDeviceCapabilities';
 import type { SiteData } from '../types';
 
 interface HomePageProps {
@@ -15,14 +16,16 @@ export const HomePage: React.FC<HomePageProps> = ({ siteData, isHeroAwake = true
   });
 
   const handleNavigate = useCallback((target: string) => {
+    const behavior: ScrollBehavior = getReducedMotionPreference() ? 'instant' : 'smooth';
+
     if (target === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior });
       return;
     }
 
     const element = document.getElementById(target);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior });
     }
   }, []);
 

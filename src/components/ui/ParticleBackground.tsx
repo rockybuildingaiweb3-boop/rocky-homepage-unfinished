@@ -1,5 +1,5 @@
 import React, { Component, useState, useRef, useEffect, useMemo, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { isWebGLAvailable } from '../../utils';
 
@@ -1174,17 +1174,27 @@ interface MutableSkillsTrackingState {
   isLowPerfDevice: boolean;
 }
 
+interface SkillsTrackerHandle {
+  stateRef: React.MutableRefObject<MutableSkillsTrackingState>;
+  prefersReducedMotion: boolean;
+  isPageVisible: boolean;
+  subscribeStaticRedraw: (cb: () => void) => () => void;
+}
+
 /**
  * Shared Skills Atmospheric Region Tracker
  * Combines IntersectionObserver, ResizeObserver, passive scroll listening, and
  * rAF-throttled layout measurement so DOM geometry is never read per animation frame.
+ * Also tracks page visibility and reduced-motion state so callers can halt RAF/WebGL cleanly.
  */
 function useSkillsAtmosphereTracker(
   containerRef: React.RefObject<HTMLDivElement | null>
-): React.MutableRefObject<MutableSkillsTrackingState> {
+): SkillsTrackerHandle {
   const initialReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const initialPageVisible =
+    typeof document !== 'undefined' ? document.visibilityState !== 'hidden' : true;
 
   const initialLowPerf =
     typeof navigator !== 'undefined' &&
@@ -1193,6 +1203,11 @@ function useSkillsAtmosphereTracker(
       (typeof (navigator as unknown as { deviceMemory?: number }).deviceMemory ===
         'number' &&
         ((navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 8) <= 2));
+
+  const [prefersReducedMotion, setPrefersReducedMotion] =
+    useState<boolean>(initialReducedMotion);
+  const [isPageVisible, setIsPageVisible] = useState<boolean>(initialPageVisible);
+  const staticRedrawListenersRef = useRef<Set<() => void>>(new Set());
 
   const stateRef = useRef<MutableSkillsTrackingState>({
     centerU: 0.5,
@@ -1207,15 +1222,43 @@ function useSkillsAtmosphereTracker(
     isLowPerfDevice: initialLowPerf,
   });
 
+  const subscribeStaticRedraw = React.useCallback((cb: () => void) => {
+    staticRedrawListenersRef.current.add(cb);
+    return () => {
+      staticRedrawListenersRef.current.delete(cb);
+    };
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    const notifyStaticRedraw = () => {
+      if (document.visibilityState === 'hidden') return;
+      staticRedrawListenersRef.current.forEach((cb) => cb());
+    };
+
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     stateRef.current.prefersReducedMotion = mq.matches;
+    setPrefersReducedMotion(mq.matches);
+
     const handleMotionChange = (e: MediaQueryListEvent) => {
       stateRef.current.prefersReducedMotion = e.matches;
+      setPrefersReducedMotion(e.matches);
+      if (e.matches) {
+        stateRef.current.currentMix = stateRef.current.targetMix;
+        notifyStaticRedraw();
+      }
     };
     mq.addEventListener('change', handleMotionChange);
+
+    const handleVisibilityChange = () => {
+      const visible = document.visibilityState !== 'hidden';
+      setIsPageVisible(visible);
+      if (visible && stateRef.current.prefersReducedMotion) {
+        notifyStaticRedraw();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     let skillsEl: HTMLElement | null = null;
     let isIntersecting = false;
@@ -1263,6 +1306,7 @@ function useSkillsAtmosphereTracker(
           ? TOTAL_PERIPHERAL_STARFIELD_COUNT
           : TOTAL_STARFIELD_COUNT;
         syncDomDiagnostics();
+        notifyStaticRedraw();
       }
     };
 
@@ -1334,6 +1378,9 @@ function useSkillsAtmosphereTracker(
 
     const handleResize = () => {
       scheduleMeasure();
+      if (stateRef.current.prefersReducedMotion) {
+        notifyStaticRedraw();
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -1342,6 +1389,7 @@ function useSkillsAtmosphereTracker(
 
     return () => {
       mq.removeEventListener('change', handleMotionChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       intersectionObserver?.disconnect();
@@ -1351,7 +1399,12 @@ function useSkillsAtmosphereTracker(
     };
   }, [containerRef]);
 
-  return stateRef;
+  return {
+    stateRef,
+    prefersReducedMotion,
+    isPageVisible,
+    subscribeStaticRedraw,
+  };
 }
 
 interface WebGLStarLayerProps {
@@ -1656,7 +1709,29 @@ const WebGLStellarTrails: React.FC<{
 interface StarBackgroundProps {
   skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
   hostContainerRef: React.RefObject<HTMLDivElement | null>;
+  subscribeStaticRedraw: (cb: () => void) => () => void;
+  prefersReducedMotion: boolean;
+  isPageVisible: boolean;
 }
+
+const WebGLStaticInvalidator: React.FC<{
+  subscribeStaticRedraw: (cb: () => void) => () => void;
+  prefersReducedMotion: boolean;
+  isPageVisible: boolean;
+}> = ({ subscribeStaticRedraw, prefersReducedMotion, isPageVisible }) => {
+  const invalidate = useThree((s) => s.invalidate);
+
+  useEffect(() => {
+    if (isPageVisible) {
+      invalidate();
+    }
+    return subscribeStaticRedraw(() => {
+      invalidate();
+    });
+  }, [invalidate, subscribeStaticRedraw, prefersReducedMotion, isPageVisible]);
+
+  return null;
+};
 
 /**
  * StarBackground — Dual-Mode 4-Layer WebGL Starfield
@@ -1664,9 +1739,17 @@ interface StarBackgroundProps {
 export const StarBackground: React.FC<StarBackgroundProps> = ({
   skillsTrackerRef,
   hostContainerRef,
+  subscribeStaticRedraw,
+  prefersReducedMotion,
+  isPageVisible,
 }) => {
   return (
     <group>
+      <WebGLStaticInvalidator
+        subscribeStaticRedraw={subscribeStaticRedraw}
+        prefersReducedMotion={prefersReducedMotion}
+        isPageVisible={isPageVisible}
+      />
       <WebGLSkillsCoordinator
         skillsTrackerRef={skillsTrackerRef}
         hostContainerRef={hostContainerRef}
@@ -1686,6 +1769,9 @@ export const StarBackground: React.FC<StarBackgroundProps> = ({
 interface StarBackground2DProps {
   skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
   hostContainerRef: React.RefObject<HTMLDivElement | null>;
+  subscribeStaticRedraw: (cb: () => void) => () => void;
+  prefersReducedMotion: boolean;
+  isPageVisible: boolean;
 }
 
 /**
@@ -1693,10 +1779,15 @@ interface StarBackground2DProps {
  * - Normal Mode: iterates all 5,500 stars
  * - Skills Mode: iterates ONLY the precomputed 800-star outer-perimeter subset
  *   using the exact same `computeStarVisibilityFactor` mask and motion rules.
+ * - True static rendering when `prefersReducedMotion` is active, pauses when hidden,
+ *   and scales canvas backing store cleanly with capped devicePixelRatio.
  */
 const StarBackground2D: React.FC<StarBackground2DProps> = ({
   skillsTrackerRef,
   hostContainerRef,
+  subscribeStaticRedraw,
+  prefersReducedMotion,
+  isPageVisible,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -1706,9 +1797,30 @@ const StarBackground2D: React.FC<StarBackground2DProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let animId: number | null = null;
+    let width = window.innerWidth || 1440;
+    let height = window.innerHeight || 900;
+
+    const getCappedDpr = () => {
+      const rawDpr = window.devicePixelRatio || 1;
+      const cap = skillsTrackerRef.current.isLowPerfDevice ? 1 : 2;
+      return Math.min(rawDpr, cap);
+    };
+
+    const syncCanvasSize = () => {
+      width = window.innerWidth || 1440;
+      height = window.innerHeight || 900;
+      const dpr = getCappedDpr();
+      const targetW = Math.max(1, Math.round(width * dpr));
+      const targetH = Math.max(1, Math.round(height * dpr));
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    syncCanvasSize();
 
     const layerDataList = STARFIELD_LAYER_SPECS.map((spec) =>
       generateScreenSpaceStarLayerData(spec)
@@ -1717,25 +1829,18 @@ const StarBackground2D: React.FC<StarBackground2DProps> = ({
       d.spec.paletteRgb.map((rgb) => `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`)
     );
 
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
     let elapsedSec = 0;
     let lastTime = performance.now();
     let lastMode: ParticleRenderMode = 'normal';
     let lastActiveCount = TOTAL_STARFIELD_COUNT;
 
-    const render = (time: number) => {
+    const drawFrame = (time: number, isStatic: boolean) => {
       const rawDelta = Math.max(0.001, (time - lastTime) / 1000);
       const delta = Math.min(rawDelta, 0.25);
       lastTime = time;
 
       const tracker = skillsTrackerRef.current;
-      if (tracker.prefersReducedMotion) {
+      if (isStatic || tracker.prefersReducedMotion) {
         tracker.currentMix = tracker.targetMix;
       } else {
         elapsedSec += Math.min(rawDelta, 0.1);
@@ -1770,7 +1875,7 @@ const StarBackground2D: React.FC<StarBackground2DProps> = ({
         radiusV: tracker.radiusV,
         mix: tracker.currentMix,
       };
-      const evalTime = tracker.prefersReducedMotion ? 0 : elapsedSec;
+      const evalTime = isStatic || tracker.prefersReducedMotion ? 0 : elapsedSec;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -1806,7 +1911,7 @@ const StarBackground2D: React.FC<StarBackground2DProps> = ({
           const py = v * height;
 
           const twinkle =
-            !tracker.prefersReducedMotion && i % 3 === 0
+            !isStatic && !tracker.prefersReducedMotion && i % 3 === 0
               ? Math.sin(evalTime * data.twinkleFreq[i] + phase) * spec.twinkleAmp
               : 0;
           const alpha = Math.max(
@@ -1831,7 +1936,7 @@ const StarBackground2D: React.FC<StarBackground2DProps> = ({
       ctx.globalAlpha = 1;
 
       // 2. Render delicate stellar motion trails (disabled when reduced motion is active)
-      if (!tracker.prefersReducedMotion) {
+      if (!isStatic && !tracker.prefersReducedMotion) {
         const activeTrails = evaluateStellarTrails(evalTime, width, height, region);
         for (let tIdx = 0; tIdx < activeTrails.length; tIdx++) {
           const tr = activeTrails[tIdx];
@@ -1853,17 +1958,53 @@ const StarBackground2D: React.FC<StarBackground2DProps> = ({
           ctx.stroke();
         }
       }
-
-      animId = requestAnimationFrame(render);
     };
 
-    animId = requestAnimationFrame(render);
+    const stopLoop = () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+    };
+
+    const renderLoop = (time: number) => {
+      animId = null;
+      if (!isPageVisible || prefersReducedMotion || skillsTrackerRef.current.prefersReducedMotion) {
+        return;
+      }
+      drawFrame(time, false);
+      animId = requestAnimationFrame(renderLoop);
+    };
+
+    const handleResize = () => {
+      syncCanvasSize();
+      if (isPageVisible && (prefersReducedMotion || skillsTrackerRef.current.prefersReducedMotion)) {
+        drawFrame(performance.now(), true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    const unsubscribeRedraw = subscribeStaticRedraw(() => {
+      if (isPageVisible && (prefersReducedMotion || skillsTrackerRef.current.prefersReducedMotion)) {
+        drawFrame(performance.now(), true);
+      }
+    });
+
+    if (isPageVisible) {
+      if (prefersReducedMotion || skillsTrackerRef.current.prefersReducedMotion) {
+        drawFrame(performance.now(), true);
+      } else {
+        lastTime = performance.now();
+        animId = requestAnimationFrame(renderLoop);
+      }
+    }
 
     return () => {
-      cancelAnimationFrame(animId);
+      stopLoop();
+      unsubscribeRedraw();
       window.removeEventListener('resize', handleResize);
     };
-  }, [skillsTrackerRef, hostContainerRef]);
+  }, [skillsTrackerRef, hostContainerRef, subscribeStaticRedraw, prefersReducedMotion, isPageVisible]);
 
   return (
     <canvas
@@ -1914,13 +2055,19 @@ class WebGLErrorBoundary extends Component<
 export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
   const [canUseWebGL, setCanUseWebGL] = useState<boolean>(() => isWebGLAvailable());
   const hostContainerRef = useRef<HTMLDivElement | null>(null);
-  const skillsTrackerRef = useSkillsAtmosphereTracker(hostContainerRef);
+  const {
+    stateRef: skillsTrackerRef,
+    prefersReducedMotion,
+    isPageVisible,
+    subscribeStaticRedraw,
+  } = useSkillsAtmosphereTracker(hostContainerRef);
 
   useEffect(() => {
     setCanUseWebGL(isWebGLAvailable());
   }, []);
 
   const dprMax = skillsTrackerRef.current.isLowPerfDevice ? 1 : 2;
+  const shouldAnimate = isPageVisible && !prefersReducedMotion;
 
   return (
     <div
@@ -1932,6 +2079,7 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
       data-total-budget={String(TOTAL_STARFIELD_COUNT)}
       data-peripheral-budget={String(TOTAL_PERIPHERAL_STARFIELD_COUNT)}
       data-renderer={canUseWebGL ? 'webgl' : '2d'}
+      data-motion-paused={shouldAnimate ? 'false' : 'true'}
       aria-hidden="true"
     >
       {canUseWebGL ? (
@@ -1941,10 +2089,14 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
             <StarBackground2D
               skillsTrackerRef={skillsTrackerRef}
               hostContainerRef={hostContainerRef}
+              subscribeStaticRedraw={subscribeStaticRedraw}
+              prefersReducedMotion={prefersReducedMotion}
+              isPageVisible={isPageVisible}
             />
           }
         >
           <Canvas
+            frameloop={shouldAnimate ? 'always' : 'demand'}
             dpr={[1, dprMax]}
             style={{ pointerEvents: 'none' }}
             camera={{ position: [0, 0, 1], fov: 75 }}
@@ -1957,6 +2109,9 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
               <StarBackground
                 skillsTrackerRef={skillsTrackerRef}
                 hostContainerRef={hostContainerRef}
+                subscribeStaticRedraw={subscribeStaticRedraw}
+                prefersReducedMotion={prefersReducedMotion}
+                isPageVisible={isPageVisible}
               />
             </Suspense>
           </Canvas>
@@ -1965,6 +2120,9 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
         <StarBackground2D
           skillsTrackerRef={skillsTrackerRef}
           hostContainerRef={hostContainerRef}
+          subscribeStaticRedraw={subscribeStaticRedraw}
+          prefersReducedMotion={prefersReducedMotion}
+          isPageVisible={isPageVisible}
         />
       )}
     </div>

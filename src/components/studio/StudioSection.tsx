@@ -78,6 +78,7 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
 
   const rendererRef = useRef<StudioRenderer | null>(null);
   const wakeLoopRef = useRef<() => void>(() => {});
+  const dragEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchGestureRef = useRef<{
     startX: number;
     startY: number;
@@ -93,7 +94,11 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
     start * (1 - factor) + end * factor;
 
   const updateTrackBoundsCache = useCallback(() => {
-    const clientW = document.body.clientWidth || window.innerWidth || 1200;
+    const clientW =
+      containerRef.current?.clientWidth ||
+      document.body.clientWidth ||
+      window.innerWidth ||
+      1200;
     const listEl = listRef.current;
     let endPoint = 0;
     if (listEl) {
@@ -104,12 +109,17 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
   }, []);
 
   // Center active item smoothly
-  const scrollToActiveItem = useCallback((idx: number) => {
-    const itemEl = itemRefs.current[idx];
-    if (!itemEl) return;
-    const target = -(itemEl.offsetLeft - window.innerWidth / 4 + window.innerWidth / 10);
-    sliderState.current.targetPosition = target;
-  }, []);
+  const scrollToActiveItem = useCallback(
+    (idx: number) => {
+      const itemEl = itemRefs.current[idx];
+      if (!itemEl) return;
+      updateTrackBoundsCache();
+      const clientW = cachedBoundsRef.current.clientWidth || 1200;
+      const target = -(itemEl.offsetLeft - clientW / 4 + clientW / 10);
+      sliderState.current.targetPosition = target;
+    },
+    [updateTrackBoundsCache]
+  );
 
   const toggleActiveItem = useCallback(
     (index: number) => {
@@ -175,7 +185,11 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
     sliderState.current.isInteracting = false;
     setIsHolding(false);
     wakeLoopRef.current();
-    setTimeout(() => {
+    if (dragEndTimerRef.current !== null) {
+      clearTimeout(dragEndTimerRef.current);
+    }
+    dragEndTimerRef.current = setTimeout(() => {
+      dragEndTimerRef.current = null;
       isDraggingRef.current = false;
     }, 50);
   }, []);
@@ -536,6 +550,10 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
     return () => {
       isCancelled = true;
       stopLoop();
+      if (dragEndTimerRef.current !== null) {
+        clearTimeout(dragEndTimerRef.current);
+        dragEndTimerRef.current = null;
+      }
       if (containerEl) {
         containerEl.removeEventListener('wheel', handleNativeWheel);
       }
