@@ -21,6 +21,9 @@ export interface StudioProject {
   details: ProjectDetails;
   roles: string[];
   image: string;
+  imageWebp?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   links?: ProjectLink[];
   metadata?: Record<string, string>;
 }

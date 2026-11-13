@@ -137,9 +137,10 @@ export class StudioImageMesh {
     this.updateLayoutCache(initialTrackX, viewportWidth);
     this.scene.add(this.mesh);
 
+    const textureUrl = this.element.currentSrc || this.element.src;
     const loader = new THREE.TextureLoader();
     this.texture = loader.load(
-      this.element.src,
+      textureUrl,
       (tex) => {
         if (this.isDisposed) {
           tex.dispose();

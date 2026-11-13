@@ -1722,13 +1722,21 @@ export function getIconDefinition(skillId: string): SkillRegistryEntry | undefin
  * 4. Verified Existing Local SVG
  * 5. Missing State
  */
+const RESOLVED_ICON_CACHE = new Map<string, ResolvedSkillIcon>();
+
 export function resolveSkillIcon(skillId: string, name?: string): ResolvedSkillIcon {
   const normalizedId = skillId.toLowerCase().trim();
+  const cacheKey = name ? `${normalizedId}::${name}` : normalizedId;
+  const cached = RESOLVED_ICON_CACHE.get(cacheKey);
+  if (cached) return cached;
+
   const def = ICON_REGISTRY[normalizedId];
   const displayName = name || (def ? def.name : skillId);
 
+  let result: ResolvedSkillIcon;
+
   if (!def || def.icon.source === 'missing') {
-    return {
+    result = {
       id: normalizedId,
       name: displayName,
       type: 'tool',
@@ -1743,104 +1751,101 @@ export function resolveSkillIcon(skillId: string, name?: string): ResolvedSkillI
       kind: 'missing',
       title: displayName,
     };
+  } else {
+    const { icon } = def;
+
+    if (icon.source === 'tech-stack-icons') {
+      result = {
+        id: def.id,
+        name: displayName,
+        type: icon.type,
+        visualMode: icon.visualMode,
+        scale: icon.scale,
+        brightness: icon.brightness,
+        source: 'tech-stack-icons',
+        fallbackLevel: 1,
+        key: icon.key,
+        classification: icon.classification,
+        status: icon.status,
+        kind: 'tech-stack-icon',
+        title: displayName,
+        brandColor: icon.brandColor,
+      };
+    } else if (icon.source === 'svgl') {
+      result = {
+        id: def.id,
+        name: displayName,
+        type: icon.type,
+        visualMode: icon.visualMode,
+        scale: icon.scale,
+        brightness: icon.brightness,
+        source: 'svgl',
+        fallbackLevel: 2,
+        key: icon.key,
+        url: icon.url || ('/assets/icons/svgl/' + icon.key + '.svg'),
+        classification: icon.classification,
+        status: icon.status,
+        kind: 'svgl-svg',
+        title: displayName,
+        brandColor: icon.brandColor,
+      };
+    } else if (icon.source === 'simple-icons') {
+      const si = icon.simpleIcon;
+      result = {
+        id: def.id,
+        name: displayName,
+        type: icon.type,
+        visualMode: icon.visualMode,
+        scale: icon.scale,
+        brightness: icon.brightness,
+        source: 'simple-icons',
+        fallbackLevel: 3,
+        key: icon.key,
+        path: si?.path || '',
+        hex: si?.hex || 'FFFFFF',
+        classification: icon.classification,
+        status: icon.status,
+        kind: 'svg-path',
+        title: si?.title || displayName,
+        brandColor: icon.brandColor || (si?.hex ? ('#' + si.hex) : undefined),
+      };
+    } else if (icon.source === 'verified-local') {
+      result = {
+        id: def.id,
+        name: displayName,
+        type: icon.type,
+        visualMode: icon.visualMode,
+        scale: icon.scale,
+        brightness: icon.brightness,
+        source: 'verified-local',
+        fallbackLevel: 4,
+        key: icon.key,
+        url: icon.url || ('/assets/icons/' + icon.key + '.svg'),
+        classification: icon.classification,
+        status: icon.status,
+        kind: 'local-svg',
+        title: displayName,
+        brandColor: icon.brandColor,
+      };
+    } else {
+      result = {
+        id: normalizedId,
+        name: displayName,
+        type: 'tool',
+        visualMode: 'symbol',
+        scale: 1.0,
+        brightness: 1.0,
+        source: 'missing',
+        fallbackLevel: 5,
+        key: normalizedId,
+        classification: 'missing',
+        status: 'missing',
+        kind: 'missing',
+        title: displayName,
+      };
+    }
   }
 
-  const { icon } = def;
-
-  if (icon.source === 'tech-stack-icons') {
-    return {
-      id: def.id,
-      name: displayName,
-      type: icon.type,
-      visualMode: icon.visualMode,
-      scale: icon.scale,
-      brightness: icon.brightness,
-      source: 'tech-stack-icons',
-      fallbackLevel: 1,
-      key: icon.key,
-      classification: icon.classification,
-      status: icon.status,
-      kind: 'tech-stack-icon',
-      title: displayName,
-      brandColor: icon.brandColor,
-    };
-  }
-
-  if (icon.source === 'svgl') {
-    return {
-      id: def.id,
-      name: displayName,
-      type: icon.type,
-      visualMode: icon.visualMode,
-      scale: icon.scale,
-      brightness: icon.brightness,
-      source: 'svgl',
-      fallbackLevel: 2,
-      key: icon.key,
-      url: icon.url || ('/assets/icons/svgl/' + icon.key + '.svg'),
-      classification: icon.classification,
-      status: icon.status,
-      kind: 'svgl-svg',
-      title: displayName,
-      brandColor: icon.brandColor,
-    };
-  }
-
-  if (icon.source === 'simple-icons') {
-    const si = icon.simpleIcon;
-    return {
-      id: def.id,
-      name: displayName,
-      type: icon.type,
-      visualMode: icon.visualMode,
-      scale: icon.scale,
-      brightness: icon.brightness,
-      source: 'simple-icons',
-      fallbackLevel: 3,
-      key: icon.key,
-      path: si?.path || '',
-      hex: si?.hex || 'FFFFFF',
-      classification: icon.classification,
-      status: icon.status,
-      kind: 'svg-path',
-      title: si?.title || displayName,
-      brandColor: icon.brandColor || (si?.hex ? ('#' + si.hex) : undefined),
-    };
-  }
-
-  if (icon.source === 'verified-local') {
-    return {
-      id: def.id,
-      name: displayName,
-      type: icon.type,
-      visualMode: icon.visualMode,
-      scale: icon.scale,
-      brightness: icon.brightness,
-      source: 'verified-local',
-      fallbackLevel: 4,
-      key: icon.key,
-      url: icon.url || ('/assets/icons/' + icon.key + '.svg'),
-      classification: icon.classification,
-      status: icon.status,
-      kind: 'local-svg',
-      title: displayName,
-      brandColor: icon.brandColor,
-    };
-  }
-
-  return {
-    id: normalizedId,
-    name: displayName,
-    type: 'tool',
-    visualMode: 'symbol',
-    scale: 1.0,
-    brightness: 1.0,
-    source: 'missing',
-    fallbackLevel: 5,
-    key: normalizedId,
-    classification: 'missing',
-    status: 'missing',
-    kind: 'missing',
-    title: displayName,
-  };
+  RESOLVED_ICON_CACHE.set(cacheKey, result);
+  return result;
 }

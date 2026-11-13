@@ -8,6 +8,15 @@ import {
   shouldStudioLoopContinue,
   computeMeshCenterOffsetX,
 } from '../../components/studio/studioLoopLogic';
+import {
+  computeNavbarBackdropState,
+  shouldShowStudioActiveDot,
+} from '../../components/layout/navbarLogic';
+import {
+  FOOTER_SIGNATURE_STROKES,
+  getTotalSignatureDrawDurationMs,
+} from '../../components/layout/footerSignatureLogic';
+import { resolveSkillIcon } from '../../components/skills/iconResolver';
 
 describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-Demand Loop', () => {
   it('computes Hero day-to-night parallax metrics smoothly across scroll progression', () => {
@@ -141,7 +150,6 @@ describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-
   });
 
   it('computes cached Three.js mesh center X offset identically to getBoundingClientRect math', () => {
-    // Equivalent to: rect.left - window.innerWidth / 2 + rect.width / 2
     const viewportWidth = 1440;
     const width = 320;
     const baseLeft = 200;
@@ -151,5 +159,41 @@ describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-
       computeMeshCenterOffsetX(baseLeft, trackX, width, viewportWidth),
       expected
     );
+  });
+
+  it('shows Studio dot strictly when Studio is active and adapts Navbar backdrop for light Hero vs dark cosmos', () => {
+    assert.equal(shouldShowStudioActiveDot('studio', 'home'), false);
+    assert.equal(shouldShowStudioActiveDot('studio', 'skills'), false);
+    assert.equal(shouldShowStudioActiveDot('studio', 'studio'), true);
+    assert.equal(shouldShowStudioActiveDot('home', 'home'), false);
+
+    assert.deepEqual(
+      computeNavbarBackdropState({ activeSection: 'home', scrollY: 0, viewportHeight: 900 }),
+      { isLightHeroBackdrop: true, isScrolled: false }
+    );
+    assert.deepEqual(
+      computeNavbarBackdropState({ activeSection: 'home', scrollY: 420, viewportHeight: 900 }),
+      { isLightHeroBackdrop: false, isScrolled: true }
+    );
+    assert.deepEqual(
+      computeNavbarBackdropState({ activeSection: 'skills', scrollY: 1800, viewportHeight: 900 }),
+      { isLightHeroBackdrop: false, isScrolled: true }
+    );
+  });
+
+  it('configures 4 sequential handwritten signature strokes and memoizes resolved skill icons', () => {
+    assert.equal(FOOTER_SIGNATURE_STROKES.length, 4);
+    for (let i = 1; i < FOOTER_SIGNATURE_STROKES.length; i++) {
+      assert.ok(
+        FOOTER_SIGNATURE_STROKES[i].delayMs > FOOTER_SIGNATURE_STROKES[i - 1].delayMs,
+        'Stroke delays must be strictly sequential'
+      );
+    }
+    const totalMs = getTotalSignatureDrawDurationMs();
+    assert.ok(totalMs >= 2800 && totalMs <= 3400, `Unexpected signature duration ${totalMs}ms`);
+
+    const first = resolveSkillIcon('react', 'React');
+    const second = resolveSkillIcon('react', 'React');
+    assert.equal(first, second, 'resolveSkillIcon should return cached object identity');
   });
 });

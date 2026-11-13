@@ -42,7 +42,7 @@ export function usePreloadAssets(): PreloadAssetsResult {
 
         const criticalImages = [
           '/assets/imgs/loader-flower.webp',
-          '/assets/imgs/home-back.jpg',
+          '/assets/imgs/home-back.webp',
           '/assets/imgs/logo-rb-cyber.svg',
           '/assets/imgs/signature.svg',
         ];
@@ -65,10 +65,14 @@ export function usePreloadAssets(): PreloadAssetsResult {
           })
         );
 
-        // Verify document fonts readiness
+        // Non-blocking fonts check (capped at 1000ms so slow external fonts never delay paint)
         if (typeof document !== 'undefined' && 'fonts' in document) {
           try {
-            await (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready;
+            const fontsReady = (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready;
+            await Promise.race([
+              fontsReady,
+              new Promise((resolve) => setTimeout(resolve, 1000)),
+            ]);
           } catch {
             // Non-blocking fallback
           }

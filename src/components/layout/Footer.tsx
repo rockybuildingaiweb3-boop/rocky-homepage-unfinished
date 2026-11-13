@@ -10,6 +10,11 @@ import {
 import { FaYoutube, FaSpotify, FaTelegramPlane } from 'react-icons/fa';
 import { onScrolledIntoView } from '../../utils';
 import { SiteData } from '../../types';
+import {
+  FOOTER_SIGNATURE_STROKES,
+  SIGNATURE_FINISHING_SHEEN_MS,
+  type SignatureAnimPhase,
+} from './footerSignatureLogic';
 
 interface FooterProps {
   siteData?: SiteData | null;
@@ -78,61 +83,126 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
   const signaturePath4 = useRef<SVGPathElement>(null);
 
   const currentYear = new Date().getFullYear();
-  const [signatureDrawn, setSignatureDrawn] = useState(false);
+  const [signaturePhase, setSignaturePhase] = useState<SignatureAnimPhase>('idle');
 
-  // Natural handwriting stroke animation using physiological pen timing
+  // Natural handwriting stroke animation using physiological pen timing & full cleanup
   useEffect(() => {
-    if (!footerContainerElement.current) return;
+    const containerEl = footerContainerElement.current;
+    if (!containerEl) return;
 
-    const cleanup = onScrolledIntoView(
-      footerContainerElement.current,
+    const pathRefs = [
+      signaturePath1.current,
+      signaturePath2.current,
+      signaturePath3.current,
+      signaturePath4.current,
+    ];
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Measure actual path lengths so strokeDashoffset draws smoothly on scroll entry
+    const pathLengths = pathRefs.map((pathEl) => {
+      if (!pathEl) return 0;
+      const total = typeof pathEl.getTotalLength === 'function' ? pathEl.getTotalLength() : 0;
+      const safeLen = Number.isFinite(total) && total > 0 ? Math.ceil(total) : 600;
+      pathEl.style.strokeDasharray = `${safeLen}`;
+      pathEl.style.strokeDashoffset = prefersReducedMotion ? '0' : `${safeLen}`;
+      return safeLen;
+    });
+
+    if (prefersReducedMotion) {
+      setSignaturePhase('resting');
+      return;
+    }
+
+    let isCancelled = false;
+    const activeAnimations: Animation[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const cleanupObserver = onScrolledIntoView(
+      containerEl,
       () => {
-        const strokeAnimation = [{ strokeDashoffset: '0' }];
-        const smoothEase = 'cubic-bezier(0.4, 0, 0.2, 1)';
+        if (isCancelled) return;
+        setSignaturePhase('drawing');
 
-        // 1. Initial Capital 'R' ascender & loop
-        signaturePath1.current?.animate(strokeAnimation, {
-          duration: 850,
-          delay: 0,
-          easing: smoothEase,
-          fill: 'forwards',
+        const finishedPromises: Promise<unknown>[] = [];
+
+        pathRefs.forEach((pathEl, idx) => {
+          const spec = FOOTER_SIGNATURE_STROKES[idx];
+          const length = pathLengths[idx];
+          if (!pathEl || !spec || typeof pathEl.animate !== 'function') return;
+
+          const anim = pathEl.animate(
+            [{ strokeDashoffset: `${length}` }, { strokeDashoffset: '0' }],
+            {
+              duration: spec.durationMs,
+              delay: spec.delayMs,
+              easing: spec.easing,
+              fill: 'forwards',
+            }
+          );
+          activeAnimations.push(anim);
+          if (anim.finished) {
+            finishedPromises.push(anim.finished.catch(() => undefined));
+          }
         });
 
-        // 2. 'ocky' natural flow
-        signaturePath2.current?.animate(strokeAnimation, {
-          duration: 700,
-          delay: 780,
-          easing: smoothEase,
-          fill: 'forwards',
-        });
+        const finishDraw = () => {
+          if (isCancelled || hasFinishedDraw) return;
+          hasFinishedDraw = true;
 
-        // 3. 'y' lower loop & bridge into 'B'
-        signaturePath3.current?.animate(strokeAnimation, {
-          duration: 400,
-          delay: 1420,
-          easing: smoothEase,
-          fill: 'forwards',
-        });
+          // Lock final SVG stroke attributes cleanly and release Animation handles
+          pathRefs.forEach((pathEl) => {
+            if (pathEl) {
+              pathEl.style.strokeDashoffset = '0';
+            }
+          });
+          activeAnimations.forEach((anim) => {
+            try {
+              anim.cancel();
+            } catch {
+              // Ignore if element detached
+            }
+          });
+          activeAnimations.length = 0;
 
-        // 4. 'Babcock' flourish & finishing line
-        signaturePath4.current?.animate(strokeAnimation, {
-          duration: 1150,
-          delay: 1780,
-          easing: smoothEase,
-          fill: 'forwards',
-        });
+          // Brief luminous purple-white finishing glow before entering serene resting state
+          setSignaturePhase('finishing');
+          const restTimer = setTimeout(() => {
+            if (!isCancelled) {
+              setSignaturePhase('resting');
+            }
+          }, SIGNATURE_FINISHING_SHEEN_MS);
+          timers.push(restTimer);
+        };
 
-        // Settle into soft post-draw starlight presence
-        const timer = setTimeout(() => {
-          setSignatureDrawn(true);
-        }, 2950);
+        let hasFinishedDraw = false;
+        const maxDrawMs = Math.max(
+          ...FOOTER_SIGNATURE_STROKES.map((s) => s.delayMs + s.durationMs)
+        );
+        const fallbackFinishTimer = setTimeout(finishDraw, maxDrawMs + 80);
+        timers.push(fallbackFinishTimer);
 
-        return () => clearTimeout(timer);
+        Promise.all(finishedPromises).then(finishDraw);
       },
-      0.15
+      0.2
     );
 
-    return cleanup;
+    return () => {
+      isCancelled = true;
+      cleanupObserver();
+      timers.forEach((id) => clearTimeout(id));
+      timers.length = 0;
+      activeAnimations.forEach((anim) => {
+        try {
+          anim.cancel();
+        } catch {
+          // Safe cleanup on unmount
+        }
+      });
+      activeAnimations.length = 0;
+    };
   }, []);
 
   return (
@@ -167,6 +237,10 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
                 <img
                   src="/assets/imgs/logo-rb-cyber.svg"
                   alt="Rocky Babcock Logo"
+                  width={106}
+                  height={49}
+                  loading="lazy"
+                  decoding="async"
                   className="logo w-auto h-7 sm:h-8 object-contain transition-transform duration-300 group-hover:scale-105"
                 />
               </a>
@@ -214,7 +288,7 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
                   target="_blank"
                   rel="noreferrer"
                 >
-                  open source on github &nearr;
+                  open source on github ↗
                 </a>
               </p>
             </div>
@@ -264,14 +338,14 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
               <div className="relative group cursor-pointer w-[200px] sm:w-[240px] lg:w-[280px]">
                 <svg
                   id="signature"
-                  className="w-full h-auto transition-all duration-700 hover:scale-[1.02]"
+                  className={`w-full h-auto transition-transform duration-700 hover:scale-[1.02] ${
+                    signaturePhase === 'finishing'
+                      ? 'footer-signature-finishing'
+                      : signaturePhase === 'resting'
+                      ? 'footer-signature-resting'
+                      : ''
+                  }`}
                   viewBox="0 0 1020 320"
-                  style={{
-                    filter: signatureDrawn
-                      ? 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 16px rgba(168, 85, 247, 0.22))'
-                      : 'none',
-                    transition: 'filter 1.2s ease-out',
-                  }}
                   aria-label="Rocky Babcock handwritten signature"
                 >
                   <defs>
@@ -338,8 +412,12 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
                   </g>
 
                   {/* Restrained post-draw starlight sparkle glints */}
-                  {signatureDrawn && (
-                    <g className="transition-opacity duration-1000 opacity-70">
+                  {(signaturePhase === 'finishing' || signaturePhase === 'resting') && (
+                    <g
+                      className={`transition-opacity duration-700 ${
+                        signaturePhase === 'finishing' ? 'opacity-95' : 'opacity-65'
+                      }`}
+                    >
                       <g transform="translate(155, 58) scale(0.45)">
                         <path
                           fill="#ffffff"

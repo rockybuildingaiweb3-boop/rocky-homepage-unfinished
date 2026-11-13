@@ -359,7 +359,10 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
     };
     window.addEventListener('resize', handleWindowResize, { passive: true });
 
+    let hasInitializedWebGL = false;
     const initEffects = async () => {
+      if (hasInitializedWebGL) return;
+      hasInitializedWebGL = true;
       try {
         if (prefersReduced) return;
 
@@ -383,11 +386,21 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
       }
     };
 
-    initEffects();
+    const preloadObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          preloadObserver.disconnect();
+          initEffects();
+        }
+      },
+      { rootMargin: '400px 0px', threshold: 0 }
+    );
+    preloadObserver.observe(sectionEl);
 
     return () => {
       isCancelled = true;
       stopLoop();
+      preloadObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('resize', handleWindowResize);

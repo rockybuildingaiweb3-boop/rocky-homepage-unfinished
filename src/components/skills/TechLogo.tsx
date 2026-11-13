@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import StackIcon from 'tech-stack-icons';
 import { resolveSkillIcon } from './iconResolver';
 
@@ -147,7 +147,7 @@ function getNormalizedFill(hex: string, overrideColor?: string): string {
  * 3. Strict aspect ratio preservation (xMidYMid meet & object-contain)
  * 4. Deterministic multi-source resolution without generic circular containers
  */
-export const TechLogo: React.FC<TechLogoProps> = ({
+export const TechLogo: React.FC<TechLogoProps> = memo(({
   id,
   name,
   className = 'w-6 h-6',
@@ -223,8 +223,11 @@ export const TechLogo: React.FC<TechLogoProps> = ({
         <img
           src={assetUrl}
           alt={displayName}
+          width={size || 24}
+          height={size || 24}
           className="w-full h-full object-contain pointer-events-none select-none"
           loading="lazy"
+          decoding="async"
           draggable={false}
         />
       </span>
@@ -257,6 +260,8 @@ export const TechLogo: React.FC<TechLogoProps> = ({
       </svg>
     </span>
   );
-};
+});
+
+TechLogo.displayName = 'TechLogo';
 
 export default TechLogo;

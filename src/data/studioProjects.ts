@@ -13,6 +13,9 @@ export const STUDIO_PROJECTS: StudioProject[] = [
     },
     roles: ['Creator', 'Technical Writer', 'Full-Stack Developer'],
     image: '/assets/imgs/studio/project-1.jpg',
+    imageWebp: '/assets/imgs/studio/project-1.webp',
+    imageWidth: 960,
+    imageHeight: 1440,
     links: [
       {
         type: 'web',
@@ -42,6 +45,9 @@ export const STUDIO_PROJECTS: StudioProject[] = [
     },
     roles: ['Protocol Designer', 'Frontend Architecture', 'Smart Contract Integrations'],
     image: '/assets/imgs/studio/project-2.jpg',
+    imageWebp: '/assets/imgs/studio/project-2.webp',
+    imageWidth: 960,
+    imageHeight: 720,
     links: [
       {
         type: 'web',
@@ -66,6 +72,9 @@ export const STUDIO_PROJECTS: StudioProject[] = [
     },
     roles: ['Audio Programmer', 'Shader Developer', 'Interaction Designer'],
     image: '/assets/imgs/studio/project-3.jpg',
+    imageWebp: '/assets/imgs/studio/project-3.webp',
+    imageWidth: 960,
+    imageHeight: 730,
     links: [
       {
         type: 'web',
@@ -90,6 +99,9 @@ export const STUDIO_PROJECTS: StudioProject[] = [
     },
     roles: ['Systems Architect', 'Full-Stack Developer', 'UI/UX Designer'],
     image: '/assets/imgs/studio/project-4.jpg',
+    imageWebp: '/assets/imgs/studio/project-4.webp',
+    imageWidth: 960,
+    imageHeight: 1317,
     links: [
       {
         type: 'web',
@@ -114,6 +126,9 @@ export const STUDIO_PROJECTS: StudioProject[] = [
     },
     roles: ['ZK Research Engineer', 'Front-End Designer', 'Product Architect'],
     image: '/assets/imgs/studio/project-5.jpg',
+    imageWebp: '/assets/imgs/studio/project-5.webp',
+    imageWidth: 960,
+    imageHeight: 1440,
     links: [
       {
         type: 'web',

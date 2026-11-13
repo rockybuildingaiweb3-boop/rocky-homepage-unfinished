@@ -302,15 +302,23 @@ export const HomeSection: React.FC<HomeSectionProps> = memo(({
         }}
         aria-hidden="true"
       >
-        <img
-          src="/assets/imgs/home-back.jpg"
-          alt="Rocky Babcock watercolor tulip garden"
-          draggable={false}
-          onLoad={() => setImageLoaded(true)}
-          className={`w-full h-full object-cover object-center select-none transition-opacity duration-700 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+        <picture className="w-full h-full block">
+          <source srcSet="/assets/imgs/home-back.webp" type="image/webp" />
+          <img
+            src="/assets/imgs/home-back.jpg"
+            alt="Rocky Babcock watercolor tulip garden"
+            width={1920}
+            height={1306}
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            draggable={false}
+            onLoad={() => setImageLoaded(true)}
+            className={`w-full h-full object-cover object-center select-none transition-opacity duration-700 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        </picture>
       </div>
 
       <NebulaBackground nebulaReady={nebulaReady} />
@@ -331,6 +339,10 @@ export const HomeSection: React.FC<HomeSectionProps> = memo(({
               ref={signatureRef}
               src="/assets/imgs/signature.svg"
               alt="Rocky Babcock handwritten signature"
+              width={1150}
+              height={360}
+              loading="eager"
+              decoding="async"
               draggable={false}
               className="signature-illuminated w-[50vw] sm:w-[40vw] md:w-[32vw] lg:w-[28vw] max-w-[420px] min-w-[190px] h-auto object-contain select-none will-change-transform rotate-[-3deg]"
             />

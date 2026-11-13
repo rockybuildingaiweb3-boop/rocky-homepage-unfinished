@@ -65,13 +65,22 @@ export const StudioItem = memo(forwardRef<HTMLLIElement, StudioItemProps>(
               isActive ? 'w-full mr-0' : 'w-[85%] mr-[15%]'
             }`}
           >
-            <img
-              ref={imageRef}
-              src={project.image}
-              alt={`${project.title} cover`}
-              draggable="false"
-              className="absolute top-1/2 left-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-500 opacity-65 group-hover:opacity-90"
-            />
+            <picture className="block w-full h-full relative">
+              {project.imageWebp && (
+                <source srcSet={project.imageWebp} type="image/webp" />
+              )}
+              <img
+                ref={imageRef}
+                src={project.image}
+                alt={`${project.title} cover`}
+                width={project.imageWidth ?? 960}
+                height={project.imageHeight ?? 1280}
+                loading={index < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+                draggable="false"
+                className="absolute top-1/2 left-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 object-cover transition-opacity duration-500 opacity-65 group-hover:opacity-90"
+              />
+            </picture>
             {/* Subtle dark vignette overlay for depth */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
           </div>

@@ -89,7 +89,7 @@ export const SkillsSection: React.FC = memo(() => {
   return (
     <section
       id="skills"
-      className="relative flex flex-col items-center justify-center w-full mt-6 sm:mt-10 pt-16 sm:pt-20 pb-14 sm:pb-20 text-white z-10 bg-transparent overflow-hidden"
+      className="relative flex flex-col items-center justify-center w-full mt-6 sm:mt-10 pt-20 sm:pt-24 pb-14 sm:pb-20 text-white z-10 bg-transparent overflow-hidden"
       aria-label="Living Orbit of Technologies"
     >
       {/* ─── 1. CELESTIAL PLANET ATMOSPHERE (PRESERVED VISUAL ANCHOR) ─── */}
