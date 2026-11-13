@@ -134,31 +134,23 @@ export const NON_BRAND_SKILL_IDS: readonly string[] = [
   'ipfs',
 ] as const;
 
-// Vite eager glob indexes all SVG files present under /public/assets/icons at compile time.
-const VITE_LOCAL_SVGS: Record<string, unknown> =
-  typeof import.meta !== 'undefined' && typeof (import.meta as any).glob === 'function'
-    ? (import.meta as any).glob('/public/assets/icons/**/*.svg', { eager: true })
-    : {};
-
 export type AssetExistsChecker = (url: string) => boolean;
 
 /**
- * Repository-level asset checker:
- * In Node environments (tests, build scripts, CLI), directly checks filesystem via Node fs.
- * In Vite browser environment, checks against the statically analyzed glob map.
+ * Repository-level asset checker (CLI / Node.js tests & validation scripts):
+ * Uses customChecker if supplied, otherwise checks disk under `public/` via `node:fs`.
  */
 export function checkAssetExists(url: string, customChecker?: AssetExistsChecker): boolean {
   if (customChecker) {
     return customChecker(url);
   }
 
-  // 1. Node.js environment check (build time / test script)
   if (typeof process !== 'undefined' && process.versions?.node) {
     try {
-      const getModule = (process as any).getBuiltinModule;
+      const getModule = (process as unknown as { getBuiltinModule?: (id: string) => unknown }).getBuiltinModule;
       if (typeof getModule === 'function') {
-        const fs = getModule('node:fs');
-        const path = getModule('node:path');
+        const fs = getModule('node:fs') as typeof import('node:fs') | undefined;
+        const path = getModule('node:path') as typeof import('node:path') | undefined;
         if (fs && path) {
           const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
           const fullPath = path.resolve(process.cwd(), 'public', cleanUrl);
@@ -170,15 +162,7 @@ export function checkAssetExists(url: string, customChecker?: AssetExistsChecker
     }
   }
 
-  // 2. Vite browser environment check
-  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-  const viteKey = `/public${cleanUrl}`;
-  if (Object.keys(VITE_LOCAL_SVGS).length > 0) {
-    return Object.prototype.hasOwnProperty.call(VITE_LOCAL_SVGS, viteKey);
-  }
-
-  // If running in development without globs populated, check pattern
-  return url.startsWith('/assets/icons/') && url.endsWith('.svg');
+  return false;
 }
 
 export interface SkillValidationEntry {
@@ -367,7 +351,6 @@ export function validateSkillsDataset(customAssetChecker?: AssetExistsChecker): 
 
   // 3. Exact Registry Coverage: Set(SKILLS_DATA ids) === Set(ICON_REGISTRY ids)
   const skillIdSet = new Set<string>();
-  const skillNameSet = new Set<string>();
   const idOccurrences: Record<string, number> = {};
   const nameOccurrences: Record<string, number> = {};
 

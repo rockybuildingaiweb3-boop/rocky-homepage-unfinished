@@ -3,7 +3,6 @@ import path from 'node:path';
 import { SKILLS_DATA } from '../src/data/skills';
 import {
   resolveSkillIcon,
-  ICON_REGISTRY,
   SkillType,
   VisualMode,
   IconSourceType,

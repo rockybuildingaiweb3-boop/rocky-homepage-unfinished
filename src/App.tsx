@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { GlobalShell } from './components/layout';
 import { HomePage } from './pages/HomePage';
 import { useDeviceCapabilities } from './hooks/useDeviceCapabilities';

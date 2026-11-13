@@ -1,10 +1,3 @@
-export function fetchJsonData<T = any>(sourceFile: string): Promise<T> {
-  return fetch(sourceFile).then((res) => {
-    if (!res.ok) throw new Error(`Failed to load ${sourceFile}: ${res.statusText}`);
-    return res.json();
-  });
-}
-
 export function loadImage(src: string, timeoutMs = 3500): Promise<string> {
   return new Promise((resolve) => {
     let settled = false;
@@ -70,10 +63,6 @@ export function devMsg() {
   const css = 'font-size: 1.2rem; font-weight: bold;';
   console.log('%cRocky Babcock — Portfolio', css + 'color: #22c55e;');
   console.log('%cCreative Technologist & Frontend Developer', css);
-}
-
-export function lerp(start: number, end: number, t: number) {
-  return start * (1 - t) + end * t;
 }
 
 export function easeInOutQuad(t: number) {

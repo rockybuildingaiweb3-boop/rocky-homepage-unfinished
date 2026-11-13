@@ -20,7 +20,6 @@ interface CeremonyIdentityProps {
  */
 export const CeremonyIdentity: React.FC<CeremonyIdentityProps> = ({
   phase,
-  climaxProgress = 0,
 }) => {
   const isVisible =
     phase === 'CLIMAX' ||

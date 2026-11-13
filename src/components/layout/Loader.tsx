@@ -57,7 +57,6 @@ const COSMIC_DUST_MOTES = [
  * SIGNATURE FINISHES → ENERGY CONVERGES → INNER ILLUMINATION IN ROSE → SPACE BREATHES → SILENCE → ARRIVAL.
  */
 export const Loader: React.FC<LoaderProps> = ({
-  progress = 0,
   loadingDone = false,
   onAwakenHero,
   onFinish,

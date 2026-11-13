@@ -2,7 +2,6 @@ import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
 import { SKILLS_DATA } from '../../data/skills';
 import { SkillsAtmosphere } from '../skills/SkillsAtmosphere';
 import { LivingOrbitStage } from '../skills/LivingOrbitStage';
-import { validateSkillsDataset } from '../../features/skills/validateSkills';
 
 /**
  * SkillsSection — LIVING ORBIT / A LIVING FIELD OF TECHNOLOGIES
@@ -16,13 +15,6 @@ export const SkillsSection: React.FC = memo(() => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [focusedSkillId, setFocusedSkillId] = useState<string | null>(null);
   const [hoveredSkillId, setHoveredSkillId] = useState<string | null>(null);
-
-  // Development-time dataset integrity check
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      validateSkillsDataset();
-    }
-  }, []);
 
   // Keyboard Escape handler: clears focused skill first, then resets category filter
   useEffect(() => {

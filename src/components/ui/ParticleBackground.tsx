@@ -962,7 +962,7 @@ export interface SkillsPeripheralCoverageReport {
  */
 export function evaluateSkillsPeripheralCoverage(
   width = 1440,
-  height = 900,
+  _height = 900,
   timeSec = 0,
   customRegion?: SkillsRegionMetrics
 ): SkillsPeripheralCoverageReport {
