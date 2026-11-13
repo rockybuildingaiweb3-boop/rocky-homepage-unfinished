@@ -81,11 +81,14 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
   const signaturePath2 = useRef<SVGPathElement>(null);
   const signaturePath3 = useRef<SVGPathElement>(null);
   const signaturePath4 = useRef<SVGPathElement>(null);
+  const signatureAnimationsRef = useRef<Animation[]>([]);
+  const signatureTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const currentYear = new Date().getFullYear();
   const [signaturePhase, setSignaturePhase] = useState<SignatureAnimPhase>('idle');
+  const [isFooterVisible, setIsFooterVisible] = useState<boolean>(false);
 
-  // Natural handwriting stroke animation using physiological pen timing & full cleanup
+  // Natural handwriting stroke animation using physiological pen timing, ref-tracked WAAPI handles & full cleanup
   useEffect(() => {
     const containerEl = footerContainerElement.current;
     if (!containerEl) return;
@@ -113,12 +116,46 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
 
     if (prefersReducedMotion) {
       setSignaturePhase('resting');
+      setIsFooterVisible(true);
       return;
     }
 
     let isCancelled = false;
-    const activeAnimations: Animation[] = [];
-    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const cancelAllAnimationsAndTimers = () => {
+      signatureTimersRef.current.forEach((id) => clearTimeout(id));
+      signatureTimersRef.current = [];
+      signatureAnimationsRef.current.forEach((anim) => {
+        try {
+          anim.cancel();
+        } catch {
+          // Safe cleanup on detach/unmount
+        }
+      });
+      signatureAnimationsRef.current = [];
+    };
+
+    // Pause/resume WAAPI or resting sheen when user scrolls out of / back into Footer
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (isCancelled) return;
+        const visible = entry.isIntersecting;
+        setIsFooterVisible(visible);
+        signatureAnimationsRef.current.forEach((anim) => {
+          try {
+            if (visible && anim.playState === 'paused') {
+              anim.play();
+            } else if (!visible && anim.playState === 'running') {
+              anim.pause();
+            }
+          } catch {
+            // Ignore finished or detached animations
+          }
+        });
+      },
+      { root: null, threshold: 0.05 }
+    );
+    visibilityObserver.observe(containerEl);
 
     const cleanupObserver = onScrolledIntoView(
       containerEl,
@@ -127,6 +164,7 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
         setSignaturePhase('drawing');
 
         const finishedPromises: Promise<unknown>[] = [];
+        const createdAnimations: Animation[] = [];
 
         pathRefs.forEach((pathEl, idx) => {
           const spec = FOOTER_SIGNATURE_STROKES[idx];
@@ -142,12 +180,15 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
               fill: 'forwards',
             }
           );
-          activeAnimations.push(anim);
+          createdAnimations.push(anim);
           if (anim.finished) {
             finishedPromises.push(anim.finished.catch(() => undefined));
           }
         });
 
+        signatureAnimationsRef.current = createdAnimations;
+
+        let hasFinishedDraw = false;
         const finishDraw = () => {
           if (isCancelled || hasFinishedDraw) return;
           hasFinishedDraw = true;
@@ -158,14 +199,14 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
               pathEl.style.strokeDashoffset = '0';
             }
           });
-          activeAnimations.forEach((anim) => {
+          signatureAnimationsRef.current.forEach((anim) => {
             try {
               anim.cancel();
             } catch {
               // Ignore if element detached
             }
           });
-          activeAnimations.length = 0;
+          signatureAnimationsRef.current = [];
 
           // Brief luminous purple-white finishing glow before entering serene resting state
           setSignaturePhase('finishing');
@@ -174,41 +215,34 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
               setSignaturePhase('resting');
             }
           }, SIGNATURE_FINISHING_SHEEN_MS);
-          timers.push(restTimer);
+          signatureTimersRef.current.push(restTimer);
         };
 
-        let hasFinishedDraw = false;
         const maxDrawMs = Math.max(
           ...FOOTER_SIGNATURE_STROKES.map((s) => s.delayMs + s.durationMs)
         );
         const fallbackFinishTimer = setTimeout(finishDraw, maxDrawMs + 80);
-        timers.push(fallbackFinishTimer);
+        signatureTimersRef.current.push(fallbackFinishTimer);
 
         Promise.all(finishedPromises).then(finishDraw);
+
+        return cancelAllAnimationsAndTimers;
       },
       0.2
     );
 
     return () => {
       isCancelled = true;
+      visibilityObserver.disconnect();
       cleanupObserver();
-      timers.forEach((id) => clearTimeout(id));
-      timers.length = 0;
-      activeAnimations.forEach((anim) => {
-        try {
-          anim.cancel();
-        } catch {
-          // Safe cleanup on unmount
-        }
-      });
-      activeAnimations.length = 0;
+      cancelAllAnimationsAndTimers();
     };
   }, []);
 
   return (
     <footer
       id="contact"
-      className="footer-wrapper relative overflow-hidden w-full border-t border-white/[0.08] bg-gradient-to-b from-[#0b0b0e] via-[#08080a] to-[#040405] text-white select-none z-10"
+      className="footer-wrapper relative overflow-hidden w-full border-t border-white/[0.08] bg-gradient-to-b from-[#0b0b0e] via-[#08080a] to-[#040405] text-white z-10"
       ref={footerContainerElement}
       aria-label="Footer & Contact"
     >
@@ -231,7 +265,7 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
                     onNavigateRoute('/');
                   }
                 }}
-                className="inline-flex items-center group cursor-pointer"
+                className="inline-flex items-center group cursor-pointer select-none"
                 aria-label="Rocky Babcock Portfolio Home"
               >
                 <img
@@ -335,14 +369,16 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
               </span>
 
               {/* Natural Handwritten SVG Signature */}
-              <div className="relative group cursor-pointer w-[200px] sm:w-[240px] lg:w-[280px]">
+              <div className="relative group cursor-pointer w-[200px] sm:w-[240px] lg:w-[280px] select-none">
                 <svg
                   id="signature"
-                  className={`w-full h-auto transition-transform duration-700 hover:scale-[1.02] ${
+                  className={`w-full h-auto transition-transform duration-700 hover:scale-[1.02] select-none ${
                     signaturePhase === 'finishing'
                       ? 'footer-signature-finishing'
                       : signaturePhase === 'resting'
-                      ? 'footer-signature-resting'
+                      ? isFooterVisible
+                        ? 'footer-signature-resting'
+                        : 'footer-signature-resting footer-signature-paused'
                       : ''
                   }`}
                   viewBox="0 0 1020 320"
@@ -414,7 +450,7 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
                   {/* Restrained post-draw starlight sparkle glints */}
                   {(signaturePhase === 'finishing' || signaturePhase === 'resting') && (
                     <g
-                      className={`transition-opacity duration-700 ${
+                      className={`footer-signature-sparkle transition-opacity duration-700 ${
                         signaturePhase === 'finishing' ? 'opacity-95' : 'opacity-65'
                       }`}
                     >
@@ -441,7 +477,7 @@ export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }
                 </svg>
               </div>
 
-              <span className="font-mono text-[10px] text-white/40 tracking-widest uppercase">
+              <span className="font-mono text-[10px] text-white/40 tracking-widest uppercase select-none">
                 AUTHENTICATED &bull; 2026
               </span>
             </div>

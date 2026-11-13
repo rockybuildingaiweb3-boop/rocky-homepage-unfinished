@@ -4,7 +4,14 @@ import { STUDIO_PROJECTS } from '../../data/studioProjects';
 import { StudioRenderer } from './StudioRenderer';
 import { StudioItem } from './StudioItem';
 import { StudioDetails } from './StudioDetails';
-import { shouldStudioLoopContinue } from './studioLoopLogic';
+import {
+  computeNextStudioSnapTarget,
+  resolveStudioKeyboardAction,
+  resolveStudioTouchAxis,
+  resolveStudioWheelIntent,
+  shouldStudioLoopContinue,
+  type TouchAxisLock,
+} from './studioLoopLogic';
 import type { StudioProject } from '../../types';
 
 interface StudioSectionProps {
@@ -68,6 +75,15 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
 
   const rendererRef = useRef<StudioRenderer | null>(null);
   const wakeLoopRef = useRef<() => void>(() => {});
+  const touchGestureRef = useRef<{
+    startX: number;
+    startY: number;
+    lockedAxis: TouchAxisLock;
+  }>({
+    startX: 0,
+    startY: 0,
+    lockedAxis: 'none',
+  });
 
   // Helper for linear interpolation
   const lerp = (start: number, end: number, factor: number) =>
@@ -161,21 +177,105 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
     }, 50);
   }, []);
 
-  // Trackpad / wheel listener inside Studio section
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (currentActiveRef.current >= 0 || !listRef.current) return;
-
-    if (introState.current.isIntroPlaying) {
-      introState.current.isIntroPlaying = false;
-      introState.current.isComplete = true;
-    }
-
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (Math.abs(delta) > 2) {
-      sliderState.current.targetPosition -= delta * 1.5;
-      wakeLoopRef.current();
-    }
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch || currentActiveRef.current >= 0) return;
+    touchGestureRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lockedAxis: 'none',
+    };
   }, []);
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch || currentActiveRef.current >= 0) return;
+
+      const gesture = touchGestureRef.current;
+      if (gesture.lockedAxis === 'y') return;
+
+      if (gesture.lockedAxis === 'none') {
+        const dx = touch.clientX - gesture.startX;
+        const dy = touch.clientY - gesture.startY;
+        const nextAxis = resolveStudioTouchAxis(dx, dy);
+        if (nextAxis === 'none') return;
+        gesture.lockedAxis = nextAxis;
+        if (nextAxis === 'y') return;
+
+        // Horizontal gesture confirmed: start drag from current finger position seamlessly
+        handleDragStart(touch.clientX);
+      }
+
+      handleDragMove(touch.clientX);
+    },
+    [handleDragMove, handleDragStart]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    const wasHorizontal = touchGestureRef.current.lockedAxis === 'x';
+    touchGestureRef.current.lockedAxis = 'none';
+    if (wasHorizontal) {
+      handleDragEnd();
+    }
+  }, [handleDragEnd]);
+
+  // Accessible keyboard navigation (ArrowLeft / ArrowRight / Home / End / Escape)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const action = resolveStudioKeyboardAction({
+        key: e.key,
+        currentActive: currentActiveRef.current,
+        projectCount: projects.length,
+      });
+
+      if (action.type === 'none') return;
+
+      e.preventDefault();
+      updateTrackBoundsCache();
+
+      if (introState.current.isIntroPlaying) {
+        introState.current.isIntroPlaying = false;
+        introState.current.isComplete = true;
+      }
+
+      if (action.type === 'close-details') {
+        handleCloseDetails();
+        return;
+      }
+
+      if (action.type === 'select-project') {
+        transitionUntilRef.current = performance.now() + 820;
+        setCurrentActive(action.nextIndex);
+        scrollToActiveItem(action.nextIndex);
+        wakeLoopRef.current();
+        return;
+      }
+
+      const endPoint = cachedBoundsRef.current.endPoint;
+      const snapOffsets = itemRefs.current.map((el) => {
+        if (!el) return 0;
+        const clientW = cachedBoundsRef.current.clientWidth || 1200;
+        return Math.max(0, el.offsetLeft - clientW * 0.12);
+      });
+
+      if (action.type === 'step-track') {
+        sliderState.current.targetPosition = computeNextStudioSnapTarget(
+          snapOffsets,
+          sliderState.current.targetPosition,
+          action.direction,
+          endPoint
+        );
+      } else if (action.type === 'jump-start') {
+        sliderState.current.targetPosition = 0;
+      } else if (action.type === 'jump-end') {
+        sliderState.current.targetPosition = -Math.max(0, endPoint);
+      }
+
+      wakeLoopRef.current();
+    },
+    [handleCloseDetails, projects.length, scrollToActiveItem, updateTrackBoundsCache]
+  );
 
   // Initialize WebGL, Intersection/Visibility Pause, ResizeObserver, and On-Demand Animation Loop
   useEffect(() => {
@@ -397,9 +497,49 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
     );
     preloadObserver.observe(sectionEl);
 
+    // Native non-passive wheel listener so Shift+Wheel & horizontal trackpad swipes
+    // move Studio horizontally while calling preventDefault(), whereas normal vertical
+    // wheel events pass straight through to native vertical page scrolling.
+    const containerEl = containerRef.current;
+    const handleNativeWheel = (e: WheelEvent) => {
+      if (currentActiveRef.current >= 0 || !listRef.current) return;
+
+      const intent = resolveStudioWheelIntent({
+        deltaX: e.deltaX,
+        deltaY: e.deltaY,
+        shiftKey: e.shiftKey,
+      });
+
+      if (intent.mode !== 'horizontal') {
+        return;
+      }
+
+      if (intent.shouldPreventDefault && e.cancelable) {
+        e.preventDefault();
+      }
+
+      if (introState.current.isIntroPlaying) {
+        introState.current.isIntroPlaying = false;
+        introState.current.isComplete = true;
+      }
+
+      updateTrackBoundsCache();
+      const endPoint = Math.max(0, cachedBoundsRef.current.endPoint);
+      const nextTarget = sliderState.current.targetPosition - intent.delta * 1.5;
+      sliderState.current.targetPosition = Math.max(-endPoint, Math.min(0, nextTarget));
+      wakeLoopRef.current();
+    };
+
+    if (containerEl) {
+      containerEl.addEventListener('wheel', handleNativeWheel, { passive: false });
+    }
+
     return () => {
       isCancelled = true;
       stopLoop();
+      if (containerEl) {
+        containerEl.removeEventListener('wheel', handleNativeWheel);
+      }
       preloadObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -452,20 +592,18 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
         ref={containerRef}
         role="region"
         aria-label="Studio carousel slider"
+        aria-roledescription="carousel"
         tabIndex={0}
-        onWheel={handleWheel}
+        onKeyDown={handleKeyDown}
         onMouseDown={(e) => handleDragStart(e.clientX)}
         onMouseMove={(e) => handleDragMove(e.clientX)}
         onMouseUp={handleDragEnd}
         onMouseLeave={handleDragEnd}
-        onTouchStart={(e) => {
-          if (e.touches[0]) handleDragStart(e.touches[0].clientX);
-        }}
-        onTouchMove={(e) => {
-          if (e.touches[0]) handleDragMove(e.touches[0].clientX);
-        }}
-        onTouchEnd={handleDragEnd}
-        className={`relative w-full h-[75vh] flex flex-col justify-center select-none overflow-hidden ${
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        className={`relative w-full h-[75vh] flex flex-col justify-center select-none touch-pan-y overflow-hidden focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/50 ${
           currentActive >= 0 ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
         }`}
       >
@@ -516,7 +654,7 @@ export const StudioSection: React.FC<StudioSectionProps> = memo(({
         }`}
       >
         <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-white/60">
-          &larr; Drag or Scroll Horizontally to Explore &rarr;
+          &larr; Drag, Shift+Scroll, or Use Arrow Keys to Explore &rarr;
         </span>
       </div>
     </section>

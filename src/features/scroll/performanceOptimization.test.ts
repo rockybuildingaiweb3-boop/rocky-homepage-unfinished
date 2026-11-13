@@ -5,8 +5,12 @@ import {
   resolveActiveSection,
 } from './heroParallax';
 import {
-  shouldStudioLoopContinue,
   computeMeshCenterOffsetX,
+  computeNextStudioSnapTarget,
+  resolveStudioKeyboardAction,
+  resolveStudioTouchAxis,
+  resolveStudioWheelIntent,
+  shouldStudioLoopContinue,
 } from '../../components/studio/studioLoopLogic';
 import {
   computeNavbarBackdropState,
@@ -195,5 +199,58 @@ describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-
     const first = resolveSkillIcon('react', 'React');
     const second = resolveSkillIcon('react', 'React');
     assert.equal(first, second, 'resolveSkillIcon should return cached object identity');
+  });
+
+  it('prevents Studio double-scroll by isolating trackpad horizontal swipes and Shift+Wheel from vertical wheel scroll', () => {
+    // Normal vertical mouse wheel -> passthrough vertical page scroll, never horizontal pan
+    assert.deepEqual(
+      resolveStudioWheelIntent({ deltaX: 0, deltaY: 120, shiftKey: false }),
+      { mode: 'vertical-passthrough', delta: 0, shouldPreventDefault: false }
+    );
+    assert.deepEqual(
+      resolveStudioWheelIntent({ deltaX: 8, deltaY: 90, shiftKey: false }),
+      { mode: 'vertical-passthrough', delta: 0, shouldPreventDefault: false }
+    );
+
+    // Shift + vertical mouse wheel -> horizontal Studio pan + preventDefault
+    assert.deepEqual(
+      resolveStudioWheelIntent({ deltaX: 0, deltaY: 120, shiftKey: true }),
+      { mode: 'horizontal', delta: 120, shouldPreventDefault: true }
+    );
+
+    // Trackpad horizontal swipe -> horizontal Studio pan + preventDefault
+    assert.deepEqual(
+      resolveStudioWheelIntent({ deltaX: -64, deltaY: 6, shiftKey: false }),
+      { mode: 'horizontal', delta: -64, shouldPreventDefault: true }
+    );
+  });
+
+  it('locks mobile touch axis after deadzone and resolves accessible Studio keyboard navigation', () => {
+    assert.equal(resolveStudioTouchAxis(2, 3), 'none');
+    assert.equal(resolveStudioTouchAxis(24, 5), 'x');
+    assert.equal(resolveStudioTouchAxis(5, 24), 'y');
+
+    assert.deepEqual(
+      resolveStudioKeyboardAction({ key: 'ArrowRight', currentActive: -1, projectCount: 5 }),
+      { type: 'step-track', direction: 1 }
+    );
+    assert.deepEqual(
+      resolveStudioKeyboardAction({ key: 'ArrowLeft', currentActive: -1, projectCount: 5 }),
+      { type: 'step-track', direction: -1 }
+    );
+    assert.deepEqual(
+      resolveStudioKeyboardAction({ key: 'Escape', currentActive: 2, projectCount: 5 }),
+      { type: 'close-details' }
+    );
+    assert.deepEqual(
+      resolveStudioKeyboardAction({ key: 'ArrowRight', currentActive: 2, projectCount: 5 }),
+      { type: 'select-project', nextIndex: 3 }
+    );
+
+    const offsets = [0, 380, 760, 1140];
+    assert.equal(computeNextStudioSnapTarget(offsets, 0, 1, 1200), -380);
+    assert.equal(computeNextStudioSnapTarget(offsets, -380, 1, 1200), -760);
+    assert.equal(computeNextStudioSnapTarget(offsets, -760, -1, 1200), -380);
+    assert.equal(computeNextStudioSnapTarget(offsets, -380, -1, 1200), 0);
   });
 });

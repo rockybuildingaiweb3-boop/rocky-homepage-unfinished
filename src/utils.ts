@@ -41,14 +41,15 @@ export function loadImage(src: string, timeoutMs = 3500): Promise<string> {
 
 export function onScrolledIntoView(
   node: HTMLElement,
-  callback: (entry: IntersectionObserverEntry) => void,
+  callback: (entry: IntersectionObserverEntry) => void | (() => void),
   threshold = 0.35
 ) {
+  let callbackCleanup: (() => void) | void;
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          callback(entry);
+          callbackCleanup = callback(entry);
           observer.disconnect();
         }
       });
@@ -56,7 +57,13 @@ export function onScrolledIntoView(
     { root: null, threshold }
   );
   observer.observe(node);
-  return () => observer.disconnect();
+  return () => {
+    observer.disconnect();
+    if (typeof callbackCleanup === 'function') {
+      callbackCleanup();
+      callbackCleanup = undefined;
+    }
+  };
 }
 
 export function devMsg() {

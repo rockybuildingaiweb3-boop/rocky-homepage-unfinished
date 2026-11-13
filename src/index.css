@@ -48,6 +48,10 @@ button { font: inherit; }
   animation: footer-signature-breathe 7.5s ease-in-out infinite;
 }
 
+.footer-signature-paused {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .marquee-track { animation: none; }
