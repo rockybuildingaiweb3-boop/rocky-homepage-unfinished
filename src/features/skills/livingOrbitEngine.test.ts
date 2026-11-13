@@ -18,10 +18,16 @@ import {
 import {
   STARFIELD_LAYER_SPECS,
   STELLAR_TRAIL_SPECS,
+  TOTAL_STARFIELD_COUNT,
+  TOTAL_PERIPHERAL_STARFIELD_COUNT,
+  SKILLS_CULL_MIX_THRESHOLD,
   generateScreenSpaceStarLayerData,
   generateStratifiedStarLayer,
   evaluateStellarTrails,
   evaluateStarfieldCoverage,
+  evaluateSkillsPeripheralCoverage,
+  computeSkillsRegionFromRect,
+  computeStarVisibilityFactor,
 } from '../../components/ui/ParticleBackground';
 
 describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture', () => {
@@ -206,6 +212,7 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
   it('calibrates the 5,500-star Global Starfield (4500 tiny, 800 medium, 150 bright, 50 accent) with 1–2 simultaneous stellar trails and full corner, edge, and grid occupancy across 1440x900, 1920x1080, 2048x1002, and 390x844 at t=0, 10, 30, 60s', () => {
     assert.equal(STARFIELD_LAYER_SPECS.length, 4);
     assert.equal(STELLAR_TRAIL_SPECS.length, 3);
+    assert.equal(TOTAL_STARFIELD_COUNT, 5500);
 
     // Verify WebGL and 2D Canvas shared data parity
     for (const spec of STARFIELD_LAYER_SPECS) {
@@ -216,6 +223,17 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
       assert.equal(data.sizePx.length, spec.count);
       assert.equal(data.baseOpacity.length, spec.count);
       assert.equal(data.twinklePhase.length, spec.count);
+      assert.equal(data.peripheralCount, spec.peripheralCount);
+      assert.equal(data.isPeripheral.length, spec.count);
+
+      for (let i = 0; i < spec.count; i++) {
+        const expectedFlag = i < spec.peripheralCount ? 1.0 : 0.0;
+        assert.equal(
+          data.isPeripheral[i],
+          expectedFlag,
+          `Pre-partitioned isPeripheral mismatch at ${spec.id}[${i}]`
+        );
+      }
 
       const buf = generateStratifiedStarLayer(spec, 16 / 9, 0);
       assert.equal(buf.length, spec.count * 3);
@@ -287,5 +305,111 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
       }
     }
   });
+
+  it('implements Mode B (Skills Peripheral Particle Mode) with 800 active draw-range stars, 4,700 culled stars, zero central core leaks, and dynamic viewport region tracking', () => {
+    assert.equal(TOTAL_PERIPHERAL_STARFIELD_COUNT, 800);
+    assert.ok(SKILLS_CULL_MIX_THRESHOLD >= 0.8 && SKILLS_CULL_MIX_THRESHOLD <= 0.95);
+
+    // 1. Dynamic region calculation across offscreen, scrolled partial entry, centered desktop, and mobile rects
+    const hiddenRegion = computeSkillsRegionFromRect(null, 1440, 900);
+    assert.equal(hiddenRegion.targetMix, 0);
+
+    const zeroRect = computeSkillsRegionFromRect(
+      { left: 0, top: 0, width: 0, height: 0 },
+      1440,
+      900
+    );
+    assert.equal(zeroRect.targetMix, 0);
+
+    const offscreenBelow = computeSkillsRegionFromRect(
+      { left: 0, top: 1200, width: 1440, height: 960 },
+      1440,
+      900
+    );
+    assert.equal(offscreenBelow.targetMix, 0);
+
+    const offscreenAbove = computeSkillsRegionFromRect(
+      { left: 0, top: -1100, width: 1440, height: 960 },
+      1440,
+      900
+    );
+    assert.equal(offscreenAbove.targetMix, 0);
+
+    const enteringSkills = computeSkillsRegionFromRect(
+      { left: 0, top: 680, width: 1440, height: 960 },
+      1440,
+      900
+    );
+    assert.ok(
+      enteringSkills.targetMix > 0.05 && enteringSkills.targetMix < 0.85,
+      `Expected smooth partial transition on entry, got ${enteringSkills.targetMix}`
+    );
+
+    const centeredDesktop = computeSkillsRegionFromRect(
+      { left: 0, top: -30, width: 1440, height: 960 },
+      1440,
+      900
+    );
+    assert.equal(centeredDesktop.targetMix, 1);
+    assert.ok(Math.abs(centeredDesktop.centerU - 0.5) < 0.01);
+
+    // Non-centered scrolled position should track actual rect center dynamically (never hardcoded)
+    const shiftedSkills = computeSkillsRegionFromRect(
+      { left: 0, top: 260, width: 1440, height: 960 },
+      1440,
+      900
+    );
+    assert.ok(
+      shiftedSkills.centerV > centeredDesktop.centerV + 0.15,
+      `Expected live centerV tracking when Skills shifts downward (${centeredDesktop.centerV} -> ${shiftedSkills.centerV})`
+    );
+
+    // 2. Per-star visibility attenuation parity
+    // In Mode A (mix = 0), center stars and outer stars both have visibility 1.0
+    const modeARegion = { ...centeredDesktop, mix: 0 };
+    assert.equal(computeStarVisibilityFactor(0.5, 0.51, false, modeARegion), 1);
+    assert.equal(computeStarVisibilityFactor(0.05, 0.5, true, modeARegion), 1);
+
+    // In Mode B (mix = 1), center interior stars are suppressed to 0 while outer margins remain crisp
+    const modeBRegion = { ...centeredDesktop, mix: 1 };
+    assert.equal(computeStarVisibilityFactor(0.5, 0.51, false, modeBRegion), 0);
+    assert.equal(computeStarVisibilityFactor(0.5, 0.51, true, modeBRegion), 0);
+    assert.ok(computeStarVisibilityFactor(0.04, 0.5, true, modeBRegion) >= 0.8);
+    assert.ok(computeStarVisibilityFactor(0.96, 0.5, true, modeBRegion) >= 0.8);
+    assert.ok(computeStarVisibilityFactor(0.5, 0.03, true, modeBRegion) >= 0.8);
+    assert.ok(computeStarVisibilityFactor(0.5, 0.97, true, modeBRegion) >= 0.8);
+
+    // 3. Verify 800-star peripheral drawRange subset & perimeter distribution across viewports and times
+    const viewports: readonly [number, number][] = [
+      [1440, 900],
+      [1920, 1080],
+      [390, 844],
+    ];
+    for (const [w, h] of viewports) {
+      for (const t of [0, 10, 30, 60]) {
+        const peri = evaluateSkillsPeripheralCoverage(w, h, t);
+        assert.equal(peri.drawnCount, 800);
+        assert.equal(peri.culledCount, 4700);
+        assert.equal(peri.layerDrawnCounts.tiny, 620);
+        assert.equal(peri.layerDrawnCounts.medium, 128);
+        assert.equal(peri.layerDrawnCounts.bright, 36);
+        assert.equal(peri.layerDrawnCounts.accent, 16);
+        assert.equal(
+          peri.coreLeakCount,
+          0,
+          `Expected 0 core leaks in Skills mode at ${w}x${h} (t=${t}s), got ${peri.coreLeakCount}`
+        );
+        assert.ok(
+          peri.visibleOuterCount >= 650 && peri.visibleOuterCount <= 800,
+          `Expected 650-800 visible peripheral stars at ${w}x${h} (t=${t}s), got ${peri.visibleOuterCount}`
+        );
+        assert.ok(peri.outerZones.left >= 120);
+        assert.ok(peri.outerZones.right >= 120);
+        assert.ok(peri.outerZones.top >= 110);
+        assert.ok(peri.outerZones.bottom >= 110);
+      }
+    }
+  });
 });
+
 

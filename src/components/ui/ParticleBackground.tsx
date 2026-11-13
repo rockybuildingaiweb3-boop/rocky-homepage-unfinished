@@ -7,10 +7,14 @@ export interface ParticleBackgroundProps {
   className?: string;
 }
 
+export type ParticleRenderMode = 'normal' | 'skills';
+
 export interface StarLayerSpec {
   id: 'tiny' | 'medium' | 'bright' | 'accent';
   label: string;
   count: number;
+  /** Dedicated outer-perimeter subset count from this layer's global budget */
+  peripheralCount: number;
   /** Camera distance range [minDepth, maxDepth] along the view frustum */
   minDepth: number;
   maxDepth: number;
@@ -36,20 +40,21 @@ export interface StarLayerSpec {
 }
 
 /**
- * LIVING ORBIT 2.3 — GLOBAL STARFIELD CALIBRATION (5,500 Active Visible Stars)
+ * LIVING ORBIT 2.3 + SMART PARTICLE OCCLUSION — 5,500 Global / 800 Skills Peripheral
  *
- * Calibrated 4-layer cosmic particle architecture:
- * - Layer 1 (tiny — Tiny Stellar Dust):     4,500 stars (subtle, continuous foundation)
- * - Layer 2 (medium — Medium Ambient Stars):  800 stars (less visually dominant)
- * - Layer 3 (bright — Bright Stars):          150 stars (selective focal points)
- * - Layer 4 (accent — Accent Glints):          50 stars (rare, elegant celestial glints)
- * - Total:                                  5,500 active visible stars
+ * Calibrated 4-layer cosmic particle architecture sharing a single 5,500-star budget:
+ * - Layer 1 (tiny — Tiny Stellar Dust):     4,500 global | 620 Skills outer-perimeter
+ * - Layer 2 (medium — Medium Ambient Stars):  800 global | 128 Skills outer-perimeter
+ * - Layer 3 (bright — Bright Stars):          150 global |  36 Skills outer-perimeter
+ * - Layer 4 (accent — Accent Glints):          50 global |  16 Skills outer-perimeter
+ * - Total:                                  5,500 global | 800 Skills outer-perimeter
  */
 export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
   {
     id: 'tiny',
     label: 'Layer 1 · Tiny Stellar Dust',
     count: 4500,
+    peripheralCount: 620,
     minDepth: 1.34,
     maxDepth: 2.24,
     color: '#d8b4fe',
@@ -74,6 +79,7 @@ export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
     id: 'medium',
     label: 'Layer 2 · Medium Ambient Stars',
     count: 800,
+    peripheralCount: 128,
     minDepth: 1.0,
     maxDepth: 1.66,
     color: '#f3e8ff',
@@ -98,6 +104,7 @@ export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
     id: 'bright',
     label: 'Layer 3 · Bright Stars',
     count: 150,
+    peripheralCount: 36,
     minDepth: 0.78,
     maxDepth: 1.26,
     color: '#ffffff',
@@ -121,6 +128,7 @@ export const STARFIELD_LAYER_SPECS: readonly StarLayerSpec[] = [
     id: 'accent',
     label: 'Layer 4 · Accent Glints',
     count: 50,
+    peripheralCount: 16,
     minDepth: 0.7,
     maxDepth: 1.14,
     color: '#e9d5ff',
@@ -148,6 +156,130 @@ export const TOTAL_STARFIELD_COUNT = STARFIELD_LAYER_SPECS.reduce(
   0
 );
 
+export const TOTAL_PERIPHERAL_STARFIELD_COUNT = STARFIELD_LAYER_SPECS.reduce(
+  (acc, s) => acc + s.peripheralCount,
+  0
+);
+
+/** Mix threshold above which central interior stars are fully culled via drawRange */
+export const SKILLS_CULL_MIX_THRESHOLD = 0.86;
+
+export interface SkillsRegionMetrics {
+  centerU: number;
+  centerV: number;
+  radiusU: number;
+  radiusV: number;
+  mix: number;
+}
+
+export interface SkillsRegionRectTarget extends SkillsRegionMetrics {
+  targetMix: number;
+}
+
+export function clamp01(val: number): number {
+  return val < 0 ? 0 : val > 1 ? 1 : val;
+}
+
+export function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = clamp01((x - edge0) / Math.max(1e-5, edge1 - edge0));
+  return t * t * (3 - 2 * t);
+}
+
+/**
+ * Computes normalized Skills atmospheric occlusion bounds and transition target mix
+ * from a live DOM bounding rect (`SkillsAtmosphere` / `#skills`).
+ */
+export function computeSkillsRegionFromRect(
+  rect: { left: number; top: number; width: number; height: number } | null,
+  viewportWidth = 1440,
+  viewportHeight = 900
+): SkillsRegionRectTarget {
+  const safeW = Math.max(1, viewportWidth);
+  const safeH = Math.max(1, viewportHeight);
+
+  if (!rect || rect.width <= 0 || rect.height <= 0) {
+    return {
+      centerU: 0.5,
+      centerV: 0.5,
+      radiusU: 0.36,
+      radiusV: 0.36,
+      mix: 0,
+      targetMix: 0,
+    };
+  }
+
+  const visibleTop = Math.max(0, rect.top);
+  const visibleBottom = Math.min(safeH, rect.top + rect.height);
+  const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+
+  const visibleLeft = Math.max(0, rect.left);
+  const visibleRight = Math.min(safeW, rect.left + rect.width);
+  const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+
+  if (visibleHeight <= 0 || visibleWidth <= 0) {
+    return {
+      centerU: (rect.left + rect.width * 0.5) / safeW,
+      centerV: (rect.top + rect.height * 0.52) / safeH,
+      radiusU: 0.36,
+      radiusV: 0.36,
+      mix: 0,
+      targetMix: 0,
+    };
+  }
+
+  const vpFraction = visibleHeight / safeH;
+  const secFraction = visibleHeight / rect.height;
+  const presence = Math.max(vpFraction, secFraction * 0.9);
+  const targetMix = smoothstep(0.14, 0.52, presence);
+
+  const centerU = (rect.left + rect.width * 0.5) / safeW;
+  const centerV = (rect.top + rect.height * 0.52) / safeH;
+
+  const isMobile = safeW < 768;
+  const radiusU = (rect.width * (isMobile ? 0.39 : 0.35)) / safeW;
+  const radiusV = (rect.height * (isMobile ? 0.32 : 0.36)) / safeH;
+
+  return {
+    centerU,
+    centerV,
+    radiusU: Math.max(0.18, radiusU),
+    radiusV: Math.max(0.18, radiusV),
+    mix: targetMix,
+    targetMix,
+  };
+}
+
+/**
+ * Evaluates per-star visibility attenuation factor [0..1] for Mode A, Mode B,
+ * and smooth scroll transitions. Matches `STARFIELD_VERTEX_SHADER` identically.
+ */
+export function computeStarVisibilityFactor(
+  u: number,
+  v: number,
+  isPeripheral: boolean,
+  region: SkillsRegionMetrics
+): number {
+  if (region.mix <= 0.0001) return 1.0;
+
+  const dx = (u - region.centerU) / Math.max(0.05, region.radiusU);
+  const dy = (v - region.centerV) / Math.max(0.05, region.radiusV);
+  const eDist = Math.hypot(dx, dy);
+
+  // Inside 0.74: completely suppressed behind central planet & radial vortex
+  // 0.74 .. 1.14: soft outer-orbital boundary feathering
+  // >= 1.14: outer cosmic perimeter
+  const coreMask = smoothstep(0.74, 1.14, eDist);
+
+  if (isPeripheral) {
+    return 1.0 + (coreMask * 0.88 - 1.0) * region.mix;
+  }
+
+  const interiorFade = clamp01(1.0 - region.mix / SKILLS_CULL_MIX_THRESHOLD);
+  const earlyCoreSuppression =
+    1.0 + (coreMask - 1.0) * smoothstep(0.0, 0.5, region.mix);
+  return interiorFade * earlyCoreSuppression;
+}
+
 /**
  * Deterministic Halton sequence generator for low-discrepancy quasi-random sampling.
  */
@@ -166,6 +298,8 @@ export function halton(index: number, base: number): number {
 export interface StarfieldLayerData {
   spec: StarLayerSpec;
   count: number;
+  /** Number of pre-partitioned outer-perimeter stars stored in indices [0 .. peripheralCount - 1] */
+  peripheralCount: number;
   /** Normalized initial screen coordinates u0, v0 in [0, 1) (length = count * 2) */
   uv0: Float32Array;
   /** Screen-space UV velocity du/dt, dv/dt per second (length = count * 2) */
@@ -184,20 +318,18 @@ export interface StarfieldLayerData {
   colorNorm: Float32Array;
   /** Per-star palette index for 2D Canvas rendering (length = count) */
   paletteIndex: Uint8Array;
+  /** 1.0 for pre-partitioned peripheral stars [0 .. peripheralCount - 1], 0.0 otherwise */
+  isPeripheral: Float32Array;
 }
 
 /**
  * Stratified 24×16 screen-space micro-grid + Halton quasi-random discrepancy +
  * multi-harmonic organic cosmic clustering field.
- *
- * Ensures consistent density across all four corners, screen edges, upper and
- * lower regions with natural, slightly organic clustering and zero empty zones.
  */
 const STRATIFIED_MICRO_COLS = 24;
 const STRATIFIED_MICRO_ROWS = 16;
 const STRATIFIED_MICRO_TOTAL = STRATIFIED_MICRO_COLS * STRATIFIED_MICRO_ROWS; // 384 cells
 
-// Coprime permutation strides per layer so layers never stack on the same micro-cell order
 const LAYER_CELL_STRIDES: Record<StarLayerSpec['id'], number> = {
   tiny: 173,
   medium: 211,
@@ -207,10 +339,6 @@ const LAYER_CELL_STRIDES: Record<StarLayerSpec['id'], number> = {
 
 const LAYER_DATA_CACHE = new Map<StarLayerSpec['id'], StarfieldLayerData>();
 
-/**
- * Computes a bounded, divergence-free organic clustering offset in UV space
- * so stars form subtle natural cosmic filaments without creating empty voids.
- */
 function computeOrganicClusterOffset(
   u: number,
   v: number,
@@ -218,7 +346,6 @@ function computeOrganicClusterOffset(
   clusterSelector: number
 ): { du: number; dv: number } {
   const phase = seed * 0.17;
-  // Multi-harmonic curl-like wave for natural galactic clustering
   const waveU =
     Math.sin(v * Math.PI * 4.0 + phase) * 0.011 +
     Math.cos((u * 1.5 + v) * Math.PI * 6.0 - phase) * 0.0065 +
@@ -231,28 +358,62 @@ function computeOrganicClusterOffset(
   return { du: waveU, dv: waveV };
 }
 
+type OuterZone = 'left' | 'right' | 'top' | 'bottom' | 'boundary' | 'interior';
+
+function classifyOuterZone(u: number, v: number): OuterZone {
+  const dx = (u - 0.5) / 0.35;
+  const dy = (v - 0.5) / 0.36;
+  const eDist = Math.hypot(dx, dy);
+
+  if (u < 0.19) return 'left';
+  if (u > 0.81) return 'right';
+  if (v < 0.18) return 'top';
+  if (v > 0.82) return 'bottom';
+  if (eDist >= 0.88 && eDist <= 1.24) return 'boundary';
+  return 'interior';
+}
+
 /**
  * Builds deterministic screen-space + frustum-depth particle data shared by both the
  * WebGL renderer (`StarBackground`) and the 2D Canvas fallback (`StarBackground2D`).
+ *
+ * Pre-partitions `spec.peripheralCount` outer-perimeter stars into the contiguous
+ * prefix `[0 .. spec.peripheralCount - 1]` so Skills mode can draw ONLY the peripheral
+ * subset via `geometry.setDrawRange(0, peripheralCount)`.
  */
 export function generateScreenSpaceStarLayerData(
   spec: StarLayerSpec
 ): StarfieldLayerData {
   const cached = LAYER_DATA_CACHE.get(spec.id);
-  if (cached && cached.count === spec.count) {
+  if (
+    cached &&
+    cached.count === spec.count &&
+    cached.peripheralCount === spec.peripheralCount
+  ) {
     return cached;
   }
 
   const n = spec.count;
-  const uv0 = new Float32Array(n * 2);
-  const velocity = new Float32Array(n * 2);
-  const depth = new Float32Array(n);
-  const sizePx = new Float32Array(n);
-  const baseOpacity = new Float32Array(n);
-  const twinklePhase = new Float32Array(n);
-  const twinkleFreq = new Float32Array(n);
-  const colorNorm = new Float32Array(n * 3);
-  const paletteIndex = new Uint8Array(n);
+  const pCount = Math.min(n, spec.peripheralCount);
+
+  const rawUv0 = new Float32Array(n * 2);
+  const rawVelocity = new Float32Array(n * 2);
+  const rawDepth = new Float32Array(n);
+  const rawSizePx = new Float32Array(n);
+  const rawBaseOpacity = new Float32Array(n);
+  const rawTwinklePhase = new Float32Array(n);
+  const rawTwinkleFreq = new Float32Array(n);
+  const rawColorNorm = new Float32Array(n * 3);
+  const rawPaletteIndex = new Uint8Array(n);
+
+  const zoneBuckets: Record<OuterZone, number[]> = {
+    left: [],
+    right: [],
+    top: [],
+    bottom: [],
+    boundary: [],
+    interior: [],
+  };
 
   const stride = LAYER_CELL_STRIDES[spec.id] || 173;
 
@@ -265,12 +426,10 @@ export function generateScreenSpaceStarLayerData(
     const h11 = halton(sampleIdx, 11);
     const h13 = halton(sampleIdx, 13);
 
-    // 1. Stratified 24×16 micro-cell assignment with coprime permutation
     const cellIdx = (i * stride + spec.seed) % STRATIFIED_MICRO_TOTAL;
     const cellCol = cellIdx % STRATIFIED_MICRO_COLS;
     const cellRow = Math.floor(cellIdx / STRATIFIED_MICRO_COLS);
 
-    // Sub-cell quasi-random placement + organic cosmic clustering modulation
     const rawU = (cellCol + h2) / STRATIFIED_MICRO_COLS;
     const rawV = (cellRow + h3) / STRATIFIED_MICRO_ROWS;
     const { du, dv } = computeOrganicClusterOffset(rawU, rawV, spec.seed, h5);
@@ -278,45 +437,152 @@ export function generateScreenSpaceStarLayerData(
     const u0 = (((rawU + du) % 1) + 1) % 1;
     const v0 = (((rawV + dv) % 1) + 1) % 1;
 
-    uv0[i * 2] = u0;
-    uv0[i * 2 + 1] = v0;
+    rawUv0[i * 2] = u0;
+    rawUv0[i * 2 + 1] = v0;
 
-    // 2. Depth assignment within [minDepth, maxDepth]
     const d = spec.minDepth + (spec.maxDepth - spec.minDepth) * Math.pow(h5, 0.85);
-    depth[i] = d;
+    rawDepth[i] = d;
 
-    // 3. Depth-dependent movement velocity with subtle per-star directional variation
     const depthSpeedFactor = 1.18 / Math.pow(d, 0.58);
     const vu =
       spec.driftU * depthSpeedFactor + (h7 - 0.5) * 2.0 * spec.velocitySpread;
     const vv =
       spec.driftV * depthSpeedFactor + (h11 - 0.5) * 2.0 * spec.velocitySpread;
-    velocity[i * 2] = vu;
-    velocity[i * 2 + 1] = vv;
+    rawVelocity[i * 2] = vu;
+    rawVelocity[i * 2 + 1] = vv;
 
-    // 4. Individual optical size and base opacity variation (natural stellar magnitude spread)
     const sizeVariation = 0.74 + Math.pow(h11, 1.3) * 0.72;
-    sizePx[i] = spec.baseSizePx * sizeVariation;
+    rawSizePx[i] = spec.baseSizePx * sizeVariation;
 
     const opacityVariation = 0.66 + h7 * 0.48;
-    baseOpacity[i] = Math.min(0.98, spec.baseOpacity * opacityVariation);
+    rawBaseOpacity[i] = Math.min(0.98, spec.baseOpacity * opacityVariation);
 
-    // 5. Twinkle phase and frequency
-    twinklePhase[i] = h13 * Math.PI * 2;
-    twinkleFreq[i] = spec.twinkleFreq * (0.76 + h5 * 0.52);
+    rawTwinklePhase[i] = h13 * Math.PI * 2;
+    rawTwinkleFreq[i] = spec.twinkleFreq * (0.76 + h5 * 0.52);
 
-    // 6. Color palette assignment
     const pIdx = (i + Math.floor(h7 * 11)) % spec.paletteRgb.length;
-    paletteIndex[i] = pIdx;
+    rawPaletteIndex[i] = pIdx;
     const rgb = spec.paletteRgb[pIdx];
-    colorNorm[i * 3] = rgb[0] / 255;
-    colorNorm[i * 3 + 1] = rgb[1] / 255;
-    colorNorm[i * 3 + 2] = rgb[2] / 255;
+    rawColorNorm[i * 3] = rgb[0] / 255;
+    rawColorNorm[i * 3 + 1] = rgb[1] / 255;
+    rawColorNorm[i * 3 + 2] = rgb[2] / 255;
+
+    zoneBuckets[classifyOuterZone(u0, v0)].push(i);
+  }
+
+  // Balanced selection of `pCount` outer-perimeter stars across Left, Right, Top, Bottom & Boundary
+  const selectedPeripheral = new Uint8Array(n);
+  const peripheralOrder: number[] = [];
+
+  const zoneTargets: readonly [OuterZone, number][] = [
+    ['left', Math.round(pCount * 0.24)],
+    ['right', Math.round(pCount * 0.24)],
+    ['top', Math.round(pCount * 0.21)],
+    ['bottom', Math.round(pCount * 0.21)],
+    ['boundary', pCount],
+  ];
+
+  for (const [zone, quota] of zoneTargets) {
+    if (peripheralOrder.length >= pCount) break;
+    const bucket = zoneBuckets[zone];
+    if (bucket.length === 0) continue;
+    const takeCount = Math.min(quota, pCount - peripheralOrder.length, bucket.length);
+    for (let k = 0; k < takeCount; k++) {
+      // Deterministic stratified pick across the zone bucket
+      const pickPos = Math.floor(((k + 0.5) * bucket.length) / takeCount);
+      const rawIdx = bucket[pickPos];
+      if (!selectedPeripheral[rawIdx]) {
+        selectedPeripheral[rawIdx] = 1;
+        peripheralOrder.push(rawIdx);
+      }
+    }
+  }
+
+  // Fallback fill from remaining outer zones if rounding left any slack
+  const fillZones: readonly OuterZone[] = ['left', 'right', 'top', 'bottom', 'boundary', 'interior'];
+  for (const zone of fillZones) {
+    if (peripheralOrder.length >= pCount) break;
+    for (const rawIdx of zoneBuckets[zone]) {
+      if (peripheralOrder.length >= pCount) break;
+      if (!selectedPeripheral[rawIdx]) {
+        selectedPeripheral[rawIdx] = 1;
+        peripheralOrder.push(rawIdx);
+      }
+    }
+  }
+
+  const reorderedIndices: number[] = [...peripheralOrder];
+  for (let i = 0; i < n; i++) {
+    if (!selectedPeripheral[i]) {
+      reorderedIndices.push(i);
+    }
+  }
+
+  const uv0 = new Float32Array(n * 2);
+  const velocity = new Float32Array(n * 2);
+  const depth = new Float32Array(n);
+  const sizePx = new Float32Array(n);
+  const baseOpacity = new Float32Array(n);
+  const twinklePhase = new Float32Array(n);
+  const twinkleFreq = new Float32Array(n);
+  const colorNorm = new Float32Array(n * 3);
+  const paletteIndex = new Uint8Array(n);
+  const isPeripheral = new Float32Array(n);
+
+  for (let dst = 0; dst < n; dst++) {
+    const src = reorderedIndices[dst];
+    const isPeriph = dst < pCount;
+    isPeripheral[dst] = isPeriph ? 1.0 : 0.0;
+
+    const u = rawUv0[src * 2];
+    const v = rawUv0[src * 2 + 1];
+    uv0[dst * 2] = u;
+    uv0[dst * 2 + 1] = v;
+
+    // Guide outer-margin peripheral stars smoothly along their outer band so
+    // Mode B maintains clean dark-margin framing over long sessions while Mode A stays rich
+    if (isPeriph) {
+      const zone = classifyOuterZone(u, v);
+      const speedMag = Math.max(
+        0.0014,
+        Math.hypot(rawVelocity[src * 2], rawVelocity[src * 2 + 1])
+      );
+      if (zone === 'left' || zone === 'right') {
+        const signV = rawVelocity[src * 2 + 1] >= 0 ? 1 : -1;
+        velocity[dst * 2] = (rawVelocity[src * 2] * 0.12);
+        velocity[dst * 2 + 1] = signV * speedMag * 0.85;
+      } else if (zone === 'top' || zone === 'bottom') {
+        const signU = rawVelocity[src * 2] >= 0 ? 1 : -1;
+        velocity[dst * 2] = signU * speedMag * 0.85;
+        velocity[dst * 2 + 1] = rawVelocity[src * 2 + 1] * 0.12;
+      } else {
+        // Gentle tangent flow along the outer orbital boundary
+        const rx = u - 0.5;
+        const ry = v - 0.5;
+        const rLen = Math.max(0.05, Math.hypot(rx, ry));
+        velocity[dst * 2] = (-ry / rLen) * speedMag * 0.65;
+        velocity[dst * 2 + 1] = (rx / rLen) * speedMag * 0.65;
+      }
+    } else {
+      velocity[dst * 2] = rawVelocity[src * 2];
+      velocity[dst * 2 + 1] = rawVelocity[src * 2 + 1];
+    }
+
+    depth[dst] = rawDepth[src];
+    sizePx[dst] = rawSizePx[src];
+    baseOpacity[dst] = rawBaseOpacity[src];
+    twinklePhase[dst] = rawTwinklePhase[src];
+    twinkleFreq[dst] = rawTwinkleFreq[src];
+    paletteIndex[dst] = rawPaletteIndex[src];
+    colorNorm[dst * 3] = rawColorNorm[src * 3];
+    colorNorm[dst * 3 + 1] = rawColorNorm[src * 3 + 1];
+    colorNorm[dst * 3 + 2] = rawColorNorm[src * 3 + 2];
   }
 
   const data: StarfieldLayerData = {
     spec,
     count: n,
+    peripheralCount: pCount,
     uv0,
     velocity,
     depth,
@@ -326,6 +592,7 @@ export function generateScreenSpaceStarLayerData(
     twinkleFreq,
     colorNorm,
     paletteIndex,
+    isPeripheral,
   };
 
   LAYER_DATA_CACHE.set(spec.id, data);
@@ -335,13 +602,6 @@ export function generateScreenSpaceStarLayerData(
 /**
  * Generates a 3D world-space position Float32Array (length = spec.count * 3)
  * projected from the screen-space UV + frustum depth model at `timeSec` for `viewportAspect`.
- *
- * Uses the exact perspective projection formula:
- *   halfHeight = d * tan(fov / 2)
- *   halfWidth  = halfHeight * aspect
- *   worldX     = (2 * u - 1) * halfWidth
- *   worldY     = (1 - 2 * v) * halfHeight
- *   worldZ     = cameraZ - d
  */
 export function generateStratifiedStarLayer(
   spec: StarLayerSpec,
@@ -362,7 +622,6 @@ export function generateStratifiedStarLayer(
     const d = data.depth[i];
     const phase = data.twinklePhase[i];
 
-    // Continuous drift + subtle harmonic sway, wrapped seamlessly in [0, 1)
     const swayU = Math.sin(timeSec * 0.42 + phase) * spec.swayAmp;
     const swayV = Math.cos(timeSec * 0.36 + phase * 1.3) * spec.swayAmp;
 
@@ -457,11 +716,13 @@ export interface ActiveStellarTrailState {
 
 /**
  * Evaluates active stellar motion trails at `timeSec` for a given viewport `(width, height)`.
+ * In Skills mode, trails intersecting the bright central planetary area are cleanly suppressed.
  */
 export function evaluateStellarTrails(
   timeSec: number,
   width = 1440,
-  height = 900
+  height = 900,
+  skillsRegion?: SkillsRegionMetrics
 ): ActiveStellarTrailState[] {
   const active: ActiveStellarTrailState[] = [];
   const safeW = Math.max(320, width);
@@ -489,14 +750,30 @@ export function evaluateStellarTrails(
 
     const lenU = (spec.dirX * spec.lengthPx) / safeW;
     const lenV = (spec.dirY * spec.lengthPx) / safeH;
+    const tailU = headU - lenU;
+    const tailV = headV - lenV;
+
+    let skillsAttenuation = 1.0;
+    if (skillsRegion && skillsRegion.mix > 0.01) {
+      const midU = (headU + tailU) * 0.5;
+      const midV = (headV + tailV) * 0.5;
+      const eDist = Math.hypot(
+        (midU - skillsRegion.centerU) / Math.max(0.05, skillsRegion.radiusU),
+        (midV - skillsRegion.centerV) / Math.max(0.05, skillsRegion.radiusV)
+      );
+      const trailMask = smoothstep(0.95, 1.25, eDist);
+      skillsAttenuation =
+        1.0 + (trailMask * 0.55 - 1.0) * skillsRegion.mix;
+      if (skillsAttenuation <= 0.02) continue;
+    }
 
     active.push({
       id: spec.id,
       headU,
       headV,
-      tailU: headU - lenU,
-      tailV: headV - lenV,
-      opacity: spec.maxOpacity * envelope,
+      tailU,
+      tailV,
+      opacity: spec.maxOpacity * envelope * skillsAttenuation,
       colorRgb: spec.colorRgb,
     });
   }
@@ -541,14 +818,7 @@ export interface StarfieldCoverageReport {
 }
 
 /**
- * Full-Screen Occupancy & Coverage Diagnostics (5,500-Star Configuration)
- *
- * Uses the exact same screen-space UV -> 3D world coordinate -> 75° FOV camera
- * perspective projection and wrapping rules as the WebGL renderer:
- * - Desktop (`width >= height`): 12 columns × 8 rows (96 cells, mean ~57.29 stars/cell)
- * - Mobile (`width < height`):   8 columns × 12 rows (96 cells, mean ~57.29 stars/cell)
- * - Evaluates at any `timeSec` (e.g. 0s, 10s, 30s, 60s) across 1440×900,
- *   1920×1080, 2048×1002, and 390×844.
+ * Mode A Diagnostics — Full-Screen 5,500-Star Global Environment
  */
 export function evaluateStarfieldCoverage(
   width = 1440,
@@ -672,13 +942,106 @@ export function evaluateStarfieldCoverage(
   };
 }
 
+export interface SkillsPeripheralCoverageReport {
+  drawnCount: number;
+  culledCount: number;
+  visibleOuterCount: number;
+  coreLeakCount: number;
+  layerDrawnCounts: Record<StarLayerSpec['id'], number>;
+  outerZones: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    boundary: number;
+  };
+}
+
 /**
- * Custom GPU Shader for the 5,500-Star Full-Screen Cosmic Starfield
- * - Seamless screen-space UV drift + gentle harmonic sway
- * - Dynamic aspect ratio projection (`uAspect` updated live from `state.size`)
- * - Subtle peripheral/corner luminance compensation so outer edges, corners,
- *   and lower regions against pure `#030014` remain naturally visible
- * - Delicate 4-point cross-diffraction spikes for Layer 4 Accent Glints
+ * Mode B Diagnostics — Skills Peripheral Particle Mode (Precomputed 800-star subset via drawRange)
+ */
+export function evaluateSkillsPeripheralCoverage(
+  width = 1440,
+  height = 900,
+  timeSec = 0,
+  customRegion?: SkillsRegionMetrics
+): SkillsPeripheralCoverageReport {
+  const isMobile = width < 768;
+  const region: SkillsRegionMetrics = customRegion ?? {
+    centerU: 0.5,
+    centerV: 0.51,
+    radiusU: isMobile ? 0.39 : 0.35,
+    radiusV: isMobile ? 0.32 : 0.36,
+    mix: 1.0,
+  };
+
+  let drawnCount = 0;
+  let visibleOuterCount = 0;
+  let coreLeakCount = 0;
+
+  const layerDrawnCounts: Record<StarLayerSpec['id'], number> = {
+    tiny: 0,
+    medium: 0,
+    bright: 0,
+    accent: 0,
+  };
+  const outerZones = { left: 0, right: 0, top: 0, bottom: 0, boundary: 0 };
+
+  for (const spec of STARFIELD_LAYER_SPECS) {
+    const data = generateScreenSpaceStarLayerData(spec);
+    const activeLimit = data.peripheralCount;
+    layerDrawnCounts[spec.id] = activeLimit;
+    drawnCount += activeLimit;
+
+    for (let i = 0; i < activeLimit; i++) {
+      const u0 = data.uv0[i * 2];
+      const v0 = data.uv0[i * 2 + 1];
+      const vu = data.velocity[i * 2];
+      const vv = data.velocity[i * 2 + 1];
+      const phase = data.twinklePhase[i];
+
+      const swayU = Math.sin(timeSec * 0.42 + phase) * spec.swayAmp;
+      const swayV = Math.cos(timeSec * 0.36 + phase * 1.3) * spec.swayAmp;
+
+      const u = ((((u0 + vu * timeSec + swayU) % 1) + 1) % 1);
+      const v = ((((v0 + vv * timeSec + swayV) % 1) + 1) % 1);
+
+      const vis = computeStarVisibilityFactor(u, v, true, region);
+      const eDist = Math.hypot(
+        (u - region.centerU) / Math.max(0.05, region.radiusU),
+        (v - region.centerV) / Math.max(0.05, region.radiusV)
+      );
+
+      if (eDist <= 0.72 && vis > 0.01) {
+        coreLeakCount++;
+      }
+
+      if (vis > 0.05) {
+        visibleOuterCount++;
+        if (u < 0.22) outerZones.left++;
+        if (u > 0.78) outerZones.right++;
+        if (v < 0.22) outerZones.top++;
+        if (v > 0.78) outerZones.bottom++;
+        if (eDist >= 0.76 && eDist <= 1.2) outerZones.boundary++;
+      }
+    }
+  }
+
+  return {
+    drawnCount,
+    culledCount: TOTAL_STARFIELD_COUNT - drawnCount,
+    visibleOuterCount,
+    coreLeakCount,
+    layerDrawnCounts,
+    outerZones,
+  };
+}
+
+/**
+ * Custom GPU Shader for the Dual-Mode Global Cosmic Starfield
+ * - Mode A (uSkillsMix = 0): Full 5,500-star screen-space field
+ * - Mode B (uSkillsMix = 1): 800-star peripheral subset via drawRange, with
+ *   real-time elliptical occlusion tracking the actual Skills atmospheric region
  */
 const STARFIELD_VERTEX_SHADER = /* glsl */ `
   uniform float uTime;
@@ -688,6 +1051,8 @@ const STARFIELD_VERTEX_SHADER = /* glsl */ `
   uniform float uTwinkleAmp;
   uniform float uSwayAmp;
   uniform float uIsGlintLayer;
+  uniform vec4 uSkillsRectUv;
+  uniform float uSkillsMix;
 
   attribute vec2 aUv0;
   attribute vec2 aVelocity;
@@ -697,18 +1062,43 @@ const STARFIELD_VERTEX_SHADER = /* glsl */ `
   attribute float aTwinklePhase;
   attribute float aTwinkleFreq;
   attribute vec3 aColor;
+  attribute float aIsPeripheral;
 
   varying vec3 vColor;
   varying float vAlpha;
   varying float vIsGlint;
 
   void main() {
-    // Continuous screen-space drift + gentle harmonic sway wrapped seamlessly in [0, 1)
     vec2 sway = vec2(
       sin(uTime * 0.42 + aTwinklePhase) * uSwayAmp,
       cos(uTime * 0.36 + aTwinklePhase * 1.3) * uSwayAmp
     );
     vec2 uv = fract(aUv0 + aVelocity * uTime + sway);
+
+    // Dynamic Skills Atmospheric Occlusion & Mode Blend
+    float skillsVisibility = 1.0;
+    if (uSkillsMix > 0.0005) {
+      vec2 deltaSkills = (uv - uSkillsRectUv.xy) / max(uSkillsRectUv.zw, vec2(0.05));
+      float eDist = length(deltaSkills);
+      float coreMask = smoothstep(0.74, 1.14, eDist);
+      float interiorFade = clamp(1.0 - uSkillsMix / 0.86, 0.0, 1.0);
+      float earlyCoreSuppression = mix(1.0, coreMask, smoothstep(0.0, 0.5, uSkillsMix));
+      skillsVisibility = mix(
+        interiorFade * earlyCoreSuppression,
+        mix(1.0, coreMask * 0.88, uSkillsMix),
+        aIsPeripheral
+      );
+    }
+
+    // Cull occluded vertices outside clip space before fragment stage
+    if (skillsVisibility <= 0.005) {
+      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      gl_PointSize = 0.0;
+      vAlpha = 0.0;
+      vColor = aColor;
+      vIsGlint = uIsGlintLayer;
+      return;
+    }
 
     float tanHalfFov = 0.767326988; // tan(75 deg / 2)
     float overscan = 1.015;
@@ -725,7 +1115,6 @@ const STARFIELD_VERTEX_SHADER = /* glsl */ `
     vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
 
-    // Gentle peripheral/corner/lower-region presence compensation against dark #030014 margins
     vec2 centeredUv = abs(uv * 2.0 - 1.0);
     float edgePresence = smoothstep(0.48, 0.98, max(centeredUv.x, centeredUv.y));
     float lowerPresence = smoothstep(0.58, 0.98, uv.y);
@@ -733,7 +1122,7 @@ const STARFIELD_VERTEX_SHADER = /* glsl */ `
 
     float twinkle = sin(uTime * aTwinkleFreq + aTwinklePhase) * uTwinkleAmp;
     float alphaScale = mix(0.68, 1.0, uViewportScale);
-    vAlpha = clamp((aBaseOpacity + twinkle) * marginBoost * alphaScale, 0.11, 0.96);
+    vAlpha = clamp((aBaseOpacity + twinkle) * marginBoost * alphaScale * skillsVisibility, 0.0, 0.96);
     vColor = aColor;
     vIsGlint = uIsGlintLayer;
 
@@ -752,16 +1141,15 @@ const STARFIELD_FRAGMENT_SHADER = /* glsl */ `
   varying float vIsGlint;
 
   void main() {
+    if (vAlpha <= 0.005) discard;
     vec2 cxy = 2.0 * gl_PointCoord - 1.0;
     float r2 = dot(cxy, cxy);
     if (r2 > 1.0) discard;
 
-    // Crisp luminous stellar core + soft atmospheric halo
     float core = exp(-r2 * 2.55);
     float halo = (1.0 - smoothstep(0.08, 1.0, r2)) * 0.44;
     float intensity = clamp(core + halo, 0.0, 1.0);
 
-    // Delicate 4-point celestial cross-glint for Layer 4 accent stars
     if (vIsGlint > 0.5) {
       float crossX = exp(-abs(cxy.y) * 10.5) * exp(-abs(cxy.x) * 2.0);
       float crossY = exp(-abs(cxy.x) * 10.5) * exp(-abs(cxy.y) * 2.0);
@@ -773,12 +1161,207 @@ const STARFIELD_FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-interface WebGLStarLayerProps {
-  spec: StarLayerSpec;
+interface MutableSkillsTrackingState {
+  centerU: number;
+  centerV: number;
+  radiusU: number;
+  radiusV: number;
+  targetMix: number;
+  currentMix: number;
+  mode: ParticleRenderMode;
+  activeStars: number;
+  prefersReducedMotion: boolean;
+  isLowPerfDevice: boolean;
 }
 
-const WebGLStarLayer: React.FC<WebGLStarLayerProps> = ({ spec }) => {
+/**
+ * Shared Skills Atmospheric Region Tracker
+ * Combines IntersectionObserver, ResizeObserver, passive scroll listening, and
+ * rAF-throttled layout measurement so DOM geometry is never read per animation frame.
+ */
+function useSkillsAtmosphereTracker(
+  containerRef: React.RefObject<HTMLDivElement | null>
+): React.MutableRefObject<MutableSkillsTrackingState> {
+  const initialReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const initialLowPerf =
+    typeof navigator !== 'undefined' &&
+    ((typeof navigator.hardwareConcurrency === 'number' &&
+      navigator.hardwareConcurrency <= 2) ||
+      (typeof (navigator as unknown as { deviceMemory?: number }).deviceMemory ===
+        'number' &&
+        ((navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 8) <= 2));
+
+  const stateRef = useRef<MutableSkillsTrackingState>({
+    centerU: 0.5,
+    centerV: 0.5,
+    radiusU: 0.36,
+    radiusV: 0.36,
+    targetMix: 0,
+    currentMix: 0,
+    mode: 'normal',
+    activeStars: TOTAL_STARFIELD_COUNT,
+    prefersReducedMotion: initialReducedMotion,
+    isLowPerfDevice: initialLowPerf,
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    stateRef.current.prefersReducedMotion = mq.matches;
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      stateRef.current.prefersReducedMotion = e.matches;
+    };
+    mq.addEventListener('change', handleMotionChange);
+
+    let skillsEl: HTMLElement | null = null;
+    let isIntersecting = false;
+    let measureRafId: number | null = null;
+    let intersectionObserver: IntersectionObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let mutationObserver: MutationObserver | null = null;
+
+    const syncDomDiagnostics = () => {
+      const host = containerRef.current;
+      if (!host) return;
+      const st = stateRef.current;
+      if (host.dataset.particleMode !== st.mode) {
+        host.dataset.particleMode = st.mode;
+      }
+      const nextCountStr = String(st.activeStars);
+      if (host.dataset.activeStars !== nextCountStr) {
+        host.dataset.activeStars = nextCountStr;
+      }
+    };
+
+    const measureSkillsBounds = () => {
+      measureRafId = null;
+      if (!skillsEl) {
+        stateRef.current.targetMix = 0;
+        return;
+      }
+
+      const rect = skillsEl.getBoundingClientRect();
+      const vw = window.innerWidth || 1440;
+      const vh = window.innerHeight || 900;
+      const computed = computeSkillsRegionFromRect(rect, vw, vh);
+
+      stateRef.current.centerU = computed.centerU;
+      stateRef.current.centerV = computed.centerV;
+      stateRef.current.radiusU = computed.radiusU;
+      stateRef.current.radiusV = computed.radiusV;
+      stateRef.current.targetMix = computed.targetMix;
+
+      if (stateRef.current.prefersReducedMotion) {
+        stateRef.current.currentMix = computed.targetMix;
+        const isSkillsMode = computed.targetMix >= SKILLS_CULL_MIX_THRESHOLD;
+        stateRef.current.mode = isSkillsMode ? 'skills' : 'normal';
+        stateRef.current.activeStars = isSkillsMode
+          ? TOTAL_PERIPHERAL_STARFIELD_COUNT
+          : TOTAL_STARFIELD_COUNT;
+        syncDomDiagnostics();
+      }
+    };
+
+    const scheduleMeasure = () => {
+      if (measureRafId !== null) return;
+      measureRafId = window.requestAnimationFrame(measureSkillsBounds);
+    };
+
+    const attachToSkillsElement = (el: HTMLElement) => {
+      if (skillsEl === el) return;
+      skillsEl = el;
+
+      intersectionObserver?.disconnect();
+      resizeObserver?.disconnect();
+
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          isIntersecting = entry.isIntersecting;
+          if (!isIntersecting) {
+            stateRef.current.targetMix = 0;
+          }
+          scheduleMeasure();
+        },
+        { threshold: [0, 0.05, 0.15, 0.25, 0.4, 0.6, 0.8, 1.0] }
+      );
+      intersectionObserver.observe(el);
+
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(() => {
+          scheduleMeasure();
+        });
+        resizeObserver.observe(el);
+      }
+
+      scheduleMeasure();
+    };
+
+    const findSkillsElement = (): HTMLElement | null => {
+      return (
+        document.querySelector<HTMLElement>('[data-skills-atmosphere="true"]') ||
+        document.getElementById('skills')
+      );
+    };
+
+    const initialEl = findSkillsElement();
+    if (initialEl) {
+      attachToSkillsElement(initialEl);
+    } else if (typeof MutationObserver !== 'undefined') {
+      mutationObserver = new MutationObserver(() => {
+        const found = findSkillsElement();
+        if (found) {
+          attachToSkillsElement(found);
+          mutationObserver?.disconnect();
+          mutationObserver = null;
+        }
+      });
+      mutationObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    const handleScroll = () => {
+      if (!skillsEl) {
+        const found = findSkillsElement();
+        if (found) attachToSkillsElement(found);
+      }
+      scheduleMeasure();
+    };
+
+    const handleResize = () => {
+      scheduleMeasure();
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    syncDomDiagnostics();
+
+    return () => {
+      mq.removeEventListener('change', handleMotionChange);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      intersectionObserver?.disconnect();
+      resizeObserver?.disconnect();
+      mutationObserver?.disconnect();
+      if (measureRafId !== null) window.cancelAnimationFrame(measureRafId);
+    };
+  }, [containerRef]);
+
+  return stateRef;
+}
+
+interface WebGLStarLayerProps {
+  spec: StarLayerSpec;
+  skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
+}
+
+const WebGLStarLayer: React.FC<WebGLStarLayerProps> = ({ spec, skillsTrackerRef }) => {
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const lastDrawCountRef = useRef<number>(-1);
 
   const layerData = useMemo(() => generateScreenSpaceStarLayerData(spec), [spec]);
 
@@ -803,8 +1386,19 @@ const WebGLStarLayer: React.FC<WebGLStarLayerProps> = ({ spec }) => {
       new THREE.BufferAttribute(layerData.twinkleFreq, 1)
     );
     geom.setAttribute('aColor', new THREE.BufferAttribute(layerData.colorNorm, 3));
+    geom.setAttribute(
+      'aIsPeripheral',
+      new THREE.BufferAttribute(layerData.isPeripheral, 1)
+    );
+    geom.setDrawRange(0, layerData.count);
     return geom;
   }, [layerData]);
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
 
   const uniforms = useMemo(
     () => ({
@@ -830,24 +1424,45 @@ const WebGLStarLayer: React.FC<WebGLStarLayerProps> = ({ spec }) => {
       uTwinkleAmp: { value: spec.twinkleAmp },
       uSwayAmp: { value: spec.swayAmp },
       uIsGlintLayer: { value: spec.isGlintLayer },
+      uSkillsRectUv: { value: new THREE.Vector4(0.5, 0.5, 0.36, 0.36) },
+      uSkillsMix: { value: 0 },
     }),
     [spec.twinkleAmp, spec.swayAmp, spec.isGlintLayer]
   );
 
   useFrame((state) => {
+    const tracker = skillsTrackerRef.current;
+    const isSkillsDrawRange = tracker.currentMix >= SKILLS_CULL_MIX_THRESHOLD;
+    const desiredCount = isSkillsDrawRange
+      ? layerData.peripheralCount
+      : layerData.count;
+
+    if (lastDrawCountRef.current !== desiredCount) {
+      geometry.setDrawRange(0, desiredCount);
+      lastDrawCountRef.current = desiredCount;
+    }
+
     if (materialRef.current) {
       const w = state.size.width || window.innerWidth || 1440;
       const h = state.size.height || window.innerHeight || 900;
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+      materialRef.current.uniforms.uTime.value = tracker.prefersReducedMotion
+        ? 0
+        : state.clock.elapsedTime;
       materialRef.current.uniforms.uAspect.value = w / Math.max(1, h);
-      materialRef.current.uniforms.uPixelRatio.value = Math.min(
-        state.gl.getPixelRatio(),
-        2
-      );
+      materialRef.current.uniforms.uPixelRatio.value = tracker.isLowPerfDevice
+        ? 1
+        : Math.min(state.gl.getPixelRatio(), 2);
       materialRef.current.uniforms.uViewportScale.value = Math.max(
         0.58,
         Math.min(1.0, Math.min(w, h) / 900)
       );
+      materialRef.current.uniforms.uSkillsRectUv.value.set(
+        tracker.centerU,
+        tracker.centerV,
+        tracker.radiusU,
+        tracker.radiusV
+      );
+      materialRef.current.uniforms.uSkillsMix.value = tracker.currentMix;
     }
   });
 
@@ -866,10 +1481,67 @@ const WebGLStarLayer: React.FC<WebGLStarLayerProps> = ({ spec }) => {
   );
 };
 
+interface WebGLSkillsCoordinatorProps {
+  skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
+  hostContainerRef: React.RefObject<HTMLDivElement | null>;
+}
+
 /**
- * WebGL Delicate Stellar Motion Trails (3–5 concurrent subtle streaks)
+ * Advances `currentMix` exponentially once per WebGL frame and syncs `data-particle-mode`
+ * & `data-active-stars` on the container only when discrete mode flips.
  */
-const WebGLStellarTrails: React.FC = () => {
+const WebGLSkillsCoordinator: React.FC<WebGLSkillsCoordinatorProps> = ({
+  skillsTrackerRef,
+  hostContainerRef,
+}) => {
+  const lastModeRef = useRef<ParticleRenderMode>('normal');
+  const lastActiveCountRef = useRef<number>(TOTAL_STARFIELD_COUNT);
+
+  useFrame((_, delta) => {
+    const tracker = skillsTrackerRef.current;
+    if (tracker.prefersReducedMotion) {
+      tracker.currentMix = tracker.targetMix;
+    } else {
+      const dt = Math.min(delta, 0.25);
+      const damp = 1 - Math.exp(-10.0 * dt);
+      tracker.currentMix += (tracker.targetMix - tracker.currentMix) * damp;
+      if (Math.abs(tracker.targetMix - tracker.currentMix) < 0.002) {
+        tracker.currentMix = tracker.targetMix;
+      }
+    }
+
+    const isSkills = tracker.currentMix >= SKILLS_CULL_MIX_THRESHOLD;
+    const nextMode: ParticleRenderMode = isSkills ? 'skills' : 'normal';
+    const nextActiveCount = isSkills
+      ? TOTAL_PERIPHERAL_STARFIELD_COUNT
+      : TOTAL_STARFIELD_COUNT;
+
+    if (
+      lastModeRef.current !== nextMode ||
+      lastActiveCountRef.current !== nextActiveCount
+    ) {
+      lastModeRef.current = nextMode;
+      lastActiveCountRef.current = nextActiveCount;
+      tracker.mode = nextMode;
+      tracker.activeStars = nextActiveCount;
+
+      const host = hostContainerRef.current;
+      if (host) {
+        host.dataset.particleMode = nextMode;
+        host.dataset.activeStars = String(nextActiveCount);
+      }
+    }
+  });
+
+  return null;
+};
+
+/**
+ * WebGL Delicate Stellar Motion Trails (1–2 concurrent subtle streaks)
+ */
+const WebGLStellarTrails: React.FC<{
+  skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
+}> = ({ skillsTrackerRef }) => {
   const lineRef = useRef<THREE.LineSegments | null>(null);
 
   const { geometry, posArray, colArray } = useMemo(() => {
@@ -884,7 +1556,19 @@ const WebGLStellarTrails: React.FC = () => {
     return { geometry: geom, posArray: positions, colArray: colors };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
+
   useFrame((state) => {
+    const tracker = skillsTrackerRef.current;
+    if (tracker.prefersReducedMotion) {
+      geometry.setDrawRange(0, 0);
+      return;
+    }
+
     const w = state.size.width || window.innerWidth || 1440;
     const h = state.size.height || window.innerHeight || 900;
     const aspect = w / Math.max(1, h);
@@ -893,11 +1577,19 @@ const WebGLStellarTrails: React.FC = () => {
     const halfH = d * tanHalfFov;
     const halfW = halfH * aspect;
 
-    const activeTrails = evaluateStellarTrails(state.clock.elapsedTime, w, h);
-    posArray.fill(0);
-    colArray.fill(0);
+    const activeTrails = evaluateStellarTrails(state.clock.elapsedTime, w, h, {
+      centerU: tracker.centerU,
+      centerV: tracker.centerV,
+      radiusU: tracker.radiusU,
+      radiusV: tracker.radiusV,
+      mix: tracker.currentMix,
+    });
 
     const segmentsPerTrail = 8;
+    const activeVerts = activeTrails.length * segmentsPerTrail * 2;
+    geometry.setDrawRange(0, activeVerts);
+    if (activeVerts === 0) return;
+
     for (let tIdx = 0; tIdx < activeTrails.length; tIdx++) {
       const tr = activeTrails[tIdx];
       const r = tr.colorRgb[0] / 255;
@@ -961,26 +1653,51 @@ const WebGLStellarTrails: React.FC = () => {
   );
 };
 
+interface StarBackgroundProps {
+  skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
+  hostContainerRef: React.RefObject<HTMLDivElement | null>;
+}
+
 /**
- * StarBackground — Multi-depth 4-layer WebGL Starfield (6,500 active visible stars + delicate trails)
+ * StarBackground — Dual-Mode 4-Layer WebGL Starfield
  */
-export const StarBackground: React.FC = () => {
+export const StarBackground: React.FC<StarBackgroundProps> = ({
+  skillsTrackerRef,
+  hostContainerRef,
+}) => {
   return (
     <group>
+      <WebGLSkillsCoordinator
+        skillsTrackerRef={skillsTrackerRef}
+        hostContainerRef={hostContainerRef}
+      />
       {STARFIELD_LAYER_SPECS.map((spec) => (
-        <WebGLStarLayer key={spec.id} spec={spec} />
+        <WebGLStarLayer
+          key={spec.id}
+          spec={spec}
+          skillsTrackerRef={skillsTrackerRef}
+        />
       ))}
-      <WebGLStellarTrails />
+      <WebGLStellarTrails skillsTrackerRef={skillsTrackerRef} />
     </group>
   );
 };
 
+interface StarBackground2DProps {
+  skillsTrackerRef: React.MutableRefObject<MutableSkillsTrackingState>;
+  hostContainerRef: React.RefObject<HTMLDivElement | null>;
+}
+
 /**
- * Fallback 2D Canvas Starfield (Full 6,500-Star Data & Motion Parity with WebGL)
- * Shares the exact same `generateScreenSpaceStarLayerData` and `evaluateStellarTrails`
- * generators as the WebGL implementation.
+ * Fallback 2D Canvas Starfield (Full Dual-Mode Parity with WebGL)
+ * - Normal Mode: iterates all 5,500 stars
+ * - Skills Mode: iterates ONLY the precomputed 800-star outer-perimeter subset
+ *   using the exact same `computeStarVisibilityFactor` mask and motion rules.
  */
-const StarBackground2D: React.FC = () => {
+const StarBackground2D: React.FC<StarBackground2DProps> = ({
+  skillsTrackerRef,
+  hostContainerRef,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -996,6 +1713,9 @@ const StarBackground2D: React.FC = () => {
     const layerDataList = STARFIELD_LAYER_SPECS.map((spec) =>
       generateScreenSpaceStarLayerData(spec)
     );
+    const layerPaletteCss = layerDataList.map((d) =>
+      d.spec.paletteRgb.map((rgb) => `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`)
+    );
 
     const handleResize = () => {
       if (!canvas) return;
@@ -1006,52 +1726,101 @@ const StarBackground2D: React.FC = () => {
 
     let elapsedSec = 0;
     let lastTime = performance.now();
+    let lastMode: ParticleRenderMode = 'normal';
+    let lastActiveCount = TOTAL_STARFIELD_COUNT;
 
     const render = (time: number) => {
-      const delta = Math.min((time - lastTime) / 1000, 0.1);
+      const rawDelta = Math.max(0.001, (time - lastTime) / 1000);
+      const delta = Math.min(rawDelta, 0.25);
       lastTime = time;
-      elapsedSec += delta;
+
+      const tracker = skillsTrackerRef.current;
+      if (tracker.prefersReducedMotion) {
+        tracker.currentMix = tracker.targetMix;
+      } else {
+        elapsedSec += Math.min(rawDelta, 0.1);
+        const damp = 1 - Math.exp(-10.0 * delta);
+        tracker.currentMix += (tracker.targetMix - tracker.currentMix) * damp;
+        if (Math.abs(tracker.targetMix - tracker.currentMix) < 0.002) {
+          tracker.currentMix = tracker.targetMix;
+        }
+      }
+
+      const isSkillsMode = tracker.currentMix >= SKILLS_CULL_MIX_THRESHOLD;
+      const nextMode: ParticleRenderMode = isSkillsMode ? 'skills' : 'normal';
+      const nextActiveCount = isSkillsMode
+        ? TOTAL_PERIPHERAL_STARFIELD_COUNT
+        : TOTAL_STARFIELD_COUNT;
+
+      if (lastMode !== nextMode || lastActiveCount !== nextActiveCount) {
+        lastMode = nextMode;
+        lastActiveCount = nextActiveCount;
+        tracker.mode = nextMode;
+        tracker.activeStars = nextActiveCount;
+        if (hostContainerRef.current) {
+          hostContainerRef.current.dataset.particleMode = nextMode;
+          hostContainerRef.current.dataset.activeStars = String(nextActiveCount);
+        }
+      }
+
+      const region: SkillsRegionMetrics = {
+        centerU: tracker.centerU,
+        centerV: tracker.centerV,
+        radiusU: tracker.radiusU,
+        radiusV: tracker.radiusV,
+        mix: tracker.currentMix,
+      };
+      const evalTime = tracker.prefersReducedMotion ? 0 : elapsedSec;
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Render all 4 star layers (6,500 active visible stars)
+      // 1. Render active subset: 5,500 stars in Normal mode, 800 peripheral stars in Skills mode
       for (let l = 0; l < layerDataList.length; l++) {
         const data = layerDataList[l];
         const spec = data.spec;
-        const palette = spec.paletteRgb;
+        const paletteCss = layerPaletteCss[l];
+        const activeLimit = isSkillsMode ? data.peripheralCount : data.count;
 
-        for (let i = 0; i < data.count; i++) {
+        for (let i = 0; i < activeLimit; i++) {
           const u0 = data.uv0[i * 2];
           const v0 = data.uv0[i * 2 + 1];
           const vu = data.velocity[i * 2];
           const vv = data.velocity[i * 2 + 1];
           const phase = data.twinklePhase[i];
 
-          const swayU = Math.sin(elapsedSec * 0.42 + phase) * spec.swayAmp;
-          const swayV = Math.cos(elapsedSec * 0.36 + phase * 1.3) * spec.swayAmp;
+          const swayU = Math.sin(evalTime * 0.42 + phase) * spec.swayAmp;
+          const swayV = Math.cos(evalTime * 0.36 + phase * 1.3) * spec.swayAmp;
 
-          const u = ((((u0 + vu * elapsedSec + swayU) % 1) + 1) % 1);
-          const v = ((((v0 + vv * elapsedSec + swayV) % 1) + 1) % 1);
+          const u = ((((u0 + vu * evalTime + swayU) % 1) + 1) % 1);
+          const v = ((((v0 + vv * evalTime + swayV) % 1) + 1) % 1);
+
+          const skillsVisibility = computeStarVisibilityFactor(
+            u,
+            v,
+            data.isPeripheral[i] > 0.5,
+            region
+          );
+          if (skillsVisibility <= 0.01) continue;
 
           const px = u * width;
           const py = v * height;
 
           const twinkle =
-            i % 3 === 0
-              ? Math.sin(elapsedSec * data.twinkleFreq[i] + phase) * spec.twinkleAmp
+            !tracker.prefersReducedMotion && i % 3 === 0
+              ? Math.sin(evalTime * data.twinkleFreq[i] + phase) * spec.twinkleAmp
               : 0;
           const alpha = Math.max(
-            0.14,
-            Math.min(0.98, data.baseOpacity[i] + twinkle)
+            0,
+            Math.min(0.96, (data.baseOpacity[i] + twinkle) * skillsVisibility)
           );
+          if (alpha <= 0.01) continue;
 
-          const rgb = palette[data.paletteIndex[i]];
-          ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha.toFixed(2)})`;
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = paletteCss[data.paletteIndex[i]];
 
           const drawSize = data.sizePx[i] * 0.78;
           ctx.fillRect(px, py, drawSize, drawSize);
 
-          // Subtle cross glint for Layer 4 accent glints
           if (spec.isGlintLayer > 0.5) {
             const arm = drawSize * 1.65;
             ctx.fillRect(px - arm * 0.5, py, arm, 0.9);
@@ -1059,27 +1828,30 @@ const StarBackground2D: React.FC = () => {
           }
         }
       }
+      ctx.globalAlpha = 1;
 
-      // 2. Render delicate stellar motion trails (3–5 subtle streaks)
-      const activeTrails = evaluateStellarTrails(elapsedSec, width, height);
-      for (let tIdx = 0; tIdx < activeTrails.length; tIdx++) {
-        const tr = activeTrails[tIdx];
-        const x0 = tr.tailU * width;
-        const y0 = tr.tailV * height;
-        const x1 = tr.headU * width;
-        const y1 = tr.headV * height;
+      // 2. Render delicate stellar motion trails (disabled when reduced motion is active)
+      if (!tracker.prefersReducedMotion) {
+        const activeTrails = evaluateStellarTrails(evalTime, width, height, region);
+        for (let tIdx = 0; tIdx < activeTrails.length; tIdx++) {
+          const tr = activeTrails[tIdx];
+          const x0 = tr.tailU * width;
+          const y0 = tr.tailV * height;
+          const x1 = tr.headU * width;
+          const y1 = tr.headV * height;
 
-        const grad = ctx.createLinearGradient(x0, y0, x1, y1);
-        const [r, g, b] = tr.colorRgb;
-        grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
-        grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${tr.opacity.toFixed(3)})`);
+          const grad = ctx.createLinearGradient(x0, y0, x1, y1);
+          const [r, g, b] = tr.colorRgb;
+          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
+          grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${tr.opacity.toFixed(3)})`);
 
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.25;
-        ctx.beginPath();
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x1, y1);
-        ctx.stroke();
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+        }
       }
 
       animId = requestAnimationFrame(render);
@@ -1091,7 +1863,7 @@ const StarBackground2D: React.FC = () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [skillsTrackerRef, hostContainerRef]);
 
   return (
     <canvas
@@ -1105,6 +1877,7 @@ const StarBackground2D: React.FC = () => {
 interface WebGLErrorBoundaryProps {
   fallback: React.ReactNode;
   children: React.ReactNode;
+  onFallback?: () => void;
 }
 
 interface WebGLErrorBoundaryState {
@@ -1127,6 +1900,7 @@ class WebGLErrorBoundary extends Component<
 
   override componentDidCatch(error: unknown) {
     console.warn('WebGL not available or disabled, using 2D canvas fallback:', error);
+    this.props.onFallback?.();
   }
 
   override render() {
@@ -1139,20 +1913,39 @@ class WebGLErrorBoundary extends Component<
 
 export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
   const [canUseWebGL, setCanUseWebGL] = useState<boolean>(() => isWebGLAvailable());
+  const hostContainerRef = useRef<HTMLDivElement | null>(null);
+  const skillsTrackerRef = useSkillsAtmosphereTracker(hostContainerRef);
 
   useEffect(() => {
     setCanUseWebGL(isWebGLAvailable());
   }, []);
 
+  const dprMax = skillsTrackerRef.current.isLowPerfDevice ? 1 : 2;
+
   return (
     <div
+      ref={hostContainerRef}
       className="particle-background fixed inset-0 w-full h-full z-0 pointer-events-none select-none overflow-hidden"
       style={{ pointerEvents: 'none' }}
+      data-particle-mode="normal"
+      data-active-stars={String(TOTAL_STARFIELD_COUNT)}
+      data-total-budget={String(TOTAL_STARFIELD_COUNT)}
+      data-peripheral-budget={String(TOTAL_PERIPHERAL_STARFIELD_COUNT)}
+      data-renderer={canUseWebGL ? 'webgl' : '2d'}
       aria-hidden="true"
     >
       {canUseWebGL ? (
-        <WebGLErrorBoundary fallback={<StarBackground2D />}>
+        <WebGLErrorBoundary
+          onFallback={() => setCanUseWebGL(false)}
+          fallback={
+            <StarBackground2D
+              skillsTrackerRef={skillsTrackerRef}
+              hostContainerRef={hostContainerRef}
+            />
+          }
+        >
           <Canvas
+            dpr={[1, dprMax]}
             style={{ pointerEvents: 'none' }}
             camera={{ position: [0, 0, 1], fov: 75 }}
             gl={{
@@ -1161,15 +1954,22 @@ export const ParticleBackground: React.FC<ParticleBackgroundProps> = () => {
             }}
           >
             <Suspense fallback={null}>
-              <StarBackground />
+              <StarBackground
+                skillsTrackerRef={skillsTrackerRef}
+                hostContainerRef={hostContainerRef}
+              />
             </Suspense>
           </Canvas>
         </WebGLErrorBoundary>
       ) : (
-        <StarBackground2D />
+        <StarBackground2D
+          skillsTrackerRef={skillsTrackerRef}
+          hostContainerRef={hostContainerRef}
+        />
       )}
     </div>
   );
 };
 
 export default ParticleBackground;
+

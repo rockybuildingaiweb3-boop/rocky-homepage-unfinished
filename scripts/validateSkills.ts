@@ -16,7 +16,10 @@ import {
 } from '../src/features/skills/livingOrbitEngine';
 import {
   STARFIELD_LAYER_SPECS,
+  TOTAL_STARFIELD_COUNT,
+  TOTAL_PERIPHERAL_STARFIELD_COUNT,
   evaluateStarfieldCoverage,
+  evaluateSkillsPeripheralCoverage,
 } from '../src/components/ui/ParticleBackground';
 import { SKILLS_DATA, SKILL_CATEGORIES } from '../src/data/skills';
 
@@ -48,19 +51,19 @@ if (!report.isValid) {
   console.log('\n[SKILLS_VALIDATION_SUCCESS] All 88 skills and icon registry entries verified.');
 }
 
-// ─── LIVING ORBIT 2.3 & 5,500-STAR GLOBAL STARFIELD VERIFICATION ───
+// ─── LIVING ORBIT 2.3 & SMART DUAL-MODE STARFIELD VERIFICATION ───
 console.log('\n==================================================');
-console.log('LIVING ORBIT 2.3 — 2.5D SCULPTURE & 5,500-STAR GLOBAL STARFIELD REPORT');
+console.log('LIVING ORBIT — DUAL-MODE STARFIELD (5,500 NORMAL / 800 SKILLS PERIPHERAL)');
 console.log('==================================================');
 
 const spatialErrors: string[] = [];
 
-// 1. Verify Living Orbit 2.3 particle count, Two-Level Featured Anchors & Arc-Length LUTs
+// 1. Verify Living Orbit particle count, Two-Level Featured Anchors & Arc-Length LUTs
 if (LIVING_ORBIT_PARTICLES.length !== 88) {
-  spatialErrors.push(`Living Orbit 2.3 has ${LIVING_ORBIT_PARTICLES.length} particles (expected 88).`);
+  spatialErrors.push(`Living Orbit has ${LIVING_ORBIT_PARTICLES.length} particles (expected 88).`);
 }
 if (FEATURED_ANCHOR_SPECS.length !== 8) {
-  spatialErrors.push(`Living Orbit 2.3 has ${FEATURED_ANCHOR_SPECS.length} Featured Anchors (expected 8).`);
+  spatialErrors.push(`Living Orbit has ${FEATURED_ANCHOR_SPECS.length} Featured Anchors (expected 8).`);
 }
 const primaryAnchors = FEATURED_ANCHOR_SPECS.filter((a) => a.anchorTier === 'primary');
 const secondaryAnchors = FEATURED_ANCHOR_SPECS.filter((a) => a.anchorTier === 'secondary');
@@ -70,7 +73,7 @@ if (primaryAnchors.length !== 4 || secondaryAnchors.length !== 4) {
   );
 }
 if (SPATIAL_SPLINES.length !== 3 || Object.keys(ORBIT_ARC_LENGTH_TABLES).length !== 3) {
-  spatialErrors.push(`Living Orbit 2.3 expected 3 trajectories and 3 arc-length LUTs.`);
+  spatialErrors.push(`Living Orbit expected 3 trajectories and 3 arc-length LUTs.`);
 }
 
 const seenInOrbitCycle = new Set<string>();
@@ -92,7 +95,7 @@ for (let t = 0; t <= 240; t += 4) {
 }
 if (seenInOrbitCycle.size !== 88) {
   spatialErrors.push(
-    `Living Orbit 2.3 cycled ${seenInOrbitCycle.size}/88 skills across t=0..240s (expected all 88).`
+    `Living Orbit cycled ${seenInOrbitCycle.size}/88 skills across t=0..240s (expected all 88).`
   );
 }
 
@@ -103,7 +106,7 @@ for (const cat of SKILL_CATEGORIES) {
   }
 }
 
-// 2. Verify 4-layer 5,500-Star Global Starfield & 12x8 / 8x12 grid occupancy across viewports & times
+// 2. Verify Mode A (5,500) & Mode B (800 peripheral, 0 core leaks) across viewports & times
 const viewports: readonly [string, number, number][] = [
   ['1440x900', 1440, 900],
   ['1920x1080', 1920, 1080],
@@ -117,14 +120,14 @@ for (const [label, w, h] of viewports) {
     const cov = evaluateStarfieldCoverage(w, h, t);
     if (
       STARFIELD_LAYER_SPECS.length !== 4 ||
-      cov.totalStars !== 5500 ||
+      cov.totalStars !== TOTAL_STARFIELD_COUNT ||
       cov.layerCounts.tiny !== 4500 ||
       cov.layerCounts.medium !== 800 ||
       cov.layerCounts.bright !== 150 ||
       cov.layerCounts.accent !== 50
     ) {
       spatialErrors.push(
-        `Starfield at ${label} (t=${t}s) expected 5,500 stars (4500/800/150/50) across 4 layers, got ${cov.totalStars}.`
+        `Mode A Starfield at ${label} (t=${t}s) expected 5,500 stars (4500/800/150/50), got ${cov.totalStars}.`
       );
     }
     if (
@@ -133,7 +136,33 @@ for (const [label, w, h] of viewports) {
       cov.minCellCount < 22
     ) {
       spatialErrors.push(
-        `Starfield grid occupancy failed at ${label} (t=${t}s): empty=${cov.emptyCellCount}, >=32Pct=${cov.cellsWithAtLeast32Pct}%, minCell=${cov.minCellCount}`
+        `Mode A grid occupancy failed at ${label} (t=${t}s): empty=${cov.emptyCellCount}, >=32Pct=${cov.cellsWithAtLeast32Pct}%, minCell=${cov.minCellCount}`
+      );
+    }
+
+    const peri = evaluateSkillsPeripheralCoverage(w, h, t);
+    if (
+      peri.drawnCount !== TOTAL_PERIPHERAL_STARFIELD_COUNT ||
+      peri.drawnCount !== 800 ||
+      peri.culledCount !== 4700
+    ) {
+      spatialErrors.push(
+        `Mode B Skills Peripheral expected 800 drawn / 4,700 culled at ${label} (t=${t}s), got ${peri.drawnCount}/${peri.culledCount}.`
+      );
+    }
+    if (peri.coreLeakCount !== 0) {
+      spatialErrors.push(
+        `Mode B central core leak detected at ${label} (t=${t}s): count=${peri.coreLeakCount}`
+      );
+    }
+    if (
+      peri.outerZones.left < 120 ||
+      peri.outerZones.right < 120 ||
+      peri.outerZones.top < 110 ||
+      peri.outerZones.bottom < 110
+    ) {
+      spatialErrors.push(
+        `Mode B outer zone underpopulated at ${label} (t=${t}s): ${JSON.stringify(peri.outerZones)}`
       );
     }
   }
@@ -143,6 +172,8 @@ const cov1440 = evaluateStarfieldCoverage(1440, 900, 0);
 const cov1920 = evaluateStarfieldCoverage(1920, 1080, 0);
 const cov2048 = evaluateStarfieldCoverage(2048, 1002, 0);
 const covMobile = evaluateStarfieldCoverage(390, 844, 0);
+const peri1440 = evaluateSkillsPeripheralCoverage(1440, 900, 0);
+const periMobile = evaluateSkillsPeripheralCoverage(390, 844, 0);
 
 console.log(`Living Orbit Particles: ${LIVING_ORBIT_PARTICLES.length} / 88`);
 console.log(
@@ -158,7 +189,16 @@ console.log(
 );
 console.log(`Cycled in Aperture:     ${seenInOrbitCycle.size} / 88 (26 moving + 8 anchors = 34 visible)`);
 console.log(
-  `Starfield Total Stars:  ${cov1440.totalStars} (tiny=${cov1440.layerCounts.tiny}, medium=${cov1440.layerCounts.medium}, bright=${cov1440.layerCounts.bright}, accent=${cov1440.layerCounts.accent})`
+  `Mode A (Normal):        ${cov1440.totalStars} stars (tiny=${cov1440.layerCounts.tiny}, medium=${cov1440.layerCounts.medium}, bright=${cov1440.layerCounts.bright}, accent=${cov1440.layerCounts.accent})`
+);
+console.log(
+  `Mode B (Skills):        ${peri1440.drawnCount} drawn / ${peri1440.culledCount} culled (tiny=${peri1440.layerDrawnCounts.tiny}, medium=${peri1440.layerDrawnCounts.medium}, bright=${peri1440.layerDrawnCounts.bright}, accent=${peri1440.layerDrawnCounts.accent})`
+);
+console.log(
+  `Mode B 1440x900 Zones:  left=${peri1440.outerZones.left}, right=${peri1440.outerZones.right}, top=${peri1440.outerZones.top}, bottom=${peri1440.outerZones.bottom}, coreLeaks=${peri1440.coreLeakCount}`
+);
+console.log(
+  `Mode B 390x844 Zones:   left=${periMobile.outerZones.left}, right=${periMobile.outerZones.right}, top=${periMobile.outerZones.top}, bottom=${periMobile.outerZones.bottom}, coreLeaks=${periMobile.coreLeakCount}`
 );
 console.log(
   `Starfield 1440x900:     12x8 Grid min=${cov1440.minCellCount}, max=${cov1440.maxCellCount}, >=32=${cov1440.cellsWithAtLeast32Pct}%`
@@ -204,7 +244,7 @@ if (spatialErrors.length > 0) {
   });
   process.exit(1);
 } else {
-  console.log('\n[LIVING_ORBIT_VALIDATION_SUCCESS] Living Orbit 2.3 & 5,500-Star Global Starfield verified.\n');
+  console.log('\n[LIVING_ORBIT_VALIDATION_SUCCESS] Dual-Mode Global Starfield (5,500 / 800) & Living Orbit verified.\n');
   process.exit(0);
 }
 

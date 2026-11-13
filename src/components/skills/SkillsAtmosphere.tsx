@@ -75,6 +75,7 @@ export const SkillsAtmosphere: React.FC<SkillsAtmosphereProps> = memo(({
   return (
     <div
       ref={containerRef}
+      data-skills-atmosphere="true"
       className="absolute inset-0 w-full h-full pointer-events-none -z-10 flex items-center justify-center overflow-hidden select-none"
       aria-hidden="true"
     >
