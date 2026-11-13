@@ -9,6 +9,7 @@ interface SkillFocusCardProps {
   onSelectSkill: (skillId: string) => void;
   onClose: () => void;
   widthPx?: number;
+  anchorSide?: 'left' | 'right' | 'center';
   isMobileLayout?: boolean;
 }
 
@@ -18,15 +19,15 @@ const TIER_EDITORIAL_META: Record<
 > = {
   core: {
     label: 'Core Architecture',
-    toneClass: 'text-amber-200/90',
+    toneClass: 'text-amber-200/85',
   },
   professional: {
     label: 'Production Stack',
-    toneClass: 'text-purple-200/90',
+    toneClass: 'text-purple-200/85',
   },
   ecosystem: {
     label: 'Ecosystem Tooling',
-    toneClass: 'text-sky-200/85',
+    toneClass: 'text-sky-200/80',
   },
 };
 
@@ -42,6 +43,8 @@ export interface DossierPlacementInput {
   stageHeight: number;
   selectedPos: { x: number; y: number };
   relatedPositions: readonly { x: number; y: number }[];
+  panelWidth?: number;
+  panelHeight?: number;
 }
 
 export interface DossierPlacementResult {
@@ -55,8 +58,8 @@ export interface DossierPlacementResult {
   relatedOverlap: number;
 }
 
-export const DOSSIER_DESKTOP_WIDTH = 472;
-export const DOSSIER_ESTIMATED_HEIGHT = 258;
+export const DOSSIER_DESKTOP_WIDTH = 440;
+export const DOSSIER_ESTIMATED_HEIGHT = 276;
 
 function rectOverlapArea(a: DossierStageRect, b: DossierStageRect): number {
   const ox = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
@@ -71,11 +74,12 @@ function rectToPointDistance(rect: DossierStageRect, px: number, py: number): nu
 }
 
 /**
- * Computes collision-aware floating placement for the Orbital Dossier inside the desktop
- * Living Orbit stage, evaluating side and corner candidate zones while avoiding:
- * 1. The central planetary focal region
- * 2. The selected technology node
- * 3. Highlighted related technology nodes
+ * Computes collision-aware negative-space placement for the Orbital Editorial 3.0
+ * floating typographic composition across left/right upper, mid, and lower flanks,
+ * strictly avoiding:
+ * 1. The central planetary focal sphere & nebula core
+ * 2. The focused hero technology mark
+ * 3. Local spatial constellation satellites & their unboxed labels
  * 4. Stage boundaries
  */
 export function computeOrbitalDossierPlacement({
@@ -83,74 +87,82 @@ export function computeOrbitalDossierPlacement({
   stageHeight,
   selectedPos,
   relatedPositions,
+  panelWidth: customWidth,
+  panelHeight: customHeight,
 }: DossierPlacementInput): DossierPlacementResult {
   const safeW = Math.max(480, stageWidth);
   const safeH = Math.max(420, stageHeight);
 
-  const edgeMarginX = safeW >= 1200 ? 24 : 16;
-  const topMargin = 16;
-  const bottomMargin = 12;
+  const edgeMarginX = safeW >= 1200 ? 32 : 20;
+  const topMargin = 20;
+  const bottomMargin = 20;
 
   const panelWidth =
-    safeW >= 1120
+    customWidth ??
+    (safeW >= 1120
       ? DOSSIER_DESKTOP_WIDTH
-      : Math.max(400, Math.min(520, safeW - edgeMarginX * 2));
-  const panelHeight = DOSSIER_ESTIMATED_HEIGHT;
+      : Math.max(360, Math.min(440, safeW - edgeMarginX * 2)));
+  const panelHeight = Math.max(210, Math.min(410, customHeight ?? DOSSIER_ESTIMATED_HEIGHT));
 
   const minX = edgeMarginX;
   const maxX = Math.max(minX, Math.round(safeW - panelWidth - edgeMarginX));
   const minY = topMargin;
   const maxY = Math.max(minY, Math.round(safeH - panelHeight - bottomMargin));
 
-  // Central planetary sphere + luminous core
+  // Central planetary sphere + bright core halo
   const planetBox: DossierStageRect = {
-    left: safeW * 0.38,
-    top: safeH * 0.23,
-    right: safeW * 0.62,
-    bottom: safeH * 0.57,
+    left: safeW * 0.365,
+    top: safeH * 0.21,
+    right: safeW * 0.635,
+    bottom: safeH * 0.59,
   };
 
   const selPxX = (selectedPos.x / 100) * safeW;
   const selPxY = (selectedPos.y / 100) * safeH;
   const selectedBox: DossierStageRect = {
-    left: selPxX - 78,
-    top: selPxY - 64,
-    right: selPxX + 78,
-    bottom: selPxY + 66,
+    left: selPxX - 84,
+    top: selPxY - 72,
+    right: selPxX + 84,
+    bottom: selPxY + 74,
   };
 
   const relatedBoxes: DossierStageRect[] = relatedPositions.map((rp) => {
     const rx = (rp.x / 100) * safeW;
     const ry = (rp.y / 100) * safeH;
     return {
-      left: rx - 60,
-      top: ry - 52,
-      right: rx + 60,
-      bottom: ry + 54,
+      left: rx - 62,
+      top: ry - 50,
+      right: rx + 62,
+      bottom: ry + 62,
     };
   });
 
+  const leftInset = Math.min(maxX, Math.round(minX + safeW * 0.03));
+  const rightInset = Math.max(minX, Math.round(maxX - safeW * 0.03));
+
   const rawCandidates: { x: number; y: number; side: 'left' | 'right' | 'center' }[] = [
-    // Floating lower-side editorial slots (preferred on wide desktop)
-    { x: minX, y: maxY, side: 'left' },
-    { x: maxX, y: maxY, side: 'right' },
-    // Mid-lower side slots
-    { x: minX, y: Math.round(safeH * 0.52), side: 'left' },
-    { x: maxX, y: Math.round(safeH * 0.52), side: 'right' },
-    // Mid-side slots
-    { x: minX, y: Math.round((minY + maxY) * 0.44), side: 'left' },
-    { x: maxX, y: Math.round((minY + maxY) * 0.44), side: 'right' },
-    // Upper-side slots
-    { x: minX, y: minY + 10, side: 'left' },
-    { x: maxX, y: minY + 10, side: 'right' },
-    // Gently inset lower corners for ultra-wide composition balance
-    { x: Math.min(maxX, Math.round(minX + safeW * 0.04)), y: maxY, side: 'left' },
-    { x: Math.max(minX, Math.round(maxX - safeW * 0.04)), y: maxY, side: 'right' },
-    // Compact lower-center fallback only if both flanks have severe collisions
+    // Asymmetric editorial mid & upper-mid opposite bands (first-class open-space zones)
+    { x: leftInset, y: Math.round(safeH * 0.25), side: 'left' },
+    { x: rightInset, y: Math.round(safeH * 0.25), side: 'right' },
+    { x: leftInset, y: Math.round((safeH - panelHeight) * 0.46), side: 'left' },
+    { x: rightInset, y: Math.round((safeH - panelHeight) * 0.46), side: 'right' },
+    { x: leftInset, y: Math.round(safeH * 0.54), side: 'left' },
+    { x: rightInset, y: Math.round(safeH * 0.54), side: 'right' },
+    // Edge-aligned flank candidates when tight on clearance
+    { x: minX, y: Math.round(safeH * 0.24), side: 'left' },
+    { x: maxX, y: Math.round(safeH * 0.24), side: 'right' },
+    { x: minX, y: Math.round((safeH - panelHeight) * 0.48), side: 'left' },
+    { x: maxX, y: Math.round((safeH - panelHeight) * 0.48), side: 'right' },
+    { x: minX, y: maxY - 8, side: 'left' },
+    { x: maxX, y: maxY - 8, side: 'right' },
+    // Upper flanks
+    { x: minX, y: minY + 12, side: 'left' },
+    { x: maxX, y: minY + 12, side: 'right' },
+    // Lower-center fallback only when both flanks overlap
     { x: Math.round((safeW - panelWidth) * 0.5), y: maxY, side: 'center' },
   ];
 
-  // Deduplicate clamped candidate rectangles
+  // Deduplicate clamped candidates
   const candidates: {
     left: number;
     top: number;
@@ -171,7 +183,7 @@ export function computeOrbitalDossierPlacement({
 
   let bestResult: DossierPlacementResult = {
     left: maxX,
-    top: maxY,
+    top: Math.round((safeH - panelHeight) * 0.46),
     width: panelWidth,
     height: panelHeight,
     anchorSide: 'right',
@@ -182,7 +194,15 @@ export function computeOrbitalDossierPlacement({
   let bestScore = Infinity;
 
   const isWideDesktop = safeW >= 1024;
-  const preferredSide: 'left' | 'right' = selectedPos.x < 48 ? 'right' : 'left';
+  const preferredSide: 'left' | 'right' = selectedPos.x < 50 ? 'right' : 'left';
+
+  // Target a graceful diagonal editorial counterbalance to the selected cluster's vertical position
+  const idealTopY =
+    selectedPos.y > 56
+      ? safeH * 0.28
+      : selectedPos.y < 38
+      ? safeH * 0.48
+      : (safeH - panelHeight) * 0.46;
 
   for (const cand of candidates) {
     const rect: DossierStageRect = {
@@ -199,43 +219,38 @@ export function computeOrbitalDossierPlacement({
       relatedOverlap += rectOverlapArea(rect, rb);
     }
 
-    // Clearance check around selected node & related nodes
+    // Clearance envelope around hero and related satellites
     const selDist = rectToPointDistance(rect, selPxX, selPxY);
-    const selClearancePenalty = selDist < 96 ? (96 - selDist) * 280 : 0;
+    const selClearancePenalty = selDist < 108 ? (108 - selDist) * 320 : 0;
 
     let relClearancePenalty = 0;
     for (const rp of relatedPositions) {
       const rx = (rp.x / 100) * safeW;
       const ry = (rp.y / 100) * safeH;
       const d = rectToPointDistance(rect, rx, ry);
-      if (d < 68) relClearancePenalty += (68 - d) * 140;
+      if (d < 78) relClearancePenalty += (78 - d) * 180;
     }
 
-    // Visual composition preferences
+    // Asymmetric opposite-hemisphere composition bias
     let compositionBias = 0;
     if (isWideDesktop && cand.side !== 'center') {
-      compositionBias -= 2600;
+      compositionBias -= 3200;
       if (cand.side === preferredSide) {
-        compositionBias -= 1400;
+        compositionBias -= 2200;
       }
     }
-    if (cand.top >= maxY - 24) {
-      // Favor grounded lower-side layout
-      compositionBias -= 900;
-    }
 
-    const panelCenterX = (rect.left + rect.right) * 0.5;
-    const panelCenterY = (rect.top + rect.bottom) * 0.5;
-    const distToSelected = Math.hypot(panelCenterX - selPxX, panelCenterY - selPxY);
+    // Prefer balanced diagonal poise in negative space over sticking arbitrarily at floor/ceiling
+    const verticalBalancePenalty = Math.abs(cand.top - idealTopY) * 2.2;
 
     const score =
-      planetOverlap * 16 +
-      selectedOverlap * 14 +
-      relatedOverlap * 10 +
+      planetOverlap * 24 +
+      selectedOverlap * 18 +
+      relatedOverlap * 14 +
       selClearancePenalty +
       relClearancePenalty +
       compositionBias +
-      distToSelected * 0.45;
+      verticalBalancePenalty;
 
     if (score < bestScore) {
       bestScore = score;
@@ -256,14 +271,23 @@ export function computeOrbitalDossierPlacement({
 }
 
 /**
- * SkillFocusCard — ORBITAL SPECIMEN / editorial annotation
+ * SkillFocusCard — ORBITAL EDITORIAL 3.0
  *
- * The selected technology remains the visual hero in the orbital field.
- * This compact dossier provides context without repeating the large logo or
- * duplicating the relationship network already visible in the scene.
+ * Floating borderless editorial annotation integrated directly into the cosmic stage.
+ * - Desktop: Zero glassmorphism rectangle, zero outer border, zero duplicated icon strip,
+ *   44–52px serif display title, concise verified technical insight, quiet minimal close.
+ * - Mobile: Cohesive borderless dark atmospheric bottom-sheet composition with tap-safe
+ *   related-technology navigation links.
  */
 export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(
-  ({ skill, onSelectSkill, onClose, widthPx, isMobileLayout = false }) => {
+  ({
+    skill,
+    onSelectSkill,
+    onClose,
+    widthPx,
+    anchorSide = 'right',
+    isMobileLayout = false,
+  }) => {
     const prefersReducedMotion = useReducedMotion();
     const category = SKILL_CATEGORIES.find((c) => c.id === skill.categoryId);
     const tierMeta = TIER_EDITORIAL_META[skill.tier];
@@ -275,193 +299,233 @@ export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(
         .filter((s): s is SkillItem => Boolean(s));
     }, [skill.id]);
 
-    const skillIndex = React.useMemo(
-      () => String(SKILLS_DATA.findIndex((item) => item.id === skill.id) + 1).padStart(2, '0'),
-      [skill.id]
-    );
+    // Scale display headline subtly only on unusually long multi-word names while staying 44–50px on standard names
+    const desktopTitleSizeClass =
+      skill.name.length > 20
+        ? 'text-[38px] lg:text-[44px]'
+        : skill.name.length > 13
+        ? 'text-[44px] lg:text-[46px]'
+        : 'text-[44px] lg:text-[50px]';
 
-    const nodeOffsets = [0, 5, 1, 6, 2];
+    if (isMobileLayout) {
+      return (
+        <motion.div
+          key={skill.id}
+          role="dialog"
+          aria-modal="false"
+          aria-label={skill.name + ' technical overview'}
+          onClick={(e) => e.stopPropagation()}
+          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+          transition={{
+            duration: prefersReducedMotion ? 0.1 : 0.24,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(5, 2, 16, 0) 0%, rgba(7, 4, 22, 0.80) 14%, rgba(5, 2, 16, 0.94) 100%)',
+          }}
+          className="relative isolate w-full pt-5 pb-4 px-4"
+        >
+          {/* Delicate top starlight fade line, not a boxed border */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-4 top-2 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, ' +
+                skill.brandColor +
+                '80 28%, rgba(233,213,255,0.28) 65%, transparent)',
+            }}
+          />
+
+          {/* 1. Category index & quiet minimal dismiss */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+              <span className="shrink-0 text-purple-200/85 tabular-nums">
+                {category?.number ?? skill.categoryNumber}
+              </span>
+              <span className="text-white/25">/</span>
+              <span className="truncate text-white/75">{category?.title ?? 'Technology'}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close technology insight"
+              className="flex h-11 w-11 -mr-2 shrink-0 items-center justify-center text-white/60 transition-colors hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
+            >
+              <span className="text-[20px] leading-none">×</span>
+            </button>
+          </div>
+
+          {/* 2. Dominant Serif Title */}
+          <h3
+            className="mt-1 text-[38px] sm:text-[42px] font-normal leading-[0.98] tracking-[-0.025em] text-white/95"
+            style={{
+              fontFamily: 'var(--title-font)',
+              textShadow: '0 2px 20px rgba(4, 2, 14, 0.9)',
+            }}
+          >
+            {skill.name}
+          </h3>
+
+          {/* 3. Tier Designation */}
+          <div className="mt-2 flex items-center gap-2.5">
+            <span
+              aria-hidden="true"
+              className="h-[1.5px] w-5"
+              style={{
+                backgroundColor: skill.brandColor,
+                boxShadow: '0 0 10px ' + skill.brandColor + '90',
+              }}
+            />
+            <span className={'font-mono text-[10px] uppercase tracking-[0.18em] ' + tierMeta.toneClass}>
+              {tierMeta.label}
+            </span>
+          </div>
+
+          {/* 4. Concise Editorial Insight */}
+          <p className="mt-3.5 text-[15px] font-normal leading-[1.62] text-purple-50/90">
+            {skill.insight}
+          </p>
+
+          {/* 5. Mobile Connected Systems Navigation (tap-safe, borderless) */}
+          {relatedSkills.length > 0 && (
+            <section className="mt-4 pt-3 border-t border-white/[0.08]" aria-label="Connected technologies">
+              <div className="mb-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
+                Connected systems · {String(relatedSkills.length).padStart(2, '0')}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                {relatedSkills.map((rel) => (
+                  <button
+                    key={rel.id}
+                    type="button"
+                    onClick={() => onSelectSkill(rel.id)}
+                    aria-label={'Inspect related technology ' + rel.name}
+                    className="inline-flex min-h-[44px] items-center gap-2 py-1 text-[12.5px] text-white/75 transition-colors hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
+                  >
+                    <TechLogo id={rel.id} name={rel.name} size={16} />
+                    <span>{rel.name}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+        </motion.div>
+      );
+    }
+
+    const veilGradientCenter = anchorSide === 'left' ? '38% 50%' : '58% 50%';
 
     return (
       <motion.div
         key={skill.id}
         role="dialog"
         aria-modal="false"
-        aria-label={skill.name + ' technical dossier'}
+        aria-label={skill.name + ' editorial annotation'}
         onClick={(e) => e.stopPropagation()}
-        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 9, scale: 0.992 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.994 }}
+        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 5 }}
         transition={{
           duration: prefersReducedMotion ? 0.1 : 0.24,
           ease: [0.16, 1, 0.3, 1],
         }}
         style={{
           width: widthPx ? String(widthPx) + 'px' : undefined,
-          borderRadius: isMobileLayout ? '12px' : '13px 4px 13px 4px',
-          background:
-            'linear-gradient(138deg, rgba(25, 14, 47, 0.76) 0%, rgba(10, 6, 26, 0.84) 58%, rgba(5, 3, 17, 0.88) 100%)',
-          border: '1px solid rgba(221, 204, 255, 0.13)',
-          boxShadow:
-            '0 22px 58px rgba(1, 0, 12, 0.48), inset 0 1px 0 rgba(255,255,255,0.055)',
-          backdropFilter: 'blur(26px) saturate(128%)',
-          WebkitBackdropFilter: 'blur(26px) saturate(128%)',
         }}
-        className={isMobileLayout ? 'relative isolate w-full overflow-hidden px-4 py-3.5' : 'relative isolate w-full overflow-hidden px-5 py-4'}
+        className="relative isolate w-full py-2 px-1"
       >
-        {/* A quiet brand-colored edge, not a glowing card frame. */}
+        {/* Localized soft feathered atmospheric veil purely for contrast — closest-side fades to 0 before bounds so zero rectangle edge exists */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-5 bottom-5 w-[2px] rounded-full opacity-80"
+          className="pointer-events-none absolute -inset-x-32 -inset-y-24 -z-10"
           style={{
-            background: 'linear-gradient(180deg, transparent, ' + skill.brandColor + 'cc 28%, ' + skill.brandColor + '70 72%, transparent)',
-            boxShadow: '0 0 14px ' + skill.brandColor + '45',
-          }}
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full blur-3xl opacity-[0.10]"
-          style={{ background: skill.brandColor }}
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-8 top-0 h-px"
-          style={{
-            background: 'linear-gradient(90deg, transparent, ' + skill.brandColor + '88 34%, rgba(245,238,255,0.36) 58%, transparent)',
+            background:
+              'radial-gradient(closest-side at ' +
+              veilGradientCenter +
+              ', rgba(5, 2, 16, 0.60) 0%, rgba(5, 2, 16, 0.34) 48%, rgba(5, 2, 16, 0.08) 76%, transparent 94%)',
           }}
         />
 
-        <div className="relative">
-          {/* Editorial index + close */}
-          <header className="flex items-center justify-between gap-3 pb-2.5 border-b border-white/[0.075]">
-            <div className="flex min-w-0 items-center gap-2 font-mono text-[9px] sm:text-[9.5px] uppercase tracking-[0.16em] text-white/48">
-              <span className="shrink-0 text-purple-200/80 tabular-nums">
+        <motion.div
+          key={skill.id}
+          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0.08 : 0.2, ease: 'easeOut' }}
+          className="relative"
+        >
+          {/* 1. Small Category Index & Technical Domain + Quiet Minimal Dismiss */}
+          <header className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.19em] text-white/55">
+              <span className="shrink-0 text-purple-200/85 tabular-nums">
                 {category?.number ?? skill.categoryNumber}
               </span>
-              <span className="text-white/20">/</span>
-              <span className="truncate text-white/65">{category?.title ?? 'Technology'}</span>
-              <span className="text-white/20">·</span>
-              <span className="shrink-0 text-white/38">Specimen {skillIndex}</span>
+              <span className="text-white/25">/</span>
+              <span className="truncate text-white/75">{category?.title ?? 'Technology'}</span>
             </div>
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close technology dossier"
-              className="group flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/[0.10] text-white/48 transition-all duration-200 hover:border-white/25 hover:bg-white/[0.06] hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
+              aria-label="Close technology insight"
+              title="Close (Esc)"
+              className="group -mr-1.5 flex h-8 w-8 shrink-0 items-center justify-center text-white/45 transition-colors duration-200 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
             >
-              <span className="text-[15px] leading-none transition-transform duration-200 group-hover:rotate-90">×</span>
+              <span className="text-[18px] leading-none transition-transform duration-200 group-hover:rotate-90">
+                ×
+              </span>
             </button>
           </header>
 
-          <motion.div
-            key={skill.id}
-            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0.08 : 0.18, ease: 'easeOut' }}
+          {/* 2. Dominant Technology Title in Editorial Serif Display Font (44–50px) */}
+          <h3
+            className={
+              'mt-2.5 font-normal leading-[0.98] tracking-[-0.025em] text-white/95 ' +
+              desktopTitleSizeClass
+            }
+            style={{
+              fontFamily: 'var(--title-font)',
+              textShadow: '0 2px 24px rgba(4, 2, 14, 0.92)',
+            }}
           >
-            {/* The scene owns the large logo; the dossier owns the typographic identity. */}
-            <div className="mt-3 flex items-end justify-between gap-3">
-              <div className="min-w-0">
-                <div className="mb-1 flex items-center gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="h-[2px] w-5 rounded-full"
-                    style={{ backgroundColor: skill.brandColor, boxShadow: '0 0 9px ' + skill.brandColor + '88' }}
-                  />
-                  <span className={'font-mono text-[9px] uppercase tracking-[0.17em] ' + tierMeta.toneClass}>
-                    {tierMeta.label}
-                  </span>
-                </div>
-                <h3
-                  className="truncate text-[29px] sm:text-[32px] font-normal leading-[1.02] tracking-[-0.025em] text-white/95"
-                  style={{ fontFamily: 'var(--title-font)' }}
-                >
-                  {skill.name}
-                </h3>
-              </div>
-              <div className="mb-0.5 hidden shrink-0 text-right sm:block">
-                <div className="font-mono text-[8px] uppercase tracking-[0.17em] text-white/30">Orbital object</div>
-                <div className="mt-1 font-mono text-[10px] tracking-[0.12em] text-white/55">
-                  {category?.number ?? skill.categoryNumber}.{skillIndex}
-                </div>
-              </div>
+            {skill.name}
+          </h3>
+
+          {/* 3. Tier Designation with Restrained Brand Accent */}
+          <div className="mt-3 flex items-center gap-2.5">
+            <span
+              aria-hidden="true"
+              className="h-[1.5px] w-6"
+              style={{
+                backgroundColor: skill.brandColor,
+                boxShadow: '0 0 10px ' + skill.brandColor + '90',
+              }}
+            />
+            <span className={'font-mono text-[10px] uppercase tracking-[0.18em] ' + tierMeta.toneClass}>
+              {tierMeta.label}
+            </span>
+          </div>
+
+          {/* 4. Concise Technical Insight (existing verified prose only) */}
+          <p
+            className="mt-4 max-w-[38ch] text-[15.5px] font-normal leading-[1.64] text-purple-50/90"
+            style={{ textShadow: '0 1px 14px rgba(4, 2, 14, 0.85)' }}
+          >
+            {skill.insight}
+          </p>
+
+          {/* 5. Restrained Connected-Technologies Index (spatial constellation owns interaction) */}
+          {relatedSkills.length > 0 && (
+            <div className="mt-4 flex items-center gap-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
+              <span>Connected systems</span>
+              <span className="text-white/22">·</span>
+              <span className="tabular-nums text-white/60">
+                {String(relatedSkills.length).padStart(2, '0')}
+              </span>
             </div>
-
-            {/* Short editorial insight: one quiet lead-in, then the existing verified copy. */}
-            <div className="mt-3 grid grid-cols-[66px_minmax(0,1fr)] gap-3 border-t border-white/[0.07] pt-3">
-              <div className="pt-0.5">
-                <span className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/34">Field note</span>
-                <span className="mt-1 block font-mono text-[9px] tabular-nums text-white/24">01 / 01</span>
-              </div>
-              <p className="min-w-0 text-[12.5px] sm:text-[13px] font-normal leading-[1.62] text-purple-50/82">
-                {skill.insight}
-              </p>
-            </div>
-
-            {/* A miniature curved relationship field; the full related nodes remain interactive in the scene. */}
-            {relatedSkills.length > 0 && (
-              <section className="mt-3 border-t border-white/[0.07] pt-2.5" aria-label="Related technologies">
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <span className="font-mono text-[8.5px] uppercase tracking-[0.17em] text-white/42">
-                    Connected systems
-                  </span>
-                  <span className="font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/30 tabular-nums">
-                    {String(relatedSkills.length).padStart(2, '0')} linked objects
-                  </span>
-                </div>
-
-                <div className="relative">
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 440 18"
-                    preserveAspectRatio="none"
-                    className="pointer-events-none absolute left-0 right-0 top-[13px] h-[18px] w-full overflow-visible"
-                  >
-                    <defs>
-                      <linearGradient id="dossierRelationArc" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor={skill.brandColor} stopOpacity="0.12" />
-                        <stop offset="48%" stopColor="#D8B4FE" stopOpacity="0.42" />
-                        <stop offset="100%" stopColor={skill.brandColor} stopOpacity="0.12" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M 8 13 C 78 2, 126 2, 165 10 S 264 22, 305 10 S 380 2, 432 13"
-                      fill="none"
-                      stroke="url(#dossierRelationArc)"
-                      strokeWidth="0.9"
-                    />
-                  </svg>
-
-                  <div className="relative grid grid-cols-5 gap-1">
-                    {relatedSkills.map((rel, index) => (
-                      <button
-                        key={rel.id}
-                        type="button"
-                        onClick={() => onSelectSkill(rel.id)}
-                        aria-label={'Inspect related technology ' + rel.name}
-                        title={'Explore ' + rel.name}
-                        className="group flex min-w-0 flex-col items-center text-center focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70 rounded-md"
-                        style={{ transform: 'translateY(' + nodeOffsets[index % nodeOffsets.length] + 'px)' }}
-                      >
-                        <span
-                          className="relative z-[1] flex h-[27px] w-[27px] items-center justify-center rounded-full border border-white/[0.10] bg-[#10091f]/90 shadow-[0_4px_14px_rgba(0,0,0,0.24)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-white/25 group-hover:bg-[#211336]"
-                          style={{
-                            boxShadow: '0 0 0 1px ' + rel.brandColor + '12, 0 4px 14px rgba(0,0,0,0.24)',
-                          }}
-                        >
-                          <TechLogo id={rel.id} name={rel.name} size={17} />
-                        </span>
-                        <span className="mt-1.5 max-w-full truncate text-[9px] leading-none tracking-[0.01em] text-white/55 transition-colors group-hover:text-white/95">
-                          {rel.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-          </motion.div>
-        </div>
+          )}
+        </motion.div>
       </motion.div>
     );
   }
@@ -469,3 +533,4 @@ export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(
 
 SkillFocusCard.displayName = 'SkillFocusCard';
 export default SkillFocusCard;
+

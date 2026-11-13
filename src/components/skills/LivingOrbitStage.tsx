@@ -17,6 +17,7 @@ import { TechLogo } from './TechLogo';
 import {
   SkillFocusCard,
   computeOrbitalDossierPlacement,
+  DOSSIER_ESTIMATED_HEIGHT,
   DossierPlacementResult,
 } from './SkillFocusCard';
 import { MobileLivingOrbit } from './MobileLivingOrbit';
@@ -158,6 +159,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     height: 720,
   });
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const editorialWrapRef = useRef<HTMLDivElement>(null);
   const relationPathRefs = useRef<(SVGPathElement | null)[]>([]);
   const relationGlowPathRefs = useRef<(SVGPathElement | null)[]>([]);
   const relationGradRefs = useRef<(SVGLinearGradientElement | null)[]>([]);
@@ -166,6 +168,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   const orbitTracerGroupRefs = useRef<(SVGGElement | null)[]>([]);
 
   const [isMotionPaused, setIsMotionPaused] = useState(false);
+  const [measuredPanelHeight, setMeasuredPanelHeight] = useState<number>(DOSSIER_ESTIMATED_HEIGHT);
 
   // Pre-compute related sets outside the 60fps loop to avoid per-frame allocations
   const focusedRelSetMemo = useMemo(
@@ -215,9 +218,15 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     active: false,
   });
 
-  // Snapshot of focused network target positions and dossier SVG footprint
+  // Snapshot of focused network target positions and dossier SVG/stage-percentage footprints
   const focusedNetworkMapRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   const dossierSvgRectRef = useRef<{
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  } | null>(null);
+  const editorialPctRectRef = useRef<{
     left: number;
     top: number;
     right: number;
@@ -284,13 +293,39 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
       stageHeight: stageSize.height,
       selectedPos,
       relatedPositions: relPositions,
+      panelHeight: measuredPanelHeight,
     });
 
     return {
       focusedNetworkMap: netMap,
       dossierPlacement: placement,
     };
-  }, [focusedSkillId, selectedCategoryId, stageSize]);
+  }, [focusedSkillId, selectedCategoryId, stageSize, measuredPanelHeight]);
+
+  // Measure rendered editorial block height on discrete skill selection changes
+  useEffect(() => {
+    if (!focusedSkillId || isMobile) return;
+    const el = editorialWrapRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      if (!editorialWrapRef.current) return;
+      const h = Math.round(editorialWrapRef.current.getBoundingClientRect().height);
+      if (h > 80) {
+        setMeasuredPanelHeight((prev) => (Math.abs(prev - h) >= 2 ? h : prev));
+      }
+    };
+
+    const rafId = requestAnimationFrame(measure);
+    const observer =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => measure()) : null;
+    observer?.observe(el);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer?.disconnect();
+    };
+  }, [focusedSkillId, isMobile]);
 
   useEffect(() => {
     focusedNetworkMapRef.current = focusedNetworkMap;
@@ -303,8 +338,17 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         right: (dossierPlacement.left + dossierPlacement.width) * sx,
         bottom: (dossierPlacement.top + dossierPlacement.height) * sy,
       };
+      const pxToPctX = 100 / stageSize.width;
+      const pxToPctY = 100 / stageSize.height;
+      editorialPctRectRef.current = {
+        left: dossierPlacement.left * pxToPctX - 4.5,
+        top: dossierPlacement.top * pxToPctY - 5.0,
+        right: (dossierPlacement.left + dossierPlacement.width) * pxToPctX + 4.5,
+        bottom: (dossierPlacement.top + dossierPlacement.height) * pxToPctY + 5.0,
+      };
     } else {
       dossierSvgRectRef.current = null;
+      editorialPctRectRef.current = null;
     }
   }, [focusedNetworkMap, dossierPlacement, stageSize]);
 
@@ -428,7 +472,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         return;
       }
 
-      const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
+      const rawDt = Math.max(0.001, (now - lastTime) / 1000);
+      const dt = Math.min(0.05, rawDt);
       lastTime = now;
 
       const {
@@ -462,8 +507,13 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         sculptureTimeSec += dt * speedMultiplier;
       }
 
-      const posLerp = 1 - Math.exp(-7.2 * dt);
-      const opacityLerp = 1 - Math.exp(-10.5 * dt);
+      const focusDt = Math.min(0.14, rawDt);
+      const posLerp = focusId
+        ? 1 - Math.exp(-13.5 * focusDt)
+        : 1 - Math.exp(-7.2 * dt);
+      const opacityLerp = focusId
+        ? 1 - Math.exp(-15.0 * focusDt)
+        : 1 - Math.exp(-10.5 * dt);
       const cursor = cursorStagePosRef.current;
       const { width: stageW, height: stageH } = stageBoundsRef.current;
       const isCompactDesktop = stageW < 1160;
@@ -536,12 +586,11 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
 
           if (isFocusNetworkMember && focusedNetworkMapRef.current.has(p.skill.id)) {
             const netPos = focusedNetworkMapRef.current.get(p.skill.id)!;
-            targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
-            targetY = netPos.y + (p.skill.id === focusId ? 0 : gentleBobY * 0.55);
-            targetDepth = p.skill.id === focusId ? 1.07 : 1.02;
+            targetX = netPos.x + pointerCurrentRef.current.x * 0.45;
+            targetY = netPos.y + (p.skill.id === focusId ? 0 : gentleBobY * 0.52);
+            targetDepth = p.skill.id === focusId ? 1.08 : 1.02;
             targetZPx = depthToZPx(targetDepth);
-            targetScale = p.skill.id === focusId ? 1.07 : 1.02;
-            targetOpacity = 1.0;
+            targetOpacity = p.skill.id === focusId ? 1.0 : 0.96;
           } else if (isInSelectedCategory) {
             targetX =
               p.categoryFormationPos.x +
@@ -554,14 +603,14 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             targetDepth = p.categoryFormationPos.depth;
             targetZPx = p.categoryFormationPos.zPx;
             targetScale = p.categoryFormationPos.scale;
-            targetOpacity = 1.0;
+            targetOpacity = focusId ? 0.21 : 1.0;
           } else if (p.isFeaturedAnchor) {
             targetX = p.recessedPos.x + gentleBobX * 0.25;
             targetY = p.recessedPos.y + gentleBobY * 0.25;
             targetDepth = 0.52;
             targetZPx = depthToZPx(targetDepth);
             targetScale = 0.64;
-            targetOpacity = focusId ? 0.03 : 0.06;
+            targetOpacity = focusId ? 0.13 : 0.06;
           } else {
             targetX = p.recessedPos.x;
             targetY = p.recessedPos.y;
@@ -593,15 +642,14 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           if (focusId && (p.skill.id === focusId || focusedRelSet?.has(p.skill.id))) {
             const netPos = focusedNetworkMapRef.current.get(p.skill.id);
             if (netPos) {
-              targetX = netPos.x + pointerCurrentRef.current.x * 0.5;
+              targetX = netPos.x + pointerCurrentRef.current.x * 0.45;
               targetY =
                 netPos.y +
-                (p.skill.id === focusId ? 0 : gentleBobY * 0.6) +
-                pointerCurrentRef.current.y * 0.5;
-              targetDepth = p.skill.id === focusId ? 1.07 : 1.02;
+                (p.skill.id === focusId ? 0 : gentleBobY * 0.55) +
+                pointerCurrentRef.current.y * 0.45;
+              targetDepth = p.skill.id === focusId ? 1.08 : 1.02;
               targetZPx = depthToZPx(targetDepth);
-              targetScale = p.skill.id === focusId ? 1.07 : 1.02;
-              targetOpacity = 1.0;
+              targetOpacity = p.skill.id === focusId ? 1.0 : 0.96;
             }
           }
 
@@ -628,19 +676,40 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           }
         }
 
-        // Focus Dilation & Hover visual hierarchy
+        // Focus Dilation & Hover visual hierarchy (88–96px optical selected hero, 44–48px spatial satellites, soft background context)
         if (focusId) {
+          const heroTargetPx = isCompactDesktop ? 84 : 92;
+          const satTargetPx = isCompactDesktop ? 42 : 46;
           if (p.skill.id === focusId) {
-            targetScale = 1.08;
-            targetZPx = Math.max(targetZPx, 74);
+            targetScale = Math.max(1.06, Math.min(2.25, heroTargetPx / p.desktopSize));
+            targetZPx = Math.max(targetZPx, 78);
             targetOpacity = 1.0;
           } else if (focusedRelSet?.has(p.skill.id)) {
-            targetScale = Math.max(targetScale * 1.03, 1.02);
+            targetScale = Math.max(0.56, Math.min(1.32, satTargetPx / p.desktopSize));
             targetZPx = Math.max(targetZPx, 48);
-            targetOpacity = Math.max(targetOpacity, 0.95);
+            targetOpacity = 0.96;
           } else {
-            targetOpacity *= 0.055;
-            targetZPx = Math.min(targetZPx - 45, -60);
+            if (!catId) {
+              if (p.isFeaturedAnchor) {
+                targetOpacity = p.anchorTier === 'primary' ? 0.22 : 0.17;
+              } else {
+                targetOpacity =
+                  targetOpacity > 0.05
+                    ? Math.max(0.09, Math.min(0.15, targetOpacity * 0.16))
+                    : 0;
+              }
+            }
+            const edRect = editorialPctRectRef.current;
+            if (
+              edRect &&
+              targetX >= edRect.left &&
+              targetX <= edRect.right &&
+              targetY >= edRect.top &&
+              targetY <= edRect.bottom
+            ) {
+              targetOpacity = Math.min(targetOpacity, 0.03);
+            }
+            targetZPx = Math.min(targetZPx - 36, -48);
             targetScale *= 0.92;
           }
         } else if (hoverId) {
@@ -784,9 +853,9 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             const my = (y1 + y2) * 0.5;
             const nx = -dy / dist;
             const ny = dx / dist;
-            const arcOffset = Math.min(84, Math.max(22, dist * 0.14));
+            const arcOffset = Math.min(54, Math.max(16, dist * 0.18));
 
-            // Evaluate +1 and -1 perpendicular arc directions and choose the path avoiding planet center and dossier panel
+            // Evaluate +1 and -1 perpendicular arc directions and choose the path avoiding planet center and editorial zone
             let bestCx = mx;
             let bestCy = my - arcOffset;
             let bestCurveScore = -Infinity;
@@ -801,7 +870,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               const distPlanet = Math.hypot(midCurveX - 500, midCurveY - 270);
               let score = distPlanet;
 
-              // Also prefer curving away from open Orbital Dossier rect
+              // Also prefer curving away from open Orbital Editorial rect
               if (dossierRect) {
                 const dRectX = Math.max(dossierRect.left, Math.min(midCurveX, dossierRect.right));
                 const dRectY = Math.max(dossierRect.top, Math.min(midCurveY, dossierRect.bottom));
@@ -830,15 +899,15 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               1
             )} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
             pathEl.setAttribute('d', d);
-            pathEl.style.opacity = focusId ? '0.56' : '0.30';
+            pathEl.style.opacity = focusId ? '0.48' : '0.26';
             if (glowEl) {
               glowEl.setAttribute('d', d);
-              glowEl.style.opacity = focusId ? '0.15' : '0.08';
+              glowEl.style.opacity = focusId ? '0.11' : '0.06';
             }
             if (dotEl) {
               dotEl.setAttribute('cx', x2.toFixed(1));
               dotEl.setAttribute('cy', y2.toFixed(1));
-              dotEl.style.opacity = focusId ? '0.58' : '0.35';
+              dotEl.style.opacity = focusId ? '0.50' : '0.30';
             }
           } else if (pathEl) {
             pathEl.style.opacity = '0';
@@ -1053,7 +1122,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           {!selectedCategoryId && (
             <g
               className="transition-opacity duration-700"
-              style={{ opacity: focusedSkillId ? 0.22 : 0.85 }}
+              style={{ opacity: focusedSkillId ? 0.14 : 0.85 }}
             >
               {/* Part 1: Subtle Continuous Base Paths */}
               {trajectoryPaths.map((tp, idx) => (
@@ -1316,11 +1385,12 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
           );
         })}
 
-        {/* ─── 3. ORBITAL DOSSIER 2.0 (COLLISION-AWARE FLOATING INSPECTOR) ─── */}
+        {/* ─── 3. ORBITAL EDITORIAL 3.0 (BORDERLESS FLOATING ANNOTATION) ─── */}
         <AnimatePresence>
           {focusedSkill && dossierPlacement && (
             <motion.div
               key="orbital-dossier-shell"
+              ref={editorialWrapRef}
               data-anchor-side={dossierPlacement.anchorSide}
               initial={
                 prefersReducedMotion
@@ -1328,8 +1398,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                   : {
                       opacity: 0,
                       x: dossierPlacement.left,
-                      y: dossierPlacement.top + 12,
-                      scale: 0.988,
+                      y: dossierPlacement.top + 10,
                     }
               }
               animate={
@@ -1339,7 +1408,6 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                       opacity: 1,
                       x: dossierPlacement.left,
                       y: dossierPlacement.top,
-                      scale: 1,
                     }
               }
               exit={
@@ -1348,11 +1416,10 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                   : {
                       opacity: 0,
                       y: dossierPlacement.top + 8,
-                      scale: 0.988,
                     }
               }
               transition={{
-                duration: prefersReducedMotion ? 0.12 : 0.22,
+                duration: prefersReducedMotion ? 0.12 : 0.24,
                 ease: [0.16, 1, 0.3, 1],
               }}
               className="absolute left-0 top-0 z-[72] pointer-events-auto"
@@ -1361,6 +1428,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
               <SkillFocusCard
                 skill={focusedSkill}
                 widthPx={dossierPlacement.width}
+                anchorSide={dossierPlacement.anchorSide}
                 onSelectSkill={onSelectSkill}
                 onClose={onClearSkillFocus}
               />

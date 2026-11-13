@@ -241,8 +241,10 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
               }}
               className={`absolute flex flex-col items-center justify-center p-1 transition-all duration-300 cursor-pointer ${
                 isDimmed
-                  ? 'opacity-20 scale-90'
-                  : showLabel || isFocused || isRelated
+                  ? 'opacity-25 scale-90'
+                  : isFocused
+                  ? 'opacity-100 scale-115'
+                  : showLabel || isRelated
                   ? 'opacity-100'
                   : 'opacity-80'
               }`}
@@ -303,7 +305,7 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
         })}
       </div>
 
-      {/* ─── 3. FOCUSED SKILL INSPECTOR CARD (ORBITAL DOSSIER 2.0) ─── */}
+      {/* ─── 3. FOCUSED SKILL EDITORIAL BOTTOM SHEET (ORBITAL EDITORIAL 3.0) ─── */}
       <AnimatePresence>
         {focusedSkill && (
           <motion.div
@@ -315,7 +317,7 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
               duration: prefersReducedMotion ? 0.12 : 0.28,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="w-full px-1 z-40"
+            className="-mx-3 w-[calc(100%+1.5rem)] z-40"
           >
             <SkillFocusCard
               skill={focusedSkill}

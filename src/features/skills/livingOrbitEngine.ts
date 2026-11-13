@@ -987,8 +987,13 @@ export const evaluateRibbonTrajectory = (
 export const ORBITAL_RIBBONS = SPATIAL_SPLINES;
 
 /**
- * Computes collision-free satellite positions around a focused skill for its
- * genuinely related technologies (above y = 57% so they never touch the bottom inspector).
+ * Computes collision-free LOCAL spatial constellation coordinates around a focused skill
+ * for its 3–5 genuinely related technologies:
+ * - Keeps the focused skill anchored smoothly near its current visual position (nudged only if
+ *   too close to viewport edges or inside the central planetary sphere).
+ * - Gathers related technologies as a cohesive local cluster around the focused technology rather
+ *   than across the entire stage, preventing long filaments crossing the central planet and leaving
+ *   the opposite hemisphere clean for borderless editorial typography.
  */
 export function computeFocusedNetworkPositions(
   focusedSkillId: string,
@@ -997,14 +1002,24 @@ export function computeFocusedNetworkPositions(
   const result = new Map<string, { x: number; y: number }>();
   const focusedCurrent = currentPositions.get(focusedSkillId);
 
-  const anchorX =
+  let anchorX =
     focusedCurrent && focusedCurrent.isVisible
-      ? Math.max(24, Math.min(76, focusedCurrent.x))
-      : 50;
-  const anchorY =
+      ? Math.max(16, Math.min(84, focusedCurrent.x))
+      : 32;
+  let anchorY =
     focusedCurrent && focusedCurrent.isVisible
-      ? Math.max(22, Math.min(55, focusedCurrent.y))
-      : 36;
+      ? Math.max(16, Math.min(80, focusedCurrent.y))
+      : 54;
+
+  // Gently keep the selected hero outside the central planetary sphere (50, 43.5)
+  const pDx = anchorX - 50;
+  const pDy = anchorY - 43.5;
+  const planetDistSq = (pDx / 19.5) ** 2 + (pDy / 21.0) ** 2;
+  if (planetDistSq < 1.0) {
+    const angle = Math.abs(pDx) < 0.5 && Math.abs(pDy) < 0.5 ? Math.PI * 0.72 : Math.atan2(pDy, pDx);
+    anchorX = Math.max(16, Math.min(84, 50 + Math.cos(angle) * 20.5));
+    anchorY = Math.max(16, Math.min(80, 43.5 + Math.sin(angle) * 22.0));
+  }
 
   const placedPoints: { x: number; y: number }[] = [{ x: anchorX, y: anchorY }];
   result.set(focusedSkillId, { x: anchorX, y: anchorY });
@@ -1012,72 +1027,121 @@ export function computeFocusedNetworkPositions(
   const relatedIds = getRelatedSkillIds(focusedSkillId).slice(0, 5);
   if (relatedIds.length === 0) return result;
 
-  const isWellSpaced = (pt: { x: number; y: number }, minDx = 12.0, minDy = 14.0) => {
-    for (const existing of placedPoints) {
-      const ndx = (pt.x - existing.x) / minDx;
-      const ndy = (pt.y - existing.y) / minDy;
-      if (ndx * ndx + ndy * ndy < 1.0) return false;
-    }
-    return true;
+  // Deterministic angle seed from focusedSkillId so each technology gets an organic constellation
+  let hash = 2166136261;
+  for (let i = 0; i < focusedSkillId.length; i++) {
+    hash ^= focusedSkillId.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const baseAngleOffset = ((hash >>> 0) % 360) * (Math.PI / 180);
+
+  // Determine which hemisphere hosts the constellation so the opposite side remains open
+  const clusterOnLeft = anchorX < 50;
+
+  const isOutsidePlanetCore = (x: number, y: number) => {
+    const dx = x - 50;
+    const dy = y - 43.5;
+    return (dx / 20.2) ** 2 + (dy / 22.0) ** 2 >= 1.0;
   };
 
-  const needsSummoning: string[] = [];
-  for (const relId of relatedIds) {
-    const existing = currentPositions.get(relId);
-    if (
-      existing &&
-      existing.isVisible &&
-      existing.x >= 10 &&
-      existing.x <= 90 &&
-      existing.y >= 14 &&
-      existing.y <= 56 &&
-      isWellSpaced(existing)
-    ) {
-      const pt = { x: existing.x, y: existing.y };
-      result.set(relId, pt);
-      placedPoints.push(pt);
-    } else {
-      needsSummoning.push(relId);
-    }
-  }
-
-  const candidateSlots: { x: number; y: number }[] = [];
-  const rings = [
-    { rx: 22, ry: 15, samples: 12 },
-    { rx: 34, ry: 21, samples: 16 },
-    { rx: 45, ry: 25, samples: 16 },
+  // Generate local asymmetric constellation candidate slots around (anchorX, anchorY)
+  const localRings = [
+    { rx: 16.0, ry: 19.5, samples: 16 },
+    { rx: 22.5, ry: 26.0, samples: 20 },
+    { rx: 29.0, ry: 32.0, samples: 24 },
+    { rx: 35.5, ry: 38.0, samples: 28 },
   ];
-  for (const ring of rings) {
+
+  const candidateSlots: { x: number; y: number; localDist: number }[] = [];
+  for (let rIdx = 0; rIdx < localRings.length; rIdx++) {
+    const ring = localRings[rIdx];
     for (let s = 0; s < ring.samples; s++) {
-      const angle = -Math.PI / 2 + (s / ring.samples) * Math.PI * 2;
+      const angle = baseAngleOffset + rIdx * 0.42 + (s / ring.samples) * Math.PI * 2;
       const cx = anchorX + Math.cos(angle) * ring.rx;
       const cy = anchorY + Math.sin(angle) * ring.ry;
-      if (cx >= 11 && cx <= 89 && cy >= 14 && cy <= 56) {
-        candidateSlots.push({ x: cx, y: cy });
+      if (
+        cx >= 8.5 &&
+        cx <= 91.5 &&
+        cy >= 12.5 &&
+        cy <= 86.5 &&
+        isOutsidePlanetCore(cx, cy)
+      ) {
+        candidateSlots.push({
+          x: cx,
+          y: cy,
+          localDist: Math.hypot((cx - anchorX) * 1.1, cy - anchorY),
+        });
       }
     }
   }
 
-  needsSummoning.forEach((relId) => {
-    let bestSlot = candidateSlots[0] || { x: 50, y: 40 };
-    let bestClearance = -1;
+  // Fallback wider arc only if geometry is unusually boxed in
+  if (candidateSlots.length < relatedIds.length * 2) {
+    for (let s = 0; s < 32; s++) {
+      const angle = baseAngleOffset + (s / 32) * Math.PI * 2;
+      const cx = anchorX + Math.cos(angle) * 42;
+      const cy = anchorY + Math.sin(angle) * 42;
+      if (cx >= 8.5 && cx <= 91.5 && cy >= 12.5 && cy <= 86.5 && isOutsidePlanetCore(cx, cy)) {
+        candidateSlots.push({
+          x: cx,
+          y: cy,
+          localDist: Math.hypot((cx - anchorX) * 1.1, cy - anchorY),
+        });
+      }
+    }
+  }
+
+  relatedIds.forEach((relId) => {
+    const cur = currentPositions.get(relId);
+    let bestSlot = candidateSlots[0] || { x: anchorX, y: Math.max(14, anchorY - 18), localDist: 18 };
+    let bestScore = Infinity;
 
     for (const slot of candidateSlots) {
       let minClearance = Infinity;
-      for (const p of placedPoints) {
-        const dx = (slot.x - p.x) / 12.0;
-        const dy = (slot.y - p.y) / 14.0;
+      for (let pIdx = 0; pIdx < placedPoints.length; pIdx++) {
+        const existing = placedPoints[pIdx];
+        // Hero and sibling satellites need generous vertical label clearance
+        const minDx = pIdx === 0 ? 14.0 : 12.8;
+        const minDy = pIdx === 0 ? 18.0 : 17.0;
+        const dx = (slot.x - existing.x) / minDx;
+        const dy = (slot.y - existing.y) / minDy;
         const d = Math.sqrt(dx * dx + dy * dy);
         if (d < minClearance) minClearance = d;
       }
-      if (minClearance > bestClearance) {
-        bestClearance = minClearance;
+
+      // Steep hard penalty if overlapping hero or previously placed satellite (or its bottom label)
+      const collisionPenalty = minClearance < 1.0 ? (1.0 - minClearance) * 12000 + 2000 : 0;
+
+      // Keep satellites clustered locally around (anchorX, anchorY) (ideal radial distance ~17-25%)
+      const distPenalty = Math.abs(slot.localDist - 20.5) * 18 + Math.max(0, slot.localDist - 29) * 32;
+
+      // Strictly preserve the opposite hemisphere open for borderless editorial typography
+      const oppositeLeak = clusterOnLeft
+        ? Math.max(0, slot.x - 50)
+        : Math.max(0, 50 - slot.x);
+      const hemispherePenalty = oppositeLeak * 280;
+
+      // Subtle directional continuity hint when candidate is otherwise similar
+      const continuityHint =
+        cur && cur.isVisible
+          ? Math.hypot(slot.x - cur.x, slot.y - cur.y) * 0.9
+          : 0;
+
+      // Reward clean breathing room beyond minimum threshold modestly
+      const spacingBonus = Math.min(0.45, Math.max(0, minClearance - 1.0)) * 26;
+
+      const score =
+        collisionPenalty + distPenalty + hemispherePenalty + continuityHint - spacingBonus;
+
+      if (score < bestScore) {
+        bestScore = score;
         bestSlot = slot;
       }
     }
 
-    result.set(relId, bestSlot);
-    placedPoints.push(bestSlot);
+    const chosen = { x: bestSlot.x, y: bestSlot.y };
+    result.set(relId, chosen);
+    placedPoints.push(chosen);
   });
 
   return result;

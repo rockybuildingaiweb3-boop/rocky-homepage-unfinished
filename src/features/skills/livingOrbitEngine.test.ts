@@ -196,20 +196,55 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
     }
   });
 
-  it('computes collision-free focused network coordinates for a clicked skill and its related technologies', () => {
-    const currentMap = new Map<string, { x: number; y: number; isVisible: boolean }>();
-    currentMap.set('typescript', { x: 24, y: 34, isVisible: true });
+  it('computes collision-free LOCAL spatial constellation coordinates around a clicked skill outside the planet core', () => {
+    const cases = [
+      { id: 'typescript', x: 20.5, y: 27.5 },
+      { id: 'postgresql', x: 45.5, y: 82.0 },
+      { id: 'threedotjs', x: 24.5, y: 66.0 },
+      { id: 'fastapi', x: 10.5, y: 51.0 },
+      { id: 'langgraph', x: 86.5, y: 52.0 },
+    ];
 
-    const net = computeFocusedNetworkPositions('typescript', currentMap);
-    assert.ok(net.has('typescript'));
+    for (const c of cases) {
+      const currentMap = new Map<string, { x: number; y: number; isVisible: boolean }>();
+      currentMap.set(c.id, { x: c.x, y: c.y, isVisible: true });
 
-    const related = getRelatedSkillIds('typescript').slice(0, 5);
-    assert.ok(related.length >= 3);
-    for (const relId of related) {
-      const pos = net.get(relId);
-      assert.ok(pos, `Missing related position for ${relId}`);
-      assert.ok(pos.x >= 10 && pos.x <= 90);
-      assert.ok(pos.y >= 12 && pos.y <= 57);
+      const net = computeFocusedNetworkPositions(c.id, currentMap);
+      const anchor = net.get(c.id);
+      assert.ok(anchor, `Missing anchor for ${c.id}`);
+
+      const related = getRelatedSkillIds(c.id).slice(0, 5);
+      assert.ok(related.length >= 3);
+      for (const relId of related) {
+        const pos = net.get(relId);
+        assert.ok(pos, `Missing related position for ${relId}`);
+        assert.ok(pos.x >= 8 && pos.x <= 92, `${relId} x=${pos.x} out of bounds`);
+        assert.ok(pos.y >= 12 && pos.y <= 88, `${relId} y=${pos.y} out of bounds`);
+
+        // Local spatial clustering: stays in same local region rather than scattering across stage
+        const radialDist = Math.hypot(pos.x - anchor.x, pos.y - anchor.y);
+        assert.ok(
+          radialDist <= 40,
+          `${c.id} -> ${relId} radial distance ${radialDist.toFixed(1)} too scattered for local constellation`
+        );
+
+        // Keeps central planetary sphere unobstructed
+        const planetNorm = ((pos.x - 50) / 19.5) ** 2 + ((pos.y - 43.5) / 21.0) ** 2;
+        assert.ok(planetNorm >= 0.98, `${c.id} -> ${relId} overlaps planet core`);
+      }
+
+      // Verify satellites do not collide with one another
+      for (let i = 0; i < related.length; i++) {
+        for (let j = i + 1; j < related.length; j++) {
+          const a = net.get(related[i])!;
+          const b = net.get(related[j])!;
+          const sep = Math.hypot((a.x - b.x) / 11.5, (a.y - b.y) / 15.0);
+          assert.ok(
+            sep >= 0.98,
+            `${c.id} satellites ${related[i]} & ${related[j]} overlap (sep=${sep.toFixed(2)})`
+          );
+        }
+      }
     }
   });
 
@@ -415,75 +450,86 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
     }
   });
 
-  it('places the Orbital Dossier cleanly without overlapping the planet core, selected node, related nodes, or stage boundaries', () => {
+  it('places the Orbital Editorial 3.0 annotation cleanly in opposite-hemisphere negative space without overlapping planet core, selected node, or local satellites', () => {
     const viewports: readonly { w: number; h: number }[] = [
       { w: 1350, h: 700 }, // 1440x900 desktop stage
       { w: 1800, h: 780 }, // 1920x1080 wide stage
     ];
 
     for (const { w, h } of viewports) {
-      // 1. PostgreSQL focused (both anchored and focused-pulled y positions)
-      for (const pgPos of [
-        { x: 45.5, y: 82 },
-        { x: 45.5, y: 55 },
-      ]) {
-        const res = computeOrbitalDossierPlacement({
-          stageWidth: w,
-          stageHeight: h,
-          selectedPos: pgPos,
-          relatedPositions: [
-            { x: 18, y: 42 },
-            { x: 34, y: 28 },
-            { x: 64, y: 26 },
-            { x: 80, y: 44 },
-          ],
-        });
-        assert.equal(res.width, DOSSIER_DESKTOP_WIDTH);
-        assert.equal(res.planetOverlap, 0, `Planet overlap for PostgreSQL at ${w}x${h}`);
-        assert.equal(res.selectedOverlap, 0, `Selected overlap for PostgreSQL at ${w}x${h}`);
-        assert.equal(res.relatedOverlap, 0, `Related overlap for PostgreSQL at ${w}x${h}`);
-        assert.ok(res.left >= 16 && res.left + res.width <= w - 16);
-        assert.ok(res.top >= 16 && res.top + res.height <= h - 4);
-        assert.notEqual(res.anchorSide, 'center');
-      }
+      // 1. PostgreSQL focused (left-of-center constellation -> open right negative space)
+      const pgMap = new Map<string, { x: number; y: number; isVisible: boolean }>([
+        ['postgresql', { x: 45.5, y: 82, isVisible: true }],
+      ]);
+      const pgNet = computeFocusedNetworkPositions('postgresql', pgMap);
+      const pgAnchor = pgNet.get('postgresql')!;
+      const pgRelated = getRelatedSkillIds('postgresql')
+        .slice(0, 5)
+        .map((id) => pgNet.get(id)!);
+      const pgRes = computeOrbitalDossierPlacement({
+        stageWidth: w,
+        stageHeight: h,
+        selectedPos: pgAnchor,
+        relatedPositions: pgRelated,
+      });
+      assert.equal(pgRes.width, DOSSIER_DESKTOP_WIDTH);
+      assert.equal(pgRes.planetOverlap, 0, `Planet overlap for PostgreSQL at ${w}x${h}`);
+      assert.equal(pgRes.selectedOverlap, 0, `Selected overlap for PostgreSQL at ${w}x${h}`);
+      assert.equal(pgRes.relatedOverlap, 0, `Related overlap for PostgreSQL at ${w}x${h}`);
+      assert.ok(pgRes.left >= 20 && pgRes.left + pgRes.width <= w - 20);
+      assert.ok(pgRes.top >= 20 && pgRes.top + pgRes.height <= h - 16);
+      assert.equal(pgRes.anchorSide, 'right');
 
-      // 2. Left-side technology focused (FastAPI / TypeScript) -> prefers right flank
-      for (const leftNode of [
-        { x: 13, y: 53 },
-        { x: 20.5, y: 27.5 },
+      // 2. Left-side technology focused (FastAPI / Three.js) -> right negative space
+      for (const leftCase of [
+        { id: 'fastapi', x: 10.5, y: 51 },
+        { id: 'threedotjs', x: 24.5, y: 66 },
+        { id: 'react', x: 36.5, y: 14 },
       ]) {
+        const net = computeFocusedNetworkPositions(
+          leftCase.id,
+          new Map<string, { x: number; y: number; isVisible: boolean }>([
+            [leftCase.id, { x: leftCase.x, y: leftCase.y, isVisible: true }],
+          ])
+        );
+        const anchor = net.get(leftCase.id)!;
+        const rels = getRelatedSkillIds(leftCase.id)
+          .slice(0, 5)
+          .map((id) => net.get(id)!);
         const res = computeOrbitalDossierPlacement({
           stageWidth: w,
           stageHeight: h,
-          selectedPos: leftNode,
-          relatedPositions: [
-            { x: 35, y: 20 },
-            { x: 38, y: 74 },
-            { x: 62, y: 24 },
-          ],
+          selectedPos: anchor,
+          relatedPositions: rels,
         });
-        assert.equal(res.anchorSide, 'right');
+        assert.equal(res.anchorSide, 'right', `Expected right flank for ${leftCase.id}`);
         assert.equal(res.planetOverlap, 0);
         assert.equal(res.selectedOverlap, 0);
         assert.equal(res.relatedOverlap, 0);
       }
 
-      // 3. Right-side technology focused (LangGraph / OpenAI) -> prefers left flank
-      for (const rightNode of [
-        { x: 85, y: 48 },
-        { x: 73.5, y: 20.5 },
+      // 3. Right-side technology focused (LangGraph / OpenAI) -> left negative space
+      for (const rightCase of [
+        { id: 'langgraph', x: 86.5, y: 52 },
+        { id: 'openai', x: 73.5, y: 20.5 },
       ]) {
+        const net = computeFocusedNetworkPositions(
+          rightCase.id,
+          new Map<string, { x: number; y: number; isVisible: boolean }>([
+            [rightCase.id, { x: rightCase.x, y: rightCase.y, isVisible: true }],
+          ])
+        );
+        const anchor = net.get(rightCase.id)!;
+        const rels = getRelatedSkillIds(rightCase.id)
+          .slice(0, 5)
+          .map((id) => net.get(id)!);
         const res = computeOrbitalDossierPlacement({
           stageWidth: w,
           stageHeight: h,
-          selectedPos: rightNode,
-          relatedPositions: [
-            { x: 60, y: 18 },
-            { x: 32, y: 24 },
-            { x: 66, y: 76 },
-          ],
+          selectedPos: anchor,
+          relatedPositions: rels,
         });
-        assert.equal(res.anchorSide, 'left');
+        assert.equal(res.anchorSide, 'left', `Expected left flank for ${rightCase.id}`);
         assert.equal(res.planetOverlap, 0);
         assert.equal(res.selectedOverlap, 0);
         assert.equal(res.relatedOverlap, 0);
@@ -495,11 +541,11 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
       stageWidth: 820,
       stageHeight: 680,
       selectedPos: { x: 22, y: 30 },
-      relatedPositions: [{ x: 70, y: 28 }],
+      relatedPositions: [{ x: 30, y: 45 }],
     });
-    assert.ok(narrow.width <= 520);
+    assert.ok(narrow.width <= 440);
     assert.ok(narrow.left >= 16 && narrow.left + narrow.width <= 820 - 16);
-    assert.ok(narrow.top >= 16 && narrow.top + narrow.height <= 680 - 4);
+    assert.ok(narrow.top >= 16 && narrow.top + narrow.height <= 680 - 16);
   });
 });
 
