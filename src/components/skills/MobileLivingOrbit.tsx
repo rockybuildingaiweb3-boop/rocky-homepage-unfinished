@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { SKILLS_DATA, SKILL_CATEGORIES, SkillItem } from '../../data/skills';
 import {
   FEATURED_ANCHOR_SPECS,
@@ -253,24 +254,42 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
               }}
             >
               <div
-                className={prefersReducedMotion ? '' : 'animate-cosmic-float'}
+                className={`relative flex items-center justify-center ${
+                  prefersReducedMotion ? '' : 'animate-cosmic-float'
+                }`}
                 style={{
                   animationDelay: `${(idx * 0.55) % 4}s`,
                   filter: isFocused
-                    ? `drop-shadow(0 0 18px ${skill.brandColor}) drop-shadow(0 2px 6px rgba(0,0,0,0.8))`
+                    ? `drop-shadow(0 0 16px ${skill.brandColor}99) drop-shadow(0 2px 6px rgba(0,0,0,0.8))`
                     : isPrimary
                     ? `drop-shadow(0 6px 14px rgba(0,0,0,0.8)) drop-shadow(0 0 14px ${skill.brandColor}55)`
                     : `drop-shadow(0 4px 12px rgba(0,0,0,0.75)) drop-shadow(0 0 10px ${skill.brandColor}40)`,
                 }}
               >
+                {isFocused && (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -inset-3 rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, ${skill.brandColor}24 0%, ${skill.brandColor}08 55%, transparent 75%)`,
+                      }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -inset-1.5 rounded-full border"
+                      style={{ borderColor: `${skill.brandColor}55` }}
+                    />
+                  </>
+                )}
                 <TechLogo id={skill.id} name={skill.name} size={size} />
               </div>
 
-              {(showLabel || isFocused || isRelated) && (
+              {!isFocused && (showLabel || isRelated) && (
                 <span
                   className={`mt-1 font-mono text-[9.5px] tracking-[0.1em] whitespace-nowrap ${
-                    isFocused
-                      ? 'text-white font-semibold bg-[#060218]/90 px-1.5 py-0.5 rounded border border-white/15'
+                    isRelated
+                      ? 'text-purple-100/95 font-medium drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]'
                       : isPrimary
                       ? 'text-white/90 font-medium drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
                       : 'text-white/75 drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)]'
@@ -284,16 +303,29 @@ export const MobileLivingOrbit: React.FC<MobileLivingOrbitProps> = ({
         })}
       </div>
 
-      {/* ─── 3. FOCUSED SKILL INSPECTOR CARD ─── */}
-      {focusedSkill && (
-        <div className="w-full px-1 z-40">
-          <SkillFocusCard
-            skill={focusedSkill}
-            onSelectSkill={onSelectSkill}
-            onClose={onClearSkillFocus}
-          />
-        </div>
-      )}
+      {/* ─── 3. FOCUSED SKILL INSPECTOR CARD (ORBITAL DOSSIER 2.0) ─── */}
+      <AnimatePresence>
+        {focusedSkill && (
+          <motion.div
+            key="mobile-orbital-dossier"
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+            transition={{
+              duration: prefersReducedMotion ? 0.12 : 0.28,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="w-full px-1 z-40"
+          >
+            <SkillFocusCard
+              skill={focusedSkill}
+              isMobileLayout
+              onSelectSkill={onSelectSkill}
+              onClose={onClearSkillFocus}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

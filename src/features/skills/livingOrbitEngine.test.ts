@@ -29,6 +29,10 @@ import {
   computeSkillsRegionFromRect,
   computeStarVisibilityFactor,
 } from '../../components/ui/ParticleBackground';
+import {
+  computeOrbitalDossierPlacement,
+  DOSSIER_DESKTOP_WIDTH,
+} from '../../components/skills/SkillFocusCard';
 
 describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture', () => {
   it('preserves all 88 canonical skills with zero duplicates', () => {
@@ -409,6 +413,93 @@ describe('Living Orbit 2.2 — Full-Screen Star Sea & Advanced Kinetic Sculpture
         assert.ok(peri.outerZones.bottom >= 110);
       }
     }
+  });
+
+  it('places the Orbital Dossier cleanly without overlapping the planet core, selected node, related nodes, or stage boundaries', () => {
+    const viewports: readonly { w: number; h: number }[] = [
+      { w: 1350, h: 700 }, // 1440x900 desktop stage
+      { w: 1800, h: 780 }, // 1920x1080 wide stage
+    ];
+
+    for (const { w, h } of viewports) {
+      // 1. PostgreSQL focused (both anchored and focused-pulled y positions)
+      for (const pgPos of [
+        { x: 45.5, y: 82 },
+        { x: 45.5, y: 55 },
+      ]) {
+        const res = computeOrbitalDossierPlacement({
+          stageWidth: w,
+          stageHeight: h,
+          selectedPos: pgPos,
+          relatedPositions: [
+            { x: 18, y: 42 },
+            { x: 34, y: 28 },
+            { x: 64, y: 26 },
+            { x: 80, y: 44 },
+          ],
+        });
+        assert.equal(res.width, DOSSIER_DESKTOP_WIDTH);
+        assert.equal(res.planetOverlap, 0, `Planet overlap for PostgreSQL at ${w}x${h}`);
+        assert.equal(res.selectedOverlap, 0, `Selected overlap for PostgreSQL at ${w}x${h}`);
+        assert.equal(res.relatedOverlap, 0, `Related overlap for PostgreSQL at ${w}x${h}`);
+        assert.ok(res.left >= 16 && res.left + res.width <= w - 16);
+        assert.ok(res.top >= 16 && res.top + res.height <= h - 4);
+        assert.notEqual(res.anchorSide, 'center');
+      }
+
+      // 2. Left-side technology focused (FastAPI / TypeScript) -> prefers right flank
+      for (const leftNode of [
+        { x: 13, y: 53 },
+        { x: 20.5, y: 27.5 },
+      ]) {
+        const res = computeOrbitalDossierPlacement({
+          stageWidth: w,
+          stageHeight: h,
+          selectedPos: leftNode,
+          relatedPositions: [
+            { x: 35, y: 20 },
+            { x: 38, y: 74 },
+            { x: 62, y: 24 },
+          ],
+        });
+        assert.equal(res.anchorSide, 'right');
+        assert.equal(res.planetOverlap, 0);
+        assert.equal(res.selectedOverlap, 0);
+        assert.equal(res.relatedOverlap, 0);
+      }
+
+      // 3. Right-side technology focused (LangGraph / OpenAI) -> prefers left flank
+      for (const rightNode of [
+        { x: 85, y: 48 },
+        { x: 73.5, y: 20.5 },
+      ]) {
+        const res = computeOrbitalDossierPlacement({
+          stageWidth: w,
+          stageHeight: h,
+          selectedPos: rightNode,
+          relatedPositions: [
+            { x: 60, y: 18 },
+            { x: 32, y: 24 },
+            { x: 66, y: 76 },
+          ],
+        });
+        assert.equal(res.anchorSide, 'left');
+        assert.equal(res.planetOverlap, 0);
+        assert.equal(res.selectedOverlap, 0);
+        assert.equal(res.relatedOverlap, 0);
+      }
+    }
+
+    // 4. Narrow desktop stage stays safely within horizontal & vertical bounds
+    const narrow = computeOrbitalDossierPlacement({
+      stageWidth: 820,
+      stageHeight: 680,
+      selectedPos: { x: 22, y: 30 },
+      relatedPositions: [{ x: 70, y: 28 }],
+    });
+    assert.ok(narrow.width <= 520);
+    assert.ok(narrow.left >= 16 && narrow.left + narrow.width <= 820 - 16);
+    assert.ok(narrow.top >= 16 && narrow.top + narrow.height <= 680 - 4);
   });
 });
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
 import {
   LIVING_ORBIT_PARTICLES,
@@ -14,7 +14,11 @@ import {
 } from '../../features/skills/livingOrbitEngine';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { TechLogo } from './TechLogo';
-import { SkillFocusCard } from './SkillFocusCard';
+import {
+  SkillFocusCard,
+  computeOrbitalDossierPlacement,
+  DossierPlacementResult,
+} from './SkillFocusCard';
 import { MobileLivingOrbit } from './MobileLivingOrbit';
 
 export interface LivingOrbitStageProps {
@@ -143,14 +147,21 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
   onLeaveSkill,
 }) => {
   const isMobile = useIsMobile(768);
+  const prefersReducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
   const stageBoundsRef = useRef<{ width: number; height: number }>({
+    width: 1560,
+    height: 720,
+  });
+  const [stageSize, setStageSize] = useState<{ width: number; height: number }>({
     width: 1560,
     height: 720,
   });
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const relationPathRefs = useRef<(SVGPathElement | null)[]>([]);
   const relationGlowPathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const relationGradRefs = useRef<(SVGLinearGradientElement | null)[]>([]);
+  const relationDotRefs = useRef<(SVGCircleElement | null)[]>([]);
   const orbitPulseRefs = useRef<(SVGPathElement | null)[]>([]);
   const orbitTracerGroupRefs = useRef<(SVGGElement | null)[]>([]);
 
@@ -204,8 +215,14 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     active: false,
   });
 
-  // Snapshot of focused network target positions when a skill is clicked
+  // Snapshot of focused network target positions and dossier SVG footprint
   const focusedNetworkMapRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const dossierSvgRectRef = useRef<{
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  } | null>(null);
 
   // Initialize particle states deterministically at t = 18.0s
   const animStatesRef = useRef<ParticleAnimState[]>(
@@ -223,11 +240,13 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
     })
   );
 
-  // Recompute collision-free satellite coordinates whenever focusedSkillId or selectedCategoryId changes
-  useEffect(() => {
+  // Compute collision-free satellite coordinates and collision-aware dossier placement synchronously on discrete state/resize changes
+  const { focusedNetworkMap, dossierPlacement } = useMemo(() => {
     if (!focusedSkillId) {
-      focusedNetworkMapRef.current.clear();
-      return;
+      return {
+        focusedNetworkMap: new Map<string, { x: number; y: number }>(),
+        dossierPlacement: null as DossierPlacementResult | null,
+      };
     }
 
     const currentSnapshot = new Map<string, { x: number; y: number; isVisible: boolean }>();
@@ -251,11 +270,43 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
       }
     });
 
-    focusedNetworkMapRef.current = computeFocusedNetworkPositions(
-      focusedSkillId,
-      currentSnapshot
-    );
-  }, [focusedSkillId, selectedCategoryId]);
+    const netMap = computeFocusedNetworkPositions(focusedSkillId, currentSnapshot);
+    const selectedPos = netMap.get(focusedSkillId) ?? { x: 50, y: 50 };
+    const relPositions: { x: number; y: number }[] = [];
+    const relIds = getRelatedSkillIds(focusedSkillId).slice(0, 5);
+    for (const rId of relIds) {
+      const rp = netMap.get(rId);
+      if (rp) relPositions.push(rp);
+    }
+
+    const placement = computeOrbitalDossierPlacement({
+      stageWidth: stageSize.width,
+      stageHeight: stageSize.height,
+      selectedPos,
+      relatedPositions: relPositions,
+    });
+
+    return {
+      focusedNetworkMap: netMap,
+      dossierPlacement: placement,
+    };
+  }, [focusedSkillId, selectedCategoryId, stageSize]);
+
+  useEffect(() => {
+    focusedNetworkMapRef.current = focusedNetworkMap;
+    if (dossierPlacement && stageSize.width > 0 && stageSize.height > 0) {
+      const sx = 1000 / stageSize.width;
+      const sy = 620 / stageSize.height;
+      dossierSvgRectRef.current = {
+        left: dossierPlacement.left * sx,
+        top: dossierPlacement.top * sy,
+        right: (dossierPlacement.left + dossierPlacement.width) * sx,
+        bottom: (dossierPlacement.top + dossierPlacement.height) * sy,
+      };
+    } else {
+      dossierSvgRectRef.current = null;
+    }
+  }, [focusedNetworkMap, dossierPlacement, stageSize]);
 
   // Active skill (focused takes priority over hovered)
   const activeSkillId = focusedSkillId || hoveredSkillId;
@@ -340,6 +391,13 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
       const rect = stageRef.current.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
         stageBoundsRef.current = { width: rect.width, height: rect.height };
+        const roundedW = Math.round(rect.width);
+        const roundedH = Math.round(rect.height);
+        setStageSize((prev) =>
+          Math.abs(prev.width - roundedW) >= 2 || Math.abs(prev.height - roundedH) >= 2
+            ? { width: roundedW, height: roundedH }
+            : prev
+        );
       }
     };
     updateStageBounds();
@@ -482,7 +540,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             targetY = netPos.y + (p.skill.id === focusId ? 0 : gentleBobY * 0.55);
             targetDepth = p.skill.id === focusId ? 1.07 : 1.02;
             targetZPx = depthToZPx(targetDepth);
-            targetScale = p.skill.id === focusId ? 1.14 : 1.02;
+            targetScale = p.skill.id === focusId ? 1.07 : 1.02;
             targetOpacity = 1.0;
           } else if (isInSelectedCategory) {
             targetX =
@@ -542,7 +600,7 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                 pointerCurrentRef.current.y * 0.5;
               targetDepth = p.skill.id === focusId ? 1.07 : 1.02;
               targetZPx = depthToZPx(targetDepth);
-              targetScale = p.skill.id === focusId ? 1.14 : 1.03;
+              targetScale = p.skill.id === focusId ? 1.07 : 1.02;
               targetOpacity = 1.0;
             }
           }
@@ -573,15 +631,15 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         // Focus Dilation & Hover visual hierarchy
         if (focusId) {
           if (p.skill.id === focusId) {
-            targetScale = Math.max(targetScale * 1.12, 1.16);
-            targetZPx = Math.max(targetZPx, 78);
+            targetScale = 1.08;
+            targetZPx = Math.max(targetZPx, 74);
             targetOpacity = 1.0;
           } else if (focusedRelSet?.has(p.skill.id)) {
-            targetScale = Math.max(targetScale * 1.04, 1.02);
+            targetScale = Math.max(targetScale * 1.03, 1.02);
             targetZPx = Math.max(targetZPx, 48);
             targetOpacity = Math.max(targetOpacity, 0.95);
           } else {
-            targetOpacity *= 0.12;
+            targetOpacity *= 0.055;
             targetZPx = Math.min(targetZPx - 45, -60);
             targetScale *= 0.92;
           }
@@ -697,16 +755,19 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
         }
       }
 
-      // Update selective relationship filaments
+      // Update selective relationship filaments (continuous gradient-tinted Bézier curves curving around planet & dossier)
       const activeId = focusId || hoverId;
       if (activeId) {
         const srcIdx = particleIndexById.get(activeId);
         const srcState = srcIdx !== undefined ? animStatesRef.current[srcIdx] : null;
         const relIds = getRelatedSkillIds(activeId).slice(0, 5);
+        const dossierRect = focusId ? dossierSvgRectRef.current : null;
 
         for (let r = 0; r < 5; r++) {
           const pathEl = relationPathRefs.current[r];
           const glowEl = relationGlowPathRefs.current[r];
+          const gradEl = relationGradRefs.current[r];
+          const dotEl = relationDotRefs.current[r];
           const relId = relIds[r];
           const dstIdx = relId ? particleIndexById.get(relId) : undefined;
           const dstState = dstIdx !== undefined ? animStatesRef.current[dstIdx] : null;
@@ -716,18 +777,73 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             const y1 = srcState.y * 6.2;
             const x2 = dstState.x * 10;
             const y2 = dstState.y * 6.2;
-            const mx = (x1 + x2) / 2;
-            const my = (y1 + y2) / 2 - Math.hypot(x2 - x1, y2 - y1) * 0.12;
-            const d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const dist = Math.max(1, Math.hypot(dx, dy));
+            const mx = (x1 + x2) * 0.5;
+            const my = (y1 + y2) * 0.5;
+            const nx = -dy / dist;
+            const ny = dx / dist;
+            const arcOffset = Math.min(84, Math.max(22, dist * 0.14));
+
+            // Evaluate +1 and -1 perpendicular arc directions and choose the path avoiding planet center and dossier panel
+            let bestCx = mx;
+            let bestCy = my - arcOffset;
+            let bestCurveScore = -Infinity;
+
+            for (const sign of [-1, 1]) {
+              const candCx = Math.max(24, Math.min(976, mx + nx * arcOffset * sign));
+              const candCy = Math.max(24, Math.min(596, my + ny * arcOffset * sign));
+              const midCurveX = 0.25 * x1 + 0.5 * candCx + 0.25 * x2;
+              const midCurveY = 0.25 * y1 + 0.5 * candCy + 0.25 * y2;
+
+              // Prefer curving away from central planetary core (500, 270)
+              const distPlanet = Math.hypot(midCurveX - 500, midCurveY - 270);
+              let score = distPlanet;
+
+              // Also prefer curving away from open Orbital Dossier rect
+              if (dossierRect) {
+                const dRectX = Math.max(dossierRect.left, Math.min(midCurveX, dossierRect.right));
+                const dRectY = Math.max(dossierRect.top, Math.min(midCurveY, dossierRect.bottom));
+                const distDossier = Math.hypot(midCurveX - dRectX, midCurveY - dRectY);
+                score += distDossier * 1.4;
+              }
+
+              // Subtle upward preference when equidistant
+              score += (candCy < my ? 10 : 0);
+
+              if (score > bestCurveScore) {
+                bestCurveScore = score;
+                bestCx = candCx;
+                bestCy = candCy;
+              }
+            }
+
+            if (gradEl) {
+              gradEl.setAttribute('x1', x1.toFixed(1));
+              gradEl.setAttribute('y1', y1.toFixed(1));
+              gradEl.setAttribute('x2', x2.toFixed(1));
+              gradEl.setAttribute('y2', y2.toFixed(1));
+            }
+
+            const d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} Q ${bestCx.toFixed(1)} ${bestCy.toFixed(
+              1
+            )} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
             pathEl.setAttribute('d', d);
-            pathEl.style.opacity = focusId ? '0.82' : '0.46';
+            pathEl.style.opacity = focusId ? '0.56' : '0.30';
             if (glowEl) {
               glowEl.setAttribute('d', d);
-              glowEl.style.opacity = focusId ? '0.28' : '0.14';
+              glowEl.style.opacity = focusId ? '0.15' : '0.08';
+            }
+            if (dotEl) {
+              dotEl.setAttribute('cx', x2.toFixed(1));
+              dotEl.setAttribute('cy', y2.toFixed(1));
+              dotEl.style.opacity = focusId ? '0.58' : '0.35';
             }
           } else if (pathEl) {
             pathEl.style.opacity = '0';
             if (glowEl) glowEl.style.opacity = '0';
+            if (dotEl) dotEl.style.opacity = '0';
           }
         }
       }
@@ -1009,33 +1125,66 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
             </g>
           )}
 
-          {/* Selective Relationship Filaments (Rendered only when a skill is focused or hovered) */}
+          {/* Selective Relationship Filaments (Continuous brand-tinted curved Bézier hairlines) */}
           {activeSkill &&
-            activeRelatedIds.map((relId, idx) => (
-              <g key={`${activeSkill.id}-${relId}`}>
-                <path
-                  ref={(el) => {
-                    relationGlowPathRefs.current[idx] = el;
-                  }}
-                  fill="none"
-                  stroke={activeSkill.brandColor}
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  style={{ opacity: 0, filter: 'blur(4px)', transition: 'opacity 180ms ease-out' }}
-                />
-                <path
-                  ref={(el) => {
-                    relationPathRefs.current[idx] = el;
-                  }}
-                  fill="none"
-                  stroke="rgba(243, 232, 255, 0.82)"
-                  strokeWidth="1.2"
-                  strokeDasharray="4 5"
-                  strokeLinecap="round"
-                  style={{ opacity: 0, transition: 'opacity 180ms ease-out' }}
-                />
-              </g>
-            ))}
+            activeRelatedIds.map((relId, idx) => {
+              const dstSkill = SKILLS_DATA.find((s) => s.id === relId);
+              const dstColor = dstSkill?.brandColor || '#C084FC';
+              const gradId = `rel-filament-grad-${idx}`;
+              return (
+                <g key={`${activeSkill.id}-${relId}`}>
+                  <defs>
+                    <linearGradient
+                      id={gradId}
+                      ref={(el) => {
+                        relationGradRefs.current[idx] = el;
+                      }}
+                      gradientUnits="userSpaceOnUse"
+                      x1="0"
+                      y1="0"
+                      x2="100"
+                      y2="100"
+                    >
+                      <stop offset="0%" stopColor={activeSkill.brandColor} stopOpacity={0.82} />
+                      <stop offset="52%" stopColor="#E9D5FF" stopOpacity={0.56} />
+                      <stop offset="100%" stopColor={dstColor} stopOpacity={0.78} />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    ref={(el) => {
+                      relationGlowPathRefs.current[idx] = el;
+                    }}
+                    fill="none"
+                    stroke={`url(#${gradId})`}
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    style={{
+                      opacity: 0,
+                      filter: 'blur(2.5px)',
+                      transition: 'opacity 200ms ease-out',
+                    }}
+                  />
+                  <path
+                    ref={(el) => {
+                      relationPathRefs.current[idx] = el;
+                    }}
+                    fill="none"
+                    stroke={`url(#${gradId})`}
+                    strokeWidth="1.05"
+                    strokeLinecap="round"
+                    style={{ opacity: 0, transition: 'opacity 200ms ease-out' }}
+                  />
+                  <circle
+                    ref={(el) => {
+                      relationDotRefs.current[idx] = el;
+                    }}
+                    r="2"
+                    fill={dstColor}
+                    style={{ opacity: 0, transition: 'opacity 200ms ease-out' }}
+                  />
+                </g>
+              );
+            })}
         </svg>
 
         {/* 88 Floating Technology Objects in True 2.5D Perspective Space */}
@@ -1102,16 +1251,16 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                 willChange: 'transform, opacity',
               }}
             >
-              {/* Authentic Floating Brand Mark (No generic circular wrapper) */}
+              {/* Authentic Floating Brand Mark with Restrained Orbital Selection Halo */}
               <div
                 className="relative flex items-center justify-center transition-transform duration-300 ease-out"
                 style={{
                   width: desktopSize,
                   height: desktopSize,
                   filter: isFocused
-                    ? `drop-shadow(0 0 24px ${skill.brandColor}) drop-shadow(0 3px 10px rgba(0,0,0,0.88))`
+                    ? `drop-shadow(0 0 18px ${skill.brandColor}99) drop-shadow(0 3px 10px rgba(0,0,0,0.88))`
                     : isHovered
-                    ? `drop-shadow(0 0 18px ${skill.brandColor}bb) drop-shadow(0 2px 6px rgba(0,0,0,0.78))`
+                    ? `drop-shadow(0 0 16px ${skill.brandColor}b3) drop-shadow(0 2px 6px rgba(0,0,0,0.78))`
                     : isRelated
                     ? `drop-shadow(0 0 14px ${skill.brandColor}88) drop-shadow(0 2px 6px rgba(0,0,0,0.78))`
                     : isPrimaryAnchor
@@ -1121,41 +1270,101 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
                     : `drop-shadow(0 4px 12px rgba(0,0,0,0.68)) drop-shadow(0 0 8px ${skill.brandColor}28)`,
                 }}
               >
+                {isFocused && (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -inset-4 rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, ${skill.brandColor}26 0%, ${skill.brandColor}0a 52%, transparent 74%)`,
+                      }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -inset-2 rounded-full border"
+                      style={{
+                        borderColor: `${skill.brandColor}55`,
+                        boxShadow: `0 0 16px ${skill.brandColor}24`,
+                      }}
+                    />
+                  </>
+                )}
                 <TechLogo id={skill.id} name={skill.name} size={desktopSize} />
               </div>
 
-              {/* Refined Typographic Label */}
-              <span
-                className={`mt-1.5 font-mono whitespace-nowrap pointer-events-none transition-all duration-200 ${
-                  isFocused || isHovered
-                    ? 'text-[10.5px] font-medium tracking-[0.14em] text-white px-2 py-0.5 rounded bg-[#050214]/90 border border-white/15 shadow-[0_4px_12px_rgba(0,0,0,0.7)] opacity-100'
-                    : isRelated
-                    ? 'text-[10px] tracking-[0.12em] text-purple-100 px-2 py-0.5 rounded bg-[#050214]/80 border border-purple-400/25 opacity-100'
-                    : isSelectedCatMember
-                    ? 'text-[10px] tracking-[0.12em] text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95'
-                    : showLabel && isPrimaryAnchor
-                    ? 'text-[10px] font-medium tracking-[0.15em] uppercase text-white/85 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95 group-hover:text-white'
-                    : showLabel
-                    ? 'text-[9.5px] tracking-[0.13em] uppercase text-white/68 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-90 group-hover:text-white'
-                    : 'text-[9.5px] tracking-[0.12em] text-white/0 opacity-0'
-                }`}
-              >
-                {skill.name}
-              </span>
+              {/* Refined Typographic Label (Omitted while focused so Dossier owns the title) */}
+              {!isFocused && (
+                <span
+                  className={`mt-1.5 font-mono whitespace-nowrap pointer-events-none transition-opacity duration-200 ${
+                    isHovered
+                      ? 'text-[10.5px] font-medium tracking-[0.14em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.98)] opacity-100'
+                      : isRelated
+                      ? 'text-[10px] font-medium tracking-[0.13em] text-purple-100/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.98)] opacity-100'
+                      : isSelectedCatMember
+                      ? 'text-[10px] tracking-[0.12em] text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95'
+                      : showLabel && isPrimaryAnchor
+                      ? 'text-[10px] font-medium tracking-[0.15em] uppercase text-white/85 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-95 group-hover:text-white'
+                      : showLabel
+                      ? 'text-[9.5px] tracking-[0.13em] uppercase text-white/68 drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] opacity-90 group-hover:text-white'
+                      : 'text-[9.5px] tracking-[0.12em] text-white/0 opacity-0'
+                  }`}
+                >
+                  {skill.name}
+                </span>
+              )}
             </button>
           );
         })}
 
-        {/* ─── 3. EDITORIAL TECHNOLOGY DOSSIER INSPECTOR (ONLY ON CLICK) ─── */}
-        <AnimatePresence mode="wait">
-          {focusedSkill && (
-            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-full max-w-[780px] px-4 z-[70]">
+        {/* ─── 3. ORBITAL DOSSIER 2.0 (COLLISION-AWARE FLOATING INSPECTOR) ─── */}
+        <AnimatePresence>
+          {focusedSkill && dossierPlacement && (
+            <motion.div
+              key="orbital-dossier-shell"
+              data-anchor-side={dossierPlacement.anchorSide}
+              initial={
+                prefersReducedMotion
+                  ? { opacity: 0, x: dossierPlacement.left, y: dossierPlacement.top }
+                  : {
+                      opacity: 0,
+                      x: dossierPlacement.left,
+                      y: dossierPlacement.top + 12,
+                      scale: 0.988,
+                    }
+              }
+              animate={
+                prefersReducedMotion
+                  ? { opacity: 1, x: dossierPlacement.left, y: dossierPlacement.top }
+                  : {
+                      opacity: 1,
+                      x: dossierPlacement.left,
+                      y: dossierPlacement.top,
+                      scale: 1,
+                    }
+              }
+              exit={
+                prefersReducedMotion
+                  ? { opacity: 0 }
+                  : {
+                      opacity: 0,
+                      y: dossierPlacement.top + 8,
+                      scale: 0.988,
+                    }
+              }
+              transition={{
+                duration: prefersReducedMotion ? 0.12 : 0.22,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="absolute left-0 top-0 z-[72] pointer-events-auto"
+              style={{ width: dossierPlacement.width }}
+            >
               <SkillFocusCard
                 skill={focusedSkill}
+                widthPx={dossierPlacement.width}
                 onSelectSkill={onSelectSkill}
                 onClose={onClearSkillFocus}
               />
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
