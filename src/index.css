@@ -30,26 +30,102 @@ button { font: inherit; }
 
 @keyframes footer-signature-breathe {
   0%, 100% {
-    opacity: 0.92;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.28)) drop-shadow(0 0 14px rgba(192, 132, 252, 0.18));
+    opacity: 0.94;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.24)) drop-shadow(0 0 12px rgba(192, 132, 252, 0.16));
   }
   50% {
     opacity: 1;
-    filter: drop-shadow(0 0 9px rgba(255, 255, 255, 0.42)) drop-shadow(0 0 20px rgba(216, 180, 254, 0.32));
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.38)) drop-shadow(0 0 18px rgba(216, 180, 254, 0.28));
   }
 }
 
+@keyframes footer-pen-arrive {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+  100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+.footer-pen-arrival {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: footer-pen-arrive 0.46s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .footer-signature-finishing {
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 26px rgba(192, 132, 252, 0.55));
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.68)) drop-shadow(0 0 28px rgba(192, 132, 252, 0.56));
   transition: filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .footer-signature-resting {
-  animation: footer-signature-breathe 7.5s ease-in-out infinite;
+  animation: footer-signature-breathe 8s ease-in-out infinite;
+}
+
+.footer-signature-hover-luster {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.52)) drop-shadow(0 0 22px rgba(216, 180, 254, 0.44)) !important;
 }
 
 .footer-signature-paused {
   animation-play-state: paused;
+}
+
+/* ── Navbar Living Navigation System ───────────────────────────────────── */
+@keyframes rb-logo-sweep {
+  0% {
+    transform: translate3d(-125%, 0, 0) skewX(-22deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(145%, 0, 0) skewX(-22deg);
+    opacity: 0;
+  }
+}
+
+@keyframes rb-logo-converge {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(0.88);
+    filter: brightness(1.35) drop-shadow(0 0 12px rgba(216, 180, 254, 0.72));
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes living-nav-shimmer {
+  0% {
+    background-position: 200% 0%;
+  }
+  100% {
+    background-position: -200% 0%;
+  }
+}
+
+.rb-logo-sweep-beam {
+  animation: rb-logo-sweep 0.68s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.rb-logo-converge {
+  animation: rb-logo-converge 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.living-nav-shimmer {
+  background-size: 220% 100%;
+  animation: living-nav-shimmer 4.2s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -62,7 +138,11 @@ button { font: inherit; }
   .botanical-sunlight-shift,
   .botanical-mote-drift,
   .botanical-petal-shadow,
-  .hero-cta-border-sweep {
+  .hero-cta-border-sweep,
+  .footer-pen-arrival,
+  .rb-logo-sweep-beam,
+  .rb-logo-converge,
+  .living-nav-shimmer {
     animation: none !important;
   }
   .footer-signature-resting {

@@ -16,11 +16,20 @@ import {
 } from '../../components/studio/studioLoopLogic';
 import {
   computeNavbarBackdropState,
+  computePageScrollProgress,
+  computeSlidingIndicatorMetrics,
+  resolveNavbarSectionTheme,
   shouldShowStudioActiveDot,
 } from '../../components/layout/navbarLogic';
 import {
+  BACK_TO_TOP_RING_RADIUS,
+  computeBackToTopRingMetrics,
+  easeInOutQuart,
   FOOTER_SIGNATURE_STROKES,
   getTotalSignatureDrawDurationMs,
+  resolveFooterPlatformBrand,
+  SIGNATURE_FINISHING_SHEEN_MS,
+  SIGNATURE_PEN_ARRIVAL_MS,
 } from '../../components/layout/footerSignatureLogic';
 import { resolveSkillIcon } from '../../components/skills/iconResolver';
 import {
@@ -377,4 +386,81 @@ describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-
     assert.equal(reduced.translateX, 0);
     assert.equal(reduced.translateY, 0);
   });
+
+  it('computes full-page scroll progress, section micro-index themes, and shared sliding indicator metrics for Living Navbar', () => {
+    assert.equal(
+      computePageScrollProgress({ scrollY: 0, scrollHeight: 3600, viewportHeight: 900 }),
+      0
+    );
+    assert.equal(
+      computePageScrollProgress({ scrollY: 1350, scrollHeight: 3600, viewportHeight: 900 }),
+      0.5
+    );
+    assert.equal(
+      computePageScrollProgress({ scrollY: 2698, scrollHeight: 3600, viewportHeight: 900 }),
+      1
+    );
+    assert.equal(
+      computePageScrollProgress({ scrollY: -20, scrollHeight: 900, viewportHeight: 900 }),
+      0
+    );
+
+    const studioTheme = resolveNavbarSectionTheme('studio', false);
+    assert.equal(studioTheme.formattedBadge, '02 / STUDIO');
+    const skillsTheme = resolveNavbarSectionTheme('skills', false);
+    assert.equal(skillsTheme.formattedBadge, '03 / SKILLS');
+    assert.notEqual(studioTheme.accentGradient, skillsTheme.accentGradient);
+    const footerTheme = resolveNavbarSectionTheme('footer', false);
+    assert.equal(footerTheme.formattedBadge, '04 / CONTACT');
+
+    assert.deepEqual(
+      computeSlidingIndicatorMetrics({ offsetLeft: 120, width: 84, insetPx: 4 }),
+      { x: 124, width: 76 }
+    );
+    assert.deepEqual(
+      computeSlidingIndicatorMetrics({ offsetLeft: -10, width: 4, insetPx: 4 }),
+      { x: 0, width: 0 }
+    );
+  });
+
+  it('configures 5-stage Footer signature ceremony timings and brand-colored platform link specs', () => {
+    assert.ok(SIGNATURE_PEN_ARRIVAL_MS >= 300 && SIGNATURE_PEN_ARRIVAL_MS <= 600);
+    assert.ok(SIGNATURE_FINISHING_SHEEN_MS >= 800 && SIGNATURE_FINISHING_SHEEN_MS <= 1300);
+
+    const spotify = resolveFooterPlatformBrand('Spotify Sound');
+    assert.equal(spotify.id, 'spotify');
+    assert.ok(spotify.underlineGradient.includes('#10b981'));
+
+    const instagram = resolveFooterPlatformBrand('Instagram');
+    assert.equal(instagram.id, 'instagram');
+    assert.ok(instagram.underlineGradient.includes('#f472b6'));
+  });
+
+  it('computes circular Back to Top scroll ring geometry and reverse collapse during return-to-Hero', () => {
+    const empty = computeBackToTopRingMetrics({ progress: 0, isReturning: false });
+    assert.equal(empty.progress, 0);
+    assert.equal(empty.dashOffset, empty.circumference);
+    assert.equal(empty.ringScale, 1);
+
+    const fullAtFooter = computeBackToTopRingMetrics({
+      progress: 1,
+      isReturning: false,
+      radius: BACK_TO_TOP_RING_RADIUS,
+    });
+    assert.equal(fullAtFooter.progress, 1);
+    assert.equal(fullAtFooter.dashOffset, 0);
+    assert.equal(fullAtFooter.ringScale, 1);
+    assert.equal(fullAtFooter.ringOpacity, 1);
+
+    const midReturn = computeBackToTopRingMetrics({ progress: 0.4, isReturning: true });
+    assert.ok(midReturn.dashOffset > 0 && midReturn.dashOffset < midReturn.circumference);
+    assert.ok(midReturn.ringScale < 1 && midReturn.ringScale >= 0.91);
+
+    assert.equal(easeInOutQuart(0), 0);
+    assert.equal(easeInOutQuart(0.5), 0.5);
+    assert.equal(easeInOutQuart(1), 1);
+    assert.ok(easeInOutQuart(0.25) < 0.25);
+    assert.ok(easeInOutQuart(0.75) > 0.75);
+  });
 });
+
