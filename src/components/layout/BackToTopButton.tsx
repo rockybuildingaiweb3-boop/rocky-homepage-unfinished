@@ -129,9 +129,9 @@ export const BackToTopButton: React.FC<BackToTopButtonProps> = memo(({ className
       const t = Math.min(1, elapsed / RETURN_SCROLL_DURATION_MS);
       const eased = easeInOutQuart(t);
 
-      // Scroll smoothly back to Hero
+      // Scroll smoothly back to Hero (explicit 'auto' prevents CSS scroll-behavior: smooth from resetting each RAF step)
       const nextY = Math.round(startY * (1 - eased));
-      window.scrollTo(0, nextY);
+      window.scrollTo({ top: nextY, behavior: 'auto' });
 
       // Reverse collapse of outer progress ring synced tightly with return progression
       const liveRatio = Math.max(0, initialProgress * (1 - eased));
