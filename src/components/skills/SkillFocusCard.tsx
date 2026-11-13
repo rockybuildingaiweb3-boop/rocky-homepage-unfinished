@@ -55,8 +55,8 @@ export interface DossierPlacementResult {
   relatedOverlap: number;
 }
 
-export const DOSSIER_DESKTOP_WIDTH = 532;
-export const DOSSIER_ESTIMATED_HEIGHT = 276;
+export const DOSSIER_DESKTOP_WIDTH = 472;
+export const DOSSIER_ESTIMATED_HEIGHT = 258;
 
 function rectOverlapArea(a: DossierStageRect, b: DossierStageRect): number {
   const ox = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
@@ -256,13 +256,11 @@ export function computeOrbitalDossierPlacement({
 }
 
 /**
- * SkillFocusCard — ORBITAL DOSSIER 2.0
+ * SkillFocusCard — ORBITAL SPECIMEN / editorial annotation
  *
- * Art-directed editorial technology inspector crafted as a digital exhibition plate:
- * - Deep-violet translucent atmospheric material with calibrated blur & edge hairline
- * - Dominant serif technology typography (`var(--title-font)`) paired with authentic mark
- * - Asymmetric header/identity/prose composition with zero pill enclosures
- * - Horizontal architectural constellation strip of 3–5 interactive linked technologies
+ * The selected technology remains the visual hero in the orbital field.
+ * This compact dossier provides context without repeating the large logo or
+ * duplicating the relationship network already visible in the scene.
  */
 export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(
   ({ skill, onSelectSkill, onClose, widthPx, isMobileLayout = false }) => {
@@ -277,216 +275,194 @@ export const SkillFocusCard: React.FC<SkillFocusCardProps> = memo(
         .filter((s): s is SkillItem => Boolean(s));
     }, [skill.id]);
 
+    const skillIndex = React.useMemo(
+      () => String(SKILLS_DATA.findIndex((item) => item.id === skill.id) + 1).padStart(2, '0'),
+      [skill.id]
+    );
+
+    const nodeOffsets = [0, 5, 1, 6, 2];
+
     return (
-      <div
+      <motion.div
+        key={skill.id}
         role="dialog"
         aria-modal="false"
-        aria-label={`${skill.name} technical dossier`}
+        aria-label={skill.name + ' technical dossier'}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: widthPx ? `${widthPx}px` : undefined,
-          background:
-            'linear-gradient(156deg, rgba(24, 13, 52, 0.78) 0%, rgba(12, 7, 30, 0.84) 56%, rgba(6, 3, 18, 0.9) 100%)',
-          boxShadow:
-            '0 22px 56px rgba(2, 0, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 9, scale: 0.992 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.994 }}
+        transition={{
+          duration: prefersReducedMotion ? 0.1 : 0.24,
+          ease: [0.16, 1, 0.3, 1],
         }}
-        className={`relative overflow-hidden backdrop-blur-xl border border-purple-200/[0.14] ${
-          isMobileLayout
-            ? 'w-full rounded-xl px-4 py-3.5'
-            : 'w-full max-w-[544px] rounded-xl px-5 py-3.5'
-        }`}
+        style={{
+          width: widthPx ? String(widthPx) + 'px' : undefined,
+          borderRadius: isMobileLayout ? '12px' : '13px 4px 13px 4px',
+          background:
+            'linear-gradient(138deg, rgba(25, 14, 47, 0.76) 0%, rgba(10, 6, 26, 0.84) 58%, rgba(5, 3, 17, 0.88) 100%)',
+          border: '1px solid rgba(221, 204, 255, 0.13)',
+          boxShadow:
+            '0 22px 58px rgba(1, 0, 12, 0.48), inset 0 1px 0 rgba(255,255,255,0.055)',
+          backdropFilter: 'blur(26px) saturate(128%)',
+          WebkitBackdropFilter: 'blur(26px) saturate(128%)',
+        }}
+        className={isMobileLayout ? 'relative isolate w-full overflow-hidden px-4 py-3.5' : 'relative isolate w-full overflow-hidden px-5 py-4'}
       >
-        {/* Top Architectural Specular Edge Highlight */}
-        <div
+        {/* A quiet brand-colored edge, not a glowing card frame. */}
+        <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-[1px]"
+          className="pointer-events-none absolute left-0 top-5 bottom-5 w-[2px] rounded-full opacity-80"
           style={{
-            background: `linear-gradient(90deg, transparent 4%, ${skill.brandColor}90 28%, rgba(243,232,255,0.48) 54%, rgba(192,132,252,0.22) 78%, transparent 96%)`,
+            background: 'linear-gradient(180deg, transparent, ' + skill.brandColor + 'cc 28%, ' + skill.brandColor + '70 72%, transparent)',
+            boxShadow: '0 0 14px ' + skill.brandColor + '45',
           }}
         />
-
-        {/* Restrained Brand-Tinted Ambient Illumination */}
-        <div
+        <span
           aria-hidden="true"
-          className="pointer-events-none absolute -top-16 -left-10 w-64 h-40 rounded-full blur-3xl opacity-[0.15] transition-colors duration-500"
+          className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full blur-3xl opacity-[0.10]"
           style={{ background: skill.brandColor }}
         />
-
-        {/* Subtle Architectural Corner Index Hairlines */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute top-2 left-2 w-2 h-2 border-t border-l border-purple-200/25"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-2 right-2 w-2 h-2 border-b border-r border-purple-200/20"
-        />
-
-        {/* ─── A. EDITORIAL HEADER ROW ─── */}
-        <div className="relative flex items-center justify-between gap-4 pb-2 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2 min-w-0 text-[10.5px] font-mono tracking-[0.11em] uppercase text-white/55 truncate">
-            {category && (
-              <>
-                <span className="text-purple-200/80 tabular-nums">{category.number}</span>
-                <span aria-hidden="true" className="text-white/25">
-                  /
-                </span>
-                <span className="text-white/75 truncate">{category.title}</span>
-                <span aria-hidden="true" className="text-white/25">
-                  ·
-                </span>
-              </>
-            )}
-            <span className="text-white/45 shrink-0">Technical Dossier</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close technical dossier"
-            className="shrink-0 group inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 px-2 py-1 -mr-1.5 rounded-md text-white/55 hover:text-white hover:bg-white/[0.05] transition-colors duration-150 cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
-          >
-            <span className="hidden sm:inline font-mono text-[9.5px] tracking-[0.12em] uppercase text-white/40 group-hover:text-white/80 transition-colors">
-              Esc
-            </span>
-            <span className="text-xs leading-none text-white/75 group-hover:text-white">
-              ✕
-            </span>
-          </button>
-        </div>
-
-        {/* Immediate Cross-Fade Content Plate (Never renders an empty intermediate state) */}
-        <motion.div
-          key={skill.id}
-          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          transition={{
-            duration: prefersReducedMotion ? 0.1 : 0.18,
-            ease: [0.16, 1, 0.3, 1],
+          className="pointer-events-none absolute inset-x-8 top-0 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent, ' + skill.brandColor + '88 34%, rgba(245,238,255,0.36) 58%, transparent)',
           }}
-          className="relative"
-        >
-            {/* ─── B. TECHNOLOGY IDENTITY LOCKUP ─── */}
-            <div className="mt-2.5 flex items-start gap-3.5">
-              <div
-                className="relative flex items-center justify-center shrink-0 w-9 h-9 sm:w-10 sm:h-10 mt-0.5"
-                style={{
-                  filter: `drop-shadow(0 0 12px ${skill.brandColor}55) drop-shadow(0 3px 8px rgba(0,0,0,0.65))`,
-                }}
-              >
-                <TechLogo
-                  id={skill.id}
-                  name={skill.name}
-                  size={isMobileLayout ? 34 : 38}
-                />
-              </div>
+        />
 
-              <div className="min-w-0 flex-1">
+        <div className="relative">
+          {/* Editorial index + close */}
+          <header className="flex items-center justify-between gap-3 pb-2.5 border-b border-white/[0.075]">
+            <div className="flex min-w-0 items-center gap-2 font-mono text-[9px] sm:text-[9.5px] uppercase tracking-[0.16em] text-white/48">
+              <span className="shrink-0 text-purple-200/80 tabular-nums">
+                {category?.number ?? skill.categoryNumber}
+              </span>
+              <span className="text-white/20">/</span>
+              <span className="truncate text-white/65">{category?.title ?? 'Technology'}</span>
+              <span className="text-white/20">·</span>
+              <span className="shrink-0 text-white/38">Specimen {skillIndex}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close technology dossier"
+              className="group flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/[0.10] text-white/48 transition-all duration-200 hover:border-white/25 hover:bg-white/[0.06] hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
+            >
+              <span className="text-[15px] leading-none transition-transform duration-200 group-hover:rotate-90">×</span>
+            </button>
+          </header>
+
+          <motion.div
+            key={skill.id}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0.08 : 0.18, ease: 'easeOut' }}
+          >
+            {/* The scene owns the large logo; the dossier owns the typographic identity. */}
+            <div className="mt-3 flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="h-[2px] w-5 rounded-full"
+                    style={{ backgroundColor: skill.brandColor, boxShadow: '0 0 9px ' + skill.brandColor + '88' }}
+                  />
+                  <span className={'font-mono text-[9px] uppercase tracking-[0.17em] ' + tierMeta.toneClass}>
+                    {tierMeta.label}
+                  </span>
+                </div>
                 <h3
-                  className="text-[26px] sm:text-[30px] font-normal leading-[1.05] tracking-[0.01em] text-white/95 truncate"
+                  className="truncate text-[29px] sm:text-[32px] font-normal leading-[1.02] tracking-[-0.025em] text-white/95"
                   style={{ fontFamily: 'var(--title-font)' }}
                 >
                   {skill.name}
                 </h3>
-
-                {/* Quiet Unboxed Classification + Brand Hairline Accent */}
-                <div className="mt-1 flex items-center gap-2 text-[11px] tracking-[0.04em] text-white/60">
-                  <span
-                    aria-hidden="true"
-                    className="inline-block w-3.5 h-[1.5px] rounded-full shrink-0"
-                    style={{ backgroundColor: skill.brandColor }}
-                  />
-                  <span className={tierMeta.toneClass}>{tierMeta.label}</span>
-                  {category && (
-                    <>
-                      <span aria-hidden="true" className="text-white/25">
-                        ·
-                      </span>
-                      <span className="text-white/50 truncate">{category.title}</span>
-                    </>
-                  )}
+              </div>
+              <div className="mb-0.5 hidden shrink-0 text-right sm:block">
+                <div className="font-mono text-[8px] uppercase tracking-[0.17em] text-white/30">Orbital object</div>
+                <div className="mt-1 font-mono text-[10px] tracking-[0.12em] text-white/55">
+                  {category?.number ?? skill.categoryNumber}.{skillIndex}
                 </div>
               </div>
             </div>
 
-            {/* ─── C. TECHNICAL INSIGHT PROSE ─── */}
-            <p className="mt-2.5 text-[13.5px] sm:text-[14px] leading-[1.56] text-purple-50/85 font-normal max-w-[49ch]">
-              {skill.insight}
-            </p>
+            {/* Short editorial insight: one quiet lead-in, then the existing verified copy. */}
+            <div className="mt-3 grid grid-cols-[66px_minmax(0,1fr)] gap-3 border-t border-white/[0.07] pt-3">
+              <div className="pt-0.5">
+                <span className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/34">Field note</span>
+                <span className="mt-1 block font-mono text-[9px] tabular-nums text-white/24">01 / 01</span>
+              </div>
+              <p className="min-w-0 text-[12.5px] sm:text-[13px] font-normal leading-[1.62] text-purple-50/82">
+                {skill.insight}
+              </p>
+            </div>
 
-            {/* ─── D. HORIZONTAL ARCHITECTURAL CONSTELLATION STRIP ─── */}
+            {/* A miniature curved relationship field; the full related nodes remain interactive in the scene. */}
             {relatedSkills.length > 0 && (
-              <div className="mt-3 pt-2.5 border-t border-white/[0.08]">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="font-mono text-[9.5px] tracking-[0.14em] uppercase text-white/45">
-                    Connected Constellation
+              <section className="mt-3 border-t border-white/[0.07] pt-2.5" aria-label="Related technologies">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="font-mono text-[8.5px] uppercase tracking-[0.17em] text-white/42">
+                    Connected systems
                   </span>
-                  <span className="font-mono text-[9.5px] tracking-[0.08em] text-purple-200/45 tabular-nums">
-                    {relatedSkills.length} linked
+                  <span className="font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/30 tabular-nums">
+                    {String(relatedSkills.length).padStart(2, '0')} linked objects
                   </span>
                 </div>
 
                 <div className="relative">
-                  {/* Fine Connecting Constellation Filament Behind Nodes (Desktop Horizontal Strip) */}
-                  <div
+                  <svg
                     aria-hidden="true"
-                    className="hidden sm:block pointer-events-none absolute top-[10px] left-3 right-3 h-[1px]"
-                    style={{
-                      background: `linear-gradient(90deg, ${skill.brandColor}45 0%, rgba(216,180,254,0.22) 50%, rgba(216,180,254,0.08) 100%)`,
-                    }}
-                  />
-
-                  <div
-                    className={`grid gap-1.5 ${
-                      relatedSkills.length <= 3
-                        ? 'grid-cols-3'
-                        : relatedSkills.length === 4
-                        ? 'grid-cols-2 sm:grid-cols-4'
-                        : 'grid-cols-2 sm:grid-cols-5'
-                    }`}
+                    viewBox="0 0 440 18"
+                    preserveAspectRatio="none"
+                    className="pointer-events-none absolute left-0 right-0 top-[13px] h-[18px] w-full overflow-visible"
                   >
-                    {relatedSkills.map((rel) => (
+                    <defs>
+                      <linearGradient id="dossierRelationArc" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor={skill.brandColor} stopOpacity="0.12" />
+                        <stop offset="48%" stopColor="#D8B4FE" stopOpacity="0.42" />
+                        <stop offset="100%" stopColor={skill.brandColor} stopOpacity="0.12" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M 8 13 C 78 2, 126 2, 165 10 S 264 22, 305 10 S 380 2, 432 13"
+                      fill="none"
+                      stroke="url(#dossierRelationArc)"
+                      strokeWidth="0.9"
+                    />
+                  </svg>
+
+                  <div className="relative grid grid-cols-5 gap-1">
+                    {relatedSkills.map((rel, index) => (
                       <button
                         key={rel.id}
                         type="button"
                         onClick={() => onSelectSkill(rel.id)}
-                        className="group relative flex sm:flex-col items-center sm:items-start gap-2.5 sm:gap-1 min-h-[44px] sm:min-h-0 px-2.5 py-2 sm:px-2 sm:py-1 rounded-lg border border-white/[0.05] sm:border-transparent bg-white/[0.02] sm:bg-transparent hover:bg-purple-300/[0.08] hover:border-purple-200/[0.16] transition-all duration-150 cursor-pointer text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70"
+                        aria-label={'Inspect related technology ' + rel.name}
+                        title={'Explore ' + rel.name}
+                        className="group flex min-w-0 flex-col items-center text-center focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-300/70 rounded-md"
+                        style={{ transform: 'translateY(' + nodeOffsets[index % nodeOffsets.length] + 'px)' }}
                       >
-                        {/* Architectural Constellation Node Dot + Authentic Miniature Logo */}
-                        <span className="relative flex items-center gap-2 shrink-0">
-                          <span
-                            aria-hidden="true"
-                            className="hidden sm:inline-block w-1.5 h-1.5 rounded-full transition-transform duration-200 group-hover:scale-125"
-                            style={{
-                              backgroundColor: rel.brandColor,
-                              boxShadow: `0 0 8px ${rel.brandColor}80`,
-                            }}
-                          />
-                          <span className="flex items-center justify-center w-[18px] h-[18px] opacity-85 group-hover:opacity-100 transition-opacity">
-                            <TechLogo id={rel.id} name={rel.name} size={17} />
-                          </span>
+                        <span
+                          className="relative z-[1] flex h-[27px] w-[27px] items-center justify-center rounded-full border border-white/[0.10] bg-[#10091f]/90 shadow-[0_4px_14px_rgba(0,0,0,0.24)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-white/25 group-hover:bg-[#211336]"
+                          style={{
+                            boxShadow: '0 0 0 1px ' + rel.brandColor + '12, 0 4px 14px rgba(0,0,0,0.24)',
+                          }}
+                        >
+                          <TechLogo id={rel.id} name={rel.name} size={17} />
                         </span>
-
-                        {/* Name Label + Restrained Directional Indicator */}
-                        <span className="flex items-center justify-between gap-1 w-full min-w-0">
-                          <span className="text-[11px] font-medium tracking-[0.01em] text-white/75 group-hover:text-white transition-colors truncate">
-                            {rel.name}
-                          </span>
-                          <span
-                            aria-hidden="true"
-                            className="font-mono text-[10px] text-purple-200/35 group-hover:text-purple-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0"
-                          >
-                            ↗
-                          </span>
+                        <span className="mt-1.5 max-w-full truncate text-[9px] leading-none tracking-[0.01em] text-white/55 transition-colors group-hover:text-white/95">
+                          {rel.name}
                         </span>
                       </button>
                     ))}
                   </div>
                 </div>
-              </div>
+              </section>
             )}
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      </motion.div>
     );
   }
 );
