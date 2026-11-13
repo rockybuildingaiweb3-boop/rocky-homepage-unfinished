@@ -1,7 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  computeHeroMouseParallax,
   computeHeroParallaxMetrics,
+  computeMagneticCtaOffset,
   resolveActiveSection,
 } from './heroParallax';
 import {
@@ -288,5 +290,91 @@ describe('P1 Performance Optimizations — Hero Parallax, ScrollSpy & Studio On-
       computeStudioWebGLEligibility({ tier: 2, isMobile: false, fps: 24, prefersReducedMotion: false }),
       false
     );
+  });
+
+  it('computes Hero multi-plane pointer micro-parallax with opposite foreground/background planes and honors reduced motion', () => {
+    const center = computeHeroMouseParallax({
+      pointerX: 720,
+      pointerY: 450,
+      viewportWidth: 1440,
+      viewportHeight: 900,
+    });
+    assert.deepEqual(center, {
+      bgX: 0,
+      bgY: 0,
+      nebulaX: 0,
+      nebulaY: 0,
+      titleX: 0,
+      titleY: 0,
+      signatureX: 0,
+      signatureY: 0,
+      foregroundX: 0,
+      foregroundY: 0,
+    });
+
+    const bottomRight = computeHeroMouseParallax({
+      pointerX: 1440,
+      pointerY: 900,
+      viewportWidth: 1440,
+      viewportHeight: 900,
+    });
+    assert.ok(bottomRight.bgX < 0 && bottomRight.bgY < 0);
+    assert.ok(bottomRight.foregroundX < 0 && bottomRight.foregroundY < 0);
+    assert.ok(bottomRight.titleX > 0 && bottomRight.titleY > 0);
+    assert.ok(bottomRight.signatureX > bottomRight.titleX);
+    assert.ok(bottomRight.nebulaX > bottomRight.signatureX);
+
+    const reduced = computeHeroMouseParallax({
+      pointerX: 1440,
+      pointerY: 900,
+      viewportWidth: 1440,
+      viewportHeight: 900,
+      prefersReducedMotion: true,
+    });
+    assert.deepEqual(reduced, center);
+  });
+
+  it('computes bounded magnetic CTA offset, proximity cutoff, internal cursor spotlight, and reduced-motion reset', () => {
+    const far = computeMagneticCtaOffset({
+      pointerX: 50,
+      pointerY: 50,
+      rectLeft: 500,
+      rectTop: 600,
+      rectWidth: 240,
+      rectHeight: 48,
+    });
+    assert.equal(far.isNear, false);
+    assert.equal(far.translateX, 0);
+    assert.equal(far.translateY, 0);
+    assert.equal(far.spotXPercent, 50);
+    assert.equal(far.spotYPercent, 50);
+
+    const rightEdgeHover = computeMagneticCtaOffset({
+      pointerX: 730,
+      pointerY: 624,
+      rectLeft: 500,
+      rectTop: 600,
+      rectWidth: 240,
+      rectHeight: 48,
+    });
+    assert.equal(rightEdgeHover.isNear, true);
+    assert.ok(rightEdgeHover.translateX > 0 && rightEdgeHover.translateX <= 9);
+    assert.equal(rightEdgeHover.translateY, 0);
+    assert.ok(rightEdgeHover.innerX > 0 && rightEdgeHover.innerX < rightEdgeHover.translateX);
+    assert.ok(rightEdgeHover.spotXPercent > 90 && rightEdgeHover.spotXPercent <= 100);
+    assert.equal(rightEdgeHover.spotYPercent, 50);
+
+    const reduced = computeMagneticCtaOffset({
+      pointerX: 730,
+      pointerY: 624,
+      rectLeft: 500,
+      rectTop: 600,
+      rectWidth: 240,
+      rectHeight: 48,
+      prefersReducedMotion: true,
+    });
+    assert.equal(reduced.isNear, false);
+    assert.equal(reduced.translateX, 0);
+    assert.equal(reduced.translateY, 0);
   });
 });
