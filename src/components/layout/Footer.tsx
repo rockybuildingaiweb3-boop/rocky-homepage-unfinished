@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import {
   RxGithubLogo,
   RxDiscordLogo,
@@ -70,7 +70,7 @@ export const FOOTER_DATA = [
   },
 ];
 
-export const Footer: React.FC<FooterProps> = ({ siteData, onNavigateRoute }) => {
+export const Footer: React.FC<FooterProps> = memo(({ siteData, onNavigateRoute }) => {
   const footerContainerElement = useRef<HTMLDivElement>(null);
   const signaturePath1 = useRef<SVGPathElement>(null);
   const signaturePath2 = useRef<SVGPathElement>(null);
@@ -373,6 +373,8 @@ export const Footer: React.FC<FooterProps> = ({ siteData, onNavigateRoute }) => 
       </div>
     </footer>
   );
-};
+});
+
+Footer.displayName = 'Footer';
 
 export default Footer;

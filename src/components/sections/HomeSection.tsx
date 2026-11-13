@@ -1,19 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { NebulaBackground } from './NebulaBackground';
-import { VISUAL_CONSTANTS } from '../../constants/visual';
+import { computeHeroParallaxMetrics } from '../../features/scroll/heroParallax';
 
 interface HomeSectionProps {
-  scrollY?: number;
   onNavigate?: (targetId: string) => void;
   isAwake?: boolean;
 }
 
-export const HomeSection: React.FC<HomeSectionProps> = ({
-  scrollY = 0,
+export const HomeSection: React.FC<HomeSectionProps> = memo(({
   onNavigate,
   isAwake = true,
 }) => {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const bgLayerRef = useRef<HTMLDivElement>(null);
+  const foregroundRef = useRef<HTMLDivElement>(null);
+  const bottomGradientRef = useRef<HTMLDivElement>(null);
   const word1Ref = useRef<HTMLSpanElement>(null);
   const word2Ref = useRef<HTMLSpanElement>(null);
   const signatureRef = useRef<HTMLImageElement>(null);
@@ -170,25 +171,101 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
     };
   }, [imageLoaded, isAwake]);
 
-  const safeScrollY = typeof scrollY === 'number' && Number.isFinite(scrollY) ? Math.max(0, scrollY) : 0;
-  const bgParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.BACKGROUND;
-  const nebulaParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.NEBULA;
-  const textParallaxY = safeScrollY * VISUAL_CONSTANTS.PARALLAX.TEXT;
+  // Independent, zero-React-render Hero parallax & day-to-night loop
+  useEffect(() => {
+    const sectionEl = sectionRef.current;
+    if (!sectionEl || typeof window === 'undefined') return;
 
-  const windowH =
-    typeof window !== 'undefined' && Number.isFinite(window.innerHeight) && window.innerHeight > 0
-      ? window.innerHeight
-      : 900;
-  const divisor = windowH * 0.85;
-  const rawProgress = divisor > 0 ? safeScrollY / divisor : 0;
-  const dayToNightProgress = Number.isFinite(rawProgress) ? Math.min(1, Math.max(0, rawProgress)) : 0;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let isIntersecting = true;
+    let rafId: number | null = null;
+    let lastAppliedScroll = -1;
+    let lastAppliedHeight = -1;
 
-  const heroOpacity = Number.isFinite(dayToNightProgress)
-    ? Math.max(0, 1 - dayToNightProgress * 1.35)
-    : 1;
-  const bottomGradientOpacity = Number.isFinite(dayToNightProgress)
-    ? Math.max(0.4, dayToNightProgress)
-    : 0.4;
+    const applyHeroParallax = (force = false) => {
+      const currentScroll = prefersReducedMotion
+        ? 0
+        : window.scrollY || document.documentElement.scrollTop || 0;
+      const viewportH = window.innerHeight || 900;
+
+      if (!force && currentScroll === lastAppliedScroll && viewportH === lastAppliedHeight) {
+        return;
+      }
+      lastAppliedScroll = currentScroll;
+      lastAppliedHeight = viewportH;
+
+      const m = computeHeroParallaxMetrics(currentScroll, viewportH);
+
+      sectionEl.style.backgroundColor = m.sectionBackgroundColor;
+      sectionEl.style.setProperty('--nebula-parallax-y', `${m.nebulaOffsetY}px`);
+
+      if (bgLayerRef.current) {
+        bgLayerRef.current.style.transform = `translate3d(0, ${m.bgParallaxY}px, 0)`;
+        bgLayerRef.current.style.filter = `saturate(${m.bgSaturate}) brightness(${m.bgBrightness})`;
+      }
+
+      if (foregroundRef.current) {
+        foregroundRef.current.style.transform = `translate3d(0, ${m.textParallaxY}px, 0) scale(${m.heroScale})`;
+        foregroundRef.current.style.opacity = String(m.heroOpacity);
+        foregroundRef.current.style.filter = `blur(${m.heroBlurPx}px)`;
+      }
+
+      if (bottomGradientRef.current) {
+        bottomGradientRef.current.style.opacity = String(m.bottomGradientOpacity);
+      }
+    };
+
+    const scheduleParallaxFrame = () => {
+      if (!isIntersecting || document.visibilityState === 'hidden' || rafId !== null) {
+        return;
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        applyHeroParallax();
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasIntersecting = isIntersecting;
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting || wasIntersecting) {
+          // Ensure final clamped state is applied cleanly when leaving or entering
+          applyHeroParallax(true);
+        }
+      },
+      { threshold: 0, rootMargin: '40px 0px' }
+    );
+    observer.observe(sectionEl);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isIntersecting) {
+        applyHeroParallax(true);
+      } else if (document.visibilityState === 'hidden' && rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    const handleResize = () => {
+      scheduleParallaxFrame();
+    };
+
+    applyHeroParallax(true);
+    window.addEventListener('scroll', scheduleParallaxFrame, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', scheduleParallaxFrame);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
 
   const handleScrollCueClick = () => {
     if (onNavigate) {
@@ -210,18 +287,16 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
       ref={sectionRef}
       className="relative w-full h-screen overflow-hidden box-border select-none flex items-center justify-center transition-colors duration-500"
       style={{
-        backgroundColor: dayToNightProgress > 0.45 ? '#06040f' : '#ebe8e1',
+        backgroundColor: '#ebe8e1',
       }}
       aria-label="Hero section — Rocky Babcock"
     >
       <div
+        ref={bgLayerRef}
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-[1] overflow-hidden"
         style={{
-          transform: `translate3d(0, ${bgParallaxY}px, 0)`,
-          filter: `saturate(${Math.max(0.08, 1 - dayToNightProgress * 0.92)}) brightness(${Math.max(
-            0.18,
-            1 - dayToNightProgress * 0.76
-          )})`,
+          transform: 'translate3d(0, 0px, 0)',
+          filter: 'saturate(1) brightness(1)',
           willChange: 'transform, filter',
           transition: 'filter 0.1s ease-out',
         }}
@@ -238,17 +313,15 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
         />
       </div>
 
-      <NebulaBackground
-        nebulaReady={nebulaReady}
-        nebulaParallaxY={nebulaParallaxY - dayToNightProgress * 60}
-      />
+      <NebulaBackground nebulaReady={nebulaReady} />
 
       <div
+        ref={foregroundRef}
         className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none box-border pt-10 sm:pt-14 pb-8 sm:pb-12 will-change-transform bg-transparent"
         style={{
-          transform: `translate3d(0, ${textParallaxY}px, 0) scale(${Math.max(0.94, 1 - dayToNightProgress * 0.08)})`,
-          opacity: heroOpacity,
-          filter: `blur(${dayToNightProgress * 5}px)`,
+          transform: 'translate3d(0, 0px, 0) scale(1)',
+          opacity: 1,
+          filter: 'blur(0px)',
           willChange: 'transform, opacity, filter',
         }}
       >
@@ -370,13 +443,16 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
       </div>
 
       <div
+        ref={bottomGradientRef}
         className="absolute bottom-0 left-0 right-0 h-36 sm:h-48 pointer-events-none z-[4] transition-opacity duration-300"
         style={{
           background: 'linear-gradient(to bottom, transparent 0%, rgba(3, 0, 20, 0.4) 50%, rgba(3, 0, 20, 0.95) 100%)',
-          opacity: bottomGradientOpacity,
+          opacity: 0.4,
         }}
         aria-hidden="true"
       />
     </section>
   );
-};
+});
+
+HomeSection.displayName = 'HomeSection';

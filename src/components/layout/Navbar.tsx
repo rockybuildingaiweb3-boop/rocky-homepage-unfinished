@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useBackgroundMusic } from '../../features/audio';
 
@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'CONTACT' },
 ] as const;
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'home', visible = true }) => {
+export const Navbar: React.FC<NavbarProps> = memo(({ onNavigate, activeSection = 'home', visible = true }) => {
   const [mobileMenuActive, setMobileMenuActive] = useState(false);
   const isMobile = useIsMobile(768);
   const { isMuted, toggleMute } = useBackgroundMusic();
@@ -262,4 +262,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection = 'hom
       </div>
     </nav>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { memo, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { SKILLS_DATA, SKILL_CATEGORIES } from '../../data/skills';
 import {
@@ -137,7 +137,7 @@ const ORBIT_TRACER_SPECS: readonly {
  *   moving technologies (34 total visible objects) and 3-part SVG trajectory visualization
  *   (continuous base path + animated luminous energy segment + 6 arc-length light tracers).
  */
-export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
+export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = memo(({
   selectedCategoryId,
   focusedSkillId,
   hoveredSkillId,
@@ -1438,6 +1438,8 @@ export const LivingOrbitStage: React.FC<LivingOrbitStageProps> = ({
       </div>
     </div>
   );
-};
+});
+
+LivingOrbitStage.displayName = 'LivingOrbitStage';
 
 export default LivingOrbitStage;

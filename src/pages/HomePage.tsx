@@ -10,7 +10,7 @@ interface HomePageProps {
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ siteData, isHeroAwake = true }) => {
-  const { scrollY, activeSection } = useScrollSpy({
+  const { activeSection } = useScrollSpy({
     sectionIds: ['home', 'studio', 'skills', 'contact'],
   });
 
@@ -29,7 +29,7 @@ export const HomePage: React.FC<HomePageProps> = ({ siteData, isHeroAwake = true
   return (
     <main className="relative z-10 w-full overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} visible={isHeroAwake} />
-      <HomeSection scrollY={scrollY} onNavigate={handleNavigate} isAwake={isHeroAwake} />
+      <HomeSection onNavigate={handleNavigate} isAwake={isHeroAwake} />
       <StudioSection />
       <SkillsSection />
       <Footer siteData={siteData} />

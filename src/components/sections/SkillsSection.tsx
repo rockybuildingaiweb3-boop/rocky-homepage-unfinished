@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
 import { SKILLS_DATA } from '../../data/skills';
 import { SkillsAtmosphere } from '../skills/SkillsAtmosphere';
 import { LivingOrbitStage } from '../skills/LivingOrbitStage';
@@ -12,7 +12,7 @@ import { validateSkillsDataset } from '../../features/skills/validateSkills';
  * Preserves all 88 validated technologies and 8 canonical categories without
  * visual clutter, category spheres, or bottom dashboard panels.
  */
-export const SkillsSection: React.FC = () => {
+export const SkillsSection: React.FC = memo(() => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [focusedSkillId, setFocusedSkillId] = useState<string | null>(null);
   const [hoveredSkillId, setHoveredSkillId] = useState<string | null>(null);
@@ -127,6 +127,8 @@ export const SkillsSection: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+
+SkillsSection.displayName = 'SkillsSection';
 
 export default SkillsSection;

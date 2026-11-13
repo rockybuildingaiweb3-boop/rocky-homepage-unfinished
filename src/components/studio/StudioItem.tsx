@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, memo } from 'react';
 import type { StudioProject } from '../../types';
 
 interface StudioItemProps {
@@ -14,7 +14,7 @@ interface StudioItemProps {
   imageRef: (el: HTMLImageElement | null) => void;
 }
 
-export const StudioItem = forwardRef<HTMLLIElement, StudioItemProps>(
+export const StudioItem = memo(forwardRef<HTMLLIElement, StudioItemProps>(
   (
     {
       project,
@@ -153,6 +153,6 @@ export const StudioItem = forwardRef<HTMLLIElement, StudioItemProps>(
       </li>
     );
   }
-);
+));
 
 StudioItem.displayName = 'StudioItem';

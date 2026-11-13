@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 export interface NebulaBackgroundProps {
   nebulaReady: boolean;
-  nebulaParallaxY: number;
+  nebulaParallaxY?: number;
 }
 
 /**
@@ -15,10 +15,12 @@ export interface NebulaBackgroundProps {
  * - Completely free of dark matter, heavy opacity, cutouts, or grey holes.
  * - Positioned as an ethereal celestial crown slightly behind & above the title with generous breathing room.
  */
-export const NebulaBackground: React.FC<NebulaBackgroundProps> = ({
+export const NebulaBackground: React.FC<NebulaBackgroundProps> = memo(({
   nebulaReady,
   nebulaParallaxY,
 }) => {
+  const parallaxOffset =
+    nebulaParallaxY !== undefined ? `${nebulaParallaxY}px` : 'var(--nebula-parallax-y, 0px)';
   return (
     <div
       className="absolute inset-0 pointer-events-none select-none z-[3] overflow-hidden will-change-transform"
@@ -39,7 +41,7 @@ export const NebulaBackground: React.FC<NebulaBackgroundProps> = ({
         className="absolute left-1/2 flex flex-col items-center justify-center pointer-events-none mix-blend-screen will-change-transform"
         style={{
           top: '22%',
-          transform: `translate3d(-50%, calc(-50% + ${nebulaParallaxY}px), 0) scale(${nebulaReady ? 1 : 0.94})`,
+          transform: `translate3d(-50%, calc(-50% + ${parallaxOffset}), 0) scale(${nebulaReady ? 1 : 0.94})`,
           opacity: nebulaReady ? 0.88 : 0.10,
           transition: 'transform 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s ease-out',
           width: 'clamp(320px, 46vw, 620px)',
@@ -123,5 +125,7 @@ export const NebulaBackground: React.FC<NebulaBackgroundProps> = ({
       </div>
     </div>
   );
-};
+});
+
+NebulaBackground.displayName = 'NebulaBackground';
 

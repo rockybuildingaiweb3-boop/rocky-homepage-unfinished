@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { getFragmentShaders, vertexShader } from './shaders';
+import { computeMeshCenterOffsetX } from './studioLoopLogic';
 
 export class StudioImageMesh {
   element: HTMLImageElement;
@@ -11,8 +12,19 @@ export class StudioImageMesh {
   geometry!: THREE.PlaneGeometry;
   mesh!: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   activeFragmentShader: string = '';
-  clock: THREE.Clock;
   texture: THREE.Texture | null = null;
+
+  cachedBaseLeft: number = 0;
+  cachedWidth: number = 0;
+  cachedHeight: number = 0;
+  cachedImgWidth: number = 300;
+  cachedImgHeight: number = 400;
+
+  hasLoaded: boolean = false;
+  hasFailed: boolean = false;
+  isDisposed: boolean = false;
+  private startTimeMs: number;
+  private onTextureReady?: () => void;
 
   shaders: {
     fragment: { vertical: string; horizontal: string };
@@ -28,13 +40,21 @@ export class StudioImageMesh {
     uAlpha: { value: number };
   };
 
-  constructor(element: HTMLImageElement, scene: THREE.Scene, dimensionsNode: HTMLElement) {
+  constructor(
+    element: HTMLImageElement,
+    scene: THREE.Scene,
+    dimensionsNode: HTMLElement,
+    initialTrackX: number = 0,
+    viewportWidth: number = typeof window !== 'undefined' ? window.innerWidth : 1200,
+    onTextureReady?: () => void
+  ) {
     this.element = element;
     this.scene = scene;
     this.dimensionsNode = dimensionsNode;
     this.offset = new THREE.Vector2(0, 0);
     this.sizes = new THREE.Vector2(0, 0);
-    this.clock = new THREE.Clock();
+    this.startTimeMs = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    this.onTextureReady = onTextureReady;
 
     const frags = getFragmentShaders();
     this.shaders = {
@@ -54,43 +74,52 @@ export class StudioImageMesh {
       uAlpha: { value: 0.85 },
     };
 
-    this.createMesh();
+    this.createMesh(initialTrackX, viewportWidth);
   }
 
-  setDimensions(): void {
+  /**
+   * Measures DOM layout rects and caches base horizontal offset relative to trackX = 0.
+   * Called only on init, ResizeObserver changes, or explicit transition sync — never on every steady frame.
+   */
+  updateLayoutCache(currentTrackX: number, viewportWidth: number): void {
+    if (this.isDisposed) return;
+
     const rect = this.dimensionsNode.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const left = rect.left;
+    const imgRect = this.element.getBoundingClientRect();
 
-    this.sizes.set(width, height);
-    // Position relative to viewport center in Three.js coordinate system (1 unit = 1 pixel)
-    this.offset.set(left - window.innerWidth / 2 + width / 2, 0);
+    this.cachedWidth = rect.width;
+    this.cachedHeight = rect.height;
+    this.cachedBaseLeft = rect.left - currentTrackX;
+    this.cachedImgWidth = imgRect.width || rect.width || 300;
+    this.cachedImgHeight = imgRect.height || rect.height || 400;
+
+    this.sizes.set(this.cachedWidth, this.cachedHeight);
+    this.uniforms.uMeshSize.value.set(this.cachedWidth, this.cachedHeight);
+    this.uniforms.uImgSize.value.set(this.cachedImgWidth, this.cachedImgHeight);
+
+    if (this.mesh) {
+      this.mesh.scale.set(this.cachedWidth || 1, this.cachedHeight || 1, 1);
+    }
+
+    this.applyCachedPosition(currentTrackX, viewportWidth);
   }
 
-  createMesh(): void {
-    this.setDimensions();
+  applyCachedPosition(currentTrackX: number, viewportWidth: number): void {
+    const offsetX = computeMeshCenterOffsetX(
+      this.cachedBaseLeft,
+      currentTrackX,
+      this.cachedWidth,
+      viewportWidth
+    );
+    this.offset.set(offsetX, 0);
+    if (this.mesh) {
+      this.mesh.position.set(offsetX, 0, 0);
+    }
+  }
 
+  createMesh(initialTrackX: number, viewportWidth: number): void {
     // 32x32 subdivisions ensure smooth vertex deformation and wave ripple
     this.geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
-
-    const imgRect = this.element.getBoundingClientRect();
-    const imgW = imgRect.width || this.sizes.x || 300;
-    const imgH = imgRect.height || this.sizes.y || 400;
-
-    const loader = new THREE.TextureLoader();
-    this.texture = loader.load(this.element.src, (tex) => {
-      tex.generateMipmaps = true;
-      tex.minFilter = THREE.LinearMipmapLinearFilter;
-      tex.magFilter = THREE.LinearFilter;
-      if (this.material) {
-        this.material.needsUpdate = true;
-      }
-    });
-
-    this.uniforms.uTexture.value = this.texture;
-    this.uniforms.uMeshSize.value.set(this.sizes.x, this.sizes.y);
-    this.uniforms.uImgSize.value.set(imgW, imgH);
 
     this.activeFragmentShader = this.loadFragmentShader;
     this.material = new THREE.ShaderMaterial({
@@ -103,24 +132,63 @@ export class StudioImageMesh {
     });
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.position.set(this.offset.x, this.offset.y, 0);
-    this.mesh.scale.set(this.sizes.x || 1, this.sizes.y || 1, 1);
+    // Keep mesh hidden until texture finishes loading so original HTML <img> remains visible with zero flash
+    this.mesh.visible = false;
+    this.updateLayoutCache(initialTrackX, viewportWidth);
     this.scene.add(this.mesh);
 
-    // Hide original image element so WebGL mesh renders seamlessly in its place
-    this.element.style.opacity = '0';
+    const loader = new THREE.TextureLoader();
+    this.texture = loader.load(
+      this.element.src,
+      (tex) => {
+        if (this.isDisposed) {
+          tex.dispose();
+          return;
+        }
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        this.hasLoaded = true;
+        this.hasFailed = false;
+        this.checkShader();
+        if (this.material) {
+          this.material.needsUpdate = true;
+        }
+        if (this.mesh) {
+          this.mesh.visible = true;
+        }
+        // Hide original HTML <img> only after WebGL texture succeeds
+        this.element.style.opacity = '0';
+        this.onTextureReady?.();
+      },
+      undefined,
+      () => {
+        if (this.isDisposed) return;
+        this.hasFailed = true;
+        this.hasLoaded = false;
+        if (this.mesh) {
+          this.mesh.visible = false;
+          this.scene.remove(this.mesh);
+        }
+        if (this.texture) {
+          this.texture.dispose();
+          this.texture = null;
+        }
+        this.uniforms.uTexture.value = null;
+        // Fallback cleanly to the original HTML <img>
+        this.element.style.opacity = '1';
+        this.onTextureReady?.();
+      }
+    );
+
+    this.uniforms.uTexture.value = this.texture;
   }
 
-  render(speed: number): void {
-    this.setDimensions();
+  render(speed: number, currentTrackX: number, viewportWidth: number): void {
+    if (this.isDisposed || this.hasFailed || !this.hasLoaded || !this.mesh) return;
+
+    this.applyCachedPosition(currentTrackX, viewportWidth);
     this.checkShader();
-
-    this.mesh.position.set(this.offset.x, this.offset.y, 0);
-    this.mesh.scale.set(this.sizes.x, this.sizes.y, 1);
-
-    const imgRect = this.element.getBoundingClientRect();
-    this.uniforms.uImgSize.value.set(imgRect.width || this.sizes.x, imgRect.height || this.sizes.y);
-    this.uniforms.uMeshSize.value.set(this.sizes.x, this.sizes.y);
 
     // Warping and distortion effect driven by velocity (calibrated to reference)
     const factorX = -0.00012;
@@ -128,7 +196,7 @@ export class StudioImageMesh {
     const clampedOffsetX = Math.max(-0.25, Math.min(0.25, speed * factorX));
     const clampedOffsetY = Math.max(0, Math.min(0.08, Math.abs(speed * factorY)));
     this.uniforms.uOffset.value.set(clampedOffsetX, clampedOffsetY);
-    this.uniforms.uTime.value = this.clock.getElapsedTime() * 0.8;
+    this.uniforms.uTime.value = (performance.now() - this.startTimeMs) * 0.0008;
   }
 
   checkShader(): void {
@@ -136,8 +204,10 @@ export class StudioImageMesh {
     if (targetShader === this.activeFragmentShader) return;
     this.activeFragmentShader = targetShader;
 
-    this.material.fragmentShader = this.activeFragmentShader;
-    this.material.needsUpdate = true;
+    if (this.material) {
+      this.material.fragmentShader = this.activeFragmentShader;
+      this.material.needsUpdate = true;
+    }
   }
 
   private get loadFragmentShader(): string {
@@ -149,6 +219,7 @@ export class StudioImageMesh {
   }
 
   dispose(): void {
+    this.isDisposed = true;
     if (this.mesh && this.scene) {
       this.scene.remove(this.mesh);
     }
@@ -160,6 +231,7 @@ export class StudioImageMesh {
     }
     if (this.texture) {
       this.texture.dispose();
+      this.texture = null;
     }
     if (this.element) {
       this.element.style.opacity = '1';
